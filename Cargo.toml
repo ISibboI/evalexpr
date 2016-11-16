@@ -1,12 +1,12 @@
 [package]
 name = "eval"
-version = "0.1.0"
+version = "0.1.1"
 description = "Expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "expr"]
 authors = ["fengcen <fengcen.love@gmail.com>"]
 repository = "https://github.com/fengcen/eval.git"
 homepage = "https://github.com/fengcen/eval"
-documentation = "https://github.com/fengcen/eval"
+documentation = "https://docs.rs/eval"
 readme = "README.md"
 license = "MIT"
 

@@ -472,7 +472,7 @@ fn is_range(ident: &str) -> bool {
 fn parse_range(ident: &str) -> Result<Value, Error> {
     let segments = ident.split("..").collect::<Vec<_>>();
     if segments.len() != 2 {
-        Err(Error::InvalidArray(ident.to_owned()))
+        Err(Error::InvalidRange(ident.to_owned()))
     } else {
         let start = segments[0].parse::<i64>();
         let end = segments[1].parse::<i64>();
@@ -484,7 +484,7 @@ fn parse_range(ident: &str) -> Result<Value, Error> {
             }
             Ok(to_value(array))
         } else {
-            Err(Error::InvalidArray(ident.to_owned()))
+            Err(Error::InvalidRange(ident.to_owned()))
         }
     }
 }

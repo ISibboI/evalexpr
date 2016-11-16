@@ -63,9 +63,9 @@ quick_error! {
         UnsupportedTypes(a: String, b: String) {
             display("This two value types are different or do not support mathematical calculations: {}, {}", a, b)
         }
-        /// Invalid array expression like `1..2..3`
-        InvalidArray(ident: String) {
-            display("Invalid array expression: {}", ident)
+        /// Invalid range expression like `1..2..3`
+        InvalidRange(ident: String) {
+            display("Invalid range expression: {}", ident)
         }
         /// Custom error.
         Custom(detail: String) {
