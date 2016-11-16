@@ -1,7 +1,11 @@
 
 eval
 ===
+[![docs](https://docs.rs/eval/badge.svg?version=0.1.1 "docs")](https://docs.rs/eval)
+
 Expression evaluator for Rust.
+
+## [Document](https://docs.rs/eval)
 
 ## Features
 Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
