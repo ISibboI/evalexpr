@@ -15,15 +15,12 @@ pub struct Expression {
     pub raw: String,
     pub pos: Vec<usize>,
     pub operators: Vec<Operator>,
-    pub node: Option<Node>
+    pub node: Option<Node>,
 }
 
 impl Expression {
     pub fn new<T: Into<String>>(raw: T) -> Result<Expression, Error> {
-        let mut expr = Expression {
-            raw: raw.into(),
-            ..Default::default()
-        };
+        let mut expr = Expression { raw: raw.into(), ..Default::default() };
 
         expr.parse_pos()?;
         expr.parse_operators()?;
@@ -36,19 +33,19 @@ impl Expression {
 
         for (index, cur) in self.raw.chars().enumerate() {
             match cur {
-                '(' | ')' | '+' | '-' | '*' | '/' | ',' | ' ' | '!' | '=' |
-                '>' | '<' | '\'' | '[' | ']' | '%' | '&' | '|' => {
-                    if ! found_quote {
+                '(' | ')' | '+' | '-' | '*' | '/' | ',' | ' ' | '!' | '=' | '>' | '<' | '\'' |
+                '[' | ']' | '%' | '&' | '|' => {
+                    if !found_quote {
                         self.pos.push(index);
                         self.pos.push(index + 1);
                     }
-                },
+                }
                 '"' => {
-                    found_quote = ! found_quote;
+                    found_quote = !found_quote;
                     self.pos.push(index);
                     self.pos.push(index + 1);
-                },
-                _  => ()
+                }
+                _ => (),
             }
         }
 
@@ -90,8 +87,8 @@ impl Expression {
                         prev.clear();
                         continue;
                     }
-                },
-                _ => ()
+                }
+                _ => (),
             };
 
             if quote.is_some() {
@@ -147,11 +144,11 @@ impl Expression {
                     operators.push(Operator::Function("array".to_owned()));
                     operators.push(operator);
                     continue;
-                },
+                }
                 Operator::LeftParenthesis => {
                     parenthesis += 1;
 
-                    if ! operators.is_empty() {
+                    if !operators.is_empty() {
                         let prev_operator = operators.pop().unwrap();
                         if prev_operator.is_identifier() {
                             operators.push(Operator::Function(prev_operator.get_identifier()));
@@ -161,11 +158,11 @@ impl Expression {
                             operators.push(prev_operator);
                         }
                     }
-                },
+                }
                 Operator::RightParenthesis => parenthesis -= 1,
                 Operator::RightSquareBracket => square_brackets -= 1,
                 Operator::WhiteSpace => continue,
-                _ => ()
+                _ => (),
             }
 
             prev = raw;
@@ -185,17 +182,24 @@ impl Expression {
 
         for operator in &self.operators {
             match *operator {
-                Operator::Add(priority) | Operator::Sub(priority) |
-                Operator::Mul(priority) | Operator::Div(priority) |
-                Operator::Not(priority) | Operator::Eq(priority) |
-                Operator::Ne(priority) | Operator::Gt(priority) |
-                Operator::Lt(priority) | Operator::Ge(priority) |
-                Operator::And(priority) | Operator::Or(priority) |
-                Operator::Le(priority) | Operator::Rem(priority) => {
-                    if ! parsing_nodes.is_empty() {
+                Operator::Add(priority) |
+                Operator::Sub(priority) |
+                Operator::Mul(priority) |
+                Operator::Div(priority) |
+                Operator::Not(priority) |
+                Operator::Eq(priority) |
+                Operator::Ne(priority) |
+                Operator::Gt(priority) |
+                Operator::Lt(priority) |
+                Operator::Ge(priority) |
+                Operator::And(priority) |
+                Operator::Or(priority) |
+                Operator::Le(priority) |
+                Operator::Rem(priority) => {
+                    if !parsing_nodes.is_empty() {
                         let prev = parsing_nodes.pop().unwrap();
                         if prev.is_value_or_enough() {
-                            if prev.operator.get_priority() < priority && ! prev.closed {
+                            if prev.operator.get_priority() < priority && !prev.closed {
                                 parsing_nodes.extend_from_slice(&rob_to(prev, operator.to_node()));
                             } else {
                                 parsing_nodes.push(operator.children_to_node(vec![prev]));
@@ -211,12 +215,18 @@ impl Expression {
                     } else {
                         return Err(Error::StartWithNonValueOperator);
                     }
-                },
-                Operator::Function(_) | Operator::LeftParenthesis | Operator::LeftSquareBracket => parsing_nodes.push(operator.to_node()),
+                }
+                Operator::Function(_) |
+                Operator::LeftParenthesis |
+                Operator::LeftSquareBracket => parsing_nodes.push(operator.to_node()),
                 Operator::Comma => close_comma(&mut parsing_nodes)?,
-                Operator::RightParenthesis | Operator::RightSquareBracket => close_bracket(&mut parsing_nodes, operator.get_left())?,
-                Operator::Value(_) | Operator::Identifier(_) => append_child_to_last_node(&mut parsing_nodes, operator)?,
-                _ => ()
+                Operator::RightParenthesis |
+                Operator::RightSquareBracket => {
+                    close_bracket(&mut parsing_nodes, operator.get_left())?
+                }
+                Operator::Value(_) |
+                Operator::Identifier(_) => append_child_to_last_node(&mut parsing_nodes, operator)?,
+                _ => (),
             }
         }
 
@@ -230,21 +240,75 @@ impl Expression {
         Box::new(move |contexts, buildin, functions| -> Result<Value, Error> {
             return exec_node(&node, contexts, buildin, functions);
 
-            fn exec_node(node: &Node, contexts: ContextsRef, buildin: &Functions, functions: &Functions) -> Result<Value, Error> {
+            fn exec_node(node: &Node,
+                         contexts: ContextsRef,
+                         buildin: &Functions,
+                         functions: &Functions)
+                         -> Result<Value, Error> {
                 match node.operator {
-                    Operator::Add(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.add(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Mul(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.mul(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Sub(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.sub(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Div(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.div(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Rem(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.rem(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Eq(_) => Math::eq(&exec_node(&node.get_first_child(), contexts, buildin, functions)?, &exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Ne(_) => Math::ne(&exec_node(&node.get_first_child(), contexts, buildin, functions)?, &exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Gt(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.gt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Lt(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.lt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Ge(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.ge(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Le(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.le(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::And(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.and(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
-                    Operator::Or(_) => exec_node(&node.get_first_child(), contexts, buildin, functions)?.or(&exec_node(&node.get_last_child(), contexts, buildin, functions)?),
+                    Operator::Add(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .add(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Mul(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .mul(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Sub(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .sub(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Div(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .div(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Rem(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .rem(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Eq(_) => {
+                        Math::eq(&exec_node(&node.get_first_child(), contexts, buildin, functions)?,
+                                 &exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Ne(_) => {
+                        Math::ne(&exec_node(&node.get_first_child(), contexts, buildin, functions)?,
+                                 &exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Gt(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .gt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Lt(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .lt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Ge(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .ge(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Le(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .le(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::And(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .and(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
+                    Operator::Or(_) => {
+                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                            ?
+                            .or(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                    }
                     Operator::Function(ref ident) => {
                         let function_option = if functions.contains_key(ident) {
                             functions.get(ident)
@@ -263,16 +327,17 @@ impl Expression {
                         } else {
                             Err(Error::FunctionNotExists(ident.to_owned()))
                         }
-                    },
+                    }
                     Operator::Value(ref value) => Ok(value.clone()),
                     Operator::Not(_) => {
-                        let value = exec_node(&node.get_first_child(), contexts, buildin, functions)?;
+                        let value =
+                            exec_node(&node.get_first_child(), contexts, buildin, functions)?;
                         match value {
                             Value::Bool(boolean) => Ok(Value::Bool(!boolean)),
                             Value::Null => Ok(Value::Bool(true)),
-                            _ => Err(Error::NotBoolean(value))
+                            _ => Err(Error::NotBoolean(value)),
                         }
-                    },
+                    }
                     Operator::Identifier(ref ident) => {
                         let number = parse_number(ident);
                         if number.is_some() {
@@ -282,18 +347,20 @@ impl Expression {
                         } else {
                             match find(contexts, ident) {
                                 Some(value) => Ok(value),
-                                None => Ok(Value::Null)
+                                None => Ok(Value::Null),
                             }
                         }
-                    },
-                    _ => Err(Error::CanNotExec(node.operator.clone()))
+                    }
+                    _ => Err(Error::CanNotExec(node.operator.clone())),
                 }
             }
         })
     }
 }
 
-fn append_child_to_last_node(parsing_nodes: &mut Vec<Node>, operator: &Operator) -> Result<(), Error> {
+fn append_child_to_last_node(parsing_nodes: &mut Vec<Node>,
+                             operator: &Operator)
+                             -> Result<(), Error> {
     let mut node = operator.to_node();
     node.closed = true;
 
@@ -316,7 +383,7 @@ fn append_child_to_last_node(parsing_nodes: &mut Vec<Node>, operator: &Operator)
 
 fn get_final_node(mut parsing_nodes: Vec<Node>) -> Result<Node, Error> {
     if parsing_nodes.is_empty() {
-        return Err(Error::NoFinalNode)
+        return Err(Error::NoFinalNode);
     }
 
     while parsing_nodes.len() != 1 {
@@ -343,7 +410,7 @@ fn close_bracket(parsing_nodes: &mut Vec<Node>, bracket: Operator) -> Result<(),
                 return Err(Error::BracketNotWithFunction);
             }
         } else if prev.operator == bracket {
-            if ! current.closed {
+            if !current.closed {
                 current.closed = true;
             }
 
@@ -361,13 +428,13 @@ fn close_bracket(parsing_nodes: &mut Vec<Node>, bracket: Operator) -> Result<(),
             }
             break;
         } else {
-            if ! prev.closed {
+            if !prev.closed {
                 prev.add_child(current);
                 if prev.is_enough() {
                     prev.closed = true;
                 }
 
-                if ! parsing_nodes.is_empty() {
+                if !parsing_nodes.is_empty() {
                     parsing_nodes.push(prev);
                 } else {
                     return Err(Error::StartWithNonValueOperator);
@@ -410,13 +477,13 @@ fn close_comma(parsing_nodes: &mut Vec<Node>) -> Result<(), Error> {
                 return Err(Error::CommaNotWithFunction);
             }
         } else {
-            if ! prev.closed {
+            if !prev.closed {
                 prev.add_child(current);
                 if prev.is_enough() {
                     prev.closed = true;
                 }
 
-                if ! parsing_nodes.is_empty() {
+                if !parsing_nodes.is_empty() {
                     parsing_nodes.push(prev);
                 } else {
                     return Err(Error::StartWithNonValueOperator);
@@ -440,7 +507,7 @@ fn find(contexts: ContextsRef, key: &str) -> Option<Value> {
         let value = get(context, key);
         match value {
             Some(_) => return value,
-            None => continue
+            None => continue,
         }
     }
 
@@ -454,10 +521,10 @@ fn get(context: &Context, key: &str) -> Option<Value> {
 
     if context_value_option.is_none() {
         None
-    } else if ! keys.is_empty() {
+    } else if !keys.is_empty() {
         match context_value_option.unwrap().search(&keys.join(".")) {
             Some(value) => Some(value.clone()),
-            None => None
+            None => None,
         }
     } else {
         Some(context_value_option.unwrap().clone())

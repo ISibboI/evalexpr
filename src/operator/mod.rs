@@ -31,65 +31,68 @@ pub enum Operator {
     Comma,
     Function(String),
     Identifier(String),
-    Value(Value)
+    Value(Value),
 }
 
 impl Operator {
     pub fn is_identifier(&self) -> bool {
         match *self {
             Operator::Identifier(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn can_at_beginning(&self) -> bool {
         match *self {
-            Operator::Not(_) | Operator::Function(_) | Operator::LeftParenthesis => true,
-            _ => false
+            Operator::Not(_) |
+            Operator::Function(_) |
+            Operator::LeftParenthesis => true,
+            _ => false,
         }
     }
 
     pub fn get_max_args(&self) -> Option<usize> {
         match *self {
-            Operator::Add(_) | Operator::Sub(_) |
-            Operator::Mul(_) | Operator::Div(_) |
-            Operator::Eq(_) | Operator::Ne(_) |
-            Operator::Gt(_) | Operator::Lt(_) |
-            Operator::Ge(_) | Operator::Le(_) |
-            Operator::And(_) | Operator::Or(_) |
-            Operator::Rem(_)=> Some(2),
+            Operator::Add(_) | Operator::Sub(_) | Operator::Mul(_) | Operator::Div(_) |
+            Operator::Eq(_) | Operator::Ne(_) | Operator::Gt(_) | Operator::Lt(_) |
+            Operator::Ge(_) | Operator::Le(_) | Operator::And(_) | Operator::Or(_) |
+            Operator::Rem(_) => Some(2),
             Operator::Not(_) => Some(1),
             Operator::Function(_) => None,
-            _ => Some(0)
+            _ => Some(0),
         }
     }
 
     pub fn get_min_args(&self) -> Option<usize> {
         match *self {
-            Operator::Add(_) | Operator::Sub(_) |
-            Operator::Mul(_) | Operator::Div(_) |
-            Operator::Eq(_) | Operator::Ne(_) |
-            Operator::Gt(_) | Operator::Lt(_) |
-            Operator::Ge(_) | Operator::Le(_) |
-            Operator::And(_) | Operator::Or(_) |
+            Operator::Add(_) | Operator::Sub(_) | Operator::Mul(_) | Operator::Div(_) |
+            Operator::Eq(_) | Operator::Ne(_) | Operator::Gt(_) | Operator::Lt(_) |
+            Operator::Ge(_) | Operator::Le(_) | Operator::And(_) | Operator::Or(_) |
             Operator::Rem(_) => Some(2),
             Operator::Not(_) => Some(1),
             Operator::Function(_) => None,
-            _ => Some(0)
+            _ => Some(0),
         }
     }
 
     pub fn get_priority(&self) -> u8 {
         match *self {
-            Operator::Add(priority) | Operator::Sub(priority) |
-            Operator::Div(priority) | Operator::Mul(priority) |
-            Operator::Eq(priority) | Operator::Ne(priority) |
-            Operator::Gt(priority) | Operator::Lt(priority) |
-            Operator::Ge(priority) | Operator::Le(priority) |
-            Operator::And(priority) | Operator::Or(priority) |
+            Operator::Add(priority) |
+            Operator::Sub(priority) |
+            Operator::Div(priority) |
+            Operator::Mul(priority) |
+            Operator::Eq(priority) |
+            Operator::Ne(priority) |
+            Operator::Gt(priority) |
+            Operator::Lt(priority) |
+            Operator::Ge(priority) |
+            Operator::Le(priority) |
+            Operator::And(priority) |
+            Operator::Or(priority) |
             Operator::Rem(priority) => priority,
-            Operator::Value(_) | Operator::Identifier(_) => 0,
-            _ => 99
+            Operator::Value(_) |
+            Operator::Identifier(_) => 0,
+            _ => 99,
         }
     }
 
@@ -100,34 +103,43 @@ impl Operator {
     pub fn is_not(&self) -> bool {
         match *self {
             Operator::Not(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn is_value_or_ident(&self) -> bool {
         match *self {
-            Operator::Value(_) | Operator::Identifier(_) => true,
-            _ => false
+            Operator::Value(_) |
+            Operator::Identifier(_) => true,
+            _ => false,
         }
     }
 
     pub fn can_have_child(&self) -> bool {
         match *self {
-            Operator::Function(_) | Operator::Add(_) |
-            Operator::Sub(_) | Operator::Div(_) |
-            Operator::Mul(_) | Operator::Rem(_) |
-            Operator::Eq(_) | Operator::Ne(_) |
-            Operator::Gt(_) | Operator::Lt(_) |
-            Operator::And(_) | Operator::Or(_) |
-            Operator::Ge(_) | Operator::Le(_) => true,
-            _ => false
+            Operator::Function(_) |
+            Operator::Add(_) |
+            Operator::Sub(_) |
+            Operator::Div(_) |
+            Operator::Mul(_) |
+            Operator::Rem(_) |
+            Operator::Eq(_) |
+            Operator::Ne(_) |
+            Operator::Gt(_) |
+            Operator::Lt(_) |
+            Operator::And(_) |
+            Operator::Or(_) |
+            Operator::Ge(_) |
+            Operator::Le(_) => true,
+            _ => false,
         }
     }
 
     pub fn is_left(&self) -> bool {
         match *self {
-            Operator::LeftParenthesis | Operator::LeftSquareBracket => true,
-            _ => false
+            Operator::LeftParenthesis |
+            Operator::LeftSquareBracket => true,
+            _ => false,
         }
     }
 
@@ -135,12 +147,12 @@ impl Operator {
         match *self {
             Operator::RightParenthesis => Operator::LeftParenthesis,
             Operator::RightSquareBracket => Operator::LeftSquareBracket,
-            _ => panic!("not bracket")
+            _ => panic!("not bracket"),
         }
     }
 
     pub fn to_node(&self) -> Node {
-       Node::new(self.clone())
+        Node::new(self.clone())
     }
 
     pub fn children_to_node(&self, children: Vec<Node>) -> Node {
@@ -152,7 +164,7 @@ impl Operator {
     pub fn get_identifier(&self) -> String {
         match *self {
             Operator::Identifier(ref ident) => ident.to_owned(),
-            _ => panic!("not identifier")
+            _ => panic!("not identifier"),
         }
     }
 }
@@ -186,7 +198,7 @@ impl FromStr for Operator {
             "<=" => Ok(Operator::Le(6)),
             "&&" => Ok(Operator::And(4)),
             "||" => Ok(Operator::Or(2)),
-            _ => Ok(Operator::Identifier(raw.to_owned()))
+            _ => Ok(Operator::Identifier(raw.to_owned())),
         }
     }
 }

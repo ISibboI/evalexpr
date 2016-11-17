@@ -117,7 +117,10 @@ pub fn eval_with_functions(expr: &str, functions: &Functions) -> Result<Value, E
 }
 
 /// Evaluates the value of an expression with the given context and functions.
-pub fn eval_with_context_and_functions(expr: &str, context: &Context, functions: &Functions) -> Result<Value, Error> {
+pub fn eval_with_context_and_functions(expr: &str,
+                                       context: &Context,
+                                       functions: &Functions)
+                                       -> Result<Value, Error> {
     let mut contexts = Contexts::new();
     contexts.push(context.clone());
     eval_with_contexts_and_functions(expr, &contexts, functions)
@@ -125,7 +128,10 @@ pub fn eval_with_context_and_functions(expr: &str, context: &Context, functions:
 
 /// Evaluates the value of an expression with the given contexts and functions.<br>
 /// The value of the last context is searched first.
-pub fn eval_with_contexts_and_functions(expr: &str, contexts: ContextsRef, functions: &Functions) -> Result<Value, Error> {
+pub fn eval_with_contexts_and_functions(expr: &str,
+                                        contexts: ContextsRef,
+                                        functions: &Functions)
+                                        -> Result<Value, Error> {
     Expression::new(expr)?.compile()(contexts, &BuiltIn::new(), functions)
 }
 
@@ -194,7 +200,8 @@ mod tests {
 
     #[test]
     fn test_min_brackets() {
-        assert_eq!(eval("(min(30, 5, 245, 20) * 10 + (5 + 5) * 5)"), Ok(to_value(100)));
+        assert_eq!(eval("(min(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
+                   Ok(to_value(100)));
     }
 
     #[test]
@@ -209,7 +216,8 @@ mod tests {
 
     #[test]
     fn test_max_brackets() {
-        assert_eq!(eval("(max(30, 5, 245, 20) * 10 + (5 + 5) * 5)"), Ok(to_value(2500)));
+        assert_eq!(eval("(max(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
+                   Ok(to_value(2500)));
     }
 
     #[test]
@@ -301,12 +309,14 @@ mod tests {
 
     #[test]
     fn test_single_and_double_quote() {
-        assert_eq!(eval(r#"' """" ' + ' """" '"#), Ok(to_value(r#" """"  """" "#)));
+        assert_eq!(eval(r#"' """" ' + ' """" '"#),
+                   Ok(to_value(r#" """"  """" "#)));
     }
 
     #[test]
     fn test_double_and_single_quote() {
-        assert_eq!(eval(r#"" '''' " + " '''' ""#), Ok(to_value(r#" ''''  '''' "#)));
+        assert_eq!(eval(r#"" '''' " + " '''' ""#),
+                   Ok(to_value(r#" ''''  '''' "#)));
     }
 
     #[test]
@@ -398,7 +408,8 @@ mod tests {
     fn test_buildin_is_empty() {
         let mut context = Context::new();
         context.insert("array".to_owned(), to_value(Vec::<String>::new()));
-        assert_eq!(eval_with_context("is_empty(array)", &context), Ok(to_value(true)));
+        assert_eq!(eval_with_context("is_empty(array)", &context),
+                   Ok(to_value(true)));
     }
 
     #[test]
@@ -411,8 +422,10 @@ mod tests {
     #[test]
     fn test_custom_function() {
         let mut functions = Functions::new();
-        functions.insert("output".to_owned(), Function::new(|_|Ok(to_value("This is custom function's output"))));
-        assert_eq!(eval_with_functions("output()", &functions), Ok(to_value("This is custom function's output")));
+        functions.insert("output".to_owned(),
+                         Function::new(|_| Ok(to_value("This is custom function's output"))));
+        assert_eq!(eval_with_functions("output()", &functions),
+                   Ok(to_value("This is custom function's output")));
     }
 
     #[test]
@@ -421,7 +434,7 @@ mod tests {
             raw: "+ + 5".to_owned(),
             pos: Vec::new(),
             operators: Vec::new(),
-            node: None
+            node: None,
         };
 
         expr.parse_pos().unwrap();
@@ -432,10 +445,7 @@ mod tests {
 
     #[test]
     fn test_error_duplicate_operator() {
-        let mut expr = Expression {
-            raw: "5 + + 5".to_owned(),
-            ..Default::default()
-        };
+        let mut expr = Expression { raw: "5 + + 5".to_owned(), ..Default::default() };
 
         expr.parse_pos().unwrap();
         expr.parse_operators().unwrap();
@@ -445,10 +455,7 @@ mod tests {
 
     #[test]
     fn test_error_duplicate_value() {
-        let mut expr = Expression {
-            raw: "2 + 6 5".to_owned(),
-            ..Default::default()
-        };
+        let mut expr = Expression { raw: "2 + 6 5".to_owned(), ..Default::default() };
 
         expr.parse_pos().unwrap();
         expr.parse_operators().unwrap();
@@ -458,10 +465,7 @@ mod tests {
 
     #[test]
     fn test_error_unpaired_brackets() {
-        let mut expr = Expression {
-            raw: "(2 + 3)) * 5".to_owned(),
-            ..Default::default()
-        };
+        let mut expr = Expression { raw: "(2 + 3)) * 5".to_owned(), ..Default::default() };
 
         expr.parse_pos().unwrap();
 
@@ -470,10 +474,7 @@ mod tests {
 
     #[test]
     fn test_error_comma() {
-        let mut expr = Expression {
-            raw: ", 2 + 5".to_owned(),
-            ..Default::default()
-        };
+        let mut expr = Expression { raw: ", 2 + 5".to_owned(), ..Default::default() };
 
         expr.parse_pos().unwrap();
         expr.parse_operators().unwrap();

@@ -8,7 +8,7 @@ use Function;
 pub struct Node {
     pub operator: Operator,
     pub children: Vec<Node>,
-    pub closed: bool
+    pub closed: bool,
 }
 
 impl Node {
@@ -16,7 +16,7 @@ impl Node {
         Node {
             operator: operator,
             children: Vec::new(),
-            closed: false
+            closed: false,
         }
     }
 
@@ -51,11 +51,7 @@ impl Node {
         if self.operator.is_value_or_ident() {
             true
         } else if self.operator.can_have_child() {
-            if self.closed {
-                true
-            } else {
-                self.is_enough()
-            }
+            if self.closed { true } else { self.is_enough() }
         } else {
             false
         }
@@ -63,8 +59,8 @@ impl Node {
 
     pub fn is_unclosed_function(&self) -> bool {
         match self.operator {
-            Operator::Function(_) => ! self.closed,
-            _ => false
+            Operator::Function(_) => !self.closed,
+            _ => false,
         }
     }
 

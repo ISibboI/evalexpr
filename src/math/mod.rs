@@ -165,7 +165,7 @@ impl Type for Value {
             Value::F64(f) => f,
             Value::I64(f) => f as f64,
             Value::U64(f) => f as f64,
-            _ => panic!("not a number")
+            _ => panic!("not a number"),
         }
     }
 

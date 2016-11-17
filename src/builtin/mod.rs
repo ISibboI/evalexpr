@@ -20,7 +20,7 @@ impl BuiltIn {
 #[derive(PartialEq)]
 enum Compare {
     Min,
-    Max
+    Max,
 }
 
 fn create_min_fuction() -> Function {
@@ -36,7 +36,8 @@ fn compare(compare: Compare) -> Function {
         max_args: None,
         min_args: Some(1),
         compiled: Box::new(move |values| {
-            let mut prev: Result<Value, Error> = Err(Error::Custom("can't find min value.".to_owned()));
+            let mut prev: Result<Value, Error> = Err(Error::Custom("can't find min value."
+                .to_owned()));
 
             for value in values {
                 match value {
@@ -56,7 +57,7 @@ fn compare(compare: Compare) -> Function {
                                 prev = Ok(value);
                             }
                         }
-                    },
+                    }
                     _ => {
                         if prev.is_ok() {
                             if compare == Compare::Min {
@@ -75,7 +76,7 @@ fn compare(compare: Compare) -> Function {
                 }
             }
             prev
-        })
+        }),
     }
 }
 
@@ -84,18 +85,18 @@ fn create_is_empty_fuction() -> Function {
     Function {
         max_args: Some(1),
         min_args: Some(1),
-        compiled: Box::new(|values|{
+        compiled: Box::new(|values| {
             match *values.first().unwrap() {
                 Value::String(ref string) => Ok(Value::Bool(string.is_empty())),
                 Value::Array(ref array) => Ok(Value::Bool(array.is_empty())),
                 Value::Object(ref object) => Ok(Value::Bool(object.is_empty())),
                 Value::Null => Ok(Value::Bool(true)),
-                _ => Ok(Value::Bool(false))
+                _ => Ok(Value::Bool(false)),
             }
-        })
+        }),
     }
 }
 
 fn create_array_function() -> Function {
-    Function::new(|values|Ok(to_value(values)))
+    Function::new(|values| Ok(to_value(values)))
 }
