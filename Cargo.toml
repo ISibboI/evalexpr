@@ -2,7 +2,7 @@
 name = "eval"
 version = "0.1.1"
 description = "Expression evaluator"
-keywords = ["expression", "evaluate", "evaluator", "expr"]
+keywords = ["expression", "evaluate", "evaluator", "expr", "template"]
 authors = ["fengcen <fengcen.love@gmail.com>"]
 repository = "https://github.com/fengcen/eval.git"
 homepage = "https://github.com/fengcen/eval"

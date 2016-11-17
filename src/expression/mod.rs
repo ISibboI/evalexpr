@@ -180,6 +180,50 @@ impl Expression {
         }
     }
 
+    pub fn parse_node(&mut self) -> Result<(), Error> {
+        let mut parsing_nodes = Vec::<Node>::new();
+
+        for operator in &self.operators {
+            match *operator {
+                Operator::Add(priority) | Operator::Sub(priority) |
+                Operator::Mul(priority) | Operator::Div(priority) |
+                Operator::Not(priority) | Operator::Eq(priority) |
+                Operator::Ne(priority) | Operator::Gt(priority) |
+                Operator::Lt(priority) | Operator::Ge(priority) |
+                Operator::And(priority) | Operator::Or(priority) |
+                Operator::Le(priority) | Operator::Rem(priority) => {
+                    if ! parsing_nodes.is_empty() {
+                        let prev = parsing_nodes.pop().unwrap();
+                        if prev.is_value_or_enough() {
+                            if prev.operator.get_priority() < priority && ! prev.closed {
+                                parsing_nodes.extend_from_slice(&rob_to(prev, operator.to_node()));
+                            } else {
+                                parsing_nodes.push(operator.children_to_node(vec![prev]));
+                            }
+                        } else if prev.operator.can_at_beginning() {
+                            parsing_nodes.push(prev);
+                            parsing_nodes.push(operator.to_node());
+                        } else {
+                            return Err(Error::DuplicateOperatorNode);
+                        }
+                    } else if operator.can_at_beginning() {
+                        parsing_nodes.push(operator.to_node());
+                    } else {
+                        return Err(Error::StartWithNonValueOperator);
+                    }
+                },
+                Operator::Function(_) | Operator::LeftParenthesis | Operator::LeftSquareBracket => parsing_nodes.push(operator.to_node()),
+                Operator::Comma => close_comma(&mut parsing_nodes)?,
+                Operator::RightParenthesis | Operator::RightSquareBracket => close_bracket(&mut parsing_nodes, operator.get_left())?,
+                Operator::Value(_) | Operator::Identifier(_) => append_child_to_last_node(&mut parsing_nodes, operator)?,
+                _ => ()
+            }
+        }
+
+        self.node = Some(get_final_node(parsing_nodes)?);
+        Ok(())
+    }
+
     pub fn compile(&self) -> Box<Fn(ContextsRef, &Functions, &Functions) -> Result<Value, Error>> {
         let node = self.node.clone().unwrap();
 
@@ -247,50 +291,6 @@ impl Expression {
             }
         })
     }
-
-    pub fn parse_node(&mut self) -> Result<(), Error> {
-        let mut parsing_nodes = Vec::<Node>::new();
-
-        for operator in &self.operators {
-            match *operator {
-                Operator::Add(priority) | Operator::Sub(priority) |
-                Operator::Mul(priority) | Operator::Div(priority) |
-                Operator::Not(priority) | Operator::Eq(priority) |
-                Operator::Ne(priority) | Operator::Gt(priority) |
-                Operator::Lt(priority) | Operator::Ge(priority) |
-                Operator::And(priority) | Operator::Or(priority) |
-                Operator::Le(priority) | Operator::Rem(priority) => {
-                    if ! parsing_nodes.is_empty() {
-                        let prev = parsing_nodes.pop().unwrap();
-                        if prev.is_value_or_enough() {
-                            if prev.operator.get_priority() < priority && ! prev.closed {
-                                parsing_nodes.extend_from_slice(&rob_to(prev, operator.to_node()));
-                            } else {
-                                parsing_nodes.push(operator.children_to_node(vec![prev]));
-                            }
-                        } else if prev.operator.can_at_beginning() {
-                            parsing_nodes.push(prev);
-                            parsing_nodes.push(operator.to_node());
-                        } else {
-                            return Err(Error::DuplicateOperatorNode);
-                        }
-                    } else if operator.can_at_beginning() {
-                        parsing_nodes.push(operator.to_node());
-                    } else {
-                        return Err(Error::StartWithNonValueOperator);
-                    }
-                },
-                Operator::Function(_) | Operator::LeftParenthesis | Operator::LeftSquareBracket => parsing_nodes.push(operator.to_node()),
-                Operator::Comma => close_comma(&mut parsing_nodes)?,
-                Operator::RightParenthesis | Operator::RightSquareBracket => close_bracket(&mut parsing_nodes, operator.get_left())?,
-                Operator::Value(_) | Operator::Identifier(_) => append_child_to_last_node(&mut parsing_nodes, operator)?,
-                _ => ()
-            }
-        }
-
-        self.node = Some(get_final_node(parsing_nodes)?);
-        Ok(())
-    }
 }
 
 fn append_child_to_last_node(parsing_nodes: &mut Vec<Node>, operator: &Operator) -> Result<(), Error> {
@@ -320,11 +320,10 @@ fn get_final_node(mut parsing_nodes: Vec<Node>) -> Result<Node, Error> {
     }
 
     while parsing_nodes.len() != 1 {
-        let mut last_node = parsing_nodes.pop().unwrap();
-        let mut prev_node = parsing_nodes.pop().unwrap();
-        prev_node.add_child(last_node);
-        last_node = prev_node;
-        parsing_nodes.push(last_node);
+        let last = parsing_nodes.pop().unwrap();
+        let mut prev = parsing_nodes.pop().unwrap();
+        prev.add_child(last);
+        parsing_nodes.push(prev);
     }
 
     Ok(parsing_nodes.pop().unwrap())
