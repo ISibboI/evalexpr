@@ -1,4 +1,4 @@
-//! Expression evaluator.
+//! Eval is a powerful expression evaluator.
 //!
 //! Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=`
 //! `==` `+` `-` `*` `/` `%` `&&` `||` `n..m`.
