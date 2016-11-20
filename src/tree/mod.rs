@@ -7,49 +7,48 @@ use operator::Operator;
 use node::Node;
 use {Context, Functions};
 use error::Error;
-use ContextsRef;
+use Compiled;
+use builtin::BuiltIn;
 
 
 #[derive(Default)]
-pub struct Expression {
+pub struct Tree {
     pub raw: String,
     pub pos: Vec<usize>,
     pub operators: Vec<Operator>,
     pub node: Option<Node>,
 }
 
-impl Expression {
-    pub fn new<T: Into<String>>(raw: T) -> Result<Expression, Error> {
-        let mut expr = Expression { raw: raw.into(), ..Default::default() };
-
-        expr.parse_pos()?;
-        expr.parse_operators()?;
-        expr.parse_node()?;
-        Ok(expr)
+impl Tree {
+    pub fn new<T: Into<String>>(raw: T) -> Tree {
+        Tree { raw: raw.into(), ..Default::default() }
     }
 
     pub fn parse_pos(&mut self) -> Result<(), Error> {
         let mut found_quote = false;
+        let mut pos = Vec::new();
 
         for (index, cur) in self.raw.chars().enumerate() {
             match cur {
                 '(' | ')' | '+' | '-' | '*' | '/' | ',' | ' ' | '!' | '=' | '>' | '<' | '\'' |
                 '[' | ']' | '%' | '&' | '|' => {
                     if !found_quote {
-                        self.pos.push(index);
-                        self.pos.push(index + 1);
+                        pos.push(index);
+                        pos.push(index + 1);
                     }
                 }
                 '"' => {
                     found_quote = !found_quote;
-                    self.pos.push(index);
-                    self.pos.push(index + 1);
+                    pos.push(index);
+                    pos.push(index + 1);
                 }
                 _ => (),
             }
         }
 
-        self.pos.push(self.raw.len());
+        pos.push(self.raw.len());
+
+        self.pos = pos;
         Ok(())
     }
 
@@ -62,7 +61,8 @@ impl Expression {
         let mut quote = None;
         let mut prev = String::new();
 
-        for pos in self.pos.clone() {
+        for pos_ref in &self.pos {
+            let pos = *pos_ref;
             if pos == 0 {
                 continue;
             } else {
@@ -117,11 +117,9 @@ impl Expression {
                     prev = raw;
                 }
                 continue;
-            } else {
-                if prev == "!" || prev == ">" || prev == "<" {
-                    operators.push(Operator::from_str(&prev).unwrap());
-                    prev.clear();
-                }
+            } else if prev == "!" || prev == ">" || prev == "<" {
+                operators.push(Operator::from_str(&prev).unwrap());
+                prev.clear();
             }
 
             if (raw == "&" || raw == "|") && (prev == "&" || prev == "|") {
@@ -234,86 +232,90 @@ impl Expression {
         Ok(())
     }
 
-    pub fn compile(&self) -> Box<Fn(ContextsRef, &Functions, &Functions) -> Result<Value, Error>> {
-        let node = self.node.clone().unwrap();
+    pub fn compile(mut self) -> Result<Compiled, Error> {
+        self.parse_pos()?;
+        self.parse_operators()?;
+        self.parse_node()?;
+        let node = self.node.unwrap();
+        let builtin = BuiltIn::new();
 
-        Box::new(move |contexts, buildin, functions| -> Result<Value, Error> {
-            return exec_node(&node, contexts, buildin, functions);
+        Ok(Box::new(move |contexts, functions| -> Result<Value, Error> {
+            return exec_node(&node, &builtin, contexts, functions);
 
             fn exec_node(node: &Node,
-                         contexts: ContextsRef,
-                         buildin: &Functions,
+                         builtin: &Functions,
+                         contexts: &[Context],
                          functions: &Functions)
                          -> Result<Value, Error> {
                 match node.operator {
                     Operator::Add(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .add(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .add(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Mul(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .mul(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .mul(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Sub(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .sub(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .sub(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Div(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .div(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .div(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Rem(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .rem(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .rem(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Eq(_) => {
-                        Math::eq(&exec_node(&node.get_first_child(), contexts, buildin, functions)?,
-                                 &exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                        Math::eq(&exec_node(&node.get_first_child(), builtin, contexts, functions)?,
+                                 &exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Ne(_) => {
-                        Math::ne(&exec_node(&node.get_first_child(), contexts, buildin, functions)?,
-                                 &exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                        Math::ne(&exec_node(&node.get_first_child(), builtin, contexts, functions)?,
+                                 &exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Gt(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .gt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .gt(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Lt(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .lt(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .lt(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Ge(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .ge(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .ge(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Le(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .le(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .le(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::And(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .and(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .and(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Or(_) => {
-                        exec_node(&node.get_first_child(), contexts, buildin, functions)
+                        exec_node(&node.get_first_child(), builtin, contexts, functions)
                             ?
-                            .or(&exec_node(&node.get_last_child(), contexts, buildin, functions)?)
+                            .or(&exec_node(&node.get_last_child(), builtin, contexts, functions)?)
                     }
                     Operator::Function(ref ident) => {
                         let function_option = if functions.contains_key(ident) {
                             functions.get(ident)
                         } else {
-                            buildin.get(ident)
+                            builtin.get(ident)
                         };
 
                         if function_option.is_some() {
@@ -321,7 +323,7 @@ impl Expression {
                             node.check_function_args(function)?;
                             let mut values = Vec::new();
                             for node in &node.children {
-                                values.push(exec_node(node, contexts, buildin, functions)?);
+                                values.push(exec_node(node, builtin, contexts, functions)?);
                             }
                             (function.compiled)(values)
                         } else {
@@ -331,7 +333,7 @@ impl Expression {
                     Operator::Value(ref value) => Ok(value.clone()),
                     Operator::Not(_) => {
                         let value =
-                            exec_node(&node.get_first_child(), contexts, buildin, functions)?;
+                            exec_node(&node.get_first_child(), builtin, contexts, functions)?;
                         match value {
                             Value::Bool(boolean) => Ok(Value::Bool(!boolean)),
                             Value::Null => Ok(Value::Bool(true)),
@@ -354,7 +356,7 @@ impl Expression {
                     _ => Err(Error::CanNotExec(node.operator.clone())),
                 }
             }
-        })
+        }))
     }
 }
 
@@ -427,23 +429,22 @@ fn close_bracket(parsing_nodes: &mut Vec<Node>, bracket: Operator) -> Result<(),
                 parsing_nodes.push(current);
             }
             break;
-        } else {
-            if !prev.closed {
-                prev.add_child(current);
-                if prev.is_enough() {
-                    prev.closed = true;
-                }
+        } else if !prev.closed {
+            prev.add_child(current);
+            if prev.is_enough() {
+                prev.closed = true;
+            }
 
-                if !parsing_nodes.is_empty() {
-                    parsing_nodes.push(prev);
-                } else {
-                    return Err(Error::StartWithNonValueOperator);
-                }
+            if !parsing_nodes.is_empty() {
+                parsing_nodes.push(prev);
             } else {
                 return Err(Error::StartWithNonValueOperator);
             }
+        } else {
+            return Err(Error::StartWithNonValueOperator);
         }
     }
+
     Ok(())
 }
 
@@ -476,21 +477,19 @@ fn close_comma(parsing_nodes: &mut Vec<Node>) -> Result<(), Error> {
             } else {
                 return Err(Error::CommaNotWithFunction);
             }
-        } else {
-            if !prev.closed {
-                prev.add_child(current);
-                if prev.is_enough() {
-                    prev.closed = true;
-                }
+        } else if !prev.closed {
+            prev.add_child(current);
+            if prev.is_enough() {
+                prev.closed = true;
+            }
 
-                if !parsing_nodes.is_empty() {
-                    parsing_nodes.push(prev);
-                } else {
-                    return Err(Error::StartWithNonValueOperator);
-                }
+            if !parsing_nodes.is_empty() {
+                parsing_nodes.push(prev);
             } else {
                 return Err(Error::StartWithNonValueOperator);
             }
+        } else {
+            return Err(Error::StartWithNonValueOperator);
         }
     }
     Ok(())
@@ -502,7 +501,7 @@ fn rob_to(mut was_robed: Node, mut rober: Node) -> Vec<Node> {
     vec![was_robed, rober]
 }
 
-fn find(contexts: ContextsRef, key: &str) -> Option<Value> {
+fn find(contexts: &[Context], key: &str) -> Option<Value> {
     for context in contexts.iter().rev() {
         let value = get(context, key);
         match value {

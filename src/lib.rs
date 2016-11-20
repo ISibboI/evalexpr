@@ -3,9 +3,9 @@
 //! Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=`
 //! `==` `+` `-` `*` `/` `%` `&&` `||` `n..m`.
 //!
-//! Built-in functions: `min()` `max()` `is_empty()`.
+//! Built-in functions: `min()` `max()` `len()` `is_empty()`.
 //!
-//! # Examples
+//! ## Examples
 //!
 //! You can do mathematical calculations with supported operators:
 //!
@@ -21,22 +21,24 @@
 //! You can eval with context:
 //!
 //! ```
-//! use eval::{eval_with_context, Context, to_value};
+//! use eval::{Expr, to_value};
 //!
-//! let mut context = Context::new();
-//! context.insert("foo".to_owned(), to_value(true));
-//! context.insert("bar".to_owned(), to_value(true));
-//! assert_eq!(eval_with_context("foo == bar", &context), Ok(to_value(true)));
+//! assert_eq!(Expr::new("foo == bar")
+//!                .value("foo", true)
+//!                .value("bar", true)
+//!                .exec(),
+//!            Ok(to_value(true)));
 //! ```
 //!
-//! You can eval with functions:
+//! You can eval with function:
 //!
 //! ```
-//! use eval::{eval_with_functions, Functions, Function, to_value};
+//! use eval::{Expr, to_value};
 //!
-//! let mut functions = Functions::new();
-//! functions.insert("say_hello".to_owned(), Function::new(|_| Ok(to_value("Hello world!"))));
-//! assert_eq!(eval_with_functions("say_hello()", &functions), Ok(to_value("Hello world!")));
+//! assert_eq!(Expr::new("say_hello()")
+//!                .function("say_hello", |_| Ok(to_value("Hello world!")))
+//!                .exec(),
+//!            Ok(to_value("Hello world!")));
 //! ```
 //!
 //! You can create an array with `[]`:
@@ -45,7 +47,6 @@
 //! use eval::{eval, to_value};
 //!
 //! assert_eq!(eval("[1, 2, 3, 4, 5]"), Ok(to_value(vec![1, 2, 3, 4, 5])));
-//!
 //! ```
 //!
 //! You can create an integer array with `n..m`:
@@ -54,8 +55,22 @@
 //! use eval::{eval, to_value};
 //!
 //! assert_eq!(eval("0..5"), Ok(to_value(vec![0, 1, 2, 3, 4])));
-//!
 //! ```
+//!
+//! ## Built-in functions
+//!
+//! ### min()
+//! Accept multiple arguments and return the minimum value.
+//!
+//! ### max()
+//! Accept multiple arguments and return the maximum value.
+//!
+//! ### len()
+//! Accept single arguments and return the length of value. Only accept String, Array, Object and Null.
+//!
+//! ### is_empty()
+//! Accept single arguments and return the a boolean. Check whether the value is empty or not.
+//!
 //!
 #![recursion_limit="100"]
 #![deny(missing_docs)]
@@ -64,89 +79,51 @@ extern crate test;
 
 #[macro_use]
 extern crate quick_error;
+extern crate serde;
 extern crate serde_json;
-
 
 mod math;
 mod function;
 mod operator;
 mod node;
-mod expression;
+mod tree;
 mod error;
 mod builtin;
+mod expr;
 
-
+pub use expr::ExecOptions;
 pub use serde_json::{Value, to_value};
 pub use error::Error;
 pub use function::Function;
-
+pub use expr::Expr;
 use std::collections::HashMap;
-use expression::Expression;
-use builtin::BuiltIn;
 
-type ContextsRef<'a> = &'a [Context];
-
-/// Eval context.
+/// Custom context.
 pub type Context = HashMap<String, Value>;
-/// Eval contexts. The value of the last context is searched first.
+/// Custom contexts. The value of the last context is searched first.
 pub type Contexts = Vec<Context>;
-/// Eval functions.
+/// Custom functions.
 pub type Functions = HashMap<String, Function>;
 
 /// Evaluates the value of an expression.
 pub fn eval(expr: &str) -> Result<Value, Error> {
-    Expression::new(expr)?.compile()(&Contexts::new(), &BuiltIn::new(), &Functions::new())
+    Expr::new(expr).compile()?.exec()
 }
 
-/// Evaluates the value of an expression with the given context.
-pub fn eval_with_context(expr: &str, context: &Context) -> Result<Value, Error> {
-    let mut contexts = Contexts::new();
-    contexts.push(context.clone());
-    eval_with_contexts(expr, &contexts)
-}
 
-/// Evaluates the value of an expression with the given contexts.<br>
-/// The value of the last context is searched first.
-pub fn eval_with_contexts(expr: &str, contexts: ContextsRef) -> Result<Value, Error> {
-    Expression::new(expr)?.compile()(contexts, &BuiltIn::new(), &Functions::new())
-}
+type Compiled = Box<Fn(&[Context], &Functions) -> Result<Value, Error>>;
 
-/// Evaluates the value of an expression with the given functions.
-pub fn eval_with_functions(expr: &str, functions: &Functions) -> Result<Value, Error> {
-    Expression::new(expr)?.compile()(&Contexts::new(), &BuiltIn::new(), functions)
-}
-
-/// Evaluates the value of an expression with the given context and functions.
-pub fn eval_with_context_and_functions(expr: &str,
-                                       context: &Context,
-                                       functions: &Functions)
-                                       -> Result<Value, Error> {
-    let mut contexts = Contexts::new();
-    contexts.push(context.clone());
-    eval_with_contexts_and_functions(expr, &contexts, functions)
-}
-
-/// Evaluates the value of an expression with the given contexts and functions.<br>
-/// The value of the last context is searched first.
-pub fn eval_with_contexts_and_functions(expr: &str,
-                                        contexts: ContextsRef,
-                                        functions: &Functions)
-                                        -> Result<Value, Error> {
-    Expression::new(expr)?.compile()(contexts, &BuiltIn::new(), functions)
-}
 
 
 #[cfg(test)]
 mod tests {
     use test;
     use serde_json::to_value;
-    use expression::Expression;
     use error::Error;
-    use Context;
+    use Expr;
+    use tree::Tree;
     use eval;
-    use eval_with_context;
-    use eval_with_functions;
-    use {Function, Functions};
+    use std::collections::HashMap;
 
     #[test]
     fn test_add() {
@@ -223,6 +200,28 @@ mod tests {
     #[test]
     fn test_max_and_mul() {
         assert_eq!(eval("max(30, 5, 245, 20) * 10"), Ok(to_value(2450)));
+    }
+
+    #[test]
+    fn test_len_array() {
+        assert_eq!(eval("len([2, 3, 4, 5, 6])"), Ok(to_value(5)));
+    }
+
+    #[test]
+    fn test_len_string() {
+        assert_eq!(eval("len('Hello world!')"), Ok(to_value(12)));
+    }
+
+    #[test]
+    fn test_len_object() {
+        let mut object = HashMap::new();
+        object.insert("field1", "value1");
+        object.insert("field2", "value2");
+        object.insert("field3", "value3");
+        assert_eq!(Expr::new("len(object)")
+                       .value("object", object)
+                       .exec(),
+                   Ok(to_value(3)));
     }
 
     #[test]
@@ -405,81 +404,83 @@ mod tests {
     }
 
     #[test]
-    fn test_buildin_is_empty() {
-        let mut context = Context::new();
-        context.insert("array".to_owned(), to_value(Vec::<String>::new()));
-        assert_eq!(eval_with_context("is_empty(array)", &context),
+    fn test_builtin_is_empty() {
+        assert_eq!(Expr::new("is_empty(array)")
+                       .value("array", Vec::<String>::new())
+                       .compile()
+                       .unwrap()
+                       .exec(),
                    Ok(to_value(true)));
     }
 
     #[test]
-    fn test_buildin_min() {
-        let mut context = Context::new();
-        context.insert("array".to_owned(), to_value(vec![23, 34, 45, 2]));
-        assert_eq!(eval_with_context("min(array)", &context), Ok(to_value(2)));
+    fn test_builtin_min() {
+        assert_eq!(Expr::new("min(array)")
+                       .value("array", vec![23, 34, 45, 2])
+                       .compile()
+                       .unwrap()
+                       .exec(),
+                   Ok(to_value(2)));
     }
 
     #[test]
     fn test_custom_function() {
-        let mut functions = Functions::new();
-        functions.insert("output".to_owned(),
-                         Function::new(|_| Ok(to_value("This is custom function's output"))));
-        assert_eq!(eval_with_functions("output()", &functions),
+        assert_eq!(Expr::new("output()")
+                       .function("output",
+                                 |_| Ok(to_value("This is custom function's output")))
+                       .compile()
+                       .unwrap()
+                       .exec(),
                    Ok(to_value("This is custom function's output")));
     }
 
     #[test]
     fn test_error_start_with_non_value_operator() {
-        let mut expr = Expression {
-            raw: "+ + 5".to_owned(),
-            pos: Vec::new(),
-            operators: Vec::new(),
-            node: None,
-        };
+        let mut tree = Tree { raw: "+ + 5".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
+        tree.parse_pos().unwrap();
+        tree.parse_operators().unwrap();
 
-        assert_eq!(expr.parse_node(), Err(Error::StartWithNonValueOperator));
+        assert_eq!(tree.parse_node(), Err(Error::StartWithNonValueOperator));
     }
 
     #[test]
     fn test_error_duplicate_operator() {
-        let mut expr = Expression { raw: "5 + + 5".to_owned(), ..Default::default() };
+        let mut tree = Tree { raw: "5 + + 5".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
+        tree.parse_pos().unwrap();
+        tree.parse_operators().unwrap();
 
-        assert_eq!(expr.parse_node(), Err(Error::DuplicateOperatorNode));
+        assert_eq!(tree.parse_node(), Err(Error::DuplicateOperatorNode));
     }
 
     #[test]
     fn test_error_duplicate_value() {
-        let mut expr = Expression { raw: "2 + 6 5".to_owned(), ..Default::default() };
+        let mut tree = Tree { raw: "2 + 6 5".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
+        tree.parse_pos().unwrap();
+        tree.parse_operators().unwrap();
 
-        assert_eq!(expr.parse_node(), Err(Error::DuplicateValueNode));
+        assert_eq!(tree.parse_node(), Err(Error::DuplicateValueNode));
     }
 
     #[test]
     fn test_error_unpaired_brackets() {
-        let mut expr = Expression { raw: "(2 + 3)) * 5".to_owned(), ..Default::default() };
+        let mut tree = Tree { raw: "(2 + 3)) * 5".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
+        tree.parse_pos().unwrap();
 
-        assert_eq!(expr.parse_operators(), Err(Error::UnpairedBrackets));
+        assert_eq!(tree.parse_operators(), Err(Error::UnpairedBrackets));
     }
 
     #[test]
     fn test_error_comma() {
-        let mut expr = Expression { raw: ", 2 + 5".to_owned(), ..Default::default() };
+        let mut tree = Tree { raw: ", 2 + 5".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
+        tree.parse_pos().unwrap();
+        tree.parse_operators().unwrap();
 
-        assert_eq!(expr.parse_node(), Err(Error::CommaNotWithFunction));
+        assert_eq!(tree.parse_node(), Err(Error::CommaNotWithFunction));
     }
 
 
@@ -490,48 +491,47 @@ mod tests {
 
     #[bench]
     fn bench_parse_pos(b: &mut test::Bencher) {
-        let mut expr = Expression {
-            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
-            ..Default::default()
-        };
+        let mut tree =
+            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
 
-        b.iter(|| expr.parse_pos().unwrap());
+        b.iter(|| tree.parse_pos().unwrap());
     }
 
     #[bench]
     fn bench_parse_operators(b: &mut test::Bencher) {
-        let mut expr = Expression {
-            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
-            ..Default::default()
-        };
+        let mut tree =
+            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        b.iter(|| expr.parse_operators().unwrap());
+        tree.parse_pos().unwrap();
+        b.iter(|| tree.parse_operators().unwrap());
     }
 
     #[bench]
     fn bench_parse_nodes(b: &mut test::Bencher) {
-        let mut expr = Expression {
-            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
-            ..Default::default()
-        };
+        let mut tree =
+            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
-        b.iter(|| expr.parse_node().unwrap());
+        tree.parse_pos().unwrap();
+        tree.parse_operators().unwrap();
+        b.iter(|| tree.parse_node().unwrap());
     }
 
     #[bench]
     fn bench_compile(b: &mut test::Bencher) {
-        let mut expr = Expression {
-            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
-            ..Default::default()
-        };
+        b.iter(|| {
+            let mut tree =
+                Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
+            tree.parse_pos().unwrap();
+            tree.parse_operators().unwrap();
+            tree.parse_node().unwrap();
+            tree.compile().unwrap();
+        });
+    }
 
-        expr.parse_pos().unwrap();
-        expr.parse_operators().unwrap();
-        expr.parse_node().unwrap();
-        b.iter(|| expr.compile());
+    #[bench]
+    fn bench_exec(b: &mut test::Bencher) {
+        let expr = Expr::new("(2 + (3 + 4) + (6 + (6 + 7)) + 5)").compile().unwrap();
+        b.iter(|| expr.exec().unwrap())
     }
 
     #[bench]

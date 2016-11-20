@@ -11,6 +11,7 @@ impl BuiltIn {
         let mut functions = Functions::new();
         functions.insert("min".to_owned(), create_min_fuction());
         functions.insert("max".to_owned(), create_max_fuction());
+        functions.insert("len".to_owned(), create_len_fuction());
         functions.insert("is_empty".to_owned(), create_is_empty_fuction());
         functions.insert("array".to_owned(), create_array_function());
         functions
@@ -48,10 +49,8 @@ fn compare(compare: Compare) -> Function {
                                     if value.lt(prev.as_ref().unwrap())? == to_value(true) {
                                         prev = Ok(value)
                                     }
-                                } else {
-                                    if value.gt(prev.as_ref().unwrap())? == to_value(true) {
-                                        prev = Ok(value)
-                                    }
+                                } else if value.gt(prev.as_ref().unwrap())? == to_value(true) {
+                                    prev = Ok(value)
                                 }
                             } else {
                                 prev = Ok(value);
@@ -64,10 +63,8 @@ fn compare(compare: Compare) -> Function {
                                 if value.lt(prev.as_ref().unwrap())? == to_value(true) {
                                     prev = Ok(value)
                                 }
-                            } else {
-                                if value.gt(prev.as_ref().unwrap())? == to_value(true) {
-                                    prev = Ok(value)
-                                }
+                            } else if value.gt(prev.as_ref().unwrap())? == to_value(true) {
+                                prev = Ok(value)
                             }
                         } else {
                             prev = Ok(value);
@@ -87,11 +84,32 @@ fn create_is_empty_fuction() -> Function {
         min_args: Some(1),
         compiled: Box::new(|values| {
             match *values.first().unwrap() {
-                Value::String(ref string) => Ok(Value::Bool(string.is_empty())),
-                Value::Array(ref array) => Ok(Value::Bool(array.is_empty())),
-                Value::Object(ref object) => Ok(Value::Bool(object.is_empty())),
-                Value::Null => Ok(Value::Bool(true)),
-                _ => Ok(Value::Bool(false)),
+                Value::String(ref string) => Ok(to_value(string.is_empty())),
+                Value::Array(ref array) => Ok(to_value(array.is_empty())),
+                Value::Object(ref object) => Ok(to_value(object.is_empty())),
+                Value::Null => Ok(to_value(true)),
+                _ => Ok(to_value(false)),
+            }
+        }),
+    }
+}
+
+fn create_len_fuction() -> Function {
+    Function {
+        max_args: Some(1),
+        min_args: Some(1),
+        compiled: Box::new(|values| {
+            let value = values.first().unwrap();
+            match *value {
+                Value::String(ref string) => Ok(to_value(string.len())),
+                Value::Array(ref array) => Ok(to_value(array.len())),
+                Value::Object(ref object) => Ok(to_value(object.len())),
+                Value::Null => Ok(to_value(0)),
+                _ => {
+                    Err(Error::Custom(format!("len() only accept string, array, object and \
+                                               null. But the given is: {:?}",
+                                              value)))
+                }
             }
         }),
     }
