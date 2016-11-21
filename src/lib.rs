@@ -1,9 +1,9 @@
 //! Eval is a powerful expression evaluator.
 //!
-//! Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=`
+//! Supported operators: `!` `!=` `""` `''` `()` `[]` `.` `,` `>` `<` `>=` `<=`
 //! `==` `+` `-` `*` `/` `%` `&&` `||` `n..m`.
 //!
-//! Built-in functions: `min()` `max()` `len()` `is_empty()`.
+//! Built-in functions: `min()` `max()` `len()` `is_empty()` `array()`.
 //!
 //! ## Examples
 //!
@@ -30,6 +30,21 @@
 //!            Ok(to_value(true)));
 //! ```
 //!
+//! You can access data like javascript by using `.` and `[]`. `[]` supports expression.
+//!
+//! ```
+//! use eval::{Expr, to_value};
+//! use std::collections::HashMap;
+//!
+//! let mut object = HashMap::new();
+//! object.insert("foos", vec!["Hello", "world", "!"]);
+//!
+//! assert_eq!(Expr::new("object.foos[2-1] == 'world'") // Access field `foos` and index `2-1`
+//!                .value("object", object)
+//!                .exec(),
+//!            Ok(to_value(true)));
+//! ```
+//!
 //! You can eval with function:
 //!
 //! ```
@@ -41,12 +56,12 @@
 //!            Ok(to_value("Hello world!")));
 //! ```
 //!
-//! You can create an array with `[]`:
+//! You can create an array with `array()`:
 //!
 //! ```
 //! use eval::{eval, to_value};
 //!
-//! assert_eq!(eval("[1, 2, 3, 4, 5]"), Ok(to_value(vec![1, 2, 3, 4, 5])));
+//! assert_eq!(eval("array(1, 2, 3, 4, 5)"), Ok(to_value(vec![1, 2, 3, 4, 5])));
 //! ```
 //!
 //! You can create an integer array with `n..m`:
@@ -69,7 +84,10 @@
 //! Accept single arguments and return the length of value. Only accept String, Array, Object and Null.
 //!
 //! ### is_empty()
-//! Accept single arguments and return the a boolean. Check whether the value is empty or not.
+//! Accept single arguments and return a boolean. Check whether the value is empty or not.
+//!
+//! ### array()
+//! Accept multiple arguments and return an array.
 //!
 //!
 #![recursion_limit="100"]
@@ -122,6 +140,7 @@ mod tests {
     use error::Error;
     use Expr;
     use tree::Tree;
+    use Value;
     use eval;
     use std::collections::HashMap;
 
@@ -204,7 +223,7 @@ mod tests {
 
     #[test]
     fn test_len_array() {
-        assert_eq!(eval("len([2, 3, 4, 5, 6])"), Ok(to_value(5)));
+        assert_eq!(eval("len(array(2, 3, 4, 5, 6))"), Ok(to_value(5)));
     }
 
     #[test]
@@ -320,17 +339,16 @@ mod tests {
 
     #[test]
     fn test_array() {
-        assert_eq!(eval("[1, 2, 3, 4]"), Ok(to_value(vec![1, 2, 3, 4])));
         assert_eq!(eval("array(1, 2, 3, 4)"), Ok(to_value(vec![1, 2, 3, 4])));
     }
 
     #[test]
-    fn test_array_ident() {
+    fn test_range() {
         assert_eq!(eval("0..5"), Ok(to_value(vec![0, 1, 2, 3, 4])));
     }
 
     #[test]
-    fn test_array_ident_and_min() {
+    fn test_range_and_min() {
         assert_eq!(eval("min(0..5)"), Ok(to_value(0)));
     }
 
@@ -404,11 +422,57 @@ mod tests {
     }
 
     #[test]
+    fn test_object_access() {
+        let mut object = HashMap::new();
+        object.insert("foo", "Foo, hello world!");
+        object.insert("bar", "Bar, hello world!");
+        assert_eq!(Expr::new("object.foo == 'Foo, hello world!'")
+                       .value("object", object)
+                       .exec(),
+                   Ok(to_value(true)));
+    }
+
+    #[test]
+    fn test_object_dynamic_access() {
+        let mut object = HashMap::new();
+        object.insert("foo", "Foo, hello world!");
+        object.insert("bar", "Bar, hello world!");
+        assert_eq!(Expr::new("object['foo'] == 'Foo, hello world!'")
+                       .value("object", object)
+                       .exec(),
+                   Ok(to_value(true)));
+    }
+
+    #[test]
+    fn test_object_dynamic_access_2() {
+        let mut object = HashMap::new();
+        object.insert("foo", "Foo, hello world!");
+        object.insert("bar", "Bar, hello world!");
+        assert_eq!(Expr::new("object[foo] == 'Foo, hello world!'")
+                       .value("object", object)
+                       .value("foo", "foo")
+                       .exec(),
+                   Ok(to_value(true)));
+    }
+
+    #[test]
+    fn test_path() {
+        assert_eq!(Expr::new("array[2-2].foo[2-2]").exec(), Ok(Value::Null));
+    }
+
+    #[test]
+    fn test_array_access() {
+        let array = vec!["hello", "world", "!"];
+        assert_eq!(Expr::new("array[1-1] == 'hello' && array[1] == 'world' && array[2] == '!'")
+                       .value("array", array)
+                       .exec(),
+                   Ok(to_value(true)));
+    }
+
+    #[test]
     fn test_builtin_is_empty() {
         assert_eq!(Expr::new("is_empty(array)")
                        .value("array", Vec::<String>::new())
-                       .compile()
-                       .unwrap()
                        .exec(),
                    Ok(to_value(true)));
     }
@@ -417,8 +481,6 @@ mod tests {
     fn test_builtin_min() {
         assert_eq!(Expr::new("min(array)")
                        .value("array", vec![23, 34, 45, 2])
-                       .compile()
-                       .unwrap()
                        .exec(),
                    Ok(to_value(2)));
     }
@@ -428,8 +490,6 @@ mod tests {
         assert_eq!(Expr::new("output()")
                        .function("output",
                                  |_| Ok(to_value("This is custom function's output")))
-                       .compile()
-                       .unwrap()
                        .exec(),
                    Ok(to_value("This is custom function's output")));
     }

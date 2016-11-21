@@ -31,7 +31,7 @@ impl Tree {
         for (index, cur) in self.raw.chars().enumerate() {
             match cur {
                 '(' | ')' | '+' | '-' | '*' | '/' | ',' | ' ' | '!' | '=' | '>' | '<' | '\'' |
-                '[' | ']' | '%' | '&' | '|' => {
+                '[' | ']' | '.' | '%' | '&' | '|' => {
                     if !found_quote {
                         pos.push(index);
                         pos.push(index + 1);
@@ -57,9 +57,9 @@ impl Tree {
         let mut start;
         let mut end = 0;
         let mut parenthesis = 0;
-        let mut square_brackets = 0;
         let mut quote = None;
         let mut prev = String::new();
+        let mut number = String::new();
 
         for pos_ref in &self.pos {
             let pos = *pos_ref;
@@ -71,6 +71,10 @@ impl Tree {
             }
 
             let raw = self.raw[start..end].to_owned();
+
+            if raw.is_empty() {
+                continue;
+            }
 
             let operator = Operator::from_str(&raw).unwrap();
             match operator {
@@ -96,8 +100,12 @@ impl Tree {
                 continue;
             }
 
-            if raw.is_empty() {
+            if parse_number(&raw).is_some() || operator.is_dot() {
+                number += &raw;
                 continue;
+            } else if !number.is_empty() {
+                operators.push(Operator::from_str(&number).unwrap());
+                number.clear();
             }
 
             if raw == "=" {
@@ -137,19 +145,14 @@ impl Tree {
             }
 
             match operator {
-                Operator::LeftSquareBracket => {
-                    square_brackets += 1;
-                    operators.push(Operator::Function("array".to_owned()));
-                    operators.push(operator);
-                    continue;
-                }
                 Operator::LeftParenthesis => {
                     parenthesis += 1;
 
                     if !operators.is_empty() {
                         let prev_operator = operators.pop().unwrap();
                         if prev_operator.is_identifier() {
-                            operators.push(Operator::Function(prev_operator.get_identifier()));
+                            operators.push(Operator::Function(prev_operator.get_identifier()
+                                .to_owned()));
                             operators.push(operator);
                             continue;
                         } else {
@@ -158,7 +161,6 @@ impl Tree {
                     }
                 }
                 Operator::RightParenthesis => parenthesis -= 1,
-                Operator::RightSquareBracket => square_brackets -= 1,
                 Operator::WhiteSpace => continue,
                 _ => (),
             }
@@ -167,7 +169,11 @@ impl Tree {
             operators.push(operator);
         }
 
-        if parenthesis != 0 || square_brackets != 0 {
+        if !number.is_empty() {
+            operators.push(Operator::from_str(&number).unwrap());
+        }
+
+        if parenthesis != 0 {
             Err(Error::UnpairedBrackets)
         } else {
             self.operators = operators;
@@ -193,6 +199,8 @@ impl Tree {
                 Operator::And(priority) |
                 Operator::Or(priority) |
                 Operator::Le(priority) |
+                Operator::Dot(priority) |
+                Operator::LeftSquareBracket(priority) |
                 Operator::Rem(priority) => {
                     if !parsing_nodes.is_empty() {
                         let prev = parsing_nodes.pop().unwrap();
@@ -215,15 +223,14 @@ impl Tree {
                     }
                 }
                 Operator::Function(_) |
-                Operator::LeftParenthesis |
-                Operator::LeftSquareBracket => parsing_nodes.push(operator.to_node()),
+                Operator::LeftParenthesis => parsing_nodes.push(operator.to_node()),
                 Operator::Comma => close_comma(&mut parsing_nodes)?,
                 Operator::RightParenthesis |
                 Operator::RightSquareBracket => {
                     close_bracket(&mut parsing_nodes, operator.get_left())?
                 }
                 Operator::Value(_) |
-                Operator::Identifier(_) => append_child_to_last_node(&mut parsing_nodes, operator)?,
+                Operator::Identifier(_) => append_value_to_last_node(&mut parsing_nodes, operator)?,
                 _ => (),
             }
         }
@@ -337,7 +344,93 @@ impl Tree {
                         match value {
                             Value::Bool(boolean) => Ok(Value::Bool(!boolean)),
                             Value::Null => Ok(Value::Bool(true)),
-                            _ => Err(Error::NotBoolean(value)),
+                            _ => Err(Error::ExpectedBoolean(value)),
+                        }
+                    }
+                    Operator::Dot(_) => {
+                        let mut value = None;
+                        for child in &node.children {
+                            if value.is_none() {
+                                let name = exec_node(child, builtin, contexts, functions)?;
+                                if name.is_string() {
+                                    value = find(contexts, name.as_str().unwrap());
+                                    if value.is_none() {
+                                        return Ok(Value::Null);
+                                    }
+                                } else if name.is_object() {
+                                    value = Some(name);
+                                } else if name.is_null() {
+                                    return Ok(Value::Null);
+                                } else {
+                                    return Err(Error::ExpectedObject);
+                                }
+                            } else {
+                                if child.operator.is_identifier() {
+                                    value = value.as_ref()
+                                        .unwrap()
+                                        .find(child.operator.get_identifier())
+                                        .cloned();
+                                } else {
+                                    return Err(Error::ExpectedIdentifier);
+                                }
+                            }
+                        }
+
+                        if value.is_some() {
+                            return Ok(value.unwrap());
+                        } else {
+                            return Ok(Value::Null);
+                        }
+                    }
+                    Operator::LeftSquareBracket(_) => {
+                        let mut value = None;
+                        for child in &node.children {
+                            let name = exec_node(child, builtin, contexts, functions)?;
+                            if value.is_none() {
+                                if name.is_string() {
+                                    value = find(contexts, name.as_str().unwrap());
+                                    if value.is_none() {
+                                        return Ok(Value::Null);
+                                    }
+                                } else if name.is_array() {
+                                    value = Some(name);
+                                } else if name.is_object() {
+                                    value = Some(name);
+                                } else if name.is_null() {
+                                    return Ok(Value::Null);
+                                } else {
+                                    return Err(Error::ExpectedArray);
+                                }
+                            } else if value.as_ref().unwrap().is_object() {
+                                if name.is_string() {
+                                    value = value.as_ref()
+                                        .unwrap()
+                                        .find(name.as_str().unwrap())
+                                        .cloned();
+                                } else {
+                                    return Err(Error::ExpectedIdentifier);
+                                }
+                            } else {
+                                if name.is_u64() {
+                                    if value.as_ref().unwrap().is_array() {
+                                        value = value.as_ref()
+                                            .unwrap()
+                                            .as_array()
+                                            .unwrap()
+                                            .get(name.as_u64().unwrap() as usize)
+                                            .cloned();
+                                    } else {
+                                        return Err(Error::ExpectedArray);
+                                    }
+                                } else {
+                                    return Err(Error::ExpectedNumber);
+                                }
+                            }
+                        }
+                        if value.is_some() {
+                            return Ok(value.unwrap());
+                        } else {
+                            return Ok(Value::Null);
                         }
                     }
                     Operator::Identifier(ref ident) => {
@@ -360,21 +453,30 @@ impl Tree {
     }
 }
 
-fn append_child_to_last_node(parsing_nodes: &mut Vec<Node>,
+fn append_value_to_last_node(parsing_nodes: &mut Vec<Node>,
                              operator: &Operator)
                              -> Result<(), Error> {
     let mut node = operator.to_node();
     node.closed = true;
 
     if let Some(mut prev) = parsing_nodes.pop() {
-        if prev.is_value_or_enough() {
+        if prev.is_dot() {
+            prev.add_child(node);
+            prev.closed = true;
+            parsing_nodes.push(prev);
+        } else if prev.is_left_square_bracket() {
+            parsing_nodes.push(prev);
+            parsing_nodes.push(node);
+        } else if prev.is_value_or_enough() {
             return Err(Error::DuplicateValueNode);
         } else if prev.is_enough() {
             parsing_nodes.push(prev);
             parsing_nodes.push(node);
-        } else {
+        } else if prev.operator.can_have_child() {
             prev.add_child(node);
             parsing_nodes.push(prev);
+        } else {
+            return Err(Error::CanNotAddChild);
         }
     } else {
         parsing_nodes.push(node);
@@ -391,8 +493,12 @@ fn get_final_node(mut parsing_nodes: Vec<Node>) -> Result<Node, Error> {
     while parsing_nodes.len() != 1 {
         let last = parsing_nodes.pop().unwrap();
         let mut prev = parsing_nodes.pop().unwrap();
-        prev.add_child(last);
-        parsing_nodes.push(prev);
+        if prev.operator.can_have_child() {
+            prev.add_child(last);
+            parsing_nodes.push(prev);
+        } else {
+            return Err(Error::CanNotAddChild);
+        }
     }
 
     Ok(parsing_nodes.pop().unwrap())
@@ -403,7 +509,14 @@ fn close_bracket(parsing_nodes: &mut Vec<Node>, bracket: Operator) -> Result<(),
         let mut current = parsing_nodes.pop().unwrap();
         let mut prev = parsing_nodes.pop().unwrap();
 
-        if current.operator == bracket {
+        if current.operator.is_left_square_bracket() {
+            return Err(Error::BracketNotWithFunction);
+        } else if prev.operator.is_left_square_bracket() {
+            prev.add_child(current);
+            prev.closed = true;
+            parsing_nodes.push(prev);
+            break;
+        } else if current.operator == bracket {
             if prev.is_unclosed_function() {
                 prev.closed = true;
                 parsing_nodes.push(prev);
@@ -503,31 +616,13 @@ fn rob_to(mut was_robed: Node, mut rober: Node) -> Vec<Node> {
 
 fn find(contexts: &[Context], key: &str) -> Option<Value> {
     for context in contexts.iter().rev() {
-        let value = get(context, key);
-        match value {
-            Some(_) => return value,
+        match context.get(key) {
+            Some(value) => return Some(value.clone()),
             None => continue,
         }
     }
 
     None
-}
-
-fn get(context: &Context, key: &str) -> Option<Value> {
-    let mut keys = key.split('.').collect::<Vec<_>>();
-    let context_key = keys.remove(0);
-    let context_value_option = context.get(context_key);
-
-    if context_value_option.is_none() {
-        None
-    } else if !keys.is_empty() {
-        match context_value_option.unwrap().search(&keys.join(".")) {
-            Some(value) => Some(value.clone()),
-            None => None,
-        }
-    } else {
-        Some(context_value_option.unwrap().clone())
-    }
 }
 
 fn is_range(ident: &str) -> bool {

@@ -64,6 +64,27 @@ impl Node {
         }
     }
 
+    pub fn is_unclosed_square_bracket(&self) -> bool {
+        match self.operator {
+            Operator::LeftSquareBracket(_) => !self.closed,
+            _ => false,
+        }
+    }
+
+    pub fn is_left_square_bracket(&self) -> bool {
+        match self.operator {
+            Operator::LeftSquareBracket(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_dot(&self) -> bool {
+        match self.operator {
+            Operator::Dot(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn add_child(&mut self, node: Node) {
         self.children.push(node);
     }

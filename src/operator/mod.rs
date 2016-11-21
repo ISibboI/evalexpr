@@ -21,9 +21,10 @@ pub enum Operator {
     Le(u8),
     And(u8),
     Or(u8),
+    Dot(u8),
     LeftParenthesis,
     RightParenthesis,
-    LeftSquareBracket,
+    LeftSquareBracket(u8),
     RightSquareBracket,
     DoubleQuotes,
     SingleQuote,
@@ -107,6 +108,20 @@ impl Operator {
         }
     }
 
+    pub fn is_left_square_bracket(&self) -> bool {
+        match *self {
+            Operator::LeftSquareBracket(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_dot(&self) -> bool {
+        match *self {
+            Operator::Dot(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn is_value_or_ident(&self) -> bool {
         match *self {
             Operator::Value(_) |
@@ -130,6 +145,9 @@ impl Operator {
             Operator::And(_) |
             Operator::Or(_) |
             Operator::Ge(_) |
+            Operator::Not(_) |
+            Operator::Dot(_) |
+            Operator::LeftSquareBracket(_) |
             Operator::Le(_) => true,
             _ => false,
         }
@@ -138,7 +156,7 @@ impl Operator {
     pub fn is_left(&self) -> bool {
         match *self {
             Operator::LeftParenthesis |
-            Operator::LeftSquareBracket => true,
+            Operator::LeftSquareBracket(_) => true,
             _ => false,
         }
     }
@@ -146,7 +164,7 @@ impl Operator {
     pub fn get_left(&self) -> Operator {
         match *self {
             Operator::RightParenthesis => Operator::LeftParenthesis,
-            Operator::RightSquareBracket => Operator::LeftSquareBracket,
+            Operator::RightSquareBracket => Operator::LeftSquareBracket(100),
             _ => panic!("not bracket"),
         }
     }
@@ -161,9 +179,9 @@ impl Operator {
         node
     }
 
-    pub fn get_identifier(&self) -> String {
+    pub fn get_identifier(&self) -> &str {
         match *self {
-            Operator::Identifier(ref ident) => ident.to_owned(),
+            Operator::Identifier(ref ident) => ident,
             _ => panic!("not identifier"),
         }
     }
@@ -181,8 +199,9 @@ impl FromStr for Operator {
             "%" => Ok(Operator::Rem(10)),
             "(" => Ok(Operator::LeftParenthesis),
             ")" => Ok(Operator::RightParenthesis),
-            "[" => Ok(Operator::LeftSquareBracket),
+            "[" => Ok(Operator::LeftSquareBracket(100)),
             "]" => Ok(Operator::RightSquareBracket),
+            "." => Ok(Operator::Dot(100)),
             "\"" => Ok(Operator::DoubleQuotes),
             "'" => Ok(Operator::SingleQuote),
             " " => Ok(Operator::WhiteSpace),

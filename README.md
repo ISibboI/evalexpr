@@ -1,7 +1,7 @@
 
 eval
 ===
-[![docs](https://docs.rs/eval/badge.svg?version=0.2.0 "docs")](https://docs.rs/eval)
+[![docs](https://docs.rs/eval/badge.svg?version=0.2.1 "docs")](https://docs.rs/eval)
 
 Eval is a powerful expression evaluator.
 
@@ -56,6 +56,23 @@ assert_eq!(Expr::new("foo == bar")
            Ok(to_value(true)));
 ```
 
+
+You can access data like javascript by using `.` and `[]`. `[]` supports expression.
+
+```
+use eval::{Expr, to_value};
+use std::collections::HashMap;
+
+let mut object = HashMap::new();
+object.insert("foos", vec!["Hello", "world", "!"]);
+
+assert_eq!(Expr::new("object.foos[1-1] == 'Hello'")
+               .value("object", object)
+               .exec(),
+           Ok(to_value(true)));
+```
+
+
 You can eval with function:
 
 ```
@@ -67,6 +84,7 @@ assert_eq!(Expr::new("say_hello()")
            Ok(to_value("Hello world!")));
 ```
 
+
 You can create an array with `[]`:
 
 ```
@@ -74,6 +92,7 @@ use eval::{eval, to_value};
 
 assert_eq!(eval("[1, 2, 3, 4, 5]"), Ok(to_value(vec![1, 2, 3, 4, 5])));
 ```
+
 
 You can create an integer array with `n..m`:
 
