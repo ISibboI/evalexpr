@@ -1,7 +1,7 @@
 
 eval
-===
-[![docs](https://docs.rs/eval/badge.svg?version=0.3.0 "docs")](https://docs.rs/eval)
+====
+[![docs](https://docs.rs/eval/badge.svg?version=0.3.1 "docs")](https://docs.rs/eval)
 
 Eval is a powerful expression evaluator.
 

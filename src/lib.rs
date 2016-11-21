@@ -92,8 +92,7 @@
 //!
 #![recursion_limit="100"]
 #![deny(missing_docs)]
-#![feature(proc_macro, test)]
-extern crate test;
+#![cfg_attr(feature = "unstable", feature(test))]
 
 #[macro_use]
 extern crate quick_error;
@@ -135,7 +134,6 @@ type Compiled = Box<Fn(&[Context], &Functions) -> Result<Value, Error>>;
 
 #[cfg(test)]
 mod tests {
-    use test;
     use serde_json::to_value;
     use error::Error;
     use Expr;
@@ -542,7 +540,13 @@ mod tests {
 
         assert_eq!(tree.parse_node(), Err(Error::CommaNotWithFunction));
     }
+}
 
+#[cfg(all(feature = "unstable", test))]
+mod benches {
+    extern crate test;
+    use eval;
+    use tree::Tree;
 
     #[bench]
     fn bench_deep_brackets(b: &mut test::Bencher) {
