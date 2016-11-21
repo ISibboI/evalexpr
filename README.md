@@ -1,7 +1,7 @@
 
 eval
 ===
-[![docs](https://docs.rs/eval/badge.svg?version=0.2.1 "docs")](https://docs.rs/eval)
+[![docs](https://docs.rs/eval/badge.svg?version=0.3.0 "docs")](https://docs.rs/eval)
 
 Eval is a powerful expression evaluator.
 
@@ -22,7 +22,7 @@ Add dependency to Cargo.toml
 
 ```toml
 [dependencies]
-eval = "^0.2"
+eval = "^0.3"
 ```
 
 In your `main.rs` or `lib.rs`:
