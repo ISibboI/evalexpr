@@ -1,6 +1,6 @@
 [package]
 name = "eval"
-version = "0.3.1"
+version = "0.3.2"
 description = "Expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "expr", "template"]
 authors = ["fengcen <fengcen.love@gmail.com>"]
