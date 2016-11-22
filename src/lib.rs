@@ -92,7 +92,7 @@
 //!
 #![recursion_limit="100"]
 #![deny(missing_docs)]
-#![cfg_attr(feature = "unstable", feature(test))]
+#![cfg_attr(all(feature = "unstable", test), feature(test))]
 
 #[macro_use]
 extern crate quick_error;
@@ -547,6 +547,7 @@ mod benches {
     extern crate test;
     use eval;
     use tree::Tree;
+    use Expr;
 
     #[bench]
     fn bench_deep_brackets(b: &mut test::Bencher) {
