@@ -11,7 +11,7 @@ Eval is a powerful expression evaluator.
 Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
 `+` `-` `*` `/` `%` `&&` `||` `n..m`.
 
-Built-in functions: `min()` `max()` `len()` `is_empty()`.
+Built-in functions: `min()` `max()` `len()` `is_empty()` `array()`.
 
 ## Where can eval be used?
 * Template engine
