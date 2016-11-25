@@ -85,12 +85,12 @@ assert_eq!(Expr::new("say_hello()")
 ```
 
 
-You can create an array with `[]`:
+You can create an array with `array()`:
 
 ```
 use eval::{eval, to_value};
 
-assert_eq!(eval("[1, 2, 3, 4, 5]"), Ok(to_value(vec![1, 2, 3, 4, 5])));
+assert_eq!(eval("array(1, 2, 3, 4, 5)"), Ok(to_value(vec![1, 2, 3, 4, 5])));
 ```
 
 
