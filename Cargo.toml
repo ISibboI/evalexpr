@@ -1,6 +1,6 @@
 [package]
 name = "eval"
-version = "0.3.2"
+version = "0.4.0"
 description = "Expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "expr", "template"]
 authors = ["fengcen <fengcen.love@gmail.com>"]
@@ -15,8 +15,8 @@ name = "eval"
 path = "src/lib.rs"
 
 [dependencies]
-serde = "^0.8"
-serde_json = "^0.8"
+serde = "^0.9"
+serde_json = "^0.9"
 quick-error = "^1.1"
 
 [features]

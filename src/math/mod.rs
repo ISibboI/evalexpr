@@ -1,5 +1,6 @@
 
-use serde_json::{Value, to_value};
+use serde_json::Value;
+use to_value;
 use error::Error;
 
 pub trait Math {
@@ -162,9 +163,7 @@ trait Type {
 impl Type for Value {
     fn get_f64(&self) -> f64 {
         match *self {
-            Value::F64(f) => f,
-            Value::I64(f) => f as f64,
-            Value::U64(f) => f as f64,
+            Value::Number(ref n) => n.as_f64().unwrap(),
             _ => panic!("not a number"),
         }
     }

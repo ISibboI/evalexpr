@@ -1,6 +1,7 @@
 
 use std::str::FromStr;
-use serde_json::{Value, to_value};
+use serde_json::Value;
+use to_value;
 use error::Error;
 use node::Node;
 

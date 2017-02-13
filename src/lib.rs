@@ -109,11 +109,19 @@ mod builtin;
 mod expr;
 
 pub use expr::ExecOptions;
-pub use serde_json::{Value, to_value};
+pub use serde_json::Value;
 pub use error::Error;
 pub use function::Function;
 pub use expr::Expr;
+
 use std::collections::HashMap;
+use serde_json::to_value as json_to_value;
+use serde::Serialize;
+
+/// Convert variable to `serde_json::Value`
+pub fn to_value<S: Serialize>(v: S) -> Value {
+    json_to_value(v).unwrap()
+}
 
 /// Custom context.
 pub type Context = HashMap<String, Value>;
@@ -134,7 +142,7 @@ type Compiled = Box<Fn(&[Context], &Functions) -> Result<Value, Error>>;
 
 #[cfg(test)]
 mod tests {
-    use serde_json::to_value;
+    use to_value;
     use error::Error;
     use Expr;
     use tree::Tree;

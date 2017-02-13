@@ -1,7 +1,8 @@
 
 use std::str::FromStr;
 use std::clone::Clone;
-use serde_json::{Value, to_value};
+use serde_json::Value;
+use to_value;
 use math::Math;
 use operator::Operator;
 use node::Node;
@@ -368,7 +369,7 @@ impl Tree {
                                 if child.operator.is_identifier() {
                                     value = value.as_ref()
                                         .unwrap()
-                                        .find(child.operator.get_identifier())
+                                        .get(child.operator.get_identifier())
                                         .cloned();
                                 } else {
                                     return Err(Error::ExpectedIdentifier);
@@ -405,7 +406,7 @@ impl Tree {
                                 if name.is_string() {
                                     value = value.as_ref()
                                         .unwrap()
-                                        .find(name.as_str().unwrap())
+                                        .get(name.as_str().unwrap())
                                         .cloned();
                                 } else {
                                     return Err(Error::ExpectedIdentifier);

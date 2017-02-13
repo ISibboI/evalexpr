@@ -2,7 +2,7 @@
 eval
 ====
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![docs](https://docs.rs/eval/badge.svg?version=0.3.2 "docs")](https://docs.rs/eval)
+[![docs](https://docs.rs/eval/badge.svg?version=0.4.0 "docs")](https://docs.rs/eval)
 
 Eval is a powerful expression evaluator.
 
@@ -23,7 +23,7 @@ Add dependency to Cargo.toml
 
 ```toml
 [dependencies]
-eval = "^0.3"
+eval = "^0.4"
 ```
 
 In your `main.rs` or `lib.rs`:

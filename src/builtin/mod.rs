@@ -82,14 +82,12 @@ fn create_is_empty_fuction() -> Function {
     Function {
         max_args: Some(1),
         min_args: Some(1),
-        compiled: Box::new(|values| {
-            match *values.first().unwrap() {
-                Value::String(ref string) => Ok(to_value(string.is_empty())),
-                Value::Array(ref array) => Ok(to_value(array.is_empty())),
-                Value::Object(ref object) => Ok(to_value(object.is_empty())),
-                Value::Null => Ok(to_value(true)),
-                _ => Ok(to_value(false)),
-            }
+        compiled: Box::new(|values| match *values.first().unwrap() {
+            Value::String(ref string) => Ok(to_value(string.is_empty())),
+            Value::Array(ref array) => Ok(to_value(array.is_empty())),
+            Value::Object(ref object) => Ok(to_value(object.is_empty())),
+            Value::Null => Ok(to_value(true)),
+            _ => Ok(to_value(false)),
         }),
     }
 }
