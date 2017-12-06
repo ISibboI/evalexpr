@@ -13,3 +13,4 @@
 *-test
 target/
 Cargo.lock
+.vscode

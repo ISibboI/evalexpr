@@ -202,8 +202,10 @@ mod tests {
 
     #[test]
     fn test_min_brackets() {
-        assert_eq!(eval("(min(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
-                   Ok(to_value(100)));
+        assert_eq!(
+            eval("(min(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
+            Ok(to_value(100))
+        );
     }
 
     #[test]
@@ -218,8 +220,10 @@ mod tests {
 
     #[test]
     fn test_max_brackets() {
-        assert_eq!(eval("(max(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
-                   Ok(to_value(2500)));
+        assert_eq!(
+            eval("(max(30, 5, 245, 20) * 10 + (5 + 5) * 5)"),
+            Ok(to_value(2500))
+        );
     }
 
     #[test]
@@ -233,6 +237,12 @@ mod tests {
     }
 
     #[test]
+    fn test_null_and_number() {
+        assert_eq!(eval("hos != 0"), Ok(to_value(true)));
+        assert_eq!(eval("hos > 0"), Ok(to_value(false)));
+    }
+
+    #[test]
     fn test_len_string() {
         assert_eq!(eval("len('Hello world!')"), Ok(to_value(12)));
     }
@@ -243,10 +253,10 @@ mod tests {
         object.insert("field1", "value1");
         object.insert("field2", "value2");
         object.insert("field3", "value3");
-        assert_eq!(Expr::new("len(object)")
-                       .value("object", object)
-                       .exec(),
-                   Ok(to_value(3)));
+        assert_eq!(
+            Expr::new("len(object)").value("object", object).exec(),
+            Ok(to_value(3))
+        );
     }
 
     #[test]
@@ -333,14 +343,18 @@ mod tests {
 
     #[test]
     fn test_single_and_double_quote() {
-        assert_eq!(eval(r#"' """" ' + ' """" '"#),
-                   Ok(to_value(r#" """"  """" "#)));
+        assert_eq!(
+            eval(r#"' """" ' + ' """" '"#),
+            Ok(to_value(r#" """"  """" "#))
+        );
     }
 
     #[test]
     fn test_double_and_single_quote() {
-        assert_eq!(eval(r#"" '''' " + " '''' ""#),
-                   Ok(to_value(r#" ''''  '''' "#)));
+        assert_eq!(
+            eval(r#"" '''' " + " '''' ""#),
+            Ok(to_value(r#" ''''  '''' "#))
+        );
     }
 
     #[test]
@@ -432,10 +446,12 @@ mod tests {
         let mut object = HashMap::new();
         object.insert("foo", "Foo, hello world!");
         object.insert("bar", "Bar, hello world!");
-        assert_eq!(Expr::new("object.foo == 'Foo, hello world!'")
-                       .value("object", object)
-                       .exec(),
-                   Ok(to_value(true)));
+        assert_eq!(
+            Expr::new("object.foo == 'Foo, hello world!'")
+                .value("object", object)
+                .exec(),
+            Ok(to_value(true))
+        );
     }
 
     #[test]
@@ -443,10 +459,12 @@ mod tests {
         let mut object = HashMap::new();
         object.insert("foo", "Foo, hello world!");
         object.insert("bar", "Bar, hello world!");
-        assert_eq!(Expr::new("object['foo'] == 'Foo, hello world!'")
-                       .value("object", object)
-                       .exec(),
-                   Ok(to_value(true)));
+        assert_eq!(
+            Expr::new("object['foo'] == 'Foo, hello world!'")
+                .value("object", object)
+                .exec(),
+            Ok(to_value(true))
+        );
     }
 
     #[test]
@@ -454,11 +472,13 @@ mod tests {
         let mut object = HashMap::new();
         object.insert("foo", "Foo, hello world!");
         object.insert("bar", "Bar, hello world!");
-        assert_eq!(Expr::new("object[foo] == 'Foo, hello world!'")
-                       .value("object", object)
-                       .value("foo", "foo")
-                       .exec(),
-                   Ok(to_value(true)));
+        assert_eq!(
+            Expr::new("object[foo] == 'Foo, hello world!'")
+                .value("object", object)
+                .value("foo", "foo")
+                .exec(),
+            Ok(to_value(true))
+        );
     }
 
     #[test]
@@ -469,40 +489,54 @@ mod tests {
     #[test]
     fn test_array_access() {
         let array = vec!["hello", "world", "!"];
-        assert_eq!(Expr::new("array[1-1] == 'hello' && array[1] == 'world' && array[2] == '!'")
-                       .value("array", array)
-                       .exec(),
-                   Ok(to_value(true)));
+        assert_eq!(
+            Expr::new(
+                "array[1-1] == 'hello' && array[1] == 'world' && array[2] == '!'",
+            ).value("array", array)
+                .exec(),
+            Ok(to_value(true))
+        );
     }
 
     #[test]
     fn test_builtin_is_empty() {
-        assert_eq!(Expr::new("is_empty(array)")
-                       .value("array", Vec::<String>::new())
-                       .exec(),
-                   Ok(to_value(true)));
+        assert_eq!(
+            Expr::new("is_empty(array)")
+                .value("array", Vec::<String>::new())
+                .exec(),
+            Ok(to_value(true))
+        );
     }
 
     #[test]
     fn test_builtin_min() {
-        assert_eq!(Expr::new("min(array)")
-                       .value("array", vec![23, 34, 45, 2])
-                       .exec(),
-                   Ok(to_value(2)));
+        assert_eq!(
+            Expr::new("min(array)")
+                .value("array", vec![23, 34, 45, 2])
+                .exec(),
+            Ok(to_value(2))
+        );
     }
 
     #[test]
     fn test_custom_function() {
-        assert_eq!(Expr::new("output()")
-                       .function("output",
-                                 |_| Ok(to_value("This is custom function's output")))
-                       .exec(),
-                   Ok(to_value("This is custom function's output")));
+        assert_eq!(
+            Expr::new("output()")
+                .function(
+                    "output",
+                    |_| Ok(to_value("This is custom function's output")),
+                )
+                .exec(),
+            Ok(to_value("This is custom function's output"))
+        );
     }
 
     #[test]
     fn test_error_start_with_non_value_operator() {
-        let mut tree = Tree { raw: "+ + 5".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "+ + 5".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         tree.parse_operators().unwrap();
@@ -512,7 +546,10 @@ mod tests {
 
     #[test]
     fn test_error_duplicate_operator() {
-        let mut tree = Tree { raw: "5 + + 5".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "5 + + 5".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         tree.parse_operators().unwrap();
@@ -522,7 +559,10 @@ mod tests {
 
     #[test]
     fn test_error_duplicate_value() {
-        let mut tree = Tree { raw: "2 + 6 5".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "2 + 6 5".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         tree.parse_operators().unwrap();
@@ -532,7 +572,10 @@ mod tests {
 
     #[test]
     fn test_error_unpaired_brackets() {
-        let mut tree = Tree { raw: "(2 + 3)) * 5".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "(2 + 3)) * 5".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
 
@@ -541,7 +584,10 @@ mod tests {
 
     #[test]
     fn test_error_comma() {
-        let mut tree = Tree { raw: ", 2 + 5".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: ", 2 + 5".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         tree.parse_operators().unwrap();
@@ -564,16 +610,20 @@ mod benches {
 
     #[bench]
     fn bench_parse_pos(b: &mut test::Bencher) {
-        let mut tree =
-            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
+            ..Default::default()
+        };
 
         b.iter(|| tree.parse_pos().unwrap());
     }
 
     #[bench]
     fn bench_parse_operators(b: &mut test::Bencher) {
-        let mut tree =
-            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         b.iter(|| tree.parse_operators().unwrap());
@@ -581,8 +631,10 @@ mod benches {
 
     #[bench]
     fn bench_parse_nodes(b: &mut test::Bencher) {
-        let mut tree =
-            Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
+        let mut tree = Tree {
+            raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
+            ..Default::default()
+        };
 
         tree.parse_pos().unwrap();
         tree.parse_operators().unwrap();
@@ -592,8 +644,10 @@ mod benches {
     #[bench]
     fn bench_compile(b: &mut test::Bencher) {
         b.iter(|| {
-            let mut tree =
-                Tree { raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(), ..Default::default() };
+            let mut tree = Tree {
+                raw: "(2 + (3 + 4) + (6 + (6 + 7)) + 5)".to_owned(),
+                ..Default::default()
+            };
             tree.parse_pos().unwrap();
             tree.parse_operators().unwrap();
             tree.parse_node().unwrap();
@@ -603,7 +657,9 @@ mod benches {
 
     #[bench]
     fn bench_exec(b: &mut test::Bencher) {
-        let expr = Expr::new("(2 + (3 + 4) + (6 + (6 + 7)) + 5)").compile().unwrap();
+        let expr = Expr::new("(2 + (3 + 4) + (6 + (6 + 7)) + 5)")
+            .compile()
+            .unwrap();
         b.iter(|| expr.exec().unwrap())
     }
 

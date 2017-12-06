@@ -101,6 +101,9 @@ impl Math for Value {
     }
 
     fn gt(&self, value: &Value) -> Result<Value, Error> {
+        if self.is_null() || value.is_null() {
+            return Ok(to_value(false));
+        }
         if self.is_number() && value.is_number() {
             Ok(to_value(self.get_f64() > value.get_f64()))
         } else {
@@ -109,6 +112,9 @@ impl Math for Value {
     }
 
     fn lt(&self, value: &Value) -> Result<Value, Error> {
+        if self.is_null() || value.is_null() {
+            return Ok(to_value(false));
+        }
         if self.is_number() && value.is_number() {
             Ok(to_value(self.get_f64() < value.get_f64()))
         } else {
@@ -117,6 +123,9 @@ impl Math for Value {
     }
 
     fn ge(&self, value: &Value) -> Result<Value, Error> {
+        if self.is_null() || value.is_null() {
+            return Ok(to_value(false));
+        }
         if self.is_number() && value.is_number() {
             Ok(to_value(self.get_f64() >= value.get_f64()))
         } else {
@@ -125,6 +134,9 @@ impl Math for Value {
     }
 
     fn le(&self, value: &Value) -> Result<Value, Error> {
+        if self.is_null() || value.is_null() {
+            return Ok(to_value(false));
+        }
         if self.is_number() && value.is_number() {
             Ok(to_value(self.get_f64() <= value.get_f64()))
         } else {
