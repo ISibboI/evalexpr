@@ -15,8 +15,8 @@ name = "eval"
 path = "src/lib.rs"
 
 [dependencies]
-serde = "^0.9"
-serde_json = "^0.9"
+serde = ">= 0.9, < 2"
+serde_json = ">= 0.9, < 2"
 quick-error = "^1.1"
 
 [features]
