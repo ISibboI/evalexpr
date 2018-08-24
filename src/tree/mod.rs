@@ -205,7 +205,7 @@ impl Tree {
                 Operator::Rem(priority) => {
                     if !parsing_nodes.is_empty() {
                         let prev = parsing_nodes.pop().unwrap();
-                        if prev.is_value_or_enough() {
+                        if prev.is_value_or_full_children() {
                             if prev.operator.get_priority() < priority && !prev.closed {
                                 parsing_nodes.extend_from_slice(&rob_to(prev, operator.to_node()));
                             } else {
@@ -468,7 +468,7 @@ fn append_value_to_last_node(parsing_nodes: &mut Vec<Node>,
         } else if prev.is_left_square_bracket() {
             parsing_nodes.push(prev);
             parsing_nodes.push(node);
-        } else if prev.is_value_or_enough() {
+        } else if prev.is_value_or_full_children() {
             return Err(Error::DuplicateValueNode);
         } else if prev.is_enough() {
             parsing_nodes.push(prev);
@@ -533,6 +533,9 @@ fn close_bracket(parsing_nodes: &mut Vec<Node>, bracket: Operator) -> Result<(),
             if let Some(mut penult) = parsing_nodes.pop() {
                 if penult.is_unclosed_function() {
                     penult.closed = true;
+                    penult.add_child(current);
+                    parsing_nodes.push(penult);
+                } else if penult.is_unclosed_arithmetic() {
                     penult.add_child(current);
                     parsing_nodes.push(penult);
                 } else {

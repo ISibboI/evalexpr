@@ -594,6 +594,13 @@ mod tests {
 
         assert_eq!(tree.parse_node(), Err(Error::CommaNotWithFunction));
     }
+
+    #[test]
+    fn test_eval_issue_2() {
+        assert_eq!(eval("2 * (4 + 0) + 4"), Ok(to_value(12)));
+        assert_eq!(eval("2 * (2 + 2) + (1 + 3)"), Ok(to_value(12)));
+        assert_eq!(eval("2 * (4) + (4)"), Ok(to_value(12)));
+    }
 }
 
 #[cfg(all(feature = "unstable", test))]

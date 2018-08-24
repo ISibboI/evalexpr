@@ -14,7 +14,7 @@ pub struct Node {
 impl Node {
     pub fn new(operator: Operator) -> Node {
         Node {
-            operator: operator,
+            operator,
             children: Vec::new(),
             closed: false,
         }
@@ -47,7 +47,7 @@ impl Node {
         }
     }
 
-    pub fn is_value_or_enough(&self) -> bool {
+    pub fn is_value_or_full_children(&self) -> bool {
         if self.operator.is_value_or_ident() {
             true
         } else if self.operator.can_have_child() {
@@ -55,6 +55,10 @@ impl Node {
         } else {
             false
         }
+    }
+
+    pub fn is_unclosed_arithmetic(&self) -> bool {
+        return !self.closed && self.operator.can_have_child() && self.operator.can_have_child()
     }
 
     pub fn is_unclosed_function(&self) -> bool {
