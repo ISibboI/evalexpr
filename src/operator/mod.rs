@@ -477,12 +477,14 @@ impl Operator for Identifier {
     }
 
     fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 0)?;
-
-        if let Some(value) = configuration.get_value(&self.identifier).cloned() {
-            Ok(value)
+        if arguments.len() == 0 {
+            if let Some(value) = configuration.get_value(&self.identifier).cloned() {
+                Ok(value)
+            } else {
+                Err(Error::IdentifierNotFound(self.identifier.clone()))
+            }
         } else {
-            Err(Error::IdentifierNotFound(self.identifier.clone()))
+            unimplemented!()
         }
     }
 }

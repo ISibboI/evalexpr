@@ -8,6 +8,7 @@ mod operator;
 mod token;
 mod tree;
 mod value;
+mod function;
 
 pub fn eval(string: &str) -> Result<Value, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(&EmptyConfiguration)
@@ -109,12 +110,12 @@ mod test {
     #[test]
     fn test_with_configuration() {
         let mut configuration = HashMapConfiguration::new();
-        configuration.insert("tr".to_string(), Value::Boolean(true));
-        configuration.insert("fa".to_string(), Value::Boolean(false));
-        configuration.insert("five".to_string(), Value::Int(5));
-        configuration.insert("six".to_string(), Value::Int(6));
-        configuration.insert("half".to_string(), Value::Float(0.5));
-        configuration.insert("zero".to_string(), Value::Int(0));
+        configuration.insert_variable("tr".to_string(), Value::Boolean(true));
+        configuration.insert_variable("fa".to_string(), Value::Boolean(false));
+        configuration.insert_variable("five".to_string(), Value::Int(5));
+        configuration.insert_variable("six".to_string(), Value::Int(6));
+        configuration.insert_variable("half".to_string(), Value::Float(0.5));
+        configuration.insert_variable("zero".to_string(), Value::Int(0));
 
         assert_eq!(eval_with_configuration("tr", &configuration), Ok(Value::Boolean(true)));
         assert_eq!(eval_with_configuration("fa", &configuration), Ok(Value::Boolean(false)));
