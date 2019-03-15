@@ -1,0 +1,5 @@
+edition = "2018"
+reorder_imports=true
+reorder_modules=true
+format_strings=true
+merge_imports=true
