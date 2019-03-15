@@ -24,7 +24,7 @@ mod test {
         assert_eq!(eval("3.3"), Ok(Value::Float(3.3)));
         assert_eq!(eval("true"), Ok(Value::Boolean(true)));
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
-        assert_eq!(eval("blub"), Err(Error::IdentifierNotFound));
+        assert_eq!(eval("blub"), Err(Error::IdentifierNotFound("blub".to_string())));
         assert_eq!(eval("-3"), Ok(Value::Int(-3)));
         assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
         assert_eq!(eval("----3"), Ok(Value::Int(3)));

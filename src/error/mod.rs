@@ -29,7 +29,7 @@ pub enum Error {
     PrecedenceViolation,
 
     /// An identifier operation did not find its value in the configuration.
-    IdentifierNotFound,
+    IdentifierNotFound(String),
 
     /// A value has the wrong type.
     TypeError,
