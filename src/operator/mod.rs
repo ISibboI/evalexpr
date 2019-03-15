@@ -71,10 +71,14 @@ impl Operator for Add {
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
-        let a = expect_number(&arguments[0])?;
-        let b = expect_number(&arguments[1])?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
 
-        Ok(Value::Number(a + b))
+        if arguments[0].is_int() && arguments[1].is_int() {
+            Ok(Value::Int(arguments[0].as_int().unwrap() + arguments[1].as_int().unwrap()))
+        } else {
+            Ok(Value::Float(arguments[0].as_float().unwrap() + arguments[1].as_float().unwrap()))
+        }
     }
 }
 
@@ -89,10 +93,14 @@ impl Operator for Sub {
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
-        let a = expect_number(&arguments[0])?;
-        let b = expect_number(&arguments[1])?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
 
-        Ok(Value::Number(a - b))
+        if arguments[0].is_int() && arguments[1].is_int() {
+            Ok(Value::Int(arguments[0].as_int().unwrap() - arguments[1].as_int().unwrap()))
+        } else {
+            Ok(Value::Float(arguments[0].as_float().unwrap() - arguments[1].as_float().unwrap()))
+        }
     }
 }
 
@@ -107,10 +115,14 @@ impl Operator for Mul {
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
-        let a = expect_number(&arguments[0])?;
-        let b = expect_number(&arguments[1])?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
 
-        Ok(Value::Number(a * b))
+        if arguments[0].is_int() && arguments[1].is_int() {
+            Ok(Value::Int(arguments[0].as_int().unwrap() * arguments[1].as_int().unwrap()))
+        } else {
+            Ok(Value::Float(arguments[0].as_float().unwrap() * arguments[1].as_float().unwrap()))
+        }
     }
 }
 
@@ -125,10 +137,14 @@ impl Operator for Div {
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
-        let a = expect_number(&arguments[0])?;
-        let b = expect_number(&arguments[1])?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
 
-        Ok(Value::Number(a / b))
+        if arguments[0].is_int() && arguments[1].is_int() {
+            Ok(Value::Int(arguments[0].as_int().unwrap() / arguments[1].as_int().unwrap()))
+        } else {
+            Ok(Value::Float(arguments[0].as_float().unwrap() / arguments[1].as_float().unwrap()))
+        }
     }
 }
 

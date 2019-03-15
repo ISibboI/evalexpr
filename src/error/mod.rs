@@ -26,6 +26,9 @@ pub enum Error {
 
     /// An identifier operation did not find its value in the configuration.
     IdentifierNotFound,
+
+    /// A value has the wrong type.
+    TypeError,
 }
 
 impl Error {
@@ -46,9 +49,9 @@ pub fn expect_argument_amount(actual: usize, expected: usize) -> Result<(), Erro
     }
 }
 
-pub fn expect_number(actual: &Value) -> Result<f64, Error> {
+pub fn expect_number(actual: &Value) -> Result<(), Error> {
     match actual {
-        Value::Number(number) => Ok(*number),
+        Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(Error::expected_number(actual.clone())),
     }
 }

@@ -1,3 +1,5 @@
+use value::{IntType, FloatType};
+
 #[derive(Clone, PartialEq)]
 pub enum Token {
     // Single character tokens
@@ -9,7 +11,8 @@ pub enum Token {
 
     // Complex tokens
     Identifier(String),
-    Number(f64),
+    Float(FloatType),
+    Int(IntType),
     Boolean(bool),
 }
 
@@ -65,8 +68,10 @@ fn resolve_literals(tokens: &Vec<PartialToken>) -> Vec<Token> {
         .map(|token| match token {
             PartialToken::Token(token) => token.clone(),
             PartialToken::Literal(literal) => {
-                if let Ok(number) = literal.parse::<f64>() {
-                    Token::Number(number)
+                if let Ok(number) = literal.parse::<IntType>() {
+                    Token::Int(number)
+                } else if let Ok(number) = literal.parse::<FloatType>() {
+                    Token::Float(number)
                 } else if let Ok(boolean) = literal.parse::<bool>() {
                     Token::Boolean(boolean)
                 } else {

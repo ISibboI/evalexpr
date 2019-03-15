@@ -20,7 +20,7 @@ mod test {
 
     #[test]
     fn test_unary_examples() {
-        assert_eq!(eval("3"), Ok(Value::Number(3.0)));
+        assert_eq!(eval("3"), Ok(Value::Int(3)));
         assert_eq!(eval("true"), Ok(Value::Boolean(true)));
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
         assert_eq!(eval("blub"), Err(Error::IdentifierNotFound));
@@ -28,21 +28,21 @@ mod test {
 
     #[test]
     fn test_binary_examples() {
-        assert_eq!(eval("1+3"), Ok(Value::Number(4.0)));
-        assert_eq!(eval("3+1"), Ok(Value::Number(4.0)));
-        assert_eq!(eval("3-5"), Ok(Value::Number(-2.0)));
-        assert_eq!(eval("5-3"), Ok(Value::Number(2.0)));
-        assert_eq!(eval("5 / 4"), Ok(Value::Number(1.25)));
-        assert_eq!(eval("5 *3"), Ok(Value::Number(15.0)));
+        assert_eq!(eval("1+3"), Ok(Value::Int(4)));
+        assert_eq!(eval("3+1"), Ok(Value::Int(4)));
+        assert_eq!(eval("3-5"), Ok(Value::Int(-2)));
+        assert_eq!(eval("5-3"), Ok(Value::Int(2)));
+        assert_eq!(eval("5 / 4"), Ok(Value::Int(1)));
+        assert_eq!(eval("5 *3"), Ok(Value::Int(15)));
     }
 
     #[test]
     fn test_arithmetic_precedence_examples() {
-        assert_eq!(eval("1+3-2"), Ok(Value::Number(2.0)));
-        assert_eq!(eval("3+1*5"), Ok(Value::Number(8.0)));
-        assert_eq!(eval("2*3-5"), Ok(Value::Number(1.0)));
-        assert_eq!(eval("5-3/3"), Ok(Value::Number(4.0)));
-        assert_eq!(eval("5 / 4*2"), Ok(Value::Number(2.5)));
-        assert_eq!(eval("1-5 *3/15"), Ok(Value::Number(0.0)));
+        assert_eq!(eval("1+3-2"), Ok(Value::Int(2)));
+        assert_eq!(eval("3+1*5"), Ok(Value::Int(8)));
+        assert_eq!(eval("2*3-5"), Ok(Value::Int(1)));
+        assert_eq!(eval("5-3/3"), Ok(Value::Int(4)));
+        assert_eq!(eval("5 / 4*2"), Ok(Value::Int(2)));
+        assert_eq!(eval("1-5 *3/15"), Ok(Value::Int(0)));
     }
 }

@@ -86,7 +86,8 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             Token::Slash => Some(Box::new(Div)),
             Token::Whitespace => None,
             Token::Identifier(identifier) => Some(Box::new(Identifier::new(identifier))),
-            Token::Number(number) => Some(Box::new(Const::new(Value::Number(number)))),
+            Token::Float(number) => Some(Box::new(Const::new(Value::Float(number)))),
+            Token::Int(number) => Some(Box::new(Const::new(Value::Int(number)))),
             Token::Boolean(boolean) => Some(Box::new(Const::new(Value::Boolean(boolean)))),
         };
 
