@@ -1,4 +1,4 @@
-use configuration::EmptyConfiguration;
+use configuration::{EmptyConfiguration, Configuration};
 use error::Error;
 use value::Value;
 
@@ -13,10 +13,16 @@ pub fn eval(string: &str) -> Result<Value, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(&EmptyConfiguration)
 }
 
+pub fn eval_with_configuration(string: &str, configuration: &Configuration) -> Result<Value, Error> {
+    tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(configuration)
+}
+
 #[cfg(test)]
 mod test {
     use crate::{eval, value::Value};
     use error::Error;
+    use configuration::HashMapConfiguration;
+    use eval_with_configuration;
 
     #[test]
     fn test_unary_examples() {
@@ -98,6 +104,24 @@ mod test {
         );
         assert_eq!(eval("5 > 4 && 1 <= 1"), Ok(Value::Boolean(true)));
         assert_eq!(eval("5.0 <= 4.9 || !(4 > 3.5)"), Ok(Value::Boolean(false)));
+    }
+
+    #[test]
+    fn test_with_configuration() {
+        let mut configuration = HashMapConfiguration::new();
+        configuration.insert("tr".to_string(), Value::Boolean(true));
+        configuration.insert("fa".to_string(), Value::Boolean(false));
+        configuration.insert("five".to_string(), Value::Int(5));
+        configuration.insert("six".to_string(), Value::Int(6));
+        configuration.insert("half".to_string(), Value::Float(0.5));
+        configuration.insert("zero".to_string(), Value::Int(0));
+
+        assert_eq!(eval_with_configuration("tr", &configuration), Ok(Value::Boolean(true)));
+        assert_eq!(eval_with_configuration("fa", &configuration), Ok(Value::Boolean(false)));
+        assert_eq!(eval_with_configuration("tr && false", &configuration), Ok(Value::Boolean(false)));
+        assert_eq!(eval_with_configuration("five + six", &configuration), Ok(Value::Int(11)));
+        assert_eq!(eval_with_configuration("five * half", &configuration), Ok(Value::Float(2.5)));
+        assert_eq!(eval_with_configuration("five < six && true", &configuration), Ok(Value::Boolean(true)));
     }
 
     #[test]

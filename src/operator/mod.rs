@@ -473,7 +473,7 @@ impl Operator for Identifier {
     }
 
     fn argument_amount(&self) -> usize {
-        0
+        1
     }
 
     fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
