@@ -29,6 +29,12 @@ pub enum Error {
 
     /// A value has the wrong type.
     TypeError,
+
+    /// An opening brace without a matching closing brace was found.
+    UnmatchedLBrace,
+
+    /// A closing brace without a matching opening brace was found.
+    UnmatchedRBrace,
 }
 
 impl Error {

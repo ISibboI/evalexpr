@@ -7,18 +7,19 @@ pub struct Node {
 }
 
 impl Node {
-    fn new(operator: Box<dyn Operator>) -> Self {
+    fn new<T: Operator + 'static>(operator: T) -> Self {
         Self {
             children: Vec::new(),
-            operator,
+            operator: Box::new(operator),
         }
     }
 
     fn root_node() -> Self {
-        Self {
-            children: Vec::new(),
-            operator: Box::new(RootNode),
-        }
+        Self::new(RootNode)
+    }
+    
+    fn braced_node() -> Self {
+        Self::new(Braced)
     }
 
     pub fn eval(&self, configuration: &Configuration) -> Result<Value, Error> {
@@ -41,32 +42,31 @@ impl Node {
         self.children().len() == self.operator().argument_amount()
     }
 
-    fn insert_back_prioritized(&mut self, operator: Box<dyn Operator>) -> Result<(), Error> {
-        if self.operator().precedence() < operator.precedence() {
+    fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> Result<(), Error> {
+        if self.operator().precedence() < node.operator().precedence() || is_root_node {
             if self.operator().is_leaf() {
                 Err(Error::AppendedToLeafNode)
             } else if self.has_correct_amount_of_children() {
-                if self.children.last_mut().unwrap().operator().precedence() < operator.precedence()
+                if self.children.last_mut().unwrap().operator().precedence() < node.operator().precedence()
                 {
                     self.children
                         .last_mut()
                         .unwrap()
-                        .insert_back_prioritized(operator)
+                        .insert_back_prioritized(node, false)
                 } else {
-                    let new_node = Node::new(operator);
                     let last_child = self.children.pop().unwrap();
-                    self.children.push(new_node);
-                    let new_node = self.children.last_mut().unwrap();
+                    self.children.push(node);
+                    let node = self.children.last_mut().unwrap();
 
-                    if new_node.operator().is_leaf() {
+                    if node.operator().is_leaf() {
                         Err(Error::AppendedToLeafNode)
                     } else {
-                        new_node.children.push(last_child);
+                        node.children.push(last_child);
                         Ok(())
                     }
                 }
             } else {
-                self.children.push(Node::new(operator));
+                self.children.push(node);
                 Ok(())
             }
         } else {
@@ -76,29 +76,62 @@ impl Node {
 }
 
 pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
-    let mut root = Node::root_node();
+    let mut root = vec![Node::root_node()];
+    let mut last_non_whitespace_token_is_value = false;
 
     for token in tokens {
-        let operator: Option<Box<dyn Operator>> = match token {
-            Token::Plus => Some(Box::new(Add)),
-            Token::Minus => Some(Box::new(Sub)),
-            Token::Star => Some(Box::new(Mul)),
-            Token::Slash => Some(Box::new(Div)),
+        let node = match token.clone() {
+            Token::Plus => Some(Node::new(Add)),
+            Token::Minus => {
+                if last_non_whitespace_token_is_value {
+                    Some(Node::new(Sub))
+                } else {
+                    Some(Node::new(Neg))
+                }
+            }
+            Token::Star => Some(Node::new(Mul)),
+            Token::Slash => Some(Node::new(Div)),
+            Token::LBrace => {
+                root.push(Node::braced_node());
+                None
+            },
+            Token::RBrace => {
+                if root.len() < 2 {
+                    return Err(Error::UnmatchedRBrace);
+                } else {
+                    root.pop()
+                }
+            }
             Token::Whitespace => None,
-            Token::Identifier(identifier) => Some(Box::new(Identifier::new(identifier))),
-            Token::Float(number) => Some(Box::new(Const::new(Value::Float(number)))),
-            Token::Int(number) => Some(Box::new(Const::new(Value::Int(number)))),
-            Token::Boolean(boolean) => Some(Box::new(Const::new(Value::Boolean(boolean)))),
+            Token::Identifier(identifier) => Some(Node::new(Identifier::new(identifier))),
+            Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
+            Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),
+            Token::Boolean(boolean) => Some(Node::new(Const::new(Value::Boolean(boolean)))),
         };
 
-        if let Some(operator) = operator {
-            root.insert_back_prioritized(operator)?;
+        if let Some(node) = node {
+            if let Some(root) = root.last_mut() {
+                root.insert_back_prioritized(node, true)?;
+            } else {
+                return Err(Error::UnmatchedRBrace);
+            }
+        }
+
+        if token != Token::Whitespace {
+            last_non_whitespace_token_is_value = token.is_value();
         }
     }
 
-    if root.children().len() == 1 {
-        Ok(root.children.pop().unwrap())
+    if root.len() > 1 {
+        Err(Error::UnmatchedLBrace)
+    } else if root.len() == 0 {
+        Err(Error::UnmatchedRBrace)
     } else {
-        Err(Error::EmptyExpression)
+        let mut root = root.pop().unwrap();
+        if root.children().len() == 1 {
+            Ok(root.children.pop().unwrap())
+        } else {
+            Err(Error::EmptyExpression)
+        }
     }
 }

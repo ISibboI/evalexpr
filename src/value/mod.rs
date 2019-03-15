@@ -41,9 +41,3 @@ impl Value {
         }
     }
 }
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Number {
-    Float(FloatType),
-    Int(IntType),
-}

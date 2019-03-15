@@ -23,8 +23,10 @@ pub trait Operator {
 pub struct RootNode;
 pub struct Add;
 pub struct Sub;
+pub struct Neg;
 pub struct Mul;
 pub struct Div;
+pub struct Braced;
 
 pub struct Const {
     value: Value,
@@ -75,9 +77,13 @@ impl Operator for Add {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(arguments[0].as_int().unwrap() + arguments[1].as_int().unwrap()))
+            Ok(Value::Int(
+                arguments[0].as_int().unwrap() + arguments[1].as_int().unwrap(),
+            ))
         } else {
-            Ok(Value::Float(arguments[0].as_float().unwrap() + arguments[1].as_float().unwrap()))
+            Ok(Value::Float(
+                arguments[0].as_float().unwrap() + arguments[1].as_float().unwrap(),
+            ))
         }
     }
 }
@@ -97,9 +103,34 @@ impl Operator for Sub {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(arguments[0].as_int().unwrap() - arguments[1].as_int().unwrap()))
+            Ok(Value::Int(
+                arguments[0].as_int().unwrap() - arguments[1].as_int().unwrap(),
+            ))
         } else {
-            Ok(Value::Float(arguments[0].as_float().unwrap() - arguments[1].as_float().unwrap()))
+            Ok(Value::Float(
+                arguments[0].as_float().unwrap() - arguments[1].as_float().unwrap(),
+            ))
+        }
+    }
+}
+
+impl Operator for Neg {
+    fn precedence(&self) -> i32 {
+        110
+    }
+
+    fn argument_amount(&self) -> usize {
+        1
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 1)?;
+        expect_number(&arguments[0])?;
+
+        if arguments[0].is_int() {
+            Ok(Value::Int(-arguments[0].as_int().unwrap()))
+        } else {
+            Ok(Value::Float(-arguments[0].as_float().unwrap()))
         }
     }
 }
@@ -119,9 +150,13 @@ impl Operator for Mul {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(arguments[0].as_int().unwrap() * arguments[1].as_int().unwrap()))
+            Ok(Value::Int(
+                arguments[0].as_int().unwrap() * arguments[1].as_int().unwrap(),
+            ))
         } else {
-            Ok(Value::Float(arguments[0].as_float().unwrap() * arguments[1].as_float().unwrap()))
+            Ok(Value::Float(
+                arguments[0].as_float().unwrap() * arguments[1].as_float().unwrap(),
+            ))
         }
     }
 }
@@ -141,9 +176,13 @@ impl Operator for Div {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(arguments[0].as_int().unwrap() / arguments[1].as_int().unwrap()))
+            Ok(Value::Int(
+                arguments[0].as_int().unwrap() / arguments[1].as_int().unwrap(),
+            ))
         } else {
-            Ok(Value::Float(arguments[0].as_float().unwrap() / arguments[1].as_float().unwrap()))
+            Ok(Value::Float(
+                arguments[0].as_float().unwrap() / arguments[1].as_float().unwrap(),
+            ))
         }
     }
 }
@@ -177,5 +216,20 @@ impl Operator for Identifier {
         expect_argument_amount(arguments.len(), 0)?;
 
         configuration.get_value(&self.identifier)
+    }
+}
+
+impl Operator for Braced {
+    fn precedence(&self) -> i32 {
+        200
+    }
+
+    fn argument_amount(&self) -> usize {
+        1
+    }
+
+    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 1)?;
+        Ok(arguments[0].clone())
     }
 }

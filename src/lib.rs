@@ -25,6 +25,9 @@ mod test {
         assert_eq!(eval("true"), Ok(Value::Boolean(true)));
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
         assert_eq!(eval("blub"), Err(Error::IdentifierNotFound));
+        assert_eq!(eval("-3"), Ok(Value::Int(-3)));
+        assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
+        assert_eq!(eval("----3"), Ok(Value::Int(3)));
     }
 
     #[test]
@@ -41,6 +44,14 @@ mod test {
         assert_eq!(eval("5-3.0"), Ok(Value::Float(2.0)));
         assert_eq!(eval("5 / 4.0"), Ok(Value::Float(1.25)));
         assert_eq!(eval("5.0 *3"), Ok(Value::Float(15.0)));
+        assert_eq!(eval("5.0 *-3"), Ok(Value::Float(-15.0)));
+        assert_eq!(eval("5.0 *- 3"), Ok(Value::Float(-15.0)));
+        assert_eq!(eval("5.0 * -3"), Ok(Value::Float(-15.0)));
+        assert_eq!(eval("5.0 * - 3"), Ok(Value::Float(-15.0)));
+        assert_eq!(eval("-5.0 *-3"), Ok(Value::Float(15.0)));
+        assert_eq!(eval("3+-1"), Ok(Value::Int(2)));
+        assert_eq!(eval("-3-5"), Ok(Value::Int(-8)));
+        assert_eq!(eval("-5--3"), Ok(Value::Int(-2)));
     }
 
     #[test]
@@ -52,6 +63,36 @@ mod test {
         assert_eq!(eval("5 / 4*2"), Ok(Value::Int(2)));
         assert_eq!(eval("1-5 *3/15"), Ok(Value::Int(0)));
         assert_eq!(eval("15/7/2.0"), Ok(Value::Float(1.0)));
-        assert_eq!(eval("15.0/7/2"), Ok(Value::Float(15.0/7.0/2.0)));
+        assert_eq!(eval("15.0/7/2"), Ok(Value::Float(15.0 / 7.0 / 2.0)));
+        assert_eq!(eval("15.0/-7/2"), Ok(Value::Float(15.0 / -7.0 / 2.0)));
+        assert_eq!(eval("-15.0/7/2"), Ok(Value::Float(-15.0 / 7.0 / 2.0)));
+        assert_eq!(eval("-15.0/7/-2"), Ok(Value::Float(-15.0 / 7.0 / -2.0)));
     }
+
+    #[test]
+    fn test_braced_examples() {
+        assert_eq!(eval("(1)"), Ok(Value::Int(1)));
+        assert_eq!(eval("( 1.0 )"), Ok(Value::Float(1.0)));
+        assert_eq!(eval("( true)"), Ok(Value::Boolean(true)));
+        assert_eq!(eval("( -1 )"), Ok(Value::Int(-1)));
+        assert_eq!(eval("-(1)"), Ok(Value::Int(-1)));
+        assert_eq!(eval("-(1 + 3) * 7"), Ok(Value::Int(-28)));
+        assert_eq!(eval("(1 * 1) - 3"), Ok(Value::Int(-2)));
+        assert_eq!(eval("4 / (2 * 2)"), Ok(Value::Int(1)));
+        assert_eq!(eval("7/(7/(7/(7/(7/(7)))))"), Ok(Value::Int(1)));
+    }
+
+    #[test]
+    fn test_type_errors() {
+        assert_eq!(
+            eval("-true"),
+            Err(Error::expected_number(Value::Boolean(true)))
+        );
+        assert_eq!(
+            eval("1-true"),
+            Err(Error::expected_number(Value::Boolean(true)))
+        );
+        assert_eq!(eval("true-"), Err(Error::wrong_argument_amount(1, 2)));
+    }
+
 }

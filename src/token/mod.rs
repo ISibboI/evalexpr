@@ -1,4 +1,4 @@
-use value::{IntType, FloatType};
+use value::{FloatType, IntType};
 
 #[derive(Clone, PartialEq)]
 pub enum Token {
@@ -7,6 +7,8 @@ pub enum Token {
     Minus,
     Star,
     Slash,
+    LBrace,
+    RBrace,
     Whitespace,
 
     // Complex tokens
@@ -28,12 +30,33 @@ fn char_to_token(c: char) -> PartialToken {
         '-' => PartialToken::Token(Token::Minus),
         '*' => PartialToken::Token(Token::Star),
         '/' => PartialToken::Token(Token::Slash),
+        '(' => PartialToken::Token(Token::LBrace),
+        ')' => PartialToken::Token(Token::RBrace),
         c => {
             if c.is_whitespace() {
                 PartialToken::Token(Token::Whitespace)
             } else {
                 PartialToken::Literal(c.to_string())
             }
+        }
+    }
+}
+
+impl Token {
+    // Make this a const fn as soon as match gets stable (issue #57563)
+    pub fn is_value(&self) -> bool {
+        match self {
+            Token::Plus => false,
+            Token::Minus => false,
+            Token::Star => false,
+            Token::Slash => false,
+            Token::LBrace => false,
+            Token::RBrace => true,
+            Token::Whitespace => false,
+            Token::Identifier(_) => true,
+            Token::Float(_) => true,
+            Token::Int(_) => true,
+            Token::Boolean(_) => true,
         }
     }
 }
