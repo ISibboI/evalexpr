@@ -88,6 +88,17 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             Token::Star => Some(Node::new(Mul)),
             Token::Slash => Some(Node::new(Div)),
             Token::Percent => Some(Node::new(Mod)),
+
+            Token::Eq => Some(Node::new(Eq)),
+            Token::Neq => Some(Node::new(Neq)),
+            Token::Gt => Some(Node::new(Gt)),
+            Token::Lt => Some(Node::new(Lt)),
+            Token::Geq => Some(Node::new(Geq)),
+            Token::Leq => Some(Node::new(Leq)),
+            Token::And => Some(Node::new(And)),
+            Token::Or => Some(Node::new(Or)),
+            Token::Not => Some(Node::new(Not)),
+            
             Token::LBrace => {
                 root.push(Node::root_node());
                 None
@@ -100,6 +111,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                 }
             }
             Token::Whitespace => None,
+            
             Token::Identifier(identifier) => Some(Node::new(Identifier::new(identifier))),
             Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
             Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),

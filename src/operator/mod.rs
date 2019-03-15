@@ -30,6 +30,16 @@ pub struct Mul;
 pub struct Div;
 pub struct Mod;
 
+pub struct Eq;
+pub struct Neq;
+pub struct Gt;
+pub struct Lt;
+pub struct Geq;
+pub struct Leq;
+pub struct And;
+pub struct Or;
+pub struct Not;
+
 pub struct Const {
     value: Value,
 }
@@ -212,6 +222,231 @@ impl Operator for Mod {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() % arguments[1].as_float().unwrap(),
             ))
+        }
+    }
+}
+
+impl Operator for Eq {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+
+        if arguments[0] == arguments[1] {
+            Ok(Value::Boolean(true))
+        } else {
+            Ok(Value::Boolean(false))
+        }
+    }
+}
+
+impl Operator for Neq {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+
+        if arguments[0] != arguments[1] {
+            Ok(Value::Boolean(true))
+        } else {
+            Ok(Value::Boolean(false))
+        }
+    }
+}
+
+impl Operator for Gt {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        if arguments[0].is_int() && arguments[1].is_int() {
+            if arguments[0].as_int().unwrap() > arguments[1].as_int().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else {
+            if arguments[0].as_float().unwrap() > arguments[1].as_float().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        }
+    }
+}
+
+impl Operator for Lt {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        if arguments[0].is_int() && arguments[1].is_int() {
+            if arguments[0].as_int().unwrap() < arguments[1].as_int().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else {
+            if arguments[0].as_float().unwrap() < arguments[1].as_float().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        }
+    }
+}
+
+impl Operator for Geq {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        if arguments[0].is_int() && arguments[1].is_int() {
+            if arguments[0].as_int().unwrap() >= arguments[1].as_int().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else {
+            if arguments[0].as_float().unwrap() >= arguments[1].as_float().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        }
+    }
+}
+
+impl Operator for Leq {
+    fn precedence(&self) -> i32 {
+        80
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        if arguments[0].is_int() && arguments[1].is_int() {
+            if arguments[0].as_int().unwrap() <= arguments[1].as_int().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else {
+            if arguments[0].as_float().unwrap() <= arguments[1].as_float().unwrap() {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        }
+    }
+}
+
+impl Operator for And {
+    fn precedence(&self) -> i32 {
+        75
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        let a = expect_boolean(&arguments[0])?;
+        let b = expect_boolean(&arguments[1])?;
+
+            if a && b {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+    }
+}
+
+impl Operator for Or {
+    fn precedence(&self) -> i32 {
+        70
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        let a = expect_boolean(&arguments[0])?;
+        let b = expect_boolean(&arguments[1])?;
+
+        if a || b {
+            Ok(Value::Boolean(true))
+        } else {
+            Ok(Value::Boolean(false))
+        }
+    }
+}
+
+impl Operator for Not {
+    fn precedence(&self) -> i32 {
+        110
+    }
+
+    fn argument_amount(&self) -> usize {
+        1
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 1)?;
+        let a = expect_boolean(&arguments[0])?;
+
+        if !a {
+            Ok(Value::Boolean(true))
+        } else {
+            Ok(Value::Boolean(false))
         }
     }
 }

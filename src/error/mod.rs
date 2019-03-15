@@ -1,4 +1,5 @@
 use crate::value::Value;
+use token::PartialToken;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -7,6 +8,9 @@ pub enum Error {
         actual: usize,
     },
     ExpectedNumber {
+        actual: Value,
+    },
+    ExpectedBoolean {
         actual: Value,
     },
 
@@ -35,6 +39,11 @@ pub enum Error {
 
     /// A closing brace without a matching opening brace was found.
     UnmatchedRBrace,
+
+    UnmatchedPartialToken {
+        first: PartialToken,
+        second: Option<PartialToken>,
+    },
 }
 
 impl Error {
@@ -44,6 +53,14 @@ impl Error {
 
     pub fn expected_number(actual: Value) -> Self {
         Error::ExpectedNumber { actual }
+    }
+
+    pub fn expected_boolean(actual: Value) -> Self {
+        Error::ExpectedBoolean { actual }
+    }
+
+    pub fn unmatched_partial_token(first: PartialToken, second: Option<PartialToken>) -> Self {
+        Error::UnmatchedPartialToken {first, second}
     }
 }
 
@@ -59,5 +76,12 @@ pub fn expect_number(actual: &Value) -> Result<(), Error> {
     match actual {
         Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(Error::expected_number(actual.clone())),
+    }
+}
+
+pub fn expect_boolean(actual: &Value) -> Result<bool, Error> {
+    match actual {
+        Value::Boolean(boolean) => Ok(*boolean),
+        _ => Err(Error::expected_boolean(actual.clone())),
     }
 }
