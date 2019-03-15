@@ -1,5 +1,4 @@
 use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
-use std::mem;
 use token::Token;
 
 pub struct Node {
@@ -42,7 +41,7 @@ impl Node {
         self.children().len() == self.operator().argument_amount()
     }
 
-    fn insert_back_prioritized(&mut self, mut operator: Box<dyn Operator>) -> Result<(), Error> {
+    fn insert_back_prioritized(&mut self, operator: Box<dyn Operator>) -> Result<(), Error> {
         if self.operator().precedence() < operator.precedence() {
             if self.operator().is_leaf() {
                 Err(Error::AppendedToLeafNode)
@@ -54,7 +53,7 @@ impl Node {
                         .unwrap()
                         .insert_back_prioritized(operator)
                 } else {
-                    let mut new_node = Node::new(operator);
+                    let new_node = Node::new(operator);
                     let last_child = self.children.pop().unwrap();
                     self.children.push(new_node);
                     let new_node = self.children.last_mut().unwrap();
@@ -92,7 +91,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
         };
 
         if let Some(operator) = operator {
-            root.insert_back_prioritized(operator);
+            root.insert_back_prioritized(operator)?;
         }
     }
 

@@ -55,7 +55,7 @@ impl Operator for RootNode {
         1
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, _arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         Err(Error::EvaluatedRootNode)
     }
 }
@@ -69,7 +69,7 @@ impl Operator for Add {
         2
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
         let a = expect_number(&arguments[0])?;
         let b = expect_number(&arguments[1])?;
@@ -87,7 +87,7 @@ impl Operator for Sub {
         2
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
         let a = expect_number(&arguments[0])?;
         let b = expect_number(&arguments[1])?;
@@ -105,7 +105,7 @@ impl Operator for Mul {
         2
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
         let a = expect_number(&arguments[0])?;
         let b = expect_number(&arguments[1])?;
@@ -123,7 +123,7 @@ impl Operator for Div {
         2
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 2)?;
         let a = expect_number(&arguments[0])?;
         let b = expect_number(&arguments[1])?;
@@ -141,7 +141,7 @@ impl Operator for Const {
         0
     }
 
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
         expect_argument_amount(arguments.len(), 0)?;
 
         Ok(self.value.clone())

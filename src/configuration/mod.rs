@@ -7,7 +7,7 @@ pub trait Configuration {
 pub struct EmptyConfiguration;
 
 impl Configuration for EmptyConfiguration {
-    fn get_value(&self, identifier: &str) -> Result<Value, Error> {
+    fn get_value(&self, _identifier: &str) -> Result<Value, Error> {
         Err(Error::IdentifierNotFound)
     }
 }
