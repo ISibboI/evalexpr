@@ -4,7 +4,6 @@
 //! `==` `+` `-` `*` `/` `%` `&&` `||` `n..m`.
 //!
 //! Built-in functions: `min()` `max()` `len()` `is_empty()` `array()` `converge()`.
-//! See the `builtin` module for a detailed description of each.
 //!
 //! ## Examples
 //!
@@ -89,6 +88,9 @@
 //!
 //! ### array()
 //! Accept multiple arguments and return an array.
+//!
+//! ### converge()
+//! See `builtin::create_converge_function()`.
 //!
 //!
 #![recursion_limit="100"]

@@ -1,13 +1,15 @@
-eval
-====
+evalexpr
+========
 
-[![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](https://www.repostatus.org/badges/latest/abandoned.svg)](https://www.repostatus.org/#abandoned)
+**This is a fork of the eval crate originally created by fengcen and then abandoned.**
 
-[![docs](https://docs.rs/eval/badge.svg?version=0.4.3 "docs")](https://docs.rs/eval)
+<!-- [![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](https://www.repostatus.org/badges/latest/abandoned.svg)](https://www.repostatus.org/#abandoned) -->
 
-Eval is a powerful expression evaluator.
+[![docs](https://docs.rs/evalexpr/badge.svg?version=0.4.4 "docs")](https://docs.rs/evalexpr)
 
-[Document](https://docs.rs/eval)
+Evalexpr is a powerful expression evaluator.
+
+[Document](https://docs.rs/evalexpr)
 --------------------------------
 
 Features
@@ -23,6 +25,7 @@ Where can eval be used?
 -----------------------
 
 * Template engine
+* Scripting language
 * ...
 
 Usage
@@ -32,13 +35,13 @@ Add dependency to Cargo.toml
 
 ```toml
 [dependencies]
-eval = "^0.4"
+evalexpr = "0.4"
 ```
 
 In your `main.rs` or `lib.rs`:
 
 ```rust
-extern crate eval;
+extern crate evalexpr as eval;
 ```
 
 Examples
@@ -112,5 +115,5 @@ assert_eq!(eval("0..5"), Ok(to_value(vec![0, 1, 2, 3, 4])));
 License
 -------
 
-eval is primarily distributed under the terms of the MIT license.
+evalexpr is primarily distributed under the terms of the MIT license.
 See [LICENSE](LICENSE) for details.
