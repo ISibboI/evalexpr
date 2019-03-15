@@ -16,7 +16,8 @@ Features
 Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
 `+` `-` `*` `/` `%` `&&` `||` `n..m`.
 
-Built-in functions: `min()` `max()` `len()` `is_empty()` `array()`.
+Built-in functions: `min()` `max()` `len()` `is_empty()` `array()` `converge()`.
+See the `builtin` module for a detailed description of each.
 
 Where can eval be used?
 -----------------------
