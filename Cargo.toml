@@ -1,17 +1,17 @@
 [package]
-name = "eval"
-version = "0.4.3"
+name = "evalexpr"
+version = "0.4.4"
 description = "Expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "expr", "template"]
-authors = ["fengcen <fengcen.love@gmail.com>"]
-repository = "https://github.com/fengcen/eval.git"
-homepage = "https://github.com/fengcen/eval"
-documentation = "https://docs.rs/eval"
+authors = ["fengcen <fengcen.love@gmail.com>", "isibboi <isibboi@gmail.com>"]
+repository = "https://github.com/ISibboI/eval.git"
+homepage = "https://github.com/ISibboI/eval"
+documentation = "https://docs.rs/evalexpr"
 readme = "README.md"
 license = "MIT"
 
 [lib]
-name = "eval"
+name = "evalexpr"
 path = "src/lib.rs"
 
 [dependencies]
