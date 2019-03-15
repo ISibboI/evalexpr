@@ -8,6 +8,7 @@ use node::Node;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Operator {
+    Neg(u8),
     Add(u8),
     Mul(u8),
     Sub(u8),
@@ -46,6 +47,7 @@ impl Operator {
 
     pub fn can_at_beginning(&self) -> bool {
         match *self {
+            Operator::Neg(_) |
             Operator::Not(_) |
             Operator::Function(_) |
             Operator::LeftParenthesis => true,
@@ -59,7 +61,7 @@ impl Operator {
             Operator::Eq(_) | Operator::Ne(_) | Operator::Gt(_) | Operator::Lt(_) |
             Operator::Ge(_) | Operator::Le(_) | Operator::And(_) | Operator::Or(_) |
             Operator::Rem(_) => Some(2),
-            Operator::Not(_) => Some(1),
+            Operator::Not(_) | Operator::Neg(_) => Some(1),
             Operator::Function(_) => None,
             _ => Some(0),
         }
@@ -71,7 +73,7 @@ impl Operator {
             Operator::Eq(_) | Operator::Ne(_) | Operator::Gt(_) | Operator::Lt(_) |
             Operator::Ge(_) | Operator::Le(_) | Operator::And(_) | Operator::Or(_) |
             Operator::Rem(_) => Some(2),
-            Operator::Not(_) => Some(1),
+            Operator::Not(_) | Operator::Neg(_) => Some(1),
             Operator::Function(_) => None,
             _ => Some(0),
         }
@@ -79,6 +81,7 @@ impl Operator {
 
     pub fn get_priority(&self) -> u8 {
         match *self {
+            Operator::Neg(priority) |
             Operator::Add(priority) |
             Operator::Sub(priority) |
             Operator::Div(priority) |
@@ -147,6 +150,7 @@ impl Operator {
             Operator::Or(_) |
             Operator::Ge(_) |
             Operator::Not(_) |
+            Operator::Neg(_) |
             Operator::Dot(_) |
             Operator::LeftSquareBracket(_) |
             Operator::Le(_) => true,

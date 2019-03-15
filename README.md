@@ -16,7 +16,7 @@ Features
 --------
 
 Supported operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
-`+` `-` `*` `/` `%` `&&` `||` `n..m`.
+`+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
 
 Built-in functions: `min()` `max()` `len()` `is_empty()` `array()` `converge()`.
 See the `builtin` module for a detailed description of each.

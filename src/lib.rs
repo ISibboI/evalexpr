@@ -1,7 +1,7 @@
 //! Eval is a powerful expression evaluator.
 //!
 //! Supported operators: `!` `!=` `""` `''` `()` `[]` `.` `,` `>` `<` `>=` `<=`
-//! `==` `+` `-` `*` `/` `%` `&&` `||` `n..m`.
+//! `==` `+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
 //!
 //! Built-in functions: `min()` `max()` `len()` `is_empty()` `array()` `converge()`.
 //!
@@ -110,6 +110,8 @@ mod tree;
 mod error;
 mod builtin;
 mod expr;
+
+mod reboot;
 
 pub use expr::ExecOptions;
 pub use serde_json::Value;
@@ -603,6 +605,16 @@ mod tests {
         assert_eq!(eval("2 * (4 + 0) + 4"), Ok(to_value(12)));
         assert_eq!(eval("2 * (2 + 2) + (1 + 3)"), Ok(to_value(12)));
         assert_eq!(eval("2 * (4) + (4)"), Ok(to_value(12)));
+    }
+
+    #[test]
+    fn test_unary_minus() {
+        assert_eq!(eval("3 + -4"), Ok(to_value(-1)));
+        assert_eq!(eval("3+-4"), Ok(to_value(-1)));
+        assert_eq!(eval("true && !false"), Ok(to_value(true)));
+        assert_eq!(eval("!true || !true"), Ok(to_value(false)));
+        assert_eq!(eval("-5 + -4"), Ok(to_value(-9)));
+        assert_eq!(eval("-3-4"), Ok(to_value(-7)));
     }
 }
 
