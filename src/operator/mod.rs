@@ -400,11 +400,11 @@ impl Operator for And {
         let a = expect_boolean(&arguments[0])?;
         let b = expect_boolean(&arguments[1])?;
 
-            if a && b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
+        if a && b {
+            Ok(Value::Boolean(true))
+        } else {
+            Ok(Value::Boolean(false))
+        }
     }
 }
 

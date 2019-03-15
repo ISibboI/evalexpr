@@ -43,7 +43,8 @@ impl Node {
             if self.operator().is_leaf() {
                 Err(Error::AppendedToLeafNode)
             } else if self.has_correct_amount_of_children() {
-                if self.children.last_mut().unwrap().operator().precedence() < node.operator().precedence()
+                if self.children.last_mut().unwrap().operator().precedence()
+                    < node.operator().precedence()
                 {
                     self.children
                         .last_mut()
@@ -98,11 +99,11 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             Token::And => Some(Node::new(And)),
             Token::Or => Some(Node::new(Or)),
             Token::Not => Some(Node::new(Not)),
-            
+
             Token::LBrace => {
                 root.push(Node::root_node());
                 None
-            },
+            }
             Token::RBrace => {
                 if root.len() < 2 {
                     return Err(Error::UnmatchedRBrace);
@@ -111,7 +112,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                 }
             }
             Token::Whitespace => None,
-            
+
             Token::Identifier(identifier) => Some(Node::new(Identifier::new(identifier))),
             Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
             Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),

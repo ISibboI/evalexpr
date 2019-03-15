@@ -1,5 +1,5 @@
-use value::{FloatType, IntType};
 use error::Error;
+use value::{FloatType, IntType};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Token {
@@ -139,7 +139,10 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
         let mut cutoff = 2;
 
         result.push(match first {
-            PartialToken::Token(token) => {cutoff = 1; token},
+            PartialToken::Token(token) => {
+                cutoff = 1;
+                token
+            }
             PartialToken::Literal(literal) => {
                 cutoff = 1;
                 if let Ok(number) = literal.parse::<IntType>() {
@@ -151,42 +154,39 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
                 } else {
                     Token::Identifier(literal.to_string())
                 }
+            }
+            PartialToken::Eq => match second {
+                Some(PartialToken::Eq) => Token::Eq,
+                _ => return Err(Error::unmatched_partial_token(first, second)),
             },
-            PartialToken::Eq => {
-                match second {
-                    Some(PartialToken::Eq) => Token::Eq,
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
+            PartialToken::ExclamationMark => match second {
+                Some(PartialToken::Eq) => Token::Eq,
+                _ => {
+                    cutoff = 1;
+                    Token::Not
                 }
             },
-            PartialToken::ExclamationMark => {
-                match second {
-                    Some(PartialToken::Eq) => Token::Eq,
-                    _ => {cutoff = 1; Token::Not},
+            PartialToken::Gt => match second {
+                Some(PartialToken::Eq) => Token::Geq,
+                _ => {
+                    cutoff = 1;
+                    Token::Gt
                 }
             },
-            PartialToken::Gt => {
-                match second {
-                    Some(PartialToken::Eq) => Token::Geq,
-                    _ => {cutoff = 1; Token::Gt},
+            PartialToken::Lt => match second {
+                Some(PartialToken::Eq) => Token::Leq,
+                _ => {
+                    cutoff = 1;
+                    Token::Lt
                 }
             },
-            PartialToken::Lt => {
-                match second {
-                    Some(PartialToken::Eq) => Token::Leq,
-                    _ => {cutoff = 1; Token::Lt},
-                }
+            PartialToken::Ampersand => match second {
+                Some(PartialToken::Ampersand) => Token::And,
+                _ => return Err(Error::unmatched_partial_token(first, second)),
             },
-            PartialToken::Ampersand => {
-                match second {
-                    Some(PartialToken::Ampersand) => Token::And,
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
-                }
-            },
-            PartialToken::VerticalBar => {
-                match second {
-                    Some(PartialToken::VerticalBar) => Token::Or,
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
-                }
+            PartialToken::VerticalBar => match second {
+                Some(PartialToken::VerticalBar) => Token::Or,
+                _ => return Err(Error::unmatched_partial_token(first, second)),
             },
         });
 

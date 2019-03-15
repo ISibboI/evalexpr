@@ -60,7 +60,7 @@ impl Error {
     }
 
     pub fn unmatched_partial_token(first: PartialToken, second: Option<PartialToken>) -> Self {
-        Error::UnmatchedPartialToken {first, second}
+        Error::UnmatchedPartialToken { first, second }
     }
 }
 

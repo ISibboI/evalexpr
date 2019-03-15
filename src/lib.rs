@@ -92,7 +92,10 @@ mod test {
     #[test]
     fn test_boolean_examples() {
         assert_eq!(eval("true && false"), Ok(Value::Boolean(false)));
-        assert_eq!(eval("true && false || true && true"), Ok(Value::Boolean(true)));
+        assert_eq!(
+            eval("true && false || true && true"),
+            Ok(Value::Boolean(true))
+        );
         assert_eq!(eval("5 > 4 && 1 <= 1"), Ok(Value::Boolean(true)));
         assert_eq!(eval("5.0 <= 4.9 || !(4 > 3.5)"), Ok(Value::Boolean(false)));
     }
