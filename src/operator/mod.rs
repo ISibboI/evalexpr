@@ -21,12 +21,14 @@ pub trait Operator {
 }
 
 pub struct RootNode;
+pub struct Braced;
+
 pub struct Add;
 pub struct Sub;
 pub struct Neg;
 pub struct Mul;
 pub struct Div;
-pub struct Braced;
+pub struct Mod;
 
 pub struct Const {
     value: Value,
@@ -50,15 +52,16 @@ impl Identifier {
 
 impl Operator for RootNode {
     fn precedence(&self) -> i32 {
-        i32::min_value()
+        200
     }
 
     fn argument_amount(&self) -> usize {
         1
     }
 
-    fn eval(&self, _arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        Err(Error::EvaluatedRootNode)
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 1)?;
+        Ok(arguments[0].clone())
     }
 }
 
@@ -187,6 +190,32 @@ impl Operator for Div {
     }
 }
 
+impl Operator for Mod {
+    fn precedence(&self) -> i32 {
+        100
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        if arguments[0].is_int() && arguments[1].is_int() {
+            Ok(Value::Int(
+                arguments[0].as_int().unwrap() % arguments[1].as_int().unwrap(),
+            ))
+        } else {
+            Ok(Value::Float(
+                arguments[0].as_float().unwrap() % arguments[1].as_float().unwrap(),
+            ))
+        }
+    }
+}
+
 impl Operator for Const {
     fn precedence(&self) -> i32 {
         200
@@ -216,20 +245,5 @@ impl Operator for Identifier {
         expect_argument_amount(arguments.len(), 0)?;
 
         configuration.get_value(&self.identifier)
-    }
-}
-
-impl Operator for Braced {
-    fn precedence(&self) -> i32 {
-        200
-    }
-
-    fn argument_amount(&self) -> usize {
-        1
-    }
-
-    fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 1)?;
-        Ok(arguments[0].clone())
     }
 }

@@ -83,6 +83,13 @@ mod test {
     }
 
     #[test]
+    fn test_mod_examples() {
+        assert_eq!(eval("1 % 4"), Ok(Value::Int(1)));
+        assert_eq!(eval("6 % 4"), Ok(Value::Int(2)));
+        assert_eq!(eval("1 % 4 + 2"), Ok(Value::Int(3)));
+    }
+
+    #[test]
     fn test_type_errors() {
         assert_eq!(
             eval("-true"),

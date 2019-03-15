@@ -17,10 +17,6 @@ impl Node {
     fn root_node() -> Self {
         Self::new(RootNode)
     }
-    
-    fn braced_node() -> Self {
-        Self::new(Braced)
-    }
 
     pub fn eval(&self, configuration: &Configuration) -> Result<Value, Error> {
         let mut arguments = Vec::new();
@@ -91,8 +87,9 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             }
             Token::Star => Some(Node::new(Mul)),
             Token::Slash => Some(Node::new(Div)),
+            Token::Percent => Some(Node::new(Mod)),
             Token::LBrace => {
-                root.push(Node::braced_node());
+                root.push(Node::root_node());
                 None
             },
             Token::RBrace => {

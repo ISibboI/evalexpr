@@ -7,6 +7,7 @@ pub enum Token {
     Minus,
     Star,
     Slash,
+    Percent,
     LBrace,
     RBrace,
     Whitespace,
@@ -30,6 +31,7 @@ fn char_to_token(c: char) -> PartialToken {
         '-' => PartialToken::Token(Token::Minus),
         '*' => PartialToken::Token(Token::Star),
         '/' => PartialToken::Token(Token::Slash),
+        '%' => PartialToken::Token(Token::Percent),
         '(' => PartialToken::Token(Token::LBrace),
         ')' => PartialToken::Token(Token::RBrace),
         c => {
@@ -50,6 +52,7 @@ impl Token {
             Token::Minus => false,
             Token::Star => false,
             Token::Slash => false,
+            Token::Percent => false,
             Token::LBrace => false,
             Token::RBrace => true,
             Token::Whitespace => false,
