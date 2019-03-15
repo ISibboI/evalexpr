@@ -35,4 +35,14 @@ mod test {
         assert_eq!(eval("5 / 4"), Ok(Value::Number(1.25)));
         assert_eq!(eval("5 *3"), Ok(Value::Number(15.0)));
     }
+
+    #[test]
+    fn test_arithmetic_precedence_examples() {
+        assert_eq!(eval("1+3-2"), Ok(Value::Number(2.0)));
+        assert_eq!(eval("3+1*5"), Ok(Value::Number(8.0)));
+        assert_eq!(eval("2*3-5"), Ok(Value::Number(1.0)));
+        assert_eq!(eval("5-3/3"), Ok(Value::Number(4.0)));
+        assert_eq!(eval("5 / 4*2"), Ok(Value::Number(2.5)));
+        assert_eq!(eval("1-5 *3/15"), Ok(Value::Number(0.0)));
+    }
 }
