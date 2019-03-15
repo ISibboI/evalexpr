@@ -21,6 +21,7 @@ mod test {
     #[test]
     fn test_unary_examples() {
         assert_eq!(eval("3"), Ok(Value::Int(3)));
+        assert_eq!(eval("3.3"), Ok(Value::Float(3.3)));
         assert_eq!(eval("true"), Ok(Value::Boolean(true)));
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
         assert_eq!(eval("blub"), Err(Error::IdentifierNotFound));
@@ -34,6 +35,12 @@ mod test {
         assert_eq!(eval("5-3"), Ok(Value::Int(2)));
         assert_eq!(eval("5 / 4"), Ok(Value::Int(1)));
         assert_eq!(eval("5 *3"), Ok(Value::Int(15)));
+        assert_eq!(eval("1.0+3"), Ok(Value::Float(4.0)));
+        assert_eq!(eval("3.0+1"), Ok(Value::Float(4.0)));
+        assert_eq!(eval("3-5.0"), Ok(Value::Float(-2.0)));
+        assert_eq!(eval("5-3.0"), Ok(Value::Float(2.0)));
+        assert_eq!(eval("5 / 4.0"), Ok(Value::Float(1.25)));
+        assert_eq!(eval("5.0 *3"), Ok(Value::Float(15.0)));
     }
 
     #[test]
@@ -44,5 +51,7 @@ mod test {
         assert_eq!(eval("5-3/3"), Ok(Value::Int(4)));
         assert_eq!(eval("5 / 4*2"), Ok(Value::Int(2)));
         assert_eq!(eval("1-5 *3/15"), Ok(Value::Int(0)));
+        assert_eq!(eval("15/7/2.0"), Ok(Value::Float(1.0)));
+        assert_eq!(eval("15.0/7/2"), Ok(Value::Float(15.0/7.0/2.0)));
     }
 }
