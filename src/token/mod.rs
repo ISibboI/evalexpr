@@ -25,7 +25,6 @@ pub enum Token {
     // Precedence
     LBrace,
     RBrace,
-    Whitespace,
 
     // Complex tokens
     Identifier(String),
@@ -38,6 +37,7 @@ pub enum Token {
 pub enum PartialToken {
     Token(Token),
     Literal(String),
+    Whitespace,
     Eq,
     ExclamationMark,
     Gt,
@@ -67,7 +67,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
 
         c => {
             if c.is_whitespace() {
-                PartialToken::Token(Token::Whitespace)
+                PartialToken::Whitespace
             } else {
                 PartialToken::Literal(c.to_string())
             }
@@ -77,7 +77,36 @@ fn char_to_partial_token(c: char) -> PartialToken {
 
 impl Token {
     // Make this a const fn as soon as match gets stable (issue #57563)
-    pub fn is_value(&self) -> bool {
+    pub fn is_leftsided_value(&self) -> bool {
+        match self {
+            Token::Plus => false,
+            Token::Minus => false,
+            Token::Star => false,
+            Token::Slash => false,
+            Token::Percent => false,
+
+            Token::Eq => false,
+            Token::Neq => false,
+            Token::Gt => false,
+            Token::Lt => false,
+            Token::Geq => false,
+            Token::Leq => false,
+            Token::And => false,
+            Token::Or => false,
+            Token::Not => false,
+
+            Token::LBrace => true,
+            Token::RBrace => false,
+
+            Token::Identifier(_) => true,
+            Token::Float(_) => true,
+            Token::Int(_) => true,
+            Token::Boolean(_) => true,
+        }
+    }
+
+    // Make this a const fn as soon as match gets stable (issue #57563)
+    pub fn is_rightsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
             Token::Minus => false,
@@ -97,7 +126,6 @@ impl Token {
 
             Token::LBrace => false,
             Token::RBrace => true,
-            Token::Whitespace => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,
@@ -138,57 +166,64 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
         let second = tokens.get(1).cloned();
         let mut cutoff = 2;
 
-        result.push(match first {
-            PartialToken::Token(token) => {
-                cutoff = 1;
-                token
+        result.extend(
+            match first {
+                PartialToken::Token(token) => {
+                    cutoff = 1;
+                    Some(token)
+                }
+                PartialToken::Literal(literal) => {
+                    cutoff = 1;
+                    if let Ok(number) = literal.parse::<IntType>() {
+                        Some(Token::Int(number))
+                    } else if let Ok(number) = literal.parse::<FloatType>() {
+                        Some(Token::Float(number))
+                    } else if let Ok(boolean) = literal.parse::<bool>() {
+                        Some(Token::Boolean(boolean))
+                    } else {
+                        Some(Token::Identifier(literal.to_string()))
+                    }
+                }
+                PartialToken::Whitespace => {
+                    cutoff = 1;
+                    None
+                }
+                PartialToken::Eq => match second {
+                    Some(PartialToken::Eq) => Some(Token::Eq),
+                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                },
+                PartialToken::ExclamationMark => match second {
+                    Some(PartialToken::Eq) => Some(Token::Eq),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Not)
+                    }
+                },
+                PartialToken::Gt => match second {
+                    Some(PartialToken::Eq) => Some(Token::Geq),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Gt)
+                    }
+                },
+                PartialToken::Lt => match second {
+                    Some(PartialToken::Eq) => Some(Token::Leq),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Lt)
+                    }
+                },
+                PartialToken::Ampersand => match second {
+                    Some(PartialToken::Ampersand) => Some(Token::And),
+                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                },
+                PartialToken::VerticalBar => match second {
+                    Some(PartialToken::VerticalBar) => Some(Token::Or),
+                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                },
             }
-            PartialToken::Literal(literal) => {
-                cutoff = 1;
-                if let Ok(number) = literal.parse::<IntType>() {
-                    Token::Int(number)
-                } else if let Ok(number) = literal.parse::<FloatType>() {
-                    Token::Float(number)
-                } else if let Ok(boolean) = literal.parse::<bool>() {
-                    Token::Boolean(boolean)
-                } else {
-                    Token::Identifier(literal.to_string())
-                }
-            }
-            PartialToken::Eq => match second {
-                Some(PartialToken::Eq) => Token::Eq,
-                _ => return Err(Error::unmatched_partial_token(first, second)),
-            },
-            PartialToken::ExclamationMark => match second {
-                Some(PartialToken::Eq) => Token::Eq,
-                _ => {
-                    cutoff = 1;
-                    Token::Not
-                }
-            },
-            PartialToken::Gt => match second {
-                Some(PartialToken::Eq) => Token::Geq,
-                _ => {
-                    cutoff = 1;
-                    Token::Gt
-                }
-            },
-            PartialToken::Lt => match second {
-                Some(PartialToken::Eq) => Token::Leq,
-                _ => {
-                    cutoff = 1;
-                    Token::Lt
-                }
-            },
-            PartialToken::Ampersand => match second {
-                Some(PartialToken::Ampersand) => Token::And,
-                _ => return Err(Error::unmatched_partial_token(first, second)),
-            },
-            PartialToken::VerticalBar => match second {
-                Some(PartialToken::VerticalBar) => Token::Or,
-                _ => return Err(Error::unmatched_partial_token(first, second)),
-            },
-        });
+            .into_iter(),
+        );
 
         tokens = &tokens[cutoff..];
     }

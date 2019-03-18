@@ -1,6 +1,7 @@
 use crate::{configuration::Configuration, error::*, value::Value};
+use std::fmt::Debug;
 
-pub trait Operator {
+pub trait Operator: Debug {
     /// Returns the precedence of the operator.
     /// A high precedence means that the operator has priority to be deeper in the tree.
     // Make this a const fn once #57563 is resolved
@@ -20,25 +21,42 @@ pub trait Operator {
     fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error>;
 }
 
+#[derive(Debug)]
 pub struct RootNode;
 
+#[derive(Debug)]
 pub struct Add;
+#[derive(Debug)]
 pub struct Sub;
+#[derive(Debug)]
 pub struct Neg;
+#[derive(Debug)]
 pub struct Mul;
+#[derive(Debug)]
 pub struct Div;
+#[derive(Debug)]
 pub struct Mod;
+#[derive(Debug)]
 
 pub struct Eq;
+#[derive(Debug)]
 pub struct Neq;
+#[derive(Debug)]
 pub struct Gt;
+#[derive(Debug)]
 pub struct Lt;
+#[derive(Debug)]
 pub struct Geq;
+#[derive(Debug)]
 pub struct Leq;
+#[derive(Debug)]
 pub struct And;
+#[derive(Debug)]
 pub struct Or;
+#[derive(Debug)]
 pub struct Not;
 
+#[derive(Debug)]
 pub struct Const {
     value: Value,
 }
@@ -49,11 +67,23 @@ impl Const {
     }
 }
 
-pub struct Identifier {
+#[derive(Debug)]
+pub struct VariableIdentifier {
     identifier: String,
 }
 
-impl Identifier {
+impl VariableIdentifier {
+    pub fn new(identifier: String) -> Self {
+        Self { identifier }
+    }
+}
+
+#[derive(Debug)]
+pub struct FunctionIdentifier {
+    identifier: String,
+}
+
+impl FunctionIdentifier {
     pub fn new(identifier: String) -> Self {
         Self { identifier }
     }
@@ -466,9 +496,27 @@ impl Operator for Const {
     }
 }
 
-impl Operator for Identifier {
+impl Operator for VariableIdentifier {
     fn precedence(&self) -> i32 {
         200
+    }
+
+    fn argument_amount(&self) -> usize {
+        0
+    }
+
+    fn eval(&self, _arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+        if let Some(value) = configuration.get_value(&self.identifier).cloned() {
+            Ok(value)
+        } else {
+            Err(Error::VariableIdentifierNotFound(self.identifier.clone()))
+        }
+    }
+}
+
+impl Operator for FunctionIdentifier {
+    fn precedence(&self) -> i32 {
+        190
     }
 
     fn argument_amount(&self) -> usize {
@@ -476,14 +524,11 @@ impl Operator for Identifier {
     }
 
     fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
-        if arguments.len() == 0 {
-            if let Some(value) = configuration.get_value(&self.identifier).cloned() {
-                Ok(value)
-            } else {
-                Err(Error::IdentifierNotFound(self.identifier.clone()))
-            }
+        if let Some(function) = configuration.get_function(&self.identifier) {
+            // Function::call checks for correct argument amount
+            function.call(arguments)
         } else {
-            unimplemented!()
+            Err(Error::FunctionIdentifierNotFound(self.identifier.clone()))
         }
     }
 }

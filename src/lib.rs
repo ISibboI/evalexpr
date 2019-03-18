@@ -30,6 +30,7 @@ mod test {
     use configuration::HashMapConfiguration;
     use error::Error;
     use eval_with_configuration;
+    use Function;
 
     #[test]
     fn test_unary_examples() {
@@ -39,7 +40,7 @@ mod test {
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
         assert_eq!(
             eval("blub"),
-            Err(Error::IdentifierNotFound("blub".to_string()))
+            Err(Error::VariableIdentifierNotFound("blub".to_string()))
         );
         assert_eq!(eval("-3"), Ok(Value::Int(-3)));
         assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
@@ -149,6 +150,46 @@ mod test {
         assert_eq!(
             eval_with_configuration("five < six && true", &configuration),
             Ok(Value::Boolean(true))
+        );
+    }
+
+    #[test]
+    fn test_functions() {
+        let mut configuration = HashMapConfiguration::new();
+        configuration.insert_function(
+            "sub2".to_string(),
+            Function::new(
+                1,
+                Box::new(|arguments| {
+                    if let Value::Int(int) = arguments[0] {
+                        Ok(Value::Int(int - 2))
+                    } else {
+                        Err(Error::expected_number(arguments[0].clone()))
+                    }
+                }),
+            ),
+        );
+        configuration.insert_variable("five".to_string(), Value::Int(5));
+
+        assert_eq!(
+            eval_with_configuration("sub2 5", &configuration),
+            Ok(Value::Int(3))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2(5)", &configuration),
+            Ok(Value::Int(3))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2 five", &configuration),
+            Ok(Value::Int(3))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2(five)", &configuration),
+            Ok(Value::Int(3))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2(3) + five", &configuration),
+            Ok(Value::Int(6))
         );
     }
 

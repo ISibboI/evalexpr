@@ -1,6 +1,7 @@
 use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
 use token::Token;
 
+#[derive(Debug)]
 pub struct Node {
     children: Vec<Node>,
     operator: Box<dyn Operator>,
@@ -43,24 +44,26 @@ impl Node {
             if self.operator().is_leaf() {
                 Err(Error::AppendedToLeafNode)
             } else if self.has_correct_amount_of_children() {
-                if self.children.last_mut().unwrap().operator().precedence()
+                if self.children.last().unwrap().operator().precedence()
                     < node.operator().precedence()
+                // Function call
+                //|| self.children().last().unwrap()
                 {
                     self.children
                         .last_mut()
                         .unwrap()
                         .insert_back_prioritized(node, false)
                 } else {
+                    if node.operator().is_leaf() {
+                        return Err(Error::AppendedToLeafNode);
+                    }
+
                     let last_child = self.children.pop().unwrap();
                     self.children.push(node);
                     let node = self.children.last_mut().unwrap();
 
-                    if node.operator().is_leaf() {
-                        Err(Error::AppendedToLeafNode)
-                    } else {
-                        node.children.push(last_child);
-                        Ok(())
-                    }
+                    node.children.push(last_child);
+                    Ok(())
                 }
             } else {
                 self.children.push(node);
@@ -74,13 +77,16 @@ impl Node {
 
 pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
     let mut root = vec![Node::root_node()];
-    let mut last_non_whitespace_token_is_value = false;
+    let mut last_token_is_rightsided_value = false;
+    let mut token_iter = tokens.iter().peekable();
 
-    for token in tokens {
+    while let Some(token) = token_iter.next().cloned() {
+        let next = token_iter.peek().cloned();
+
         let node = match token.clone() {
             Token::Plus => Some(Node::new(Add)),
             Token::Minus => {
-                if last_non_whitespace_token_is_value {
+                if last_token_is_rightsided_value {
                     Some(Node::new(Sub))
                 } else {
                     Some(Node::new(Neg))
@@ -111,9 +117,16 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                     root.pop()
                 }
             }
-            Token::Whitespace => None,
 
-            Token::Identifier(identifier) => Some(Node::new(Identifier::new(identifier))),
+            Token::Identifier(identifier) => {
+                let mut result = Some(Node::new(VariableIdentifier::new(identifier.clone())));
+                if let Some(next) = next {
+                    if next.is_leftsided_value() {
+                        result = Some(Node::new(FunctionIdentifier::new(identifier)));
+                    }
+                }
+                result
+            }
             Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
             Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),
             Token::Boolean(boolean) => Some(Node::new(Const::new(Value::Boolean(boolean)))),
@@ -127,9 +140,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             }
         }
 
-        if token != Token::Whitespace {
-            last_non_whitespace_token_is_value = token.is_value();
-        }
+        last_token_is_rightsided_value = token.is_rightsided_value();
     }
 
     if root.len() > 1 {

@@ -28,8 +28,11 @@ pub enum Error {
     /// Tried to append a child to a node such that the precedence of the child is not higher.
     PrecedenceViolation,
 
-    /// An identifier operation did not find its value in the configuration.
-    IdentifierNotFound(String),
+    /// A `VariableIdentifier` operation did not find its value in the configuration.
+    VariableIdentifierNotFound(String),
+
+    /// A `FunctionIdentifier` operation did not find its value in the configuration.
+    FunctionIdentifierNotFound(String),
 
     /// A value has the wrong type.
     TypeError,
