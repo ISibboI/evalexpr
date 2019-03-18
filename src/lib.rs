@@ -11,6 +11,7 @@ mod value;
 pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
 pub use error::Error;
 pub use function::Function;
+pub use tree::Node;
 pub use value::Value;
 
 pub fn eval(string: &str) -> Result<Value, Error> {
@@ -22,6 +23,10 @@ pub fn eval_with_configuration(
     configuration: &Configuration,
 ) -> Result<Value, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(configuration)
+}
+
+pub fn build_operator_tree(string: &str) -> Result<Node, Error> {
+    tree::tokens_to_operator_tree(token::tokenize(string)?)
 }
 
 #[cfg(test)]
