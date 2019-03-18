@@ -21,7 +21,6 @@ pub trait Operator {
 }
 
 pub struct RootNode;
-pub struct Braced;
 
 pub struct Add;
 pub struct Sub;

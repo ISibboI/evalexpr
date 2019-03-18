@@ -1,28 +1,34 @@
-use configuration::{EmptyConfiguration, Configuration};
-use error::Error;
-use value::Value;
-
 mod configuration;
 mod error;
+mod function;
 mod operator;
 mod token;
 mod tree;
 mod value;
-mod function;
+
+// Exports
+
+pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
+pub use error::Error;
+pub use function::Function;
+pub use value::Value;
 
 pub fn eval(string: &str) -> Result<Value, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(&EmptyConfiguration)
 }
 
-pub fn eval_with_configuration(string: &str, configuration: &Configuration) -> Result<Value, Error> {
+pub fn eval_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<Value, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(configuration)
 }
 
 #[cfg(test)]
 mod test {
     use crate::{eval, value::Value};
-    use error::Error;
     use configuration::HashMapConfiguration;
+    use error::Error;
     use eval_with_configuration;
 
     #[test]
@@ -31,7 +37,10 @@ mod test {
         assert_eq!(eval("3.3"), Ok(Value::Float(3.3)));
         assert_eq!(eval("true"), Ok(Value::Boolean(true)));
         assert_eq!(eval("false"), Ok(Value::Boolean(false)));
-        assert_eq!(eval("blub"), Err(Error::IdentifierNotFound("blub".to_string())));
+        assert_eq!(
+            eval("blub"),
+            Err(Error::IdentifierNotFound("blub".to_string()))
+        );
         assert_eq!(eval("-3"), Ok(Value::Int(-3)));
         assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
         assert_eq!(eval("----3"), Ok(Value::Int(3)));
@@ -117,12 +126,30 @@ mod test {
         configuration.insert_variable("half".to_string(), Value::Float(0.5));
         configuration.insert_variable("zero".to_string(), Value::Int(0));
 
-        assert_eq!(eval_with_configuration("tr", &configuration), Ok(Value::Boolean(true)));
-        assert_eq!(eval_with_configuration("fa", &configuration), Ok(Value::Boolean(false)));
-        assert_eq!(eval_with_configuration("tr && false", &configuration), Ok(Value::Boolean(false)));
-        assert_eq!(eval_with_configuration("five + six", &configuration), Ok(Value::Int(11)));
-        assert_eq!(eval_with_configuration("five * half", &configuration), Ok(Value::Float(2.5)));
-        assert_eq!(eval_with_configuration("five < six && true", &configuration), Ok(Value::Boolean(true)));
+        assert_eq!(
+            eval_with_configuration("tr", &configuration),
+            Ok(Value::Boolean(true))
+        );
+        assert_eq!(
+            eval_with_configuration("fa", &configuration),
+            Ok(Value::Boolean(false))
+        );
+        assert_eq!(
+            eval_with_configuration("tr && false", &configuration),
+            Ok(Value::Boolean(false))
+        );
+        assert_eq!(
+            eval_with_configuration("five + six", &configuration),
+            Ok(Value::Int(11))
+        );
+        assert_eq!(
+            eval_with_configuration("five * half", &configuration),
+            Ok(Value::Float(2.5))
+        );
+        assert_eq!(
+            eval_with_configuration("five < six && true", &configuration),
+            Ok(Value::Boolean(true))
+        );
     }
 
     #[test]

@@ -1,6 +1,6 @@
-use crate::{error::Error, value::Value};
-use std::collections::HashMap;
+use crate::value::Value;
 use function::Function;
+use std::collections::HashMap;
 
 pub trait Configuration {
     fn get_value(&self, identifier: &str) -> Option<&Value>;
@@ -11,11 +11,11 @@ pub trait Configuration {
 pub struct EmptyConfiguration;
 
 impl Configuration for EmptyConfiguration {
-    fn get_value(&self, identifier: &str) -> Option<&Value> {
+    fn get_value(&self, _identifier: &str) -> Option<&Value> {
         None
     }
 
-    fn get_function(&self, identifier: &str) -> Option<&Function> {
+    fn get_function(&self, _identifier: &str) -> Option<&Function> {
         None
     }
 }
