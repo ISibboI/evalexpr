@@ -33,12 +33,12 @@ impl HashMapConfiguration {
         }
     }
 
-    pub fn insert_variable(&mut self, identifier: String, value: Value) {
-        self.variables.insert(identifier, value);
+    pub fn insert_variable<S: Into<String>, V: Into<Value>>(&mut self, identifier: S, value: V) {
+        self.variables.insert(identifier.into(), value.into());
     }
 
-    pub fn insert_function(&mut self, identifier: String, function: Function) {
-        self.functions.insert(identifier, function);
+    pub fn insert_function<S: Into<String>>(&mut self, identifier: S, function: Function) {
+        self.functions.insert(identifier.into(), function);
     }
 }
 

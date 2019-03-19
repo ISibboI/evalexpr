@@ -1,4 +1,68 @@
 //!
+//! ## Quickstart
+//!
+//! Add `evalexpr` as dependency to your `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! evalexpr = "0.5"
+//! ```
+//!
+//! Add the `extern crate` definition to your `main.rs` or `lib.rs`:
+//!
+//! ```rust
+//! extern crate evalexpr;
+//! ```
+//!
+//! Then you can use `evalexpr` to evaluate expressions like this:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
+//! assert_eq!(eval("1 - 2 * 3"), Ok(Value::from(-5)));
+//! assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
+//! assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
+//! ```
+//!
+//! And you can use variables and functions in expressions like this:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! let mut configuration = HashMapConfiguration::new();
+//! configuration.insert_variable("five", 5);
+//! configuration.insert_variable("twelve", 12);
+//! configuration.insert_function("f", Function::new(1 /* argument amount */, Box::new(|arguments| {
+//!     if let Value::Int(int) = arguments[0] {
+//!         Ok(Value::Int(int / 2))
+//!     } else if let Value::Float(float) = arguments[0] {
+//!         Ok(Value::Float(float / 2.0))
+//!     } else {
+//!         Err(Error::expected_number(arguments[0].clone()))
+//!     }
+//! })));
+//!
+//! assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
+//! ```
+//!
+//! You can also precompile expressions like this:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! let precompiled = build_operator_tree("a * b - c > 5").unwrap();
+//!
+//! let mut configuration = HashMapConfiguration::new();
+//! configuration.insert_variable("a", 6);
+//! configuration.insert_variable("b", 2);
+//! configuration.insert_variable("c", 3);
+//! assert_eq!(precompiled.eval(&configuration), Ok(Value::from(true)));
+//!
+//! configuration.insert_variable("c", 8);
+//! assert_eq!(precompiled.eval(&configuration), Ok(Value::from(false)));
+//! ```
+//!
 //! ## Features
 //!
 //! ### Operators
@@ -27,6 +91,13 @@
 //! Operators take values as arguments and produce values as results.
 //! Values can be boolean, integer or floating point numbers.
 //! Strings are supported as well, but there are no operations defined for them yet.
+//! Values are denoted as displayed in the following table.
+//!
+//! | Value type | Example |
+//! |------------|---------|
+//! | `Value::Boolean` | `true`, `false` |
+//! | `Value::Int` | `3`, `-9`, `0`, `135412` |
+//! | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |
 //!
 //! Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
 //! Operators that take numbers as arguments can either take integers or floating point numbers.
@@ -35,115 +106,31 @@
 //!
 //! ### Variables
 //!
+//! This crate allows to compile parameterizable formulas by using variables.
+//! A variable is a literal in the formula, that does not contain whitespace or can be parsed as value.
+//! The user needs to provide bindings to the variables for evaluation.
+//! This is done with the `Configuration` trait.
+//! Two structs implementing this trait are predefined.
+//! There is `EmptyConfiguration`, that returns `None` for each request, and `HashMapConfiguration`, that stores mappings from literals to variables in a hash map.
 //!
+//! Variables do not have fixed types in the expression itself, but aer typed by the configuration.
+//! The `Configuration` trait contains a function that takes a string literal and returns a `Value` enum.
+//! The variant of this enum decides the type on evaluation.
 //!
+//! ### Functions
 //!
+//! This crate also allows to define arbitrary functions to be used in parsed expressions.
+//! A function is defined as a `Function` instance.
+//! It contains two properties, the `argument_amount` and the `function`.
+//! The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
+//! The `argument_amount` is verified on execution by the crate and does not need to be verified by the `function`.
+//! It determines the length of the slice that is passed to `function`.
+//! See the examples section above for examples on how to construct a function instance.
 //!
-//! 
-//!Supported binary operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
-//!`+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
+//! ## License
 //!
-//!Supported unary operators: ``
-//!
-//!Built-in functions: `min()` `max()` `len()` `is_empty()` `array()` `converge()`.
-//!See the `builtin` module for a detailed description of each.
-//!
-//!Where can eval be used?
-//!-----------------------
-//!
-//!* Template engine
-//!* Scripting language
-//!* ...
-//!
-//!Usage
-//!-----
-//!
-//!Add dependency to Cargo.toml
-//!
-//!```toml
-//![dependencies]
-//!evalexpr = "0.4"
-//!```
-//!
-//!In your `main.rs` or `lib.rs`:
-//!
-//!```rust
-//!extern crate evalexpr as eval;
-//!```
-//!
-//!Examples
-//!--------
-//!
-//!You can do mathematical calculations with supported operators:
-//!
-//!```rust
-//!use eval::{eval, to_value};
-//!
-//!assert_eq!(eval("1 + 2 + 3"), Ok(to_value(6)));
-//!assert_eq!(eval("2 * 2 + 3"), Ok(to_value(7)));
-//!assert_eq!(eval("2 / 2 + 3"), Ok(to_value(4.0)));
-//!assert_eq!(eval("2 / 2 + 3 / 3"), Ok(to_value(2.0)));
-//!```
-//!
-//!You can eval with context:
-//!
-//!```rust
-//!use eval::{Expr, to_value};
-//!
-//!assert_eq!(Expr::new("foo == bar")
-//!               .value("foo", true)
-//!               .value("bar", true)
-//!               .exec(),
-//!           Ok(to_value(true)));
-//!```
-//!
-//!You can access data like javascript by using `.` and `[]`. `[]` supports expression.
-//!
-//!```rust
-//!use eval::{Expr, to_value};
-//!use std::collections::HashMap;
-//!
-//!let mut object = HashMap::new();
-//!object.insert("foos", vec!["Hello", "world", "!"]);
-//!
-//!assert_eq!(Expr::new("object.foos[1-1] == 'Hello'")
-//!               .value("object", object)
-//!               .exec(),
-//!           Ok(to_value(true)));
-//!```
-//!
-//!You can eval with function:
-//!
-//!```rust
-//!use eval::{Expr, to_value};
-//!
-//!assert_eq!(Expr::new("say_hello()")
-//!               .function("say_hello", |_| Ok(to_value("Hello world!")))
-//!               .exec(),
-//!           Ok(to_value("Hello world!")));
-//!```
-//!
-//!You can create an array with `array()`:
-//!
-//!```rust
-//!use eval::{eval, to_value};
-//!
-//!assert_eq!(eval("array(1, 2, 3, 4, 5)"), Ok(to_value(vec![1, 2, 3, 4, 5])));
-//!```
-//!
-//!You can create an integer array with `n..m`:
-//!
-//!```rust
-//!use eval::{eval, to_value};
-//!
-//!assert_eq!(eval("0..5"), Ok(to_value(vec![0, 1, 2, 3, 4])));
-//!```
-//!
-//!License
-//!-------
-//!
-//!evalexpr is primarily distributed under the terms of the MIT license.
-//!See [LICENSE](LICENSE) for details. 
+//! This crate is primarily distributed under the terms of the MIT license.
+//! See [LICENSE](LICENSE) for details.
 //!
 
 mod configuration;
@@ -316,6 +303,8 @@ mod test {
                 Box::new(|arguments| {
                     if let Value::Int(int) = arguments[0] {
                         Ok(Value::Int(int - 2))
+                    } else if let Value::Float(float) = arguments[0] {
+                        Ok(Value::Float(float - 2.0))
                     } else {
                         Err(Error::expected_number(arguments[0].clone()))
                     }

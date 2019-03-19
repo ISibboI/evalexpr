@@ -41,3 +41,39 @@ impl Value {
         }
     }
 }
+
+impl From<String> for Value {
+    fn from(string: String) -> Self {
+        Value::String(string)
+    }
+}
+
+impl From<&str> for Value {
+    fn from(string: &str) -> Self {
+        Value::String(string.to_string())
+    }
+}
+
+impl From<FloatType> for Value {
+    fn from(float: FloatType) -> Self {
+        Value::Float(float)
+    }
+}
+
+impl From<IntType> for Value {
+    fn from(int: IntType) -> Self {
+        Value::Int(int)
+    }
+}
+
+impl From<bool> for Value {
+    fn from(boolean: bool) -> Self {
+        Value::Boolean(boolean)
+    }
+}
+
+impl From<Value> for Result<Value, Error> {
+    fn from(value: Value) -> Self {
+        Ok(value)
+    }
+}
