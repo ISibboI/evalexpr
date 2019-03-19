@@ -26,8 +26,8 @@ Evalexpr is a powerful arithmetic and boolean expression evaluator.
  | \>= | Greater than or equal |
  | == | Equal |
  | != | Not equal |
- | `&&` | Logical and |
- | `||` | Logical or |
+ | && | Logical and |
+ | &#124;&#124; | Logical or |
  
 Supported binary operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
 `+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
