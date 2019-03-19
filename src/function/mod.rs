@@ -1,6 +1,8 @@
 use error::{self, Error};
 use value::Value;
 
+pub mod builtin;
+
 pub struct Function {
     argument_amount: Option<usize>,
     function: Box<Fn(&[Value]) -> Result<Value, Error>>,

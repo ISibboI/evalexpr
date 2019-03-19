@@ -1,4 +1,5 @@
 use crate::{configuration::Configuration, error::*, value::Value};
+use function::builtin::builtin_function;
 use std::fmt::{Debug, Display};
 
 mod display;
@@ -687,6 +688,8 @@ impl Operator for FunctionIdentifier {
 
         if let Some(function) = configuration.get_function(&self.identifier) {
             function.call(arguments)
+        } else if let Some(builtin_function) = builtin_function(&self.identifier) {
+            builtin_function.call(arguments)
         } else {
             Err(Error::FunctionIdentifierNotFound(self.identifier.clone()))
         }
