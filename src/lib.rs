@@ -1,23 +1,44 @@
 //!
 //! ## Features
 //!
+//! ### Operators
+//!
 //! Supported binary operators:
 //!
-//! | Operator | Description |
-//! |----------|-------------|
-//! | + | Sum |
-//! | - | Difference |
-//! | * | Product |
-//! | / | Division |
-//! | % | Modulo |
-//! | < | Lower than |
-//! | > | Greater than |
-//! | <= | Lower than or equal |
-//! | >= | Greater than or equal |
-//! | == | Equal |
-//! | != | Not equal |
-//! | && | Logical and |
-//! | || | Logical or |
+//! | Operator | Precedence | Description |   | Operator | Precedence | Description |
+//! |----------|------------|-------------|---|----------|------------|-------------|
+//! | + | 95 | Sum | | < | 80 | Lower than |
+//! | - | 95 | Difference | | \> | 80 | Greater than |
+//! | * | 100 | Product | | <= | 80 | Lower than or equal |
+//! | / | 100 | Division | | \>= | 80 | Greater than or equal |
+//! | % | 100 | Modulo | | == | 80 | Equal |
+//! | && | 75 | Logical and | | != | 80 | Not equal |
+//! | &#124;&#124; | 70 | Logical or | | | |
+//!
+//! Supported unary operators:
+//!
+//! | Operator | Precedence | Description |
+//! |----------|------------|-------------|
+//! | - | 110 | Negation |
+//! | ! | 110 | Logical not |
+//!
+//! ### Values
+//!
+//! Operators take values as arguments and produce values as results.
+//! Values can be boolean, integer or floating point numbers.
+//! Strings are supported as well, but there are no operations defined for them yet.
+//!
+//! Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+//! Operators that take numbers as arguments can either take integers or floating point numbers.
+//! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
+//! Otherwise, the result is an integer.
+//!
+//! ### Variables
+//!
+//!
+//!
+//!
+//!
 //! 
 //!Supported binary operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
 //!`+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
