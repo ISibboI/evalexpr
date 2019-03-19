@@ -172,6 +172,9 @@ The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
 The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
 It is verified on execution by the crate and does not need to be verified by the `function`.
 
+Functions with no arguments are not allowed.
+Use variables instead.
+
 Be aware that functions need to verify the types of values that are passed to them.
 The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
 Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.

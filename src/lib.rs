@@ -161,6 +161,9 @@
 //! The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
 //! It is verified on execution by the crate and does not need to be verified by the `function`.
 //!
+//! Functions with no arguments are not allowed.
+//! Use variables instead.
+//!
 //! Be aware that functions need to verify the types of values that are passed to them.
 //! The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
 //! Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.
@@ -228,6 +231,7 @@ mod test {
     use configuration::HashMapConfiguration;
     use error::{expect_number, Error};
     use eval_with_configuration;
+    use value::IntType;
     use Function;
 
     #[test]
@@ -459,6 +463,13 @@ mod test {
                 }),
             ),
         );
+        configuration.insert_function(
+            "count",
+            Function::new(
+                None,
+                Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
+            ),
+        );
         configuration.insert_variable("five".to_string(), Value::Int(5));
 
         assert_eq!(
@@ -480,6 +491,18 @@ mod test {
         assert_eq!(
             eval_with_configuration("muladd(3, 6, -4)", &configuration),
             Ok(Value::Int(14))
+        );
+        assert_eq!(
+            eval_with_configuration("count()", &configuration),
+            Err(Error::wrong_operator_argument_amount(0, 1))
+        );
+        assert_eq!(
+            eval_with_configuration("count(3, 5.5, 2)", &configuration),
+            Ok(Value::Int(3))
+        );
+        assert_eq!(
+            eval_with_configuration("count 5", &configuration),
+            Ok(Value::Int(1))
         );
     }
 
