@@ -2,9 +2,10 @@
 
 [![docs](https://docs.rs/evalexpr/badge.svg?version=0.4.4 "docs")](https://docs.rs/evalexpr)
 
-Evalexpr is a powerful arithmetic and boolean expression evaluator.
-
-## [Documentation](https://docs.rs/evalexpr)
+Evalexpr is an expression evaluator in Rust.
+It has a small and easy to use interface and can be easily integrated into any application.
+It is very lightweight and comes with no further dependencies.
+Evalexpr is [available on crates.io](https://crates.io/crates/evalexpr), and its [API Documentation is available on docs.rs](https://docs.rs/evalexpr).
 
 <!-- cargo-sync-readme start -->
 
@@ -39,6 +40,7 @@ And you can use variables and functions in expressions like this:
 
 ```rust
 use evalexpr::*;
+use evalexpr::error::expect_number;
 
 let mut configuration = HashMapConfiguration::new();
 configuration.insert_variable("five", 5);
@@ -52,8 +54,19 @@ configuration.insert_function("f", Function::new(1 /* argument amount */, Box::n
         Err(Error::expected_number(arguments[0].clone()))
     }
 })));
+configuration.insert_function("avg", Function::new(2 /* argument amount */, Box::new(|arguments| {
+    expect_number(&arguments[0])?;
+    expect_number(&arguments[1])?;
+
+    if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+        Ok(Value::Int((a + b) / 2))
+    } else {
+        Ok(Value::Float((arguments[0].as_float()? + arguments[1].as_float()?) / 2.0))
+    }
+})));
 
 assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
+assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
 ```
 
 You can also precompile expressions like this:
@@ -77,6 +90,11 @@ assert_eq!(precompiled.eval(&configuration), Ok(Value::from(false)));
 
 ### Operators
 
+This crate offers a set of binary and unary operators for building expressions.
+Operators have a precedence to determine their order of evaluation.
+The precedence should resemble that of most common programming languages, especially Rust.
+The precedence of variables and values is 200, and the precedence of function literals is 190.
+
 Supported binary operators:
 
 | Operator | Precedence | Description |   | Operator | Precedence | Description |
@@ -95,9 +113,6 @@ Supported unary operators:
 |----------|------------|-------------|
 | - | 110 | Negation |
 | ! | 110 | Logical not |
-
-Operators with higher precedence have a higher priority when determining the order of evaluation.
-The precedence of variables and values is 200, and the precedence of function literals is 190.
 
 ### Values
 
@@ -172,3 +187,7 @@ See [LICENSE](LICENSE) for details.
 
 
 <!-- cargo-sync-readme end -->
+
+## Closing Notes
+
+If you have any ideas for features or see any problems in the code, architecture, interface, algorithmics or documentation, please open an issue on github.

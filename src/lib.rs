@@ -79,6 +79,11 @@
 //!
 //! ### Operators
 //!
+//! This crate offers a set of binary and unary operators for building expressions.
+//! Operators have a precedence to determine their order of evaluation.
+//! The precedence should resemble that of most common programming languages, especially Rust.
+//! The precedence of variables and values is 200, and the precedence of function literals is 190.
+//!
 //! Supported binary operators:
 //!
 //! | Operator | Precedence | Description |   | Operator | Precedence | Description |
@@ -97,9 +102,6 @@
 //! |----------|------------|-------------|
 //! | - | 110 | Negation |
 //! | ! | 110 | Logical not |
-//!
-//! Operators with higher precedence have a higher priority when determining the order of evaluation.
-//! The precedence of variables and values is 200, and the precedence of function literals is 190.
 //!
 //! ### Values
 //!
