@@ -1,6 +1,6 @@
 [package]
 name = "evalexpr"
-version = "0.6.0"
+version = "1.0.0"
 description = "Expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "arithmetic", "boolean"]
 authors = ["isibboi <isibboi@gmail.com>"]
