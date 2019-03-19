@@ -204,8 +204,6 @@
 //! See [LICENSE](LICENSE) for details.
 //!
 
-extern crate core;
-
 mod configuration;
 pub mod error;
 mod function;

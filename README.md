@@ -127,6 +127,18 @@ use evalexpr::*;
 assert_eq!(eval("1, 2, 3"), Ok(Value::from(vec![Value::from(1), Value::from(2), Value::from(3)])));
 ```
 
+### Builtin Functions
+
+This crate offers a set of builtin functions.
+
+| Identifier | Argument Amount | Description |
+|------------|-----------------|-------------|
+| min | >= 1 | Returns the minimum of the arguments |
+| max | >= 1 | Returns the maximum of the arguments |
+
+The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
+They return the result as the type it was passed into the function.
+
 ### Values
 
 Operators take values as arguments and produce values as results.
@@ -163,7 +175,7 @@ The variant of this enum decides the type on evaluation.
 
 Variables have a precedence of 200.
 
-### Functions
+### User-Defined Functions
 
 This crate also allows to define arbitrary functions to be used in parsed expressions.
 A function is defined as a `Function` instance.
