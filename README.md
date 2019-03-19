@@ -96,6 +96,9 @@ Supported unary operators:
 | - | 110 | Negation |
 | ! | 110 | Logical not |
 
+Operators with higher precedence have a higher priority when determining the order of evaluation.
+The precedence of variables and values is 200, and the precedence of function literals is 190.
+
 ### Values
 
 Operators take values as arguments and produce values as results.
@@ -114,6 +117,8 @@ Operators that take numbers as arguments can either take integers or floating po
 If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 Otherwise, the result is an integer.
 
+Values have a precedence of 200.
+
 ### Variables
 
 This crate allows to compile parameterizable formulas by using variables.
@@ -127,15 +132,38 @@ Variables do not have fixed types in the expression itself, but aer typed by the
 The `Configuration` trait contains a function that takes a string literal and returns a `Value` enum.
 The variant of this enum decides the type on evaluation.
 
+Variables have a precedence of 200.
+
 ### Functions
 
 This crate also allows to define arbitrary functions to be used in parsed expressions.
 A function is defined as a `Function` instance.
 It contains two properties, the `argument_amount` and the `function`.
 The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
-The `argument_amount` is verified on execution by the crate and does not need to be verified by the `function`.
-It determines the length of the slice that is passed to `function`.
-See the examples section above for examples on how to construct a function instance.
+The `argument_amount` determines the length of the slice that is passed to `function`.
+It is verified on execution by the crate and does not need to be verified by the `function`.
+
+Be aware that functions need to verify the types of values that are passed to them.
+The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
+Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.
+
+Functions are identified by literals, like variables as well.
+A literal identifies a function, if it is followed by an opening brace `(`, another literal, or a value.
+
+Same as variables, function bindings are provided by the user via a `Configuration`.
+Functions have a precedence of 190.
+
+### Examplary variables and functions in expressions:
+
+| Expression | Valid? | Explanation |
+|------------|--------|-------------|
+| `a` | yes | |
+| `abc` | yes | |
+| `a<b` | no | Expression is interpreted as variable `a`, operator `<` and variable `b` |
+| `a b` | no | Expression is interpreted as function `a` applied to argument `b` |
+| `123` | no | Expression is interpreted as `Value::Int` |
+| `true` | no | Expression is interpreted as `Value::Bool` |
+| `.34` | no | Expression is interpreted as `Value::Float` |
 
 ## License
 

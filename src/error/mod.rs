@@ -34,7 +34,7 @@ pub enum Error {
     /// A `FunctionIdentifier` operation did not find its value in the configuration.
     FunctionIdentifierNotFound(String),
 
-    /// A value has the wrong type.
+    /// A value has the wrong type. Only use this if there is no other error that describes the expected and provided types in more detail.
     TypeError,
 
     /// An opening brace without a matching closing brace was found.
