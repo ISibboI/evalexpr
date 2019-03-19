@@ -3,7 +3,11 @@ use token::PartialToken;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
-    WrongArgumentAmount {
+    WrongOperatorArgumentAmount {
+        expected: usize,
+        actual: usize,
+    },
+    WrongFunctionArgumentAmount {
         expected: usize,
         actual: usize,
     },
@@ -50,8 +54,12 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn wrong_argument_amount(actual: usize, expected: usize) -> Self {
-        Error::WrongArgumentAmount { actual, expected }
+    pub fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
+        Error::WrongOperatorArgumentAmount { actual, expected }
+    }
+
+    pub fn wrong_function_argument_amount(actual: usize, expected: usize) -> Self {
+        Error::WrongFunctionArgumentAmount { actual, expected }
     }
 
     pub fn expected_number(actual: Value) -> Self {
@@ -67,11 +75,19 @@ impl Error {
     }
 }
 
-pub fn expect_argument_amount(actual: usize, expected: usize) -> Result<(), Error> {
+pub fn expect_operator_argument_amount(actual: usize, expected: usize) -> Result<(), Error> {
     if actual == expected {
         Ok(())
     } else {
-        Err(Error::wrong_argument_amount(actual, expected))
+        Err(Error::wrong_operator_argument_amount(actual, expected))
+    }
+}
+
+pub fn expect_function_argument_amount(actual: usize, expected: usize) -> Result<(), Error> {
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(Error::wrong_function_argument_amount(actual, expected))
     }
 }
 

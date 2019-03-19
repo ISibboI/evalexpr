@@ -175,6 +175,8 @@
 //! See [LICENSE](LICENSE) for details.
 //!
 
+extern crate core;
+
 mod configuration;
 pub mod error;
 mod function;
@@ -210,7 +212,7 @@ pub fn build_operator_tree(string: &str) -> Result<Node, Error> {
 mod test {
     use crate::{eval, value::Value};
     use configuration::HashMapConfiguration;
-    use error::Error;
+    use error::{expect_number, Error};
     use eval_with_configuration;
     use Function;
 
@@ -378,6 +380,88 @@ mod test {
     }
 
     #[test]
+    fn test_n_ary_functions() {
+        let mut configuration = HashMapConfiguration::new();
+        configuration.insert_function(
+            "sub2",
+            Function::new(
+                1,
+                Box::new(|arguments| {
+                    if let Value::Int(int) = arguments[0] {
+                        Ok(Value::Int(int - 2))
+                    } else if let Value::Float(float) = arguments[0] {
+                        Ok(Value::Float(float - 2.0))
+                    } else {
+                        Err(Error::expected_number(arguments[0].clone()))
+                    }
+                }),
+            ),
+        );
+        configuration.insert_function(
+            "avg",
+            Function::new(
+                2,
+                Box::new(|arguments| {
+                    expect_number(&arguments[0])?;
+                    expect_number(&arguments[1])?;
+
+                    if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+                        Ok(Value::Int((a + b) / 2))
+                    } else {
+                        Ok(Value::Float(
+                            (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
+                        ))
+                    }
+                }),
+            ),
+        );
+        configuration.insert_function(
+            "muladd",
+            Function::new(
+                3,
+                Box::new(|arguments| {
+                    expect_number(&arguments[0])?;
+                    expect_number(&arguments[1])?;
+                    expect_number(&arguments[2])?;
+
+                    if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
+                        (&arguments[0], &arguments[1], &arguments[2])
+                    {
+                        Ok(Value::Int(a * b + c))
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_float()? * arguments[1].as_float()?
+                                + arguments[2].as_float()?,
+                        ))
+                    }
+                }),
+            ),
+        );
+        configuration.insert_variable("five".to_string(), Value::Int(5));
+
+        assert_eq!(
+            eval_with_configuration("avg(7, 5)", &configuration),
+            Ok(Value::Int(6))
+        );
+        assert_eq!(
+            eval_with_configuration("avg(sub2 5, 5)", &configuration),
+            Ok(Value::Int(4))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2(avg(3, 6))", &configuration),
+            Ok(Value::Int(2))
+        );
+        assert_eq!(
+            eval_with_configuration("sub2 avg(3, 6)", &configuration),
+            Ok(Value::Int(2))
+        );
+        assert_eq!(
+            eval_with_configuration("muladd(3, 6, -4)", &configuration),
+            Ok(Value::Int(14))
+        );
+    }
+
+    #[test]
     fn test_errors() {
         assert_eq!(
             eval("-true"),
@@ -387,7 +471,10 @@ mod test {
             eval("1-true"),
             Err(Error::expected_number(Value::Boolean(true)))
         );
-        assert_eq!(eval("true-"), Err(Error::wrong_argument_amount(1, 2)));
+        assert_eq!(
+            eval("true-"),
+            Err(Error::wrong_operator_argument_amount(1, 2))
+        );
         assert_eq!(eval("!(()true)"), Err(Error::AppendedToLeafNode));
     }
 }

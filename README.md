@@ -191,3 +191,4 @@ See [LICENSE](LICENSE) for details.
 ## Closing Notes
 
 If you have any ideas for features or see any problems in the code, architecture, interface, algorithmics or documentation, please open an issue on github.
+If there is already an issue describing what you want to say, please add a thumbs up or whatever emoji you think fits to the issue, so I know which ones I should prioritize.

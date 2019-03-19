@@ -3,7 +3,6 @@ use value::{FloatType, IntType};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Token {
-    // Single character tokens
     // Arithmetic
     Plus,
     Minus,
@@ -26,7 +25,10 @@ pub enum Token {
     LBrace,
     RBrace,
 
-    // Complex tokens
+    // Aggregation
+    Comma,
+
+    // Values, Variables and Functions
     Identifier(String),
     Float(FloatType),
     Int(IntType),
@@ -65,6 +67,8 @@ fn char_to_partial_token(c: char) -> PartialToken {
         '(' => PartialToken::Token(Token::LBrace),
         ')' => PartialToken::Token(Token::RBrace),
 
+        ',' => PartialToken::Token(Token::Comma),
+
         c => {
             if c.is_whitespace() {
                 PartialToken::Whitespace
@@ -98,6 +102,8 @@ impl Token {
             Token::LBrace => true,
             Token::RBrace => false,
 
+            Token::Comma => false,
+
             Token::Identifier(_) => true,
             Token::Float(_) => true,
             Token::Int(_) => true,
@@ -126,6 +132,8 @@ impl Token {
 
             Token::LBrace => false,
             Token::RBrace => true,
+
+            Token::Comma => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,

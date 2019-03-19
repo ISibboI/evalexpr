@@ -1,11 +1,19 @@
 use crate::{configuration::Configuration, error::*, value::Value};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
-pub trait Operator: Debug {
+mod display;
+
+pub trait Operator: Debug + Display {
     /// Returns the precedence of the operator.
     /// A high precedence means that the operator has priority to be deeper in the tree.
     // Make this a const fn once #57563 is resolved
     fn precedence(&self) -> i32;
+
+    /// Returns true if chains of operators with the same precedence as this one should be evaluated left-to-right,
+    /// and false if they should be evaluated right-to-left.
+    /// Left-to-right chaining has priority if operators with different order but same precedence are chained.
+    // Make this a const fn once #57563 is resolved
+    fn is_left_to_right(&self) -> bool;
 
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
@@ -57,6 +65,9 @@ pub struct Or;
 pub struct Not;
 
 #[derive(Debug)]
+pub struct Tuple;
+
+#[derive(Debug)]
 pub struct Const {
     value: Value,
 }
@@ -94,12 +105,16 @@ impl Operator for RootNode {
         200
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         1
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 1)?;
+        expect_operator_argument_amount(arguments.len(), 1)?;
         Ok(arguments[0].clone())
     }
 }
@@ -109,12 +124,16 @@ impl Operator for Add {
         95
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -135,12 +154,16 @@ impl Operator for Sub {
         95
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -161,12 +184,16 @@ impl Operator for Neg {
         110
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         1
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 1)?;
+        expect_operator_argument_amount(arguments.len(), 1)?;
         expect_number(&arguments[0])?;
 
         if arguments[0].is_int() {
@@ -182,12 +209,16 @@ impl Operator for Mul {
         100
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -208,12 +239,16 @@ impl Operator for Div {
         100
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -234,12 +269,16 @@ impl Operator for Mod {
         100
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -260,12 +299,16 @@ impl Operator for Eq {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
 
         if arguments[0] == arguments[1] {
             Ok(Value::Boolean(true))
@@ -280,12 +323,16 @@ impl Operator for Neq {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
 
         if arguments[0] != arguments[1] {
             Ok(Value::Boolean(true))
@@ -300,12 +347,16 @@ impl Operator for Gt {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -330,12 +381,16 @@ impl Operator for Lt {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -360,12 +415,16 @@ impl Operator for Geq {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -390,12 +449,16 @@ impl Operator for Leq {
         80
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
@@ -420,12 +483,16 @@ impl Operator for And {
         75
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         let a = expect_boolean(&arguments[0])?;
         let b = expect_boolean(&arguments[1])?;
 
@@ -442,12 +509,16 @@ impl Operator for Or {
         70
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         2
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 2)?;
+        expect_operator_argument_amount(arguments.len(), 2)?;
         let a = expect_boolean(&arguments[0])?;
         let b = expect_boolean(&arguments[1])?;
 
@@ -464,12 +535,16 @@ impl Operator for Not {
         110
     }
 
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
     fn argument_amount(&self) -> usize {
         1
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 1)?;
+        expect_operator_argument_amount(arguments.len(), 1)?;
         let a = expect_boolean(&arguments[0])?;
 
         if !a {
@@ -480,9 +555,50 @@ impl Operator for Not {
     }
 }
 
+impl Operator for Tuple {
+    fn precedence(&self) -> i32 {
+        40
+    }
+
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        if let Value::Tuple(tuple) = &arguments[0] {
+            let mut tuple = tuple.clone();
+            if let Value::Tuple(tuple2) = &arguments[1] {
+                tuple.extend(tuple2.iter().cloned());
+            } else {
+                tuple.push(arguments[1].clone());
+            }
+            Ok(Value::from(tuple))
+        } else {
+            if let Value::Tuple(tuple) = &arguments[1] {
+                let mut tuple = tuple.clone();
+                tuple.insert(0, arguments[0].clone());
+                Ok(Value::from(tuple))
+            } else {
+                Ok(Value::from(vec![
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ]))
+            }
+        }
+    }
+}
+
 impl Operator for Const {
     fn precedence(&self) -> i32 {
         200
+    }
+
+    fn is_left_to_right(&self) -> bool {
+        true
     }
 
     fn argument_amount(&self) -> usize {
@@ -490,7 +606,7 @@ impl Operator for Const {
     }
 
     fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
-        expect_argument_amount(arguments.len(), 0)?;
+        expect_operator_argument_amount(arguments.len(), 0)?;
 
         Ok(self.value.clone())
     }
@@ -499,6 +615,10 @@ impl Operator for Const {
 impl Operator for VariableIdentifier {
     fn precedence(&self) -> i32 {
         200
+    }
+
+    fn is_left_to_right(&self) -> bool {
+        true
     }
 
     fn argument_amount(&self) -> usize {
@@ -519,13 +639,24 @@ impl Operator for FunctionIdentifier {
         190
     }
 
+    fn is_left_to_right(&self) -> bool {
+        false
+    }
+
     fn argument_amount(&self) -> usize {
         1
     }
 
     fn eval(&self, arguments: &[Value], configuration: &Configuration) -> Result<Value, Error> {
+        expect_operator_argument_amount(arguments.len(), 1)?;
+
+        let arguments = if let Value::Tuple(arguments) = &arguments[0] {
+            arguments
+        } else {
+            arguments
+        };
+
         if let Some(function) = configuration.get_function(&self.identifier) {
-            // Function::call checks for correct argument amount
             function.call(arguments)
         } else {
             Err(Error::FunctionIdentifierNotFound(self.identifier.clone()))

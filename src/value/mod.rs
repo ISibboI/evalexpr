@@ -1,5 +1,7 @@
 use error::Error;
 
+mod display;
+
 pub type IntType = i64;
 pub type FloatType = f64;
 
@@ -9,6 +11,7 @@ pub enum Value {
     Float(FloatType),
     Int(IntType),
     Boolean(bool),
+    Tuple(Vec<Value>),
 }
 
 impl Value {
@@ -69,6 +72,12 @@ impl From<IntType> for Value {
 impl From<bool> for Value {
     fn from(boolean: bool) -> Self {
         Value::Boolean(boolean)
+    }
+}
+
+impl From<Vec<Value>> for Value {
+    fn from(tuple: Vec<Value>) -> Self {
+        Value::Tuple(tuple)
     }
 }
 

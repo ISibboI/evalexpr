@@ -1,6 +1,8 @@
 use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
 use token::Token;
 
+mod display;
+
 #[derive(Debug)]
 pub struct Node {
     children: Vec<Node>,
@@ -40,14 +42,18 @@ impl Node {
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> Result<(), Error> {
-        if self.operator().precedence() < node.operator().precedence() || is_root_node {
+        if self.operator().precedence() < node.operator().precedence() || is_root_node
+            // Right-to-left chaining
+            || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
+        {
             if self.operator().is_leaf() {
                 Err(Error::AppendedToLeafNode)
             } else if self.has_correct_amount_of_children() {
                 if self.children.last().unwrap().operator().precedence()
                     < node.operator().precedence()
-                // Function call
-                //|| self.children().last().unwrap()
+                    // Right-to-left chaining
+                    || (self.children.last().unwrap().operator().precedence()
+                    == node.operator().precedence() && !self.children.last().unwrap().operator().is_left_to_right() && !node.operator().is_left_to_right())
                 {
                     self.children
                         .last_mut()
@@ -117,6 +123,8 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                     root.pop()
                 }
             }
+
+            Token::Comma => Some(Node::new(Tuple)),
 
             Token::Identifier(identifier) => {
                 let mut result = Some(Node::new(VariableIdentifier::new(identifier.clone())));

@@ -18,7 +18,7 @@ impl Function {
     }
 
     pub fn call(&self, arguments: &[Value]) -> Result<Value, Error> {
-        error::expect_argument_amount(self.argument_amount, arguments.len())?;
+        error::expect_function_argument_amount(arguments.len(), self.argument_amount)?;
         (self.function)(arguments)
     }
 }
