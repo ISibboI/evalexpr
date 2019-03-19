@@ -3,3 +3,4 @@ reorder_imports=true
 reorder_modules=true
 format_strings=true
 merge_imports=true
+match_block_trailing_comma=true

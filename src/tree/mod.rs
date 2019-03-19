@@ -97,7 +97,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                 } else {
                     Some(Node::new(Neg))
                 }
-            }
+            },
             Token::Star => Some(Node::new(Mul)),
             Token::Slash => Some(Node::new(Div)),
             Token::Percent => Some(Node::new(Mod)),
@@ -116,14 +116,14 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             Token::LBrace => {
                 root.push(Node::root_node());
                 None
-            }
+            },
             Token::RBrace => {
                 if root.len() < 2 {
                     return Err(Error::UnmatchedRBrace);
                 } else {
                     root.pop()
                 }
-            }
+            },
 
             Token::Comma => Some(Node::new(Tuple)),
 
@@ -135,7 +135,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
                     }
                 }
                 result
-            }
+            },
             Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
             Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),
             Token::Boolean(boolean) => Some(Node::new(Const::new(Value::Boolean(boolean)))),

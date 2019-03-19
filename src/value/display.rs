@@ -20,7 +20,7 @@ impl Display for Value {
                     value.fmt(f)?;
                 }
                 write!(f, ")")
-            }
+            },
         }
     }
 }
