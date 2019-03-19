@@ -3,7 +3,21 @@
 //!
 //! Supported binary operators:
 //!
-//! | + | - | * | % | < | > | <= | >= | == | && | || |
+//! | Operator | Description |
+//! |----------|-------------|
+//! | + | Sum |
+//! | - | Difference |
+//! | * | Product |
+//! | / | Division |
+//! | % | Modulo |
+//! | < | Lower than |
+//! | > | Greater than |
+//! | <= | Lower than or equal |
+//! | >= | Greater than or equal |
+//! | == | Equal |
+//! | != | Not equal |
+//! | && | Logical and |
+//! | || | Logical or |
 //! 
 //!Supported binary operators: `!` `!=` `""` `''` `()` `[]` `,` `>` `<` `>=` `<=` `==`
 //!`+` unary/binary `-` `*` `/` `%` `&&` `||` `n..m`.
