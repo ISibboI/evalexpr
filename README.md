@@ -105,7 +105,7 @@ Supported binary operators:
 | / | 100 | Division | | \>= | 80 | Greater than or equal |
 | % | 100 | Modulo | | == | 80 | Equal |
 | && | 75 | Logical and | | != | 80 | Not equal |
-| &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentation |
+| &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentiation |
 
 Supported unary operators:
 

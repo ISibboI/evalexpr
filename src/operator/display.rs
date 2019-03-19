@@ -43,6 +43,12 @@ impl Display for Mod {
     }
 }
 
+impl Display for Exp {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "^")
+    }
+}
+
 impl Display for Eq {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "==")

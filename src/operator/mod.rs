@@ -45,7 +45,9 @@ pub struct Div;
 #[derive(Debug)]
 pub struct Mod;
 #[derive(Debug)]
+pub struct Exp;
 
+#[derive(Debug)]
 pub struct Eq;
 #[derive(Debug)]
 pub struct Neq;
@@ -291,6 +293,33 @@ impl Operator for Mod {
                 arguments[0].as_float().unwrap() % arguments[1].as_float().unwrap(),
             ))
         }
+    }
+}
+
+impl Operator for Exp {
+    fn precedence(&self) -> i32 {
+        120
+    }
+
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
+
+    fn argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _configuration: &Configuration) -> Result<Value, Error> {
+        expect_operator_argument_amount(arguments.len(), 2)?;
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
+
+        Ok(Value::Float(
+            arguments[0]
+                .as_float()
+                .unwrap()
+                .powf(arguments[1].as_float().unwrap()),
+        ))
     }
 }
 

@@ -94,7 +94,7 @@
 //! | / | 100 | Division | | \>= | 80 | Greater than or equal |
 //! | % | 100 | Modulo | | == | 80 | Equal |
 //! | && | 75 | Logical and | | != | 80 | Not equal |
-//! | &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentation |
+//! | &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentiation |
 //!
 //! Supported unary operators:
 //!
@@ -120,6 +120,7 @@
 //! Operators that take numbers as arguments can either take integers or floating point numbers.
 //! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 //! Otherwise, the result is an integer.
+//! An exception to this is the exponentiation operator that always returns a floating point number.
 //!
 //! Values have a precedence of 200.
 //!
@@ -288,6 +289,14 @@ mod test {
         assert_eq!(eval("1 % 4"), Ok(Value::Int(1)));
         assert_eq!(eval("6 % 4"), Ok(Value::Int(2)));
         assert_eq!(eval("1 % 4 + 2"), Ok(Value::Int(3)));
+    }
+
+    #[test]
+    fn test_pow_examples() {
+        assert_eq!(eval("1 ^ 4"), Ok(Value::Float(1.0)));
+        assert_eq!(eval("6 ^ 4"), Ok(Value::Float(6.0f64.powf(4.0))));
+        assert_eq!(eval("1 ^ 4 + 2"), Ok(Value::Float(3.0)));
+        assert_eq!(eval("2 ^ (4 + 2)"), Ok(Value::Float(64.0)));
     }
 
     #[test]
