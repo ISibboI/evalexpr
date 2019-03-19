@@ -9,6 +9,7 @@ pub enum Token {
     Star,
     Slash,
     Percent,
+    Hat,
 
     // Logic
     Eq,
@@ -56,6 +57,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
         '*' => PartialToken::Token(Token::Star),
         '/' => PartialToken::Token(Token::Slash),
         '%' => PartialToken::Token(Token::Percent),
+        '^' => PartialToken::Token(Token::Hat),
 
         '=' => PartialToken::Eq,
         '!' => PartialToken::ExclamationMark,
@@ -88,6 +90,7 @@ impl Token {
             Token::Star => false,
             Token::Slash => false,
             Token::Percent => false,
+            Token::Hat => false,
 
             Token::Eq => false,
             Token::Neq => false,
@@ -119,6 +122,7 @@ impl Token {
             Token::Star => false,
             Token::Slash => false,
             Token::Percent => false,
+            Token::Hat => false,
 
             Token::Eq => false,
             Token::Neq => false,

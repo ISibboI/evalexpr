@@ -101,6 +101,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
             Token::Star => Some(Node::new(Mul)),
             Token::Slash => Some(Node::new(Div)),
             Token::Percent => Some(Node::new(Mod)),
+            Token::Hat => Some(Node::new(Exp)),
 
             Token::Eq => Some(Node::new(Eq)),
             Token::Neq => Some(Node::new(Neq)),
