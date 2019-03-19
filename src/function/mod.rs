@@ -2,13 +2,13 @@ use error::{self, Error};
 use value::Value;
 
 pub struct Function {
-    argument_amount: usize,
+    argument_amount: Option<usize>,
     function: Box<Fn(&[Value]) -> Result<Value, Error>>,
 }
 
 impl Function {
     pub fn new(
-        argument_amount: usize,
+        argument_amount: Option<usize>,
         function: Box<Fn(&[Value]) -> Result<Value, Error>>,
     ) -> Self {
         Self {
@@ -18,7 +18,10 @@ impl Function {
     }
 
     pub fn call(&self, arguments: &[Value]) -> Result<Value, Error> {
-        error::expect_function_argument_amount(arguments.len(), self.argument_amount)?;
+        if let Some(argument_amount) = self.argument_amount {
+            error::expect_function_argument_amount(arguments.len(), argument_amount)?;
+        }
+
         (self.function)(arguments)
     }
 }

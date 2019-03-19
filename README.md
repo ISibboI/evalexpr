@@ -45,7 +45,7 @@ use evalexpr::error::expect_number;
 let mut configuration = HashMapConfiguration::new();
 configuration.insert_variable("five", 5);
 configuration.insert_variable("twelve", 12);
-configuration.insert_function("f", Function::new(1 /* argument amount */, Box::new(|arguments| {
+configuration.insert_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
     if let Value::Int(int) = arguments[0] {
         Ok(Value::Int(int / 2))
     } else if let Value::Float(float) = arguments[0] {
@@ -54,7 +54,7 @@ configuration.insert_function("f", Function::new(1 /* argument amount */, Box::n
         Err(Error::expected_number(arguments[0].clone()))
     }
 })));
-configuration.insert_function("avg", Function::new(2 /* argument amount */, Box::new(|arguments| {
+configuration.insert_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
     expect_number(&arguments[0])?;
     expect_number(&arguments[1])?;
 
@@ -115,6 +115,18 @@ Supported unary operators:
 | - | 110 | Negation |
 | ! | 110 | Logical not |
 
+#### The Aggregation Operator
+
+The aggregation operator aggregates two values into a tuple.
+If one of the values is a tuple already, the resulting tuple will be flattened.
+Example:
+
+```rust
+use evalexpr::*;
+
+assert_eq!(eval("1, 2, 3"), Ok(Value::from(vec![Value::from(1), Value::from(2), Value::from(3)])));
+```
+
 ### Values
 
 Operators take values as arguments and produce values as results.
@@ -157,7 +169,7 @@ This crate also allows to define arbitrary functions to be used in parsed expres
 A function is defined as a `Function` instance.
 It contains two properties, the `argument_amount` and the `function`.
 The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
-The `argument_amount` determines the length of the slice that is passed to `function`.
+The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
 It is verified on execution by the crate and does not need to be verified by the `function`.
 
 Be aware that functions need to verify the types of values that are passed to them.

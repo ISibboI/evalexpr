@@ -34,7 +34,7 @@
 //! let mut configuration = HashMapConfiguration::new();
 //! configuration.insert_variable("five", 5);
 //! configuration.insert_variable("twelve", 12);
-//! configuration.insert_function("f", Function::new(1 /* argument amount */, Box::new(|arguments| {
+//! configuration.insert_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
 //!     if let Value::Int(int) = arguments[0] {
 //!         Ok(Value::Int(int / 2))
 //!     } else if let Value::Float(float) = arguments[0] {
@@ -43,7 +43,7 @@
 //!         Err(Error::expected_number(arguments[0].clone()))
 //!     }
 //! })));
-//! configuration.insert_function("avg", Function::new(2 /* argument amount */, Box::new(|arguments| {
+//! configuration.insert_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
 //!     expect_number(&arguments[0])?;
 //!     expect_number(&arguments[1])?;
 //!
@@ -158,7 +158,7 @@
 //! A function is defined as a `Function` instance.
 //! It contains two properties, the `argument_amount` and the `function`.
 //! The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
-//! The `argument_amount` determines the length of the slice that is passed to `function`.
+//! The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
 //! It is verified on execution by the crate and does not need to be verified by the `function`.
 //!
 //! Be aware that functions need to verify the types of values that are passed to them.
@@ -365,7 +365,7 @@ mod test {
         configuration.insert_function(
             "sub2".to_string(),
             Function::new(
-                1,
+                Some(1),
                 Box::new(|arguments| {
                     if let Value::Int(int) = arguments[0] {
                         Ok(Value::Int(int - 2))
@@ -407,7 +407,7 @@ mod test {
         configuration.insert_function(
             "sub2",
             Function::new(
-                1,
+                Some(1),
                 Box::new(|arguments| {
                     if let Value::Int(int) = arguments[0] {
                         Ok(Value::Int(int - 2))
@@ -422,7 +422,7 @@ mod test {
         configuration.insert_function(
             "avg",
             Function::new(
-                2,
+                Some(2),
                 Box::new(|arguments| {
                     expect_number(&arguments[0])?;
                     expect_number(&arguments[1])?;
@@ -440,7 +440,7 @@ mod test {
         configuration.insert_function(
             "muladd",
             Function::new(
-                3,
+                Some(3),
                 Box::new(|arguments| {
                     expect_number(&arguments[0])?;
                     expect_number(&arguments[1])?;
