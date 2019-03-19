@@ -204,6 +204,8 @@
 //! See [LICENSE](LICENSE) for details.
 //!
 
+#![warn(missing_docs)]
+
 mod configuration;
 pub mod error;
 mod function;
