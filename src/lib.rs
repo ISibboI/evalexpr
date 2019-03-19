@@ -29,6 +29,7 @@
 //!
 //! ```rust
 //! use evalexpr::*;
+//! use evalexpr::error::expect_number;
 //!
 //! let mut configuration = HashMapConfiguration::new();
 //! configuration.insert_variable("five", 5);
@@ -42,8 +43,19 @@
 //!         Err(Error::expected_number(arguments[0].clone()))
 //!     }
 //! })));
+//! configuration.insert_function("avg", Function::new(2 /* argument amount */, Box::new(|arguments| {
+//!     expect_number(&arguments[0])?;
+//!     expect_number(&arguments[1])?;
+//!
+//!     if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+//!         Ok(Value::Int((a + b) / 2))
+//!     } else {
+//!         Ok(Value::Float((arguments[0].as_float()? + arguments[1].as_float()?) / 2.0))
+//!     }
+//! })));
 //!
 //! assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
+//! assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
 //! ```
 //!
 //! You can also precompile expressions like this:
@@ -162,7 +174,7 @@
 //!
 
 mod configuration;
-mod error;
+pub mod error;
 mod function;
 mod operator;
 mod token;
