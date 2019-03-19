@@ -93,8 +93,9 @@
 //! | * | 100 | Product | | <= | 80 | Lower than or equal |
 //! | / | 100 | Division | | \>= | 80 | Greater than or equal |
 //! | % | 100 | Modulo | | == | 80 | Equal |
-//! | && | 75 | Logical and | | != | 80 | Not equal |
-//! | &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentiation |
+//! | ^ | 120 | Exponentiation | | != | 80 | Not equal |
+//! | && | 75 | Logical and | | , | 40 | Aggregation |
+//! | &#124;&#124; | 70 | Logical or | | | | |
 //!
 //! Supported unary operators:
 //!
@@ -102,6 +103,18 @@
 //! |----------|------------|-------------|
 //! | - | 110 | Negation |
 //! | ! | 110 | Logical not |
+//!
+//! #### The Aggregation Operator
+//!
+//! The aggregation operator aggregates two values into a tuple.
+//! If one of the values is a tuple already, the resulting tuple will be flattened.
+//! Example:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("1, 2, 3"), Ok(Value::from(vec![Value::from(1), Value::from(2), Value::from(3)])));
+//! ```
 //!
 //! ### Values
 //!

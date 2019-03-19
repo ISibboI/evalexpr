@@ -104,8 +104,9 @@ Supported binary operators:
 | * | 100 | Product | | <= | 80 | Lower than or equal |
 | / | 100 | Division | | \>= | 80 | Greater than or equal |
 | % | 100 | Modulo | | == | 80 | Equal |
-| && | 75 | Logical and | | != | 80 | Not equal |
-| &#124;&#124; | 70 | Logical or | ^ | 120 | Exponentiation |
+| ^ | 120 | Exponentiation | | != | 80 | Not equal |
+| && | 75 | Logical and | | , | 40 | Aggregation |
+| &#124;&#124; | 70 | Logical or | | | | |
 
 Supported unary operators:
 
@@ -131,6 +132,7 @@ Integers are internally represented as `i64`, and floating point numbers are rep
 Operators that take numbers as arguments can either take integers or floating point numbers.
 If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 Otherwise, the result is an integer.
+An exception to this is the exponentiation operator that always returns a floating point number.
 
 Values have a precedence of 200.
 
