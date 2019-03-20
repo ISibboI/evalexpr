@@ -1,6 +1,8 @@
 # evalexpr
 
-[![docs](https://docs.rs/evalexpr/badge.svg?version=0.4.4 "docs")](https://docs.rs/evalexpr)
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
+[![](https://docs.rs/evalexpr/badge.svg)](https://docs.rs/evalexpr)
 
 Evalexpr is an expression evaluator in Rust.
 It has a small and easy to use interface and can be easily integrated into any application.
