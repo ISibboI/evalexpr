@@ -42,7 +42,7 @@ impl Value {
     pub fn as_int(&self) -> Result<IntType, Error> {
         match self {
             Value::Int(i) => Ok(*i),
-            _ => Err(Error::TypeError),
+            value => Err(Error::expected_int(value.clone())),
         }
     }
 
@@ -51,7 +51,7 @@ impl Value {
         match self {
             Value::Float(f) => Ok(*f),
             Value::Int(i) => Ok(*i as FloatType),
-            _ => Err(Error::TypeError),
+            value => Err(Error::expected_number(value.clone())),
         }
     }
 }

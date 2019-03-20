@@ -13,30 +13,42 @@ use token::PartialToken;
 pub enum Error {
     /// An operator was called with a wrong amount of arguments.
     WrongOperatorArgumentAmount {
-        /// Expected amount of arguments.
+        /// The expected amount of arguments.
         expected: usize,
-        /// Actual amount of arguments.
+        /// The actual amount of arguments.
         actual: usize,
     },
 
     /// A function was called with a wrong amount of arguments.
     WrongFunctionArgumentAmount {
-        /// Expected amount of arguments.
+        /// The expected amount of arguments.
         expected: usize,
-        /// Actual amount of arguments.
+        /// The actual amount of arguments.
         actual: usize,
+    },
+
+    /// An integer value was expected.
+    ExpectedInt {
+        /// The actual value.
+        actual: Value,
+    },
+
+    /// A float value was expected.
+    ExpectedFloat {
+        /// The actual value.
+        actual: Value,
     },
 
     /// A numeric value was expected.
     /// Numeric values are the variants `Value::Int` and `Value::Float`.
     ExpectedNumber {
-        /// Actual value.
+        /// The actual value.
         actual: Value,
     },
 
     /// A boolean value was expected.
     ExpectedBoolean {
-        /// Actual value.
+        /// The actual value.
         actual: Value,
     },
 
@@ -60,8 +72,14 @@ pub enum Error {
     /// A `FunctionIdentifier` operation did not find its value in the configuration.
     FunctionIdentifierNotFound(String),
 
-    /// A value has the wrong type. Only use this if there is no other error that describes the expected and provided types in more detail.
-    TypeError,
+    /// A value has the wrong type.
+    /// Only use this if there is no other error that describes the expected and provided types in more detail.
+    TypeError {
+        /// The expected types.
+        expected: Vec<Value>,
+        /// The actual value.
+        actual: Value,
+    },
 
     /// An opening brace without a matching closing brace was found.
     UnmatchedLBrace,
@@ -87,6 +105,21 @@ impl Error {
 
     pub(crate) fn wrong_function_argument_amount(actual: usize, expected: usize) -> Self {
         Error::WrongFunctionArgumentAmount { actual, expected }
+    }
+
+    /// Constructs `Error::TypeError{actual, expected}`.
+    pub fn type_error(actual: Value, expected: Vec<Value>) -> Self {
+        Error::TypeError {actual, expected}
+    }
+
+    /// Constructs `Error::ExpectedInt(actual)`.
+    pub fn expected_int(actual: Value) -> Self {
+        Error::ExpectedInt { actual }
+    }
+
+    /// Constructs `Error::ExpectedFloat(actual)`.
+    pub fn expected_float(actual: Value) -> Self {
+        Error::ExpectedFloat { actual }
     }
 
     /// Constructs `Error::ExpectedNumber(actual)`.
