@@ -96,6 +96,52 @@ pub enum Error {
         /// The token that follows the unmatched partial token and that cannot be matched to the partial token, or `None`, if `first` is the last partial token in the stream.
         second: Option<PartialToken>,
     },
+
+    /// An addition operation performed by Rust failed.
+    AdditionError {
+        /// The first argument of the addition.
+        augend: Value,
+        /// The second argument of the addition.
+        addend: Value,
+    },
+
+    /// A subtraction operation performed by Rust failed.
+    SubtractionError {
+        /// The first argument of the subtraction.
+        minuend: Value,
+        /// The second argument of the subtraction.
+        subtrahend: Value,
+    },
+
+    /// A negation operation performed by Rust failed.
+    NegationError {
+        /// The argument of the negation.
+        argument: Value,
+    },
+
+    /// A multiplication operation performed by Rust failed.
+    MultiplicationError {
+        /// The first argument of the multiplication.
+        multiplicand: Value,
+        /// The second argument of the multiplication.
+        multiplier: Value,
+    },
+
+    /// A division operation performed by Rust failed.
+    DivisionError {
+        /// The first argument of the division.
+        dividend: Value,
+        /// The second argument of the division.
+        divisor: Value,
+    },
+
+    /// A modulation operation performed by Rust failed.
+    ModulationError {
+        /// The first argument of the modulation.
+        dividend: Value,
+        /// The second argument of the modulation.
+        divisor: Value,
+    },
 }
 
 impl Error {
@@ -109,7 +155,7 @@ impl Error {
 
     /// Constructs `Error::TypeError{actual, expected}`.
     pub fn type_error(actual: Value, expected: Vec<Value>) -> Self {
-        Error::TypeError {actual, expected}
+        Error::TypeError { actual, expected }
     }
 
     /// Constructs `Error::ExpectedInt(actual)`.
@@ -137,6 +183,36 @@ impl Error {
         second: Option<PartialToken>,
     ) -> Self {
         Error::UnmatchedPartialToken { first, second }
+    }
+
+    pub(crate) fn addition_error(augend: Value, addend: Value) -> Self {
+        Error::AdditionError { augend, addend }
+    }
+
+    pub(crate) fn subtraction_error(minuend: Value, subtrahend: Value) -> Self {
+        Error::SubtractionError {
+            minuend,
+            subtrahend,
+        }
+    }
+
+    pub(crate) fn negation_error(argument: Value) -> Self {
+        Error::NegationError { argument }
+    }
+
+    pub(crate) fn multiplication_error(multiplicand: Value, multiplier: Value) -> Self {
+        Error::MultiplicationError {
+            multiplicand,
+            multiplier,
+        }
+    }
+
+    pub(crate) fn division_error(dividend: Value, divisor: Value) -> Self {
+        Error::DivisionError { dividend, divisor }
+    }
+
+    pub(crate) fn modulation_error(dividend: Value, divisor: Value) -> Self {
+        Error::ModulationError { dividend, divisor }
     }
 }
 

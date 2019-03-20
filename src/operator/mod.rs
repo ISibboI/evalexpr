@@ -141,9 +141,18 @@ impl Operator for Add {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(
-                arguments[0].as_int().unwrap() + arguments[1].as_int().unwrap(),
-            ))
+            let result = arguments[0]
+                .as_int()
+                .unwrap()
+                .checked_add(arguments[1].as_int().unwrap());
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::addition_error(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ))
+            }
         } else {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() + arguments[1].as_float().unwrap(),
@@ -171,9 +180,18 @@ impl Operator for Sub {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(
-                arguments[0].as_int().unwrap() - arguments[1].as_int().unwrap(),
-            ))
+            let result = arguments[0]
+                .as_int()
+                .unwrap()
+                .checked_sub(arguments[1].as_int().unwrap());
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::subtraction_error(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ))
+            }
         } else {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() - arguments[1].as_float().unwrap(),
@@ -200,7 +218,12 @@ impl Operator for Neg {
         expect_number(&arguments[0])?;
 
         if arguments[0].is_int() {
-            Ok(Value::Int(-arguments[0].as_int().unwrap()))
+            let result = arguments[0].as_int().unwrap().checked_neg();
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::negation_error(arguments[0].clone()))
+            }
         } else {
             Ok(Value::Float(-arguments[0].as_float().unwrap()))
         }
@@ -226,9 +249,18 @@ impl Operator for Mul {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(
-                arguments[0].as_int().unwrap() * arguments[1].as_int().unwrap(),
-            ))
+            let result = arguments[0]
+                .as_int()
+                .unwrap()
+                .checked_mul(arguments[1].as_int().unwrap());
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::multiplication_error(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ))
+            }
         } else {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() * arguments[1].as_float().unwrap(),
@@ -256,9 +288,18 @@ impl Operator for Div {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(
-                arguments[0].as_int().unwrap() / arguments[1].as_int().unwrap(),
-            ))
+            let result = arguments[0]
+                .as_int()
+                .unwrap()
+                .checked_div(arguments[1].as_int().unwrap());
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::division_error(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ))
+            }
         } else {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() / arguments[1].as_float().unwrap(),
@@ -286,9 +327,18 @@ impl Operator for Mod {
         expect_number(&arguments[1])?;
 
         if arguments[0].is_int() && arguments[1].is_int() {
-            Ok(Value::Int(
-                arguments[0].as_int().unwrap() % arguments[1].as_int().unwrap(),
-            ))
+            let result = arguments[0]
+                .as_int()
+                .unwrap()
+                .checked_rem(arguments[1].as_int().unwrap());
+            if let Some(result) = result {
+                Ok(Value::Int(result))
+            } else {
+                Err(Error::modulation_error(
+                    arguments[0].clone(),
+                    arguments[1].clone(),
+                ))
+            }
         } else {
             Ok(Value::Float(
                 arguments[0].as_float().unwrap() % arguments[1].as_float().unwrap(),

@@ -206,6 +206,8 @@
 
 #![warn(missing_docs)]
 
+extern crate core;
+
 mod configuration;
 pub mod error;
 mod function;
@@ -592,5 +594,36 @@ mod test {
             Err(Error::wrong_operator_argument_amount(1, 2))
         );
         assert_eq!(eval("!(()true)"), Err(Error::AppendedToLeafNode));
+    }
+
+    #[test]
+    fn test_no_panic() {
+        assert!(eval(&format!(
+            "{} + {}",
+            IntType::max_value(),
+            IntType::max_value()
+        ))
+        .is_err());
+        assert!(eval(&format!(
+            "-{} - {}",
+            IntType::max_value(),
+            IntType::max_value()
+        ))
+        .is_err());
+        assert!(eval(&format!("-(-{} - 1)", IntType::max_value())).is_err());
+        assert!(eval(&format!(
+            "{} * {}",
+            IntType::max_value(),
+            IntType::max_value()
+        ))
+        .is_err());
+        assert!(eval(&format!("{} / {}", IntType::max_value(), 0)).is_err());
+        assert!(eval(&format!("{} % {}", IntType::max_value(), 0)).is_err());
+        assert!(eval(&format!(
+            "{} ^ {}",
+            IntType::max_value(),
+            IntType::max_value()
+        ))
+        .is_ok());
     }
 }
