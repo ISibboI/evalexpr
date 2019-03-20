@@ -1,6 +1,9 @@
 use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
 use token::Token;
+use value::TupleType;
 use EmptyConfiguration;
+use FloatType;
+use IntType;
 
 mod display;
 
@@ -55,6 +58,111 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval(&self) -> Result<Value, Error> {
         self.eval_with_configuration(&EmptyConfiguration)
+    }
+
+    /// Evaluates the operator tree rooted at this node into a string with an the given configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_string_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<String, Error> {
+        match self.eval_with_configuration(configuration) {
+            Ok(Value::String(string)) => Ok(string),
+            Ok(value) => Err(Error::expected_string(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a float with an the given configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_float_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<FloatType, Error> {
+        match self.eval_with_configuration(configuration) {
+            Ok(Value::Float(float)) => Ok(float),
+            Ok(value) => Err(Error::expected_float(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into an integer with an the given configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_int_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<IntType, Error> {
+        match self.eval_with_configuration(configuration) {
+            Ok(Value::Int(int)) => Ok(int),
+            Ok(value) => Err(Error::expected_int(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a boolean with an the given configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_boolean_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<bool, Error> {
+        match self.eval_with_configuration(configuration) {
+            Ok(Value::Boolean(boolean)) => Ok(boolean),
+            Ok(value) => Err(Error::expected_boolean(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a tuple with an the given configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_tuple_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<TupleType, Error> {
+        match self.eval_with_configuration(configuration) {
+            Ok(Value::Tuple(tuple)) => Ok(tuple),
+            Ok(value) => Err(Error::expected_tuple(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a string with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_string(&self) -> Result<String, Error> {
+        self.eval_string_with_configuration(&EmptyConfiguration)
+    }
+
+    /// Evaluates the operator tree rooted at this node into a float with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_float(&self) -> Result<FloatType, Error> {
+        self.eval_float_with_configuration(&EmptyConfiguration)
+    }
+
+    /// Evaluates the operator tree rooted at this node into an integer with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_int(&self) -> Result<IntType, Error> {
+        self.eval_int_with_configuration(&EmptyConfiguration)
+    }
+
+    /// Evaluates the operator tree rooted at this node into a boolean with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_boolean(&self) -> Result<bool, Error> {
+        self.eval_boolean_with_configuration(&EmptyConfiguration)
+    }
+
+    /// Evaluates the operator tree rooted at this node into a tuple with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_tuple(&self) -> Result<TupleType, Error> {
+        self.eval_tuple_with_configuration(&EmptyConfiguration)
     }
 
     fn children(&self) -> &[Node] {
