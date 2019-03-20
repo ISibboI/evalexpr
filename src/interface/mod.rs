@@ -3,6 +3,8 @@ use tree;
 use Configuration;
 use EmptyConfiguration;
 use Error;
+use FloatType;
+use IntType;
 use Node;
 use Value;
 
@@ -69,4 +71,129 @@ pub fn eval_with_configuration(
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn build_operator_tree(string: &str) -> Result<Node, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)
+}
+
+/// Evaluate the given expression string expecting a string.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_string(string: &str) -> Result<String, Error> {
+    match eval(string) {
+        Ok(Value::String(string)) => Ok(string),
+        Ok(value) => Err(Error::expected_string(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting an integer.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_int(string: &str) -> Result<IntType, Error> {
+    match eval(string) {
+        Ok(Value::Int(int)) => Ok(int),
+        Ok(value) => Err(Error::expected_int(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a float.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_float(string: &str) -> Result<FloatType, Error> {
+    match eval(string) {
+        Ok(Value::Float(float)) => Ok(float),
+        Ok(value) => Err(Error::expected_float(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a boolean.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_boolean(string: &str) -> Result<bool, Error> {
+    match eval(string) {
+        Ok(Value::Boolean(boolean)) => Ok(boolean),
+        Ok(value) => Err(Error::expected_boolean(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a tuple.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_tuple(string: &str) -> Result<Vec<Value>, Error> {
+    match eval(string) {
+        Ok(Value::Tuple(tuple)) => Ok(tuple),
+        Ok(value) => Err(Error::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a string with the given configuration.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_string_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<String, Error> {
+    match eval_with_configuration(string, configuration) {
+        Ok(Value::String(string)) => Ok(string),
+        Ok(value) => Err(Error::expected_string(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting an integer with the given configuration.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_int_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<IntType, Error> {
+    match eval_with_configuration(string, configuration) {
+        Ok(Value::Int(int)) => Ok(int),
+        Ok(value) => Err(Error::expected_int(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a float with the given configuration.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_float_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<FloatType, Error> {
+    match eval_with_configuration(string, configuration) {
+        Ok(Value::Float(float)) => Ok(float),
+        Ok(value) => Err(Error::expected_float(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a boolean with the given configuration.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_boolean_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<bool, Error> {
+    match eval_with_configuration(string, configuration) {
+        Ok(Value::Boolean(boolean)) => Ok(boolean),
+        Ok(value) => Err(Error::expected_boolean(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string expecting a tuple with the given configuration.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_tuple_with_configuration(
+    string: &str,
+    configuration: &Configuration,
+) -> Result<Vec<Value>, Error> {
+    match eval_with_configuration(string, configuration) {
+        Ok(Value::Tuple(tuple)) => Ok(tuple),
+        Ok(value) => Err(Error::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
 }

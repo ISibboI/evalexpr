@@ -4,7 +4,9 @@
 
 ### Added
 
- * Made internal alias `IntType` and `FloatType` used by the `Value` enum public
+ * Internal alias `IntType` and `FloatType` used by the `Value` enum are now public
+ * Error types for expecting each value type
+ * Shortcut functions like `eval_int` to evaluate directly into a value type
 
 ### Removed
 

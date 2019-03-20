@@ -336,3 +336,32 @@ fn test_no_panic() {
     ))
     .is_ok());
 }
+
+#[test]
+fn test_shortcut_functions() {
+    let mut configuration = HashMapConfiguration::new();
+    configuration.insert_variable("string", Value::from("a string"));
+
+    // assert_eq!(eval_string("???"));
+    assert_eq!(
+        eval_string_with_configuration("string", &configuration),
+        Ok("a string".to_string())
+    );
+    assert_eq!(eval_float("3.3"), Ok(3.3));
+    assert_eq!(
+        eval_float_with_configuration("3.3", &configuration),
+        Ok(3.3)
+    );
+    assert_eq!(eval_int("3"), Ok(3));
+    assert_eq!(eval_int_with_configuration("3", &configuration), Ok(3));
+    assert_eq!(eval_boolean("true"), Ok(true));
+    assert_eq!(
+        eval_boolean_with_configuration("true", &configuration),
+        Ok(true)
+    );
+    assert_eq!(eval_tuple("3,3"), Ok(vec![Value::Int(3), Value::Int(3)]));
+    assert_eq!(
+        eval_tuple_with_configuration("3,3", &configuration),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+}

@@ -27,6 +27,12 @@ pub enum Error {
         actual: usize,
     },
 
+    /// A string value was expected.
+    ExpectedString {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// An integer value was expected.
     ExpectedInt {
         /// The actual value.
@@ -48,6 +54,12 @@ pub enum Error {
 
     /// A boolean value was expected.
     ExpectedBoolean {
+        /// The actual value.
+        actual: Value,
+    },
+
+    /// A tuple value was expected.
+    ExpectedTuple {
         /// The actual value.
         actual: Value,
     },
@@ -158,6 +170,11 @@ impl Error {
         Error::TypeError { actual, expected }
     }
 
+    /// Constructs `Error::ExpectedString(actual)`.
+    pub fn expected_string(actual: Value) -> Self {
+        Error::ExpectedString { actual }
+    }
+
     /// Constructs `Error::ExpectedInt(actual)`.
     pub fn expected_int(actual: Value) -> Self {
         Error::ExpectedInt { actual }
@@ -176,6 +193,11 @@ impl Error {
     /// Constructs `Error::ExpectedBoolean(actual)`.
     pub fn expected_boolean(actual: Value) -> Self {
         Error::ExpectedBoolean { actual }
+    }
+
+    /// Constructs `Error::ExpectedTuple(actual)`.
+    pub fn expected_tuple(actual: Value) -> Self {
+        Error::ExpectedTuple { actual }
     }
 
     pub(crate) fn unmatched_partial_token(
