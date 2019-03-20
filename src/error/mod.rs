@@ -7,6 +7,7 @@
 
 use crate::value::Value;
 use token::PartialToken;
+use value::TupleType;
 
 /// Errors used in this crate.
 #[derive(Debug, PartialEq)]
@@ -88,7 +89,7 @@ pub enum Error {
     /// Only use this if there is no other error that describes the expected and provided types in more detail.
     TypeError {
         /// The expected types.
-        expected: Vec<Value>,
+        expected: TupleType,
         /// The actual value.
         actual: Value,
     },
@@ -166,7 +167,7 @@ impl Error {
     }
 
     /// Constructs `Error::TypeError{actual, expected}`.
-    pub fn type_error(actual: Value, expected: Vec<Value>) -> Self {
+    pub fn type_error(actual: Value, expected: TupleType) -> Self {
         Error::TypeError { actual, expected }
     }
 

@@ -1,5 +1,6 @@
 use token;
 use tree;
+use value::TupleType;
 use Configuration;
 use EmptyConfiguration;
 use Error;
@@ -120,7 +121,7 @@ pub fn eval_boolean(string: &str) -> Result<bool, Error> {
 /// Evaluate the given expression string into a tuple.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_tuple(string: &str) -> Result<Vec<Value>, Error> {
+pub fn eval_tuple(string: &str) -> Result<TupleType, Error> {
     match eval(string) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(Error::expected_tuple(value)),
@@ -190,7 +191,7 @@ pub fn eval_boolean_with_configuration(
 pub fn eval_tuple_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<Vec<Value>, Error> {
+) -> Result<TupleType, Error> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(Error::expected_tuple(value)),

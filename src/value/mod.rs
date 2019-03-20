@@ -8,6 +8,9 @@ pub type IntType = i64;
 /// The type used to represent floats in `Value::Float`.
 pub type FloatType = f64;
 
+/// The type used to represent tuples in `Value::Tuple`.
+pub type TupleType = Vec<Value>;
+
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]
@@ -21,7 +24,7 @@ pub enum Value {
     /// A boolean value.
     Boolean(bool),
     /// A tuple value.
-    Tuple(Vec<Value>),
+    Tuple(TupleType),
 }
 
 impl Value {
@@ -89,8 +92,8 @@ impl From<bool> for Value {
     }
 }
 
-impl From<Vec<Value>> for Value {
-    fn from(tuple: Vec<Value>) -> Self {
+impl From<TupleType> for Value {
+    fn from(tuple: TupleType) -> Self {
         Value::Tuple(tuple)
     }
 }
