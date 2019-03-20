@@ -20,6 +20,10 @@
 //! use evalexpr::*;
 //!
 //! assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
+//! // `eval` returns a variant of the `Value` enum,
+//! // while `eval_[type]` returns the respective type directly.
+//! // Both can be used interchangeably.
+//! assert_eq!(eval_int("1 + 2 + 3"), Ok(6));
 //! assert_eq!(eval("1 - 2 * 3"), Ok(Value::from(-5)));
 //! assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
 //! assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
@@ -55,6 +59,10 @@
 //! })));
 //!
 //! assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
+//! // `eval_with_configuration` returns a variant of the `Value` enum,
+//! // while `eval_[type]_with_configuration` returns the respective type directly.
+//! // Both can be used interchangeably.
+//! assert_eq!(eval_boolean_with_configuration("five + 8 > f(twelve)", &configuration), Ok(true));
 //! assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
 //! ```
 //!
@@ -73,6 +81,10 @@
 //!
 //! configuration.insert_variable("c", 8);
 //! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
+//! // `Node::eval_with_configuration` returns a variant of the `Value` enum,
+//! // while `Node::eval_[type]_with_configuration` returns the respective type directly.
+//! // Both can be used interchangeably.
+//! assert_eq!(precompiled.eval_boolean_with_configuration(&configuration), Ok(false));
 //! ```
 //!
 //! ## Features
