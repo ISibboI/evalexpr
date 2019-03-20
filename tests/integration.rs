@@ -367,24 +367,43 @@ fn test_shortcut_functions() {
 
     // assert_eq!(build_operator_tree("???").unwrap().eval_string());
     assert_eq!(
-        build_operator_tree("string").unwrap().eval_string_with_configuration(&configuration),
+        build_operator_tree("string")
+            .unwrap()
+            .eval_string_with_configuration(&configuration),
         Ok("a string".to_string())
     );
     assert_eq!(build_operator_tree("3.3").unwrap().eval_float(), Ok(3.3));
     assert_eq!(
-        build_operator_tree("3.3").unwrap().eval_float_with_configuration(&configuration),
+        build_operator_tree("3.3")
+            .unwrap()
+            .eval_float_with_configuration(&configuration),
         Ok(3.3)
     );
     assert_eq!(build_operator_tree("3").unwrap().eval_int(), Ok(3));
-    assert_eq!(build_operator_tree("3").unwrap().eval_int_with_configuration(&configuration), Ok(3));
-    assert_eq!(build_operator_tree("true").unwrap().eval_boolean(), Ok(true));
     assert_eq!(
-        build_operator_tree("true").unwrap().eval_boolean_with_configuration(&configuration),
+        build_operator_tree("3")
+            .unwrap()
+            .eval_int_with_configuration(&configuration),
+        Ok(3)
+    );
+    assert_eq!(
+        build_operator_tree("true").unwrap().eval_boolean(),
         Ok(true)
     );
-    assert_eq!(build_operator_tree("3,3").unwrap().eval_tuple(), Ok(vec![Value::Int(3), Value::Int(3)]));
     assert_eq!(
-        build_operator_tree("3,3").unwrap().eval_tuple_with_configuration(&configuration),
+        build_operator_tree("true")
+            .unwrap()
+            .eval_boolean_with_configuration(&configuration),
+        Ok(true)
+    );
+    assert_eq!(
+        build_operator_tree("3,3").unwrap().eval_tuple(),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        build_operator_tree("3,3")
+            .unwrap()
+            .eval_tuple_with_configuration(&configuration),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
 }

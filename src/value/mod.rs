@@ -28,6 +28,13 @@ pub enum Value {
 }
 
 impl Value {
+    /// Returns true if `self` is a `Value::String`.
+    pub fn is_string(&self) -> bool {
+        match self {
+            Value::String(_) => true,
+            _ => false,
+        }
+    }
     /// Returns true if `self` is a `Value::Int`.
     pub fn is_int(&self) -> bool {
         match self {
@@ -44,7 +51,31 @@ impl Value {
         }
     }
 
-    /// Returns `self` as a `IntType`, or `Err` if `self` is not a `Value::Int`.
+    /// Returns true if `self` is a `Value::Boolean`.
+    pub fn is_boolean(&self) -> bool {
+        match self {
+            Value::Boolean(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if `self` is a `Value::Tuple`.
+    pub fn is_tuple(&self) -> bool {
+        match self {
+            Value::Tuple(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
+    pub fn as_string(&self) -> Result<String, Error> {
+        match self {
+            Value::String(string) => Ok(string.clone()),
+            value => Err(Error::expected_string(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
     pub fn as_int(&self) -> Result<IntType, Error> {
         match self {
             Value::Int(i) => Ok(*i),
@@ -52,12 +83,29 @@ impl Value {
         }
     }
 
-    /// Returns `self` as a `FloatType`, or `Err` if `self` is not a `Value::Float` or `Value::Int`.
+    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
+    /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
     pub fn as_float(&self) -> Result<FloatType, Error> {
         match self {
             Value::Float(f) => Ok(*f),
             Value::Int(i) => Ok(*i as FloatType),
             value => Err(Error::expected_number(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
+    pub fn as_boolean(&self) -> Result<bool, Error> {
+        match self {
+            Value::Boolean(boolean) => Ok(*boolean),
+            value => Err(Error::expected_boolean(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in  `self` as `TupleType`, or  returns`Err` if `self` is not a `Value::Tuple`.
+    pub fn as_tuple(&self) -> Result<TupleType, Error> {
+        match self {
+            Value::Tuple(tuple) => Ok(tuple.clone()),
+            value => Err(Error::expected_tuple(value.clone())),
         }
     }
 }
@@ -101,5 +149,34 @@ impl From<TupleType> for Value {
 impl From<Value> for Result<Value, Error> {
     fn from(value: Value) -> Self {
         Ok(value)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use value::{TupleType, Value};
+
+    #[test]
+    fn test_value_conversions() {
+        assert_eq!(
+            Value::from("string").as_string().unwrap(),
+            String::from("string")
+        );
+        assert_eq!(Value::from(3).as_int().unwrap(), 3);
+        assert_eq!(Value::from(3.3).as_float().unwrap(), 3.3);
+        assert_eq!(Value::from(true).as_boolean().unwrap(), true);
+        assert_eq!(
+            Value::from(TupleType::new()).as_tuple().unwrap(),
+            TupleType::new()
+        );
+    }
+
+    #[test]
+    fn test_value_checks() {
+        assert!(Value::from("string").is_string());
+        assert!(Value::from(3).is_int());
+        assert!(Value::from(3.3).is_float());
+        assert!(Value::from(true).is_boolean());
+        assert!(Value::from(TupleType::new()).is_tuple());
     }
 }
