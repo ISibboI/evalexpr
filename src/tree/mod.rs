@@ -3,6 +3,19 @@ use token::Token;
 
 mod display;
 
+/// A node in the operator tree.
+/// The operator tree is created by the crate-level `build_operator_tree` method.
+/// It can be evaluated for a given configuration with the `Node::eval` method.
+///
+/// # Examples
+///
+/// ```rust
+/// use evalexpr::*;
+///
+/// let node = build_operator_tree("1 + 2").unwrap();
+/// assert_eq!(node.eval(&EmptyConfiguration), Ok(Value::from(3)));
+/// ```
+///
 #[derive(Debug)]
 pub struct Node {
     children: Vec<Node>,
@@ -21,6 +34,9 @@ impl Node {
         Self::new(RootNode)
     }
 
+    /// Evaluates the operator tree rooted at this node.
+    ///
+    /// Fails, if and operator is used with a wrong number of arguments or a wrong type.
     pub fn eval(&self, configuration: &Configuration) -> Result<Value, Error> {
         let mut arguments = Vec::new();
         for child in self.children() {
@@ -29,11 +45,11 @@ impl Node {
         self.operator().eval(&arguments, configuration)
     }
 
-    pub fn children(&self) -> &[Node] {
+    fn children(&self) -> &[Node] {
         &self.children
     }
 
-    pub fn operator(&self) -> &Box<dyn Operator> {
+    fn operator(&self) -> &Box<dyn Operator> {
         &self.operator
     }
 
@@ -81,7 +97,7 @@ impl Node {
     }
 }
 
-pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
+pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
     let mut root = vec![Node::root_node()];
     let mut last_token_is_rightsided_value = false;
     let mut token_iter = tokens.iter().peekable();

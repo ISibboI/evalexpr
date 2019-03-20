@@ -83,7 +83,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
 
 impl Token {
     // Make this a const fn as soon as match gets stable (issue #57563)
-    pub fn is_leftsided_value(&self) -> bool {
+    pub(crate) fn is_leftsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
             Token::Minus => false,
@@ -115,7 +115,7 @@ impl Token {
     }
 
     // Make this a const fn as soon as match gets stable (issue #57563)
-    pub fn is_rightsided_value(&self) -> bool {
+    pub(crate) fn is_rightsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
             Token::Minus => false,
@@ -242,6 +242,6 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
     Ok(result)
 }
 
-pub fn tokenize(string: &str) -> Result<Vec<Token>, Error> {
+pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>, Error> {
     resolve_literals(&str_to_tokens(string))
 }
