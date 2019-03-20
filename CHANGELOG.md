@@ -4,6 +4,8 @@
 
 ### Added
 
+ * Made internal alias `IntType` and `FloatType` used by the `Value` enum public
+
 ### Removed
 
  * Removed integration tests from shipped crate

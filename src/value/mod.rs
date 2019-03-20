@@ -2,7 +2,10 @@ use error::Error;
 
 mod display;
 
+/// The type used to represent integers in `Value::Int`.
 pub type IntType = i64;
+
+/// The type used to represent floats in `Value::Float`.
 pub type FloatType = f64;
 
 /// The value type used by the parser.
