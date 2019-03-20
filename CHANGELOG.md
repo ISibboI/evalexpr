@@ -4,10 +4,11 @@
 
 ### Added
 
- * Internal alias `IntType` and `FloatType` used by the `Value` enum are now public
- * Error types for expecting each value type
- * Shortcut functions like `eval_int` to evaluate directly into a value type
+ * Internal aliases `IntType` and `FloatType` used by the `Value` enum are now public
  * Type alias `TupleType` used to represent tuples was added
+ * Error types like `Error::ExpectedInt` for expecting each value type were added
+ * Shortcut functions like `eval_int` or `eval_int_with_configuration` to evaluate directly into a value type were added
+ * Documentation for the shortcut functions was added
 
 ### Removed
 
