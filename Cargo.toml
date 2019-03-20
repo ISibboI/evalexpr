@@ -1,8 +1,9 @@
 [package]
 name = "evalexpr"
 version = "1.0.0"
-description = "Expression evaluator"
+description = "A powerful arithmetic and boolean expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "arithmetic", "boolean"]
+categories = ["parsing", "game-engines"]
 authors = ["isibboi <isibboi@gmail.com>"]
 repository = "https://github.com/ISibboI/evalexpr.git"
 homepage = "https://github.com/ISibboI/evalexpr"
