@@ -5,7 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "0.5"
+//! evalexpr = "1"
 //! ```
 //!
 //! Add the `extern crate` definition to your `main.rs` or `lib.rs`:

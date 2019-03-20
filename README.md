@@ -1,6 +1,6 @@
 # evalexpr
 
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
 [![](https://docs.rs/evalexpr/badge.svg)](https://docs.rs/evalexpr)
 
@@ -18,7 +18,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "0.5"
+evalexpr = "1"
 ```
 
 Add the `extern crate` definition to your `main.rs` or `lib.rs`:
