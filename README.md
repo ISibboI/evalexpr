@@ -225,7 +225,7 @@ This crate makes extensive use of the `Result` pattern and is intended to never 
 The *exception* are panics caused by *failed allocations*.
 But unfortunately, Rust does not provide any features to prove this behavior.
 The developer of this crate has not found a good solution to ensure no-panic behavior in any way.
-Please report a panic immediately if you found it as issue on [github](https://github.com/ISibboI/evalexpr/issues).
+Please report a panic in this crate immediately as issue on [github](https://github.com/ISibboI/evalexpr/issues).
 
 Even if the crate itself is panic free, it allows the user to define custom functions that are executed by the crate.
 The user needs to ensure that the function he provides to the crate never panic.
