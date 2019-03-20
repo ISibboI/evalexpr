@@ -6,6 +6,8 @@
 
 ### Removed
 
+ * Removed integration tests from shipped crate
+
 ### Changed
 
 ### Fixed
