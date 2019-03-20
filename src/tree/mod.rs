@@ -36,7 +36,7 @@ impl Node {
 
     /// Evaluates the operator tree rooted at this node.
     ///
-    /// Fails, if and operator is used with a wrong number of arguments or a wrong type.
+    /// Fails, if an operator is used with a wrong number of arguments or a wrong type.
     pub fn eval(&self, configuration: &Configuration) -> Result<Value, Error> {
         let mut arguments = Vec::new();
         for child in self.children() {
