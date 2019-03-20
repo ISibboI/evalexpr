@@ -33,6 +33,10 @@ Then you can use `evalexpr` to evaluate expressions like this:
 use evalexpr::*;
 
 assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
+// `eval` returns a variant of the `Value` enum,
+// while `eval_[type]` returns the respective type directly.
+// Both can be used interchangeably.
+assert_eq!(eval_int("1 + 2 + 3"), Ok(6));
 assert_eq!(eval("1 - 2 * 3"), Ok(Value::from(-5)));
 assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
 assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
@@ -68,6 +72,10 @@ configuration.insert_function("avg", Function::new(Some(2) /* argument amount */
 })));
 
 assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
+// `eval_with_configuration` returns a variant of the `Value` enum,
+// while `eval_[type]_with_configuration` returns the respective type directly.
+// Both can be used interchangeably.
+assert_eq!(eval_boolean_with_configuration("five + 8 > f(twelve)", &configuration), Ok(true));
 assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
 ```
 
@@ -86,6 +94,10 @@ assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(t
 
 configuration.insert_variable("c", 8);
 assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
+// `Node::eval_with_configuration` returns a variant of the `Value` enum,
+// while `Node::eval_[type]_with_configuration` returns the respective type directly.
+// Both can be used interchangeably.
+assert_eq!(precompiled.eval_boolean_with_configuration(&configuration), Ok(false));
 ```
 
 ## Features
@@ -155,6 +167,27 @@ Values are denoted as displayed in the following table.
 | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |
 
 Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+Values can be constructed either directly or using the `From` trait.
+Values can be decomposed using the `Value::as_[type]` methods.
+The type of a value can be checked using the `Value::is_[type]` methods.
+
+**Examples for constructing a value:**
+
+| Code | Result |
+|------|--------|
+| `Value::from(4)` | `Value::Int(4)` |
+| `Value::from(4.4)` | `Value::Float(4.4)` |
+| `Value::from(true)` | `Value::Boolean(true)` |
+| `Value::from(vec![Value::from(3)])` | `Value::Tuple(vec![Value::Int(3)])` |
+
+**Examples for deconstructing a value:**
+
+| Code | Result |
+|------|--------|
+| `Value::from(4).as_int()` | `Ok(4)` |
+| `Value::from(4.4).as_float()` | `Ok(4.4)` |
+| `Value::from(true).as_int()` | `Err(Error::ExpectedInt {actual: Value::Boolean(true)})` |
+
 Operators that take numbers as arguments can either take integers or floating point numbers.
 If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 Otherwise, the result is an integer.

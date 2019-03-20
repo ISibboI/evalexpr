@@ -154,6 +154,27 @@
 //! | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |
 //!
 //! Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+//! Values can be constructed either directly or using the `From` trait.
+//! Values can be decomposed using the `Value::as_[type]` methods.
+//! The type of a value can be checked using the `Value::is_[type]` methods.
+//!
+//! **Examples for constructing a value:**
+//!
+//! | Code | Result |
+//! |------|--------|
+//! | `Value::from(4)` | `Value::Int(4)` |
+//! | `Value::from(4.4)` | `Value::Float(4.4)` |
+//! | `Value::from(true)` | `Value::Boolean(true)` |
+//! | `Value::from(vec![Value::from(3)])` | `Value::Tuple(vec![Value::Int(3)])` |
+//!
+//! **Examples for deconstructing a value:**
+//!
+//! | Code | Result |
+//! |------|--------|
+//! | `Value::from(4).as_int()` | `Ok(4)` |
+//! | `Value::from(4.4).as_float()` | `Ok(4.4)` |
+//! | `Value::from(true).as_int()` | `Err(Error::ExpectedInt {actual: Value::Boolean(true)})` |
+//!
 //! Operators that take numbers as arguments can either take integers or floating point numbers.
 //! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 //! Otherwise, the result is an integer.
