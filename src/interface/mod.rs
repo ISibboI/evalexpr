@@ -73,7 +73,7 @@ pub fn build_operator_tree(string: &str) -> Result<Node, Error> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)
 }
 
-/// Evaluate the given expression string expecting a string.
+/// Evaluate the given expression string into a string.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_string(string: &str) -> Result<String, Error> {
@@ -84,7 +84,7 @@ pub fn eval_string(string: &str) -> Result<String, Error> {
     }
 }
 
-/// Evaluate the given expression string expecting an integer.
+/// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_int(string: &str) -> Result<IntType, Error> {
@@ -95,7 +95,7 @@ pub fn eval_int(string: &str) -> Result<IntType, Error> {
     }
 }
 
-/// Evaluate the given expression string expecting a float.
+/// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_float(string: &str) -> Result<FloatType, Error> {
@@ -106,7 +106,7 @@ pub fn eval_float(string: &str) -> Result<FloatType, Error> {
     }
 }
 
-/// Evaluate the given expression string expecting a boolean.
+/// Evaluate the given expression string into a boolean.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_boolean(string: &str) -> Result<bool, Error> {
@@ -117,7 +117,7 @@ pub fn eval_boolean(string: &str) -> Result<bool, Error> {
     }
 }
 
-/// Evaluate the given expression string expecting a tuple.
+/// Evaluate the given expression string into a tuple.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_tuple(string: &str) -> Result<Vec<Value>, Error> {
@@ -128,7 +128,7 @@ pub fn eval_tuple(string: &str) -> Result<Vec<Value>, Error> {
     }
 }
 
-/// Evaluate the given expression string expecting a string with the given configuration.
+/// Evaluate the given expression string into a string with the given configuration.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_string_with_configuration(
@@ -142,7 +142,7 @@ pub fn eval_string_with_configuration(
     }
 }
 
-/// Evaluate the given expression string expecting an integer with the given configuration.
+/// Evaluate the given expression string into an integer with the given configuration.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_int_with_configuration(
@@ -156,7 +156,7 @@ pub fn eval_int_with_configuration(
     }
 }
 
-/// Evaluate the given expression string expecting a float with the given configuration.
+/// Evaluate the given expression string into a float with the given configuration.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_float_with_configuration(
@@ -170,7 +170,7 @@ pub fn eval_float_with_configuration(
     }
 }
 
-/// Evaluate the given expression string expecting a boolean with the given configuration.
+/// Evaluate the given expression string into a boolean with the given configuration.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_boolean_with_configuration(
@@ -184,7 +184,7 @@ pub fn eval_boolean_with_configuration(
     }
 }
 
-/// Evaluate the given expression string expecting a tuple with the given configuration.
+/// Evaluate the given expression string into a tuple with the given configuration.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_tuple_with_configuration(
