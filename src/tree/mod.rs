@@ -1,5 +1,6 @@
 use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
 use token::Token;
+use EmptyConfiguration;
 
 mod display;
 
@@ -7,13 +8,17 @@ mod display;
 /// The operator tree is created by the crate-level `build_operator_tree` method.
 /// It can be evaluated for a given configuration with the `Node::eval` method.
 ///
+/// The advantage of constructing the operator tree separately from the actual evaluation is that it can be evaluated arbitrarily often with different configurations.
+///
 /// # Examples
 ///
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let node = build_operator_tree("1 + 2").unwrap();
-/// assert_eq!(node.eval(&EmptyConfiguration), Ok(Value::from(3)));
+/// let mut configuration = HashMapConfiguration::new();
+/// configuration.insert_variable("alpha", 2);
+/// let node = build_operator_tree("1 + alpha").unwrap();
+/// assert_eq!(node.eval_with_configuration(&configuration), Ok(Value::from(3)));
 /// ```
 ///
 #[derive(Debug)]
@@ -34,15 +39,22 @@ impl Node {
         Self::new(RootNode)
     }
 
-    /// Evaluates the operator tree rooted at this node.
+    /// Evaluates the operator tree rooted at this node with the given configuration.
     ///
-    /// Fails, if an operator is used with a wrong number of arguments or a wrong type.
-    pub fn eval(&self, configuration: &Configuration) -> Result<Value, Error> {
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_with_configuration(&self, configuration: &Configuration) -> Result<Value, Error> {
         let mut arguments = Vec::new();
         for child in self.children() {
-            arguments.push(child.eval(configuration)?);
+            arguments.push(child.eval_with_configuration(configuration)?);
         }
         self.operator().eval(&arguments, configuration)
+    }
+
+    /// Evaluates the operator tree rooted at this node with an empty configuration.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval(&self) -> Result<Value, Error> {
+        self.eval_with_configuration(&EmptyConfiguration)
     }
 
     fn children(&self) -> &[Node] {

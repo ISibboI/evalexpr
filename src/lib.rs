@@ -69,10 +69,10 @@
 //! configuration.insert_variable("a", 6);
 //! configuration.insert_variable("b", 2);
 //! configuration.insert_variable("c", 3);
-//! assert_eq!(precompiled.eval(&configuration), Ok(Value::from(true)));
+//! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(true)));
 //!
 //! configuration.insert_variable("c", 8);
-//! assert_eq!(precompiled.eval(&configuration), Ok(Value::from(false)));
+//! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
 //! ```
 //!
 //! ## Features
@@ -234,7 +234,7 @@ pub use value::Value;
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval(string: &str) -> Result<Value, Error> {
-    tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(&EmptyConfiguration)
+    eval_with_configuration(string, &EmptyConfiguration)
 }
 
 /// Evaluate the given expression string with the given configuration.
@@ -256,7 +256,7 @@ pub fn eval_with_configuration(
     string: &str,
     configuration: &Configuration,
 ) -> Result<Value, Error> {
-    tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval(configuration)
+    tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_configuration(configuration)
 }
 
 /// Build the operator tree for the given expression string.
@@ -276,10 +276,10 @@ pub fn eval_with_configuration(
 /// configuration.insert_variable("two", 2);
 /// configuration.insert_variable("three", 3);
 ///
-/// assert_eq!(precomputed.eval(&configuration), Ok(Value::from(6)));
+/// assert_eq!(precomputed.eval_with_configuration(&configuration), Ok(Value::from(6)));
 ///
 /// configuration.insert_variable("three", 5);
-/// assert_eq!(precomputed.eval(&configuration), Ok(Value::from(8)));
+/// assert_eq!(precomputed.eval_with_configuration(&configuration), Ok(Value::from(8)));
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
