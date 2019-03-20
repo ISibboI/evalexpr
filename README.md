@@ -82,10 +82,10 @@ let mut configuration = HashMapConfiguration::new();
 configuration.insert_variable("a", 6);
 configuration.insert_variable("b", 2);
 configuration.insert_variable("c", 3);
-assert_eq!(precompiled.eval(&configuration), Ok(Value::from(true)));
+assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(true)));
 
 configuration.insert_variable("c", 8);
-assert_eq!(precompiled.eval(&configuration), Ok(Value::from(false)));
+assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
 ```
 
 ## Features
