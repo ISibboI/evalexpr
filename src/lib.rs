@@ -14,7 +14,7 @@
 //! extern crate evalexpr;
 //! ```
 //!
-//! Then you can use `evalexpr` to evaluate expressions like this:
+//! Then you can use `evalexpr` to **evaluate expressions** like this:
 //!
 //! ```rust
 //! use evalexpr::*;
@@ -29,7 +29,7 @@
 //! assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
 //! ```
 //!
-//! And you can use variables and functions in expressions like this:
+//! And you can use **variables** and **functions** in expressions like this:
 //!
 //! ```rust
 //! use evalexpr::*;
@@ -66,7 +66,7 @@
 //! assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
 //! ```
 //!
-//! You can also precompile expressions like this:
+//! You can also **precompile** expressions like this:
 //!
 //! ```rust
 //! use evalexpr::*;

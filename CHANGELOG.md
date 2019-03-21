@@ -6,6 +6,8 @@
 
 ### Changed
 
+ * Highlighing in documentation
+
 ### Fixed
 
 ### Deprecated
