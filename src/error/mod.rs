@@ -9,6 +9,8 @@ use crate::value::Value;
 use token::PartialToken;
 use value::TupleType;
 
+mod display;
+
 /// Errors used in this crate.
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -67,10 +69,6 @@ pub enum Error {
 
     /// The given expression is empty
     EmptyExpression,
-
-    /// Tried to evaluate the root node.
-    /// The root node should only be used as dummy node.
-    EvaluatedRootNode,
 
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
@@ -274,3 +272,5 @@ pub fn expect_boolean(actual: &Value) -> Result<bool, Error> {
         _ => Err(Error::expected_boolean(actual.clone())),
     }
 }
+
+impl std::error::Error for Error {}
