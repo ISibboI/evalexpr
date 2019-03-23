@@ -239,7 +239,7 @@
 
 #![warn(missing_docs)]
 
-#[cfg(serde)]
+#[cfg(feature = "serde")]
 extern crate serde;
 
 mod configuration;
@@ -250,8 +250,8 @@ mod operator;
 mod token;
 mod tree;
 mod value;
-#[cfg(serde)]
-mod serde;
+#[cfg(feature = "serde")]
+mod feature_serde;
 
 // Exports
 

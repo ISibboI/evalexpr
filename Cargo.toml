@@ -19,4 +19,3 @@ path = "src/lib.rs"
 serde = { version = "1", optional = true}
 
 [features]
-#serde = ["serde"]
