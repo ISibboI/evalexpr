@@ -1,5 +1,17 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+### Removed
+
+### Changed
+
+### Fixed
+
+### Deprecated
+
 ## [1.2.0](https://github.com/ISibboI/evalexpr/compare/1.1.0...1.2.0) - 2019-03-23
 
 ### Added
