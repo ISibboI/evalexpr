@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [1.2.0](https://github.com/ISibboI/evalexpr/compare/1.1.0...1.2.0) - 2019-03-23
 
 ### Added
 
@@ -9,15 +9,9 @@
  * Document `serde` usage
  * Add custom error type with a `String` message
 
-### Removed
-
 ### Changed
 
- * Highlighing in documentation
-
-### Fixed
-
-### Deprecated
+ * Highlighting in documentation
 
 ## [1.1.0](https://github.com/ISibboI/evalexpr/compare/1.0.0...1.1.0) - 2019-03-20
 
