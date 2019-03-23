@@ -1,7 +1,7 @@
-use ::Node;
 use interface::build_operator_tree;
 use serde::{de, Deserialize, Deserializer};
 use std::fmt;
+use Node;
 
 impl<'de> Deserialize<'de> for Node {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
