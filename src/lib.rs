@@ -231,10 +231,10 @@
 //! | `true` | no | Expression is interpreted as `Value::Bool` |
 //! | `.34` | no | Expression is interpreted as `Value::Float` |
 //!
-//! ### [serde](https://serde.rs)
+//! ### [Serde](https://serde.rs)
 //!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
-//! The implementation expects a `string` as input.
+//! The implementation expects a [serde `string`](https://serde.rs/data-model.html) as input.
 //! Example parsing with [ron format](docs.rs/ron):
 //!
 //! ```rust
