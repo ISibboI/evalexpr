@@ -1,7 +1,7 @@
+use ::Node;
 use interface::build_operator_tree;
 use serde::{de, Deserialize, Deserializer};
 use std::fmt;
-use ::{Error, Node};
 
 impl<'de> Deserialize<'de> for Node {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -32,11 +32,5 @@ impl<'de> de::Visitor<'de> for NodeVisitor {
             Ok(node) => Ok(node),
             Err(error) => Err(E::custom(error)),
         }
-    }
-}
-
-impl de::Error for Error {
-    fn custom<T: fmt::Display>(msg: T) -> Self {
-        Error::Custom(msg.to_string())
     }
 }
