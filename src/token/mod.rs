@@ -1,6 +1,8 @@
 use error::Error;
 use value::{FloatType, IntType};
 
+mod display;
+
 #[derive(Clone, PartialEq, Debug)]
 pub enum Token {
     // Arithmetic
