@@ -244,6 +244,31 @@ Functions have a precedence of 190.
 | `true` | no | Expression is interpreted as `Value::Bool` |
 | `.34` | no | Expression is interpreted as `Value::Float` |
 
+### [serde](https://serde.rs)
+
+This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
+The implementation expects a `string` as input.
+Example parsing with [ron format](docs.rs/ron):
+
+```rust
+extern crate ron;
+use evalexpr::*;
+
+let mut configuration = HashMapConfiguration::new();
+configuration.insert_variable("five", 5);
+
+// In ron format, strings are surrounded by "
+let serialized_free = "\"five * five\"";
+match ron::de::from_str::<Node>(serialized_free) {
+    Ok(free) => assert_eq!(free.eval_with_configuration(&configuration), Ok(Value::from(25))),
+    Err(error) => {
+        // Handle error
+    },
+}
+```
+
+With `serde`, expressions can be integrated into arbitrarily complex data.
+
 ## License
 
 This crate is primarily distributed under the terms of the MIT license.
