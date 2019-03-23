@@ -7,6 +7,7 @@
  * Add `serde` feature
  * Implement `serde::de::Deserialize` for `Node`
  * Document `serde` usage
+ * Add custom error type with a `String` message
 
 ### Removed
 
