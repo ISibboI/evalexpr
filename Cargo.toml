@@ -19,3 +19,6 @@ path = "src/lib.rs"
 serde = { version = "1", optional = true}
 
 [features]
+
+[dev-dependencies]
+ron = "0.4"

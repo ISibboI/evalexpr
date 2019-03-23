@@ -5,6 +5,8 @@
 ### Added
 
  * Add `serde` feature
+ * Implement `serde::de::Deserialize` for `Node`
+ * Document `serde` usage
 
 ### Removed
 

@@ -153,6 +153,9 @@ pub enum Error {
         /// The second argument of the modulation.
         divisor: Value,
     },
+
+    /// A custom error explained by its message.
+    Custom(String),
 }
 
 impl Error {
