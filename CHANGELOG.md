@@ -4,6 +4,8 @@
 
 ### Added
 
+ * Add `serde` feature
+
 ### Removed
 
 ### Changed

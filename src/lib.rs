@@ -239,7 +239,8 @@
 
 #![warn(missing_docs)]
 
-extern crate core;
+#[cfg(serde)]
+extern crate serde;
 
 mod configuration;
 pub mod error;
@@ -249,6 +250,8 @@ mod operator;
 mod token;
 mod tree;
 mod value;
+#[cfg(serde)]
+mod serde;
 
 // Exports
 
