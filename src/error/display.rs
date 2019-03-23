@@ -84,7 +84,7 @@ impl fmt::Display for Error {
             ModulationError { dividend, divisor } => {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
             },
-            Custom(message) => write!(f, "Error: {}", message),
+            CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }
 }

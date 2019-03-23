@@ -155,7 +155,7 @@ pub enum Error {
     },
 
     /// A custom error explained by its message.
-    Custom(String),
+    CustomMessage(String),
 }
 
 impl Error {
