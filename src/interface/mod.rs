@@ -39,10 +39,7 @@ pub fn eval(string: &str) -> Result<Value, EvalexprError> {
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<Value, EvalexprError> {
+pub fn eval_with_context(string: &str, context: &Context) -> Result<Value, EvalexprError> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_context(context)
 }
 
@@ -132,10 +129,7 @@ pub fn eval_tuple(string: &str) -> Result<TupleType, EvalexprError> {
 /// Evaluate the given expression string into a string with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_string_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<String, EvalexprError> {
+pub fn eval_string_with_context(string: &str, context: &Context) -> Result<String, EvalexprError> {
     match eval_with_context(string, context) {
         Ok(Value::String(string)) => Ok(string),
         Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -146,10 +140,7 @@ pub fn eval_string_with_context(
 /// Evaluate the given expression string into an integer with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<IntType, EvalexprError> {
+pub fn eval_int_with_context(string: &str, context: &Context) -> Result<IntType, EvalexprError> {
     match eval_with_context(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -174,10 +165,7 @@ pub fn eval_float_with_context(
 /// Evaluate the given expression string into a boolean with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_boolean_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<bool, EvalexprError> {
+pub fn eval_boolean_with_context(string: &str, context: &Context) -> Result<bool, EvalexprError> {
     match eval_with_context(string, context) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
         Ok(value) => Err(EvalexprError::expected_boolean(value)),

@@ -26,10 +26,18 @@ pub trait Context {
 /// The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 pub trait ContextMut: Context {
     /// Links the given value to the given identifier.
-    fn set_value<S: Into<String>, V: Into<Value>>(&mut self, identifier: S, value: V) -> EvalexprResult<()>;
+    fn set_value<S: Into<String>, V: Into<Value>>(
+        &mut self,
+        identifier: S,
+        value: V,
+    ) -> EvalexprResult<()>;
 
     /// Links the given function to the given identifier.
-    fn set_function<S: Into<String>>(&mut self, identifier: S, function: Function) -> EvalexprResult<()>;
+    fn set_function<S: Into<String>>(
+        &mut self,
+        identifier: S,
+        function: Function,
+    ) -> EvalexprResult<()>;
 }
 
 /// A context that returns `None` for each identifier.
@@ -46,11 +54,19 @@ impl Context for EmptyContext {
 }
 
 impl ContextMut for EmptyContext {
-    fn set_value<S: Into<String>, V: Into<Value>>(&mut self, _identifier: S, _value: V) -> EvalexprResult<()> {
+    fn set_value<S: Into<String>, V: Into<Value>>(
+        &mut self,
+        _identifier: S,
+        _value: V,
+    ) -> EvalexprResult<()> {
         Err(EvalexprError::ContextNotManipulable)
     }
 
-    fn set_function<S: Into<String>>(&mut self, _identifier: S, _function: Function) -> EvalexprResult<()> {
+    fn set_function<S: Into<String>>(
+        &mut self,
+        _identifier: S,
+        _function: Function,
+    ) -> EvalexprResult<()> {
         Err(EvalexprError::ContextNotManipulable)
     }
 }
@@ -86,7 +102,11 @@ impl Context for HashMapContext {
 }
 
 impl ContextMut for HashMapContext {
-    fn set_value<S: Into<String>, V: Into<Value>>(&mut self, identifier: S, value: V) -> Result<(), EvalexprError> {
+    fn set_value<S: Into<String>, V: Into<Value>>(
+        &mut self,
+        identifier: S,
+        value: V,
+    ) -> Result<(), EvalexprError> {
         let identifier = identifier.into();
         let value = value.into();
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
@@ -103,7 +123,11 @@ impl ContextMut for HashMapContext {
         Ok(())
     }
 
-    fn set_function<S: Into<String>>(&mut self, identifier: S, function: Function) -> Result<(), EvalexprError> {
+    fn set_function<S: Into<String>>(
+        &mut self,
+        identifier: S,
+        function: Function,
+    ) -> Result<(), EvalexprError> {
         self.functions.insert(identifier.into(), function);
         Ok(())
     }

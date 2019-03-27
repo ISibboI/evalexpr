@@ -46,10 +46,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node with the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<Value, EvalexprError> {
+    pub fn eval_with_context(&self, context: &Context) -> Result<Value, EvalexprError> {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_context(context)?);
@@ -67,10 +64,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a string with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<String, EvalexprError> {
+    pub fn eval_string_with_context(&self, context: &Context) -> Result<String, EvalexprError> {
         match self.eval_with_context(context) {
             Ok(Value::String(string)) => Ok(string),
             Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -81,10 +75,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<FloatType, EvalexprError> {
+    pub fn eval_float_with_context(&self, context: &Context) -> Result<FloatType, EvalexprError> {
         match self.eval_with_context(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -95,10 +86,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an integer with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<IntType, EvalexprError> {
+    pub fn eval_int_with_context(&self, context: &Context) -> Result<IntType, EvalexprError> {
         match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -109,10 +97,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a boolean with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_boolean_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<bool, EvalexprError> {
+    pub fn eval_boolean_with_context(&self, context: &Context) -> Result<bool, EvalexprError> {
         match self.eval_with_context(context) {
             Ok(Value::Boolean(boolean)) => Ok(boolean),
             Ok(value) => Err(EvalexprError::expected_boolean(value)),
@@ -123,10 +108,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_context(
-        &self,
-        context: &Context,
-    ) -> Result<TupleType, EvalexprError> {
+    pub fn eval_tuple_with_context(&self, context: &Context) -> Result<TupleType, EvalexprError> {
         match self.eval_with_context(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),

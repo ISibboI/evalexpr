@@ -107,14 +107,8 @@ fn test_with_context() {
     context.set_value("half", Value::Float(0.5)).unwrap();
     context.set_value("zero", Value::Int(0)).unwrap();
 
-    assert_eq!(
-        eval_with_context("tr", &context),
-        Ok(Value::Boolean(true))
-    );
-    assert_eq!(
-        eval_with_context("fa", &context),
-        Ok(Value::Boolean(false))
-    );
+    assert_eq!(eval_with_context("tr", &context), Ok(Value::Boolean(true)));
+    assert_eq!(eval_with_context("fa", &context), Ok(Value::Boolean(false)));
     assert_eq!(
         eval_with_context("tr && false", &context),
         Ok(Value::Boolean(false))
@@ -136,39 +130,31 @@ fn test_with_context() {
 #[test]
 fn test_functions() {
     let mut context = HashMapContext::new();
-    context.set_function(
-        "sub2".to_string(),
-        Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                if let Value::Int(int) = arguments[0] {
-                    Ok(Value::Int(int - 2))
-                } else if let Value::Float(float) = arguments[0] {
-                    Ok(Value::Float(float - 2.0))
-                } else {
-                    Err(EvalexprError::expected_number(arguments[0].clone()))
-                }
-            }),
-        ),
-    ).unwrap();
-    context.set_value("five".to_string(), Value::Int(5)).unwrap();
+    context
+        .set_function(
+            "sub2".to_string(),
+            Function::new(
+                Some(1),
+                Box::new(|arguments| {
+                    if let Value::Int(int) = arguments[0] {
+                        Ok(Value::Int(int - 2))
+                    } else if let Value::Float(float) = arguments[0] {
+                        Ok(Value::Float(float - 2.0))
+                    } else {
+                        Err(EvalexprError::expected_number(arguments[0].clone()))
+                    }
+                }),
+            ),
+        )
+        .unwrap();
+    context
+        .set_value("five".to_string(), Value::Int(5))
+        .unwrap();
 
-    assert_eq!(
-        eval_with_context("sub2 5", &context),
-        Ok(Value::Int(3))
-    );
-    assert_eq!(
-        eval_with_context("sub2(5)", &context),
-        Ok(Value::Int(3))
-    );
-    assert_eq!(
-        eval_with_context("sub2 five", &context),
-        Ok(Value::Int(3))
-    );
-    assert_eq!(
-        eval_with_context("sub2(five)", &context),
-        Ok(Value::Int(3))
-    );
+    assert_eq!(eval_with_context("sub2 5", &context), Ok(Value::Int(3)));
+    assert_eq!(eval_with_context("sub2(5)", &context), Ok(Value::Int(3)));
+    assert_eq!(eval_with_context("sub2 five", &context), Ok(Value::Int(3)));
+    assert_eq!(eval_with_context("sub2(five)", &context), Ok(Value::Int(3)));
     assert_eq!(
         eval_with_context("sub2(3) + five", &context),
         Ok(Value::Int(6))
@@ -178,74 +164,81 @@ fn test_functions() {
 #[test]
 fn test_n_ary_functions() {
     let mut context = HashMapContext::new();
-    context.set_function(
-        "sub2",
-        Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                if let Value::Int(int) = arguments[0] {
-                    Ok(Value::Int(int - 2))
-                } else if let Value::Float(float) = arguments[0] {
-                    Ok(Value::Float(float - 2.0))
-                } else {
-                    Err(EvalexprError::expected_number(arguments[0].clone()))
-                }
-            }),
-        ),
-    ).unwrap();
-    context.set_function(
-        "avg",
-        Function::new(
-            Some(2),
-            Box::new(|arguments| {
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+    context
+        .set_function(
+            "sub2",
+            Function::new(
+                Some(1),
+                Box::new(|arguments| {
+                    if let Value::Int(int) = arguments[0] {
+                        Ok(Value::Int(int - 2))
+                    } else if let Value::Float(float) = arguments[0] {
+                        Ok(Value::Float(float - 2.0))
+                    } else {
+                        Err(EvalexprError::expected_number(arguments[0].clone()))
+                    }
+                }),
+            ),
+        )
+        .unwrap();
+    context
+        .set_function(
+            "avg",
+            Function::new(
+                Some(2),
+                Box::new(|arguments| {
+                    expect_number(&arguments[0])?;
+                    expect_number(&arguments[1])?;
 
-                if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
-                    Ok(Value::Int((a + b) / 2))
-                } else {
-                    Ok(Value::Float(
-                        (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
-                    ))
-                }
-            }),
-        ),
-    ).unwrap();
-    context.set_function(
-        "muladd",
-        Function::new(
-            Some(3),
-            Box::new(|arguments| {
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
-                expect_number(&arguments[2])?;
+                    if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+                        Ok(Value::Int((a + b) / 2))
+                    } else {
+                        Ok(Value::Float(
+                            (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
+                        ))
+                    }
+                }),
+            ),
+        )
+        .unwrap();
+    context
+        .set_function(
+            "muladd",
+            Function::new(
+                Some(3),
+                Box::new(|arguments| {
+                    expect_number(&arguments[0])?;
+                    expect_number(&arguments[1])?;
+                    expect_number(&arguments[2])?;
 
-                if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
+                    if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
                     (&arguments[0], &arguments[1], &arguments[2])
-                {
-                    Ok(Value::Int(a * b + c))
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_float()? * arguments[1].as_float()?
-                            + arguments[2].as_float()?,
-                    ))
-                }
-            }),
-        ),
-    ).unwrap();
-    context.set_function(
-        "count",
-        Function::new(
-            None,
-            Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
-        ),
-    ).unwrap();
-    context.set_value("five".to_string(), Value::Int(5)).unwrap();
+                    {
+                        Ok(Value::Int(a * b + c))
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_float()? * arguments[1].as_float()?
+                                + arguments[2].as_float()?,
+                        ))
+                    }
+                }),
+            ),
+        )
+        .unwrap();
+    context
+        .set_function(
+            "count",
+            Function::new(
+                None,
+                Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
+            ),
+        )
+        .unwrap();
+    context
+        .set_value("five".to_string(), Value::Int(5))
+        .unwrap();
 
-    assert_eq!(
-        eval_with_context("avg(7, 5)", &context),
-        Ok(Value::Int(6))
-    );
+    assert_eq!(eval_with_context("avg(7, 5)", &context), Ok(Value::Int(6)));
     assert_eq!(
         eval_with_context("avg(sub2 5, 5)", &context),
         Ok(Value::Int(4))
@@ -273,10 +266,7 @@ fn test_n_ary_functions() {
         eval_with_context("count(3, 5.5, 2)", &context),
         Ok(Value::Int(3))
     );
-    assert_eq!(
-        eval_with_context("count 5", &context),
-        Ok(Value::Int(1))
-    );
+    assert_eq!(eval_with_context("count 5", &context), Ok(Value::Int(1)));
 
     assert_eq!(
         eval_with_context("min(4.0, 3)", &context),
@@ -342,7 +332,9 @@ fn test_no_panic() {
 #[test]
 fn test_shortcut_functions() {
     let mut context = HashMapContext::new();
-    context.set_value("string", Value::from("a string")).unwrap();
+    context
+        .set_value("string", Value::from("a string"))
+        .unwrap();
 
     // assert_eq!(eval_string("???"));
     assert_eq!(
@@ -350,17 +342,11 @@ fn test_shortcut_functions() {
         Ok("a string".to_string())
     );
     assert_eq!(eval_float("3.3"), Ok(3.3));
-    assert_eq!(
-        eval_float_with_context("3.3", &context),
-        Ok(3.3)
-    );
+    assert_eq!(eval_float_with_context("3.3", &context), Ok(3.3));
     assert_eq!(eval_int("3"), Ok(3));
     assert_eq!(eval_int_with_context("3", &context), Ok(3));
     assert_eq!(eval_boolean("true"), Ok(true));
-    assert_eq!(
-        eval_boolean_with_context("true", &context),
-        Ok(true)
-    );
+    assert_eq!(eval_boolean_with_context("true", &context), Ok(true));
     assert_eq!(eval_tuple("3,3"), Ok(vec![Value::Int(3), Value::Int(3)]));
     assert_eq!(
         eval_tuple_with_context("3,3", &context),
