@@ -14,6 +14,13 @@
 
 ## [2.0.0](https://github.com/ISibboI/evalexpr/compare/1.2.0...2.0.0) - 2019-03-27
 
+### Notes
+
+The 2.0.0 update is the first step to transform evalexpr to a tiny scripting language with support of at least variable assignment.
+The main change for now is that `Configuration` is called `Context`, which seems to be a more proper naming for a set of variables that can not only be read, but also manipulated via expressions.
+This update includes further renamings and some inconsistencies in the API were fixed.
+For more details, see the following subsections.
+
 ### Added
 
  * Add the `ContextMut` trait, that is a manipulable configuration/context
