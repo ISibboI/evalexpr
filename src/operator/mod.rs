@@ -154,7 +154,7 @@ impl Operator for Add {
             }
         } else {
             Ok(Value::Float(
-                arguments[0].as_float().unwrap() + arguments[1].as_float().unwrap(),
+                arguments[0].as_number().unwrap() + arguments[1].as_number().unwrap(),
             ))
         }
     }
@@ -190,7 +190,7 @@ impl Operator for Sub {
             }
         } else {
             Ok(Value::Float(
-                arguments[0].as_float().unwrap() - arguments[1].as_float().unwrap(),
+                arguments[0].as_number().unwrap() - arguments[1].as_number().unwrap(),
             ))
         }
     }
@@ -221,7 +221,7 @@ impl Operator for Neg {
                 Err(EvalexprError::negation_error(arguments[0].clone()))
             }
         } else {
-            Ok(Value::Float(-arguments[0].as_float().unwrap()))
+            Ok(Value::Float(-arguments[0].as_number().unwrap()))
         }
     }
 }
@@ -256,7 +256,7 @@ impl Operator for Mul {
             }
         } else {
             Ok(Value::Float(
-                arguments[0].as_float().unwrap() * arguments[1].as_float().unwrap(),
+                arguments[0].as_number().unwrap() * arguments[1].as_number().unwrap(),
             ))
         }
     }
@@ -292,7 +292,7 @@ impl Operator for Div {
             }
         } else {
             Ok(Value::Float(
-                arguments[0].as_float().unwrap() / arguments[1].as_float().unwrap(),
+                arguments[0].as_number().unwrap() / arguments[1].as_number().unwrap(),
             ))
         }
     }
@@ -328,7 +328,7 @@ impl Operator for Mod {
             }
         } else {
             Ok(Value::Float(
-                arguments[0].as_float().unwrap() % arguments[1].as_float().unwrap(),
+                arguments[0].as_number().unwrap() % arguments[1].as_number().unwrap(),
             ))
         }
     }
@@ -354,9 +354,9 @@ impl Operator for Exp {
 
         Ok(Value::Float(
             arguments[0]
-                .as_float()
+                .as_number()
                 .unwrap()
-                .powf(arguments[1].as_float().unwrap()),
+                .powf(arguments[1].as_number().unwrap()),
         ))
     }
 }
@@ -434,7 +434,7 @@ impl Operator for Gt {
                 Ok(Value::Boolean(false))
             }
         } else {
-            if arguments[0].as_float().unwrap() > arguments[1].as_float().unwrap() {
+            if arguments[0].as_number().unwrap() > arguments[1].as_number().unwrap() {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -468,7 +468,7 @@ impl Operator for Lt {
                 Ok(Value::Boolean(false))
             }
         } else {
-            if arguments[0].as_float().unwrap() < arguments[1].as_float().unwrap() {
+            if arguments[0].as_number().unwrap() < arguments[1].as_number().unwrap() {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -502,7 +502,7 @@ impl Operator for Geq {
                 Ok(Value::Boolean(false))
             }
         } else {
-            if arguments[0].as_float().unwrap() >= arguments[1].as_float().unwrap() {
+            if arguments[0].as_number().unwrap() >= arguments[1].as_number().unwrap() {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -536,7 +536,7 @@ impl Operator for Leq {
                 Ok(Value::Boolean(false))
             }
         } else {
-            if arguments[0].as_float().unwrap() <= arguments[1].as_float().unwrap() {
+            if arguments[0].as_number().unwrap() <= arguments[1].as_number().unwrap() {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))

@@ -18,6 +18,7 @@
  * Rename `Error` to `EvalexprError`
  * Rename `Configuration` to `Context`
  * Rename `HashMapConfiguration` to `HashMapContext` and `EmptyConfiguration` to `EmptyContext`
+ * Rename `Value::as_float` to `Value::as_number` and add new `Value::as_float` that fails if value is an integer
 
 ### Fixed
 

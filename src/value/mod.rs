@@ -52,6 +52,14 @@ impl Value {
         }
     }
 
+    /// Returns true if `self` is a `Value::Int` or `Value::Float`.
+    pub fn is_number(&self) -> bool {
+        match self {
+            Value::Int(_) | Value::Float(_) => true,
+            _ => false,
+        }
+    }
+
     /// Returns true if `self` is a `Value::Boolean`.
     pub fn is_boolean(&self) -> bool {
         match self {
@@ -84,9 +92,17 @@ impl Value {
         }
     }
 
+    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
+    pub fn as_float(&self) -> Result<FloatType, EvalexprError> {
+        match self {
+            Value::Float(f) => Ok(*f),
+            value => Err(EvalexprError::expected_float(value.clone())),
+        }
+    }
+
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
     /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
-    pub fn as_float(&self) -> Result<FloatType, EvalexprError> {
+    pub fn as_number(&self) -> Result<FloatType, EvalexprError> {
         match self {
             Value::Float(f) => Ok(*f),
             Value::Int(i) => Ok(*i as FloatType),
