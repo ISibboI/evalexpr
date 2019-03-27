@@ -4,6 +4,18 @@
 
 ### Added
 
+### Removed
+
+### Changed
+
+### Fixed
+
+### Deprecated
+
+## [2.0.0](https://github.com/ISibboI/evalexpr/compare/1.2.0...2.0.0) - 2019-03-27
+
+### Added
+
  * Add the `ContextMut` trait, that is a manipulable configuration/context
  * Add `ContextNotManipulable` error variant for the `EmptyContext`
  * Make the `TupleType` alias public
@@ -12,8 +24,6 @@
  * Add `Node::eval_number` and `Node::eval_number_with_context` to evaluate to int or float and silently converting to float
  * Add `eval_number` and `eval_number_with_context` crate methods to evaluate to int or float and silently converting to float
 
-### Removed
-
 ### Changed
 
  * Get rid of some unwraps to improve safety
@@ -21,10 +31,6 @@
  * Rename `Configuration` to `Context`
  * Rename `HashMapConfiguration` to `HashMapContext` and `EmptyConfiguration` to `EmptyContext`
  * Rename `Value::as_float` to `Value::as_number` and add new `Value::as_float` that fails if value is an integer
-
-### Fixed
-
-### Deprecated
 
 ## [1.2.0](https://github.com/ISibboI/evalexpr/compare/1.1.0...1.2.0) - 2019-03-23
 
