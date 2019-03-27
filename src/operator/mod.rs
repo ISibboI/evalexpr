@@ -1,6 +1,8 @@
-use crate::{configuration::Configuration, error::*, value::Value};
-use function::builtin::builtin_function;
 use std::fmt::{Debug, Display};
+
+use function::builtin::builtin_function;
+
+use crate::{configuration::Configuration, error::*, value::Value};
 
 mod display;
 
@@ -140,11 +142,8 @@ impl Operator for Add {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            let result = arguments[0]
-                .as_int()
-                .unwrap()
-                .checked_add(arguments[1].as_int().unwrap());
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            let result = a.checked_add(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -179,11 +178,8 @@ impl Operator for Sub {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            let result = arguments[0]
-                .as_int()
-                .unwrap()
-                .checked_sub(arguments[1].as_int().unwrap());
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            let result = a.checked_sub(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -217,8 +213,8 @@ impl Operator for Neg {
         expect_operator_argument_amount(arguments.len(), 1)?;
         expect_number(&arguments[0])?;
 
-        if arguments[0].is_int() {
-            let result = arguments[0].as_int().unwrap().checked_neg();
+        if let Ok(a) = arguments[0].as_int() {
+            let result = a.checked_neg();
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -248,11 +244,8 @@ impl Operator for Mul {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            let result = arguments[0]
-                .as_int()
-                .unwrap()
-                .checked_mul(arguments[1].as_int().unwrap());
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            let result = a.checked_mul(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -287,11 +280,8 @@ impl Operator for Div {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            let result = arguments[0]
-                .as_int()
-                .unwrap()
-                .checked_div(arguments[1].as_int().unwrap());
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            let result = a.checked_div(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -326,11 +316,8 @@ impl Operator for Mod {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            let result = arguments[0]
-                .as_int()
-                .unwrap()
-                .checked_rem(arguments[1].as_int().unwrap());
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            let result = a.checked_rem(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
             } else {
@@ -440,8 +427,8 @@ impl Operator for Gt {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            if arguments[0].as_int().unwrap() > arguments[1].as_int().unwrap() {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            if a > b {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -474,8 +461,8 @@ impl Operator for Lt {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            if arguments[0].as_int().unwrap() < arguments[1].as_int().unwrap() {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            if a < b {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -508,8 +495,8 @@ impl Operator for Geq {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            if arguments[0].as_int().unwrap() >= arguments[1].as_int().unwrap() {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            if a >= b {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))
@@ -542,8 +529,8 @@ impl Operator for Leq {
         expect_number(&arguments[0])?;
         expect_number(&arguments[1])?;
 
-        if arguments[0].is_int() && arguments[1].is_int() {
-            if arguments[0].as_int().unwrap() <= arguments[1].as_int().unwrap() {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+            if a <= b {
                 Ok(Value::Boolean(true))
             } else {
                 Ok(Value::Boolean(false))

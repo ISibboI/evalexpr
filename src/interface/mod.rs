@@ -1,13 +1,13 @@
-use token;
-use tree;
-use value::TupleType;
 use Configuration;
 use EmptyConfiguration;
 use Error;
 use FloatType;
 use IntType;
 use Node;
+use token;
+use tree;
 use Value;
+use value::TupleType;
 
 /// Evaluate the given expression string.
 ///
@@ -56,7 +56,7 @@ pub fn eval_with_configuration(
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let precomputed = build_operator_tree("one + two + three").unwrap();
+/// let precomputed = build_operator_tree("one + two + three").unwrap(); // Do proper error handling here
 ///
 /// let mut configuration = HashMapConfiguration::new();
 /// configuration.insert_variable("one", 1);

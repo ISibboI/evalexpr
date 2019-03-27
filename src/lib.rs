@@ -71,7 +71,7 @@
 //! ```rust
 //! use evalexpr::*;
 //!
-//! let precompiled = build_operator_tree("a * b - c > 5").unwrap();
+//! let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
 //!
 //! let mut configuration = HashMapConfiguration::new();
 //! configuration.insert_variable("a", 6);
@@ -269,6 +269,13 @@ extern crate ron;
 #[cfg(feature = "serde")]
 extern crate serde;
 
+pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
+pub use error::Error;
+pub use function::Function;
+pub use interface::*;
+pub use tree::Node;
+pub use value::{FloatType, IntType, Value};
+
 mod configuration;
 pub mod error;
 #[cfg(feature = "serde")]
@@ -282,9 +289,3 @@ mod value;
 
 // Exports
 
-pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
-pub use error::Error;
-pub use function::Function;
-pub use interface::*;
-pub use tree::Node;
-pub use value::{FloatType, IntType, Value};

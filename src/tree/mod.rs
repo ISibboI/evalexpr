@@ -20,7 +20,7 @@ mod display;
 ///
 /// let mut configuration = HashMapConfiguration::new();
 /// configuration.insert_variable("alpha", 2);
-/// let node = build_operator_tree("1 + alpha").unwrap();
+/// let node = build_operator_tree("1 + alpha").unwrap(); // Do proper error handling here
 /// assert_eq!(node.eval_with_configuration(&configuration), Ok(Value::from(3)));
 /// ```
 ///
@@ -290,14 +290,18 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error>
 
     if root.len() > 1 {
         Err(Error::UnmatchedLBrace)
-    } else if root.len() == 0 {
-        Err(Error::UnmatchedRBrace)
-    } else {
-        let mut root = root.pop().unwrap();
-        if root.children().len() == 1 {
-            Ok(root.children.pop().unwrap())
+    } else if let Some(mut root) = root.pop() {
+        if root.children().len() > 1 {
+            Err(Error::wrong_operator_argument_amount(
+                root.children().len(),
+                1,
+            ))
+        } else if let Some(child) = root.children.pop() {
+            Ok(child)
         } else {
             Err(Error::EmptyExpression)
         }
+    } else {
+        Err(Error::UnmatchedRBrace)
     }
 }

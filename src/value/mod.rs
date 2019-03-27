@@ -159,15 +159,15 @@ mod tests {
     #[test]
     fn test_value_conversions() {
         assert_eq!(
-            Value::from("string").as_string().unwrap(),
-            String::from("string")
+            Value::from("string").as_string(),
+            Ok(String::from("string"))
         );
-        assert_eq!(Value::from(3).as_int().unwrap(), 3);
-        assert_eq!(Value::from(3.3).as_float().unwrap(), 3.3);
-        assert_eq!(Value::from(true).as_boolean().unwrap(), true);
+        assert_eq!(Value::from(3).as_int(), Ok(3));
+        assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
+        assert_eq!(Value::from(true).as_boolean(), Ok(true));
         assert_eq!(
-            Value::from(TupleType::new()).as_tuple().unwrap(),
-            TupleType::new()
+            Value::from(TupleType::new()).as_tuple(),
+            Ok(TupleType::new())
         );
     }
 
