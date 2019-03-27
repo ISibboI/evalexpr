@@ -8,6 +8,8 @@
 
 ### Changed
 
+ * Get rid of some unwraps to improve safety
+
 ### Fixed
 
 ### Deprecated
