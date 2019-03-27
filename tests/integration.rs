@@ -345,6 +345,8 @@ fn test_shortcut_functions() {
     assert_eq!(eval_float_with_context("3.3", &context), Ok(3.3));
     assert_eq!(eval_int("3"), Ok(3));
     assert_eq!(eval_int_with_context("3", &context), Ok(3));
+    assert_eq!(eval_number("3"), Ok(3.0));
+    assert_eq!(eval_number_with_context("3", &context), Ok(3.0));
     assert_eq!(eval_boolean("true"), Ok(true));
     assert_eq!(eval_boolean_with_context("true", &context), Ok(true));
     assert_eq!(eval_tuple("3,3"), Ok(vec![Value::Int(3), Value::Int(3)]));

@@ -104,6 +104,19 @@ pub fn eval_float(string: &str) -> Result<FloatType, EvalexprError> {
     }
 }
 
+/// Evaluate the given expression string into a float.
+/// If the result of the expression is an integer, it is silently converted into a float.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_number(string: &str) -> Result<FloatType, EvalexprError> {
+    match eval(string) {
+        Ok(Value::Float(float)) => Ok(float),
+        Ok(Value::Int(int)) => Ok(int as FloatType),
+        Ok(value) => Err(EvalexprError::expected_float(value)),
+        Err(error) => Err(error),
+    }
+}
+
 /// Evaluate the given expression string into a boolean.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -157,6 +170,22 @@ pub fn eval_float_with_context(
 ) -> Result<FloatType, EvalexprError> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
+        Ok(value) => Err(EvalexprError::expected_float(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string into a float with the given context.
+/// If the result of the expression is an integer, it is silently converted into a float.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_number_with_context(
+    string: &str,
+    context: &Context,
+) -> Result<FloatType, EvalexprError> {
+    match eval_with_context(string, context) {
+        Ok(Value::Float(float)) => Ok(float),
+        Ok(Value::Int(int)) => Ok(int as FloatType),
         Ok(value) => Err(EvalexprError::expected_float(value)),
         Err(error) => Err(error),
     }

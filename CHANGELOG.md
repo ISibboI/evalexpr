@@ -10,6 +10,7 @@
  * Add the `ValueType` enum that represents the type of a value for easier comparisons and matchings
  * Add `EvalexprResult<T>` type that uses the `EvalexprError` type (renamed from `Error`)
  * Add `Node::eval_number` and `Node::eval_number_with_context` to evaluate to int or float and silently converting to float
+ * Add `eval_number` and `eval_number_with_context` crate methods to evaluate to int or float and silently converting to float
 
 ### Removed
 
