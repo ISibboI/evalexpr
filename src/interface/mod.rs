@@ -1,5 +1,5 @@
 use Configuration;
-use EmptyConfiguration;
+use EmptyContext;
 use EvalexprError;
 use FloatType;
 use IntType;
@@ -21,7 +21,7 @@ use value::TupleType;
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval(string: &str) -> Result<Value, EvalexprError> {
-    eval_with_configuration(string, &EmptyConfiguration)
+    eval_with_configuration(string, &EmptyContext)
 }
 
 /// Evaluate the given expression string with the given configuration.
@@ -31,10 +31,10 @@ pub fn eval(string: &str) -> Result<Value, EvalexprError> {
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut configuration = HashMapConfiguration::new();
-/// configuration.insert_variable("one", 1);
-/// configuration.insert_variable("two", 2);
-/// configuration.insert_variable("three", 3);
+/// let mut configuration = HashMapContext::new();
+/// configuration.set_value("one", 1).unwrap(); // Do proper error handling here
+/// configuration.set_value("two", 2).unwrap(); // Do proper error handling here
+/// configuration.set_value("three", 3).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_configuration("one + two + three", &configuration), Ok(Value::from(6)));
 /// ```
 ///
@@ -58,14 +58,14 @@ pub fn eval_with_configuration(
 ///
 /// let precomputed = build_operator_tree("one + two + three").unwrap(); // Do proper error handling here
 ///
-/// let mut configuration = HashMapConfiguration::new();
-/// configuration.insert_variable("one", 1);
-/// configuration.insert_variable("two", 2);
-/// configuration.insert_variable("three", 3);
+/// let mut configuration = HashMapContext::new();
+/// configuration.set_value("one", 1).unwrap(); // Do proper error handling here
+/// configuration.set_value("two", 2).unwrap(); // Do proper error handling here
+/// configuration.set_value("three", 3).unwrap(); // Do proper error handling here
 ///
 /// assert_eq!(precomputed.eval_with_configuration(&configuration), Ok(Value::from(6)));
 ///
-/// configuration.insert_variable("three", 5);
+/// configuration.set_value("three", 5).unwrap(); // Do proper error handling here
 /// assert_eq!(precomputed.eval_with_configuration(&configuration), Ok(Value::from(8)));
 /// ```
 ///

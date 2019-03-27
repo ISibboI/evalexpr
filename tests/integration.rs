@@ -10,7 +10,9 @@ fn test_unary_examples() {
     assert_eq!(eval("false"), Ok(Value::Boolean(false)));
     assert_eq!(
         eval("blub"),
-        Err(EvalexprError::VariableIdentifierNotFound("blub".to_string()))
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "blub".to_string()
+        ))
     );
     assert_eq!(eval("-3"), Ok(Value::Int(-3)));
     assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
@@ -97,13 +99,13 @@ fn test_boolean_examples() {
 
 #[test]
 fn test_with_configuration() {
-    let mut configuration = HashMapConfiguration::new();
-    configuration.insert_variable("tr".to_string(), Value::Boolean(true));
-    configuration.insert_variable("fa".to_string(), Value::Boolean(false));
-    configuration.insert_variable("five".to_string(), Value::Int(5));
-    configuration.insert_variable("six".to_string(), Value::Int(6));
-    configuration.insert_variable("half".to_string(), Value::Float(0.5));
-    configuration.insert_variable("zero".to_string(), Value::Int(0));
+    let mut configuration = HashMapContext::new();
+    configuration.set_value("tr", Value::Boolean(true)).unwrap();
+    configuration.set_value("fa", Value::Boolean(false)).unwrap();
+    configuration.set_value("five", Value::Int(5)).unwrap();
+    configuration.set_value("six", Value::Int(6)).unwrap();
+    configuration.set_value("half", Value::Float(0.5)).unwrap();
+    configuration.set_value("zero", Value::Int(0)).unwrap();
 
     assert_eq!(
         eval_with_configuration("tr", &configuration),
@@ -133,8 +135,8 @@ fn test_with_configuration() {
 
 #[test]
 fn test_functions() {
-    let mut configuration = HashMapConfiguration::new();
-    configuration.insert_function(
+    let mut configuration = HashMapContext::new();
+    configuration.set_function(
         "sub2".to_string(),
         Function::new(
             Some(1),
@@ -148,8 +150,8 @@ fn test_functions() {
                 }
             }),
         ),
-    );
-    configuration.insert_variable("five".to_string(), Value::Int(5));
+    ).unwrap();
+    configuration.set_value("five".to_string(), Value::Int(5)).unwrap();
 
     assert_eq!(
         eval_with_configuration("sub2 5", &configuration),
@@ -175,8 +177,8 @@ fn test_functions() {
 
 #[test]
 fn test_n_ary_functions() {
-    let mut configuration = HashMapConfiguration::new();
-    configuration.insert_function(
+    let mut configuration = HashMapContext::new();
+    configuration.set_function(
         "sub2",
         Function::new(
             Some(1),
@@ -190,8 +192,8 @@ fn test_n_ary_functions() {
                 }
             }),
         ),
-    );
-    configuration.insert_function(
+    ).unwrap();
+    configuration.set_function(
         "avg",
         Function::new(
             Some(2),
@@ -208,8 +210,8 @@ fn test_n_ary_functions() {
                 }
             }),
         ),
-    );
-    configuration.insert_function(
+    ).unwrap();
+    configuration.set_function(
         "muladd",
         Function::new(
             Some(3),
@@ -230,15 +232,15 @@ fn test_n_ary_functions() {
                 }
             }),
         ),
-    );
-    configuration.insert_function(
+    ).unwrap();
+    configuration.set_function(
         "count",
         Function::new(
             None,
             Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
         ),
-    );
-    configuration.insert_variable("five".to_string(), Value::Int(5));
+    ).unwrap();
+    configuration.set_value("five".to_string(), Value::Int(5)).unwrap();
 
     assert_eq!(
         eval_with_configuration("avg(7, 5)", &configuration),
@@ -339,8 +341,8 @@ fn test_no_panic() {
 
 #[test]
 fn test_shortcut_functions() {
-    let mut configuration = HashMapConfiguration::new();
-    configuration.insert_variable("string", Value::from("a string"));
+    let mut configuration = HashMapContext::new();
+    configuration.set_value("string", Value::from("a string")).unwrap();
 
     // assert_eq!(eval_string("???"));
     assert_eq!(

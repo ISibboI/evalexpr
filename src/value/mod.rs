@@ -1,6 +1,7 @@
 use error::EvalexprError;
 
 mod display;
+pub mod value_type;
 
 /// The type used to represent integers in `Value::Int`.
 pub type IntType = i64;

@@ -85,6 +85,7 @@ impl fmt::Display for EvalexprError {
             ModulationError { dividend, divisor } => {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
             },
+            ContextNotManipulable => write!(f, "Cannot manipulate context"),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

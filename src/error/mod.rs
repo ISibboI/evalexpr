@@ -7,6 +7,7 @@
 
 use token::PartialToken;
 use value::TupleType;
+use value::value_type::ValueType;
 
 use crate::value::Value;
 
@@ -76,6 +77,8 @@ pub enum EvalexprError {
     AppendedToLeafNode,
 
     /// Tried to append a child to a node such that the precedence of the child is not higher.
+    /// This error should never occur.
+    /// If it does, please file a bug report.
     PrecedenceViolation,
 
     /// A `VariableIdentifier` operation did not find its value in the configuration.
@@ -155,6 +158,9 @@ pub enum EvalexprError {
         divisor: Value,
     },
 
+    /// A `set_`-function was called on a `Context` that does not allow modifications.
+    ContextNotManipulable,
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }
@@ -203,6 +209,17 @@ impl EvalexprError {
         EvalexprError::ExpectedTuple { actual }
     }
 
+    /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
+    pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
+        match ValueType::from(expected) {
+            ValueType::String => Self::expected_string(actual),
+            ValueType::Int => Self::expected_int(actual),
+            ValueType::Float => Self::expected_float(actual),
+            ValueType::Boolean => Self::expected_boolean(actual),
+            ValueType::Tuple => Self::expected_tuple(actual),
+        }
+    }
+
     pub(crate) fn unmatched_partial_token(
         first: PartialToken,
         second: Option<PartialToken>,
@@ -242,20 +259,30 @@ impl EvalexprError {
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongOperatorArgumentAmount)` otherwise.
-pub(crate) fn expect_operator_argument_amount(actual: usize, expected: usize) -> Result<(), EvalexprError> {
+pub(crate) fn expect_operator_argument_amount(
+    actual: usize,
+    expected: usize,
+) -> Result<(), EvalexprError> {
     if actual == expected {
         Ok(())
     } else {
-        Err(EvalexprError::wrong_operator_argument_amount(actual, expected))
+        Err(EvalexprError::wrong_operator_argument_amount(
+            actual, expected,
+        ))
     }
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub(crate) fn expect_function_argument_amount(actual: usize, expected: usize) -> Result<(), EvalexprError> {
+pub(crate) fn expect_function_argument_amount(
+    actual: usize,
+    expected: usize,
+) -> Result<(), EvalexprError> {
     if actual == expected {
         Ok(())
     } else {
-        Err(EvalexprError::wrong_function_argument_amount(actual, expected))
+        Err(EvalexprError::wrong_function_argument_amount(
+            actual, expected,
+        ))
     }
 }
 
@@ -279,4 +306,5 @@ pub fn expect_boolean(actual: &Value) -> Result<bool, EvalexprError> {
 
 impl std::error::Error for EvalexprError {}
 
+/// Standard result type used by this crate.
 pub type EvalexprResult<T> = Result<T, EvalexprError>;

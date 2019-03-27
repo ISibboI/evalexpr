@@ -35,10 +35,10 @@
 //! use evalexpr::*;
 //! use evalexpr::error::expect_number;
 //!
-//! let mut configuration = HashMapConfiguration::new();
-//! configuration.insert_variable("five", 5);
-//! configuration.insert_variable("twelve", 12);
-//! configuration.insert_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
+//! let mut configuration = HashMapContext::new();
+//! configuration.set_value("five", 5).unwrap(); // Do proper error handling here
+//! configuration.set_value("twelve", 12).unwrap(); // Do proper error handling here
+//! configuration.set_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
 //!     if let Value::Int(int) = arguments[0] {
 //!         Ok(Value::Int(int / 2))
 //!     } else if let Value::Float(float) = arguments[0] {
@@ -46,8 +46,8 @@
 //!     } else {
 //!         Err(EvalexprError::expected_number(arguments[0].clone()))
 //!     }
-//! })));
-//! configuration.insert_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+//! }))).unwrap(); // Do proper error handling here
+//! configuration.set_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
 //!     expect_number(&arguments[0])?;
 //!     expect_number(&arguments[1])?;
 //!
@@ -56,7 +56,7 @@
 //!     } else {
 //!         Ok(Value::Float((arguments[0].as_float()? + arguments[1].as_float()?) / 2.0))
 //!     }
-//! })));
+//! }))).unwrap(); // Do proper error handling here
 //!
 //! assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
 //! // `eval_with_configuration` returns a variant of the `Value` enum,
@@ -73,13 +73,13 @@
 //!
 //! let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
 //!
-//! let mut configuration = HashMapConfiguration::new();
-//! configuration.insert_variable("a", 6);
-//! configuration.insert_variable("b", 2);
-//! configuration.insert_variable("c", 3);
+//! let mut configuration = HashMapContext::new();
+//! configuration.set_value("a", 6).unwrap(); // Do proper error handling here
+//! configuration.set_value("b", 2).unwrap(); // Do proper error handling here
+//! configuration.set_value("c", 3).unwrap(); // Do proper error handling here
 //! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(true)));
 //!
-//! configuration.insert_variable("c", 8);
+//! configuration.set_value("c", 8).unwrap(); // Do proper error handling here
 //! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
 //! // `Node::eval_with_configuration` returns a variant of the `Value` enum,
 //! // while `Node::eval_[type]_with_configuration` returns the respective type directly.
@@ -241,8 +241,8 @@
 //! extern crate ron;
 //! use evalexpr::*;
 //!
-//! let mut configuration = HashMapConfiguration::new();
-//! configuration.insert_variable("five", 5);
+//! let mut configuration = HashMapContext::new();
+//! configuration.set_value("five", 5).unwrap(); // Do proper error handling here
 //!
 //! // In ron format, strings are surrounded by "
 //! let serialized_free = "\"five * five\"";
@@ -269,14 +269,14 @@ extern crate ron;
 #[cfg(feature = "serde")]
 extern crate serde;
 
-pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
+pub use context::{Configuration, Context, EmptyContext, HashMapContext};
 pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
 pub use value::{FloatType, IntType, Value};
 
-mod configuration;
+mod context;
 pub mod error;
 #[cfg(feature = "serde")]
 mod feature_serde;
@@ -288,4 +288,3 @@ mod tree;
 mod value;
 
 // Exports
-

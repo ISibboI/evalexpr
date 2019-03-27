@@ -1,10 +1,10 @@
-use EmptyConfiguration;
+use EmptyContext;
 use FloatType;
 use IntType;
 use token::Token;
 use value::TupleType;
 
-use crate::{configuration::Configuration, error::EvalexprError, operator::*, value::Value};
+use crate::{context::Configuration, error::EvalexprError, operator::*, value::Value};
 
 mod display;
 
@@ -19,8 +19,8 @@ mod display;
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut configuration = HashMapConfiguration::new();
-/// configuration.insert_variable("alpha", 2);
+/// let mut configuration = HashMapContext::new();
+/// configuration.set_value("alpha", 2).unwrap(); // Do proper error handling here
 /// let node = build_operator_tree("1 + alpha").unwrap(); // Do proper error handling here
 /// assert_eq!(node.eval_with_configuration(&configuration), Ok(Value::from(3)));
 /// ```
@@ -46,7 +46,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node with the given configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_with_configuration(&self, configuration: &Configuration) -> Result<Value, EvalexprError> {
+    pub fn eval_with_configuration(
+        &self,
+        configuration: &Configuration,
+    ) -> Result<Value, EvalexprError> {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_configuration(configuration)?);
@@ -58,7 +61,7 @@ impl Node {
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval(&self) -> Result<Value, EvalexprError> {
-        self.eval_with_configuration(&EmptyConfiguration)
+        self.eval_with_configuration(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into a string with an the given configuration.
@@ -135,35 +138,35 @@ impl Node {
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_string(&self) -> Result<String, EvalexprError> {
-        self.eval_string_with_configuration(&EmptyConfiguration)
+        self.eval_string_with_configuration(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into a float with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_float(&self) -> Result<FloatType, EvalexprError> {
-        self.eval_float_with_configuration(&EmptyConfiguration)
+        self.eval_float_with_configuration(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into an integer with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int(&self) -> Result<IntType, EvalexprError> {
-        self.eval_int_with_configuration(&EmptyConfiguration)
+        self.eval_int_with_configuration(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into a boolean with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_boolean(&self) -> Result<bool, EvalexprError> {
-        self.eval_boolean_with_configuration(&EmptyConfiguration)
+        self.eval_boolean_with_configuration(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into a tuple with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> Result<TupleType, EvalexprError> {
-        self.eval_tuple_with_configuration(&EmptyConfiguration)
+        self.eval_tuple_with_configuration(&EmptyContext)
     }
 
     fn children(&self) -> &[Node] {
@@ -178,7 +181,11 @@ impl Node {
         self.children().len() == self.operator().argument_amount()
     }
 
-    fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> Result<(), EvalexprError> {
+    fn insert_back_prioritized(
+        &mut self,
+        node: Node,
+        is_root_node: bool,
+    ) -> Result<(), EvalexprError> {
         if self.operator().precedence() < node.operator().precedence() || is_root_node
             // Right-to-left chaining
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
