@@ -3,10 +3,15 @@ use Value;
 /// The type of a `Value`.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ValueType {
+    /// The `Value::String` type.
     String,
+    /// The `Value::Float` type.
     Float,
+    /// The `Value::Int` type.
     Int,
+    /// The `Value::Boolean` type.
     Boolean,
+    /// The `Value::Tuple` type.
     Tuple,
 }
 
