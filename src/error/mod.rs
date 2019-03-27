@@ -261,7 +261,7 @@ impl EvalexprError {
 pub(crate) fn expect_operator_argument_amount(
     actual: usize,
     expected: usize,
-) -> Result<(), EvalexprError> {
+) -> EvalexprResult<()> {
     if actual == expected {
         Ok(())
     } else {
@@ -275,7 +275,7 @@ pub(crate) fn expect_operator_argument_amount(
 pub(crate) fn expect_function_argument_amount(
     actual: usize,
     expected: usize,
-) -> Result<(), EvalexprError> {
+) -> EvalexprResult<()> {
     if actual == expected {
         Ok(())
     } else {
@@ -288,7 +288,7 @@ pub(crate) fn expect_function_argument_amount(
 /// Returns `Ok(())` if the given value is numeric.
 /// Numeric types are `Value::Int` and `Value::Float`.
 /// Otherwise, `Err(Error::ExpectedNumber)` is returned.
-pub fn expect_number(actual: &Value) -> Result<(), EvalexprError> {
+pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
     match actual {
         Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(EvalexprError::expected_number(actual.clone())),
@@ -296,7 +296,7 @@ pub fn expect_number(actual: &Value) -> Result<(), EvalexprError> {
 }
 
 /// Returns `Ok(())` if the given value is a `Value::Boolean`, or `Err(Error::ExpectedBoolean)` otherwise.
-pub fn expect_boolean(actual: &Value) -> Result<bool, EvalexprError> {
+pub fn expect_boolean(actual: &Value) -> EvalexprResult<bool> {
     match actual {
         Value::Boolean(boolean) => Ok(*boolean),
         _ => Err(EvalexprError::expected_boolean(actual.clone())),

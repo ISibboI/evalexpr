@@ -106,7 +106,7 @@ impl ContextMut for HashMapContext {
         &mut self,
         identifier: S,
         value: V,
-    ) -> Result<(), EvalexprError> {
+    ) -> EvalexprResult<()> {
         let identifier = identifier.into();
         let value = value.into();
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
@@ -127,7 +127,7 @@ impl ContextMut for HashMapContext {
         &mut self,
         identifier: S,
         function: Function,
-    ) -> Result<(), EvalexprError> {
+    ) -> EvalexprResult<()> {
         self.functions.insert(identifier.into(), function);
         Ok(())
     }

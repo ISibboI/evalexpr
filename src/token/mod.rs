@@ -1,4 +1,4 @@
-use error::EvalexprError;
+use error::{EvalexprError, EvalexprResult};
 use value::{FloatType, IntType};
 
 mod display;
@@ -173,7 +173,7 @@ fn str_to_tokens(string: &str) -> Vec<PartialToken> {
 }
 
 /// Resolves all partial tokens by converting them to complex tokens.
-fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, EvalexprError> {
+fn resolve_literals(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
     let mut result = Vec::new();
     while tokens.len() > 0 {
         let first = tokens[0].clone();
@@ -244,6 +244,6 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, EvalexprE
     Ok(result)
 }
 
-pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>, EvalexprError> {
+pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
     resolve_literals(&str_to_tokens(string))
 }

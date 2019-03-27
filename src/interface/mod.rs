@@ -1,6 +1,7 @@
 use Context;
 use EmptyContext;
 use EvalexprError;
+use EvalexprResult;
 use FloatType;
 use IntType;
 use Node;
@@ -20,7 +21,7 @@ use value::TupleType;
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval(string: &str) -> Result<Value, EvalexprError> {
+pub fn eval(string: &str) -> EvalexprResult<Value> {
     eval_with_context(string, &EmptyContext)
 }
 
@@ -39,7 +40,7 @@ pub fn eval(string: &str) -> Result<Value, EvalexprError> {
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_with_context(string: &str, context: &Context) -> Result<Value, EvalexprError> {
+pub fn eval_with_context(string: &str, context: &Context) -> EvalexprResult<Value> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_context(context)
 }
 
@@ -67,14 +68,14 @@ pub fn eval_with_context(string: &str, context: &Context) -> Result<Value, Evale
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn build_operator_tree(string: &str) -> Result<Node, EvalexprError> {
+pub fn build_operator_tree(string: &str) -> EvalexprResult<Node> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)
 }
 
 /// Evaluate the given expression string into a string.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_string(string: &str) -> Result<String, EvalexprError> {
+pub fn eval_string(string: &str) -> EvalexprResult<String> {
     match eval(string) {
         Ok(Value::String(string)) => Ok(string),
         Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -85,7 +86,7 @@ pub fn eval_string(string: &str) -> Result<String, EvalexprError> {
 /// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int(string: &str) -> Result<IntType, EvalexprError> {
+pub fn eval_int(string: &str) -> EvalexprResult<IntType> {
     match eval(string) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -96,7 +97,7 @@ pub fn eval_int(string: &str) -> Result<IntType, EvalexprError> {
 /// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float(string: &str) -> Result<FloatType, EvalexprError> {
+pub fn eval_float(string: &str) -> EvalexprResult<FloatType> {
     match eval(string) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -108,7 +109,7 @@ pub fn eval_float(string: &str) -> Result<FloatType, EvalexprError> {
 /// If the result of the expression is an integer, it is silently converted into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_number(string: &str) -> Result<FloatType, EvalexprError> {
+pub fn eval_number(string: &str) -> EvalexprResult<FloatType> {
     match eval(string) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(Value::Int(int)) => Ok(int as FloatType),
@@ -120,7 +121,7 @@ pub fn eval_number(string: &str) -> Result<FloatType, EvalexprError> {
 /// Evaluate the given expression string into a boolean.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_boolean(string: &str) -> Result<bool, EvalexprError> {
+pub fn eval_boolean(string: &str) -> EvalexprResult<bool> {
     match eval(string) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
         Ok(value) => Err(EvalexprError::expected_boolean(value)),
@@ -131,7 +132,7 @@ pub fn eval_boolean(string: &str) -> Result<bool, EvalexprError> {
 /// Evaluate the given expression string into a tuple.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_tuple(string: &str) -> Result<TupleType, EvalexprError> {
+pub fn eval_tuple(string: &str) -> EvalexprResult<TupleType> {
     match eval(string) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),
@@ -142,7 +143,7 @@ pub fn eval_tuple(string: &str) -> Result<TupleType, EvalexprError> {
 /// Evaluate the given expression string into a string with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_string_with_context(string: &str, context: &Context) -> Result<String, EvalexprError> {
+pub fn eval_string_with_context(string: &str, context: &Context) -> EvalexprResult<String> {
     match eval_with_context(string, context) {
         Ok(Value::String(string)) => Ok(string),
         Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -153,7 +154,7 @@ pub fn eval_string_with_context(string: &str, context: &Context) -> Result<Strin
 /// Evaluate the given expression string into an integer with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int_with_context(string: &str, context: &Context) -> Result<IntType, EvalexprError> {
+pub fn eval_int_with_context(string: &str, context: &Context) -> EvalexprResult<IntType> {
     match eval_with_context(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -164,10 +165,7 @@ pub fn eval_int_with_context(string: &str, context: &Context) -> Result<IntType,
 /// Evaluate the given expression string into a float with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<FloatType, EvalexprError> {
+pub fn eval_float_with_context(string: &str, context: &Context) -> EvalexprResult<FloatType> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -179,10 +177,7 @@ pub fn eval_float_with_context(
 /// If the result of the expression is an integer, it is silently converted into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_number_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<FloatType, EvalexprError> {
+pub fn eval_number_with_context(string: &str, context: &Context) -> EvalexprResult<FloatType> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(Value::Int(int)) => Ok(int as FloatType),
@@ -194,7 +189,7 @@ pub fn eval_number_with_context(
 /// Evaluate the given expression string into a boolean with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_boolean_with_context(string: &str, context: &Context) -> Result<bool, EvalexprError> {
+pub fn eval_boolean_with_context(string: &str, context: &Context) -> EvalexprResult<bool> {
     match eval_with_context(string, context) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
         Ok(value) => Err(EvalexprError::expected_boolean(value)),
@@ -205,10 +200,7 @@ pub fn eval_boolean_with_context(string: &str, context: &Context) -> Result<bool
 /// Evaluate the given expression string into a tuple with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_tuple_with_context(
-    string: &str,
-    context: &Context,
-) -> Result<TupleType, EvalexprError> {
+pub fn eval_tuple_with_context(string: &str, context: &Context) -> EvalexprResult<TupleType> {
     match eval_with_context(string, context) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),

@@ -202,7 +202,7 @@
 //! This crate also allows to define arbitrary functions to be used in parsed expressions.
 //! A function is defined as a `Function` instance.
 //! It contains two properties, the `argument_amount` and the `function`.
-//! The `function` is a boxed `Fn(&[Value]) -> Result<Value, Error>`.
+//! The `function` is a boxed `Fn(&[Value]) -> EvalexprResult<Value, Error>`.
 //! The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
 //! It is verified on execution by the crate and does not need to be verified by the `function`.
 //!
