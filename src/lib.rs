@@ -274,7 +274,7 @@ pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
-pub use value::{FloatType, IntType, Value};
+pub use value::{FloatType, IntType, TupleType, Value};
 
 mod context;
 pub mod error;
