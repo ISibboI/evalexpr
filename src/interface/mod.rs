@@ -1,6 +1,6 @@
 use Configuration;
 use EmptyConfiguration;
-use Error;
+use EvalexprError;
 use FloatType;
 use IntType;
 use Node;
@@ -20,7 +20,7 @@ use value::TupleType;
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval(string: &str) -> Result<Value, Error> {
+pub fn eval(string: &str) -> Result<Value, EvalexprError> {
     eval_with_configuration(string, &EmptyConfiguration)
 }
 
@@ -42,7 +42,7 @@ pub fn eval(string: &str) -> Result<Value, Error> {
 pub fn eval_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<Value, Error> {
+) -> Result<Value, EvalexprError> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)?.eval_with_configuration(configuration)
 }
 
@@ -70,17 +70,17 @@ pub fn eval_with_configuration(
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn build_operator_tree(string: &str) -> Result<Node, Error> {
+pub fn build_operator_tree(string: &str) -> Result<Node, EvalexprError> {
     tree::tokens_to_operator_tree(token::tokenize(string)?)
 }
 
 /// Evaluate the given expression string into a string.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_string(string: &str) -> Result<String, Error> {
+pub fn eval_string(string: &str) -> Result<String, EvalexprError> {
     match eval(string) {
         Ok(Value::String(string)) => Ok(string),
-        Ok(value) => Err(Error::expected_string(value)),
+        Ok(value) => Err(EvalexprError::expected_string(value)),
         Err(error) => Err(error),
     }
 }
@@ -88,10 +88,10 @@ pub fn eval_string(string: &str) -> Result<String, Error> {
 /// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int(string: &str) -> Result<IntType, Error> {
+pub fn eval_int(string: &str) -> Result<IntType, EvalexprError> {
     match eval(string) {
         Ok(Value::Int(int)) => Ok(int),
-        Ok(value) => Err(Error::expected_int(value)),
+        Ok(value) => Err(EvalexprError::expected_int(value)),
         Err(error) => Err(error),
     }
 }
@@ -99,10 +99,10 @@ pub fn eval_int(string: &str) -> Result<IntType, Error> {
 /// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float(string: &str) -> Result<FloatType, Error> {
+pub fn eval_float(string: &str) -> Result<FloatType, EvalexprError> {
     match eval(string) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(value) => Err(Error::expected_float(value)),
+        Ok(value) => Err(EvalexprError::expected_float(value)),
         Err(error) => Err(error),
     }
 }
@@ -110,10 +110,10 @@ pub fn eval_float(string: &str) -> Result<FloatType, Error> {
 /// Evaluate the given expression string into a boolean.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_boolean(string: &str) -> Result<bool, Error> {
+pub fn eval_boolean(string: &str) -> Result<bool, EvalexprError> {
     match eval(string) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
-        Ok(value) => Err(Error::expected_boolean(value)),
+        Ok(value) => Err(EvalexprError::expected_boolean(value)),
         Err(error) => Err(error),
     }
 }
@@ -121,10 +121,10 @@ pub fn eval_boolean(string: &str) -> Result<bool, Error> {
 /// Evaluate the given expression string into a tuple.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_tuple(string: &str) -> Result<TupleType, Error> {
+pub fn eval_tuple(string: &str) -> Result<TupleType, EvalexprError> {
     match eval(string) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
-        Ok(value) => Err(Error::expected_tuple(value)),
+        Ok(value) => Err(EvalexprError::expected_tuple(value)),
         Err(error) => Err(error),
     }
 }
@@ -135,10 +135,10 @@ pub fn eval_tuple(string: &str) -> Result<TupleType, Error> {
 pub fn eval_string_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<String, Error> {
+) -> Result<String, EvalexprError> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::String(string)) => Ok(string),
-        Ok(value) => Err(Error::expected_string(value)),
+        Ok(value) => Err(EvalexprError::expected_string(value)),
         Err(error) => Err(error),
     }
 }
@@ -149,10 +149,10 @@ pub fn eval_string_with_configuration(
 pub fn eval_int_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<IntType, Error> {
+) -> Result<IntType, EvalexprError> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::Int(int)) => Ok(int),
-        Ok(value) => Err(Error::expected_int(value)),
+        Ok(value) => Err(EvalexprError::expected_int(value)),
         Err(error) => Err(error),
     }
 }
@@ -163,10 +163,10 @@ pub fn eval_int_with_configuration(
 pub fn eval_float_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<FloatType, Error> {
+) -> Result<FloatType, EvalexprError> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(value) => Err(Error::expected_float(value)),
+        Ok(value) => Err(EvalexprError::expected_float(value)),
         Err(error) => Err(error),
     }
 }
@@ -177,10 +177,10 @@ pub fn eval_float_with_configuration(
 pub fn eval_boolean_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<bool, Error> {
+) -> Result<bool, EvalexprError> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
-        Ok(value) => Err(Error::expected_boolean(value)),
+        Ok(value) => Err(EvalexprError::expected_boolean(value)),
         Err(error) => Err(error),
     }
 }
@@ -191,10 +191,10 @@ pub fn eval_boolean_with_configuration(
 pub fn eval_tuple_with_configuration(
     string: &str,
     configuration: &Configuration,
-) -> Result<TupleType, Error> {
+) -> Result<TupleType, EvalexprError> {
     match eval_with_configuration(string, configuration) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
-        Ok(value) => Err(Error::expected_tuple(value)),
+        Ok(value) => Err(EvalexprError::expected_tuple(value)),
         Err(error) => Err(error),
     }
 }

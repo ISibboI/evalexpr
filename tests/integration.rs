@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{error::*, *};
+use evalexpr::{*, error::*};
 
 #[test]
 fn test_unary_examples() {
@@ -10,7 +10,7 @@ fn test_unary_examples() {
     assert_eq!(eval("false"), Ok(Value::Boolean(false)));
     assert_eq!(
         eval("blub"),
-        Err(Error::VariableIdentifierNotFound("blub".to_string()))
+        Err(EvalexprError::VariableIdentifierNotFound("blub".to_string()))
     );
     assert_eq!(eval("-3"), Ok(Value::Int(-3)));
     assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
@@ -144,7 +144,7 @@ fn test_functions() {
                 } else if let Value::Float(float) = arguments[0] {
                     Ok(Value::Float(float - 2.0))
                 } else {
-                    Err(Error::expected_number(arguments[0].clone()))
+                    Err(EvalexprError::expected_number(arguments[0].clone()))
                 }
             }),
         ),
@@ -186,7 +186,7 @@ fn test_n_ary_functions() {
                 } else if let Value::Float(float) = arguments[0] {
                     Ok(Value::Float(float - 2.0))
                 } else {
-                    Err(Error::expected_number(arguments[0].clone()))
+                    Err(EvalexprError::expected_number(arguments[0].clone()))
                 }
             }),
         ),
@@ -262,7 +262,7 @@ fn test_n_ary_functions() {
     );
     assert_eq!(
         eval_with_configuration("count()", &configuration),
-        Err(Error::WrongOperatorArgumentAmount {
+        Err(EvalexprError::WrongOperatorArgumentAmount {
             actual: 0,
             expected: 1
         })
@@ -290,20 +290,20 @@ fn test_n_ary_functions() {
 fn test_errors() {
     assert_eq!(
         eval("-true"),
-        Err(Error::expected_number(Value::Boolean(true)))
+        Err(EvalexprError::expected_number(Value::Boolean(true)))
     );
     assert_eq!(
         eval("1-true"),
-        Err(Error::expected_number(Value::Boolean(true)))
+        Err(EvalexprError::expected_number(Value::Boolean(true)))
     );
     assert_eq!(
         eval("true-"),
-        Err(Error::WrongOperatorArgumentAmount {
+        Err(EvalexprError::WrongOperatorArgumentAmount {
             actual: 1,
             expected: 2
         })
     );
-    assert_eq!(eval("!(()true)"), Err(Error::AppendedToLeafNode));
+    assert_eq!(eval("!(()true)"), Err(EvalexprError::AppendedToLeafNode));
 }
 
 #[test]

@@ -44,7 +44,7 @@
 //!     } else if let Value::Float(float) = arguments[0] {
 //!         Ok(Value::Float(float / 2.0))
 //!     } else {
-//!         Err(Error::expected_number(arguments[0].clone()))
+//!         Err(EvalexprError::expected_number(arguments[0].clone()))
 //!     }
 //! })));
 //! configuration.insert_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
@@ -270,7 +270,7 @@ extern crate ron;
 extern crate serde;
 
 pub use configuration::{Configuration, EmptyConfiguration, HashMapConfiguration};
-pub use error::Error;
+pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
 pub use tree::Node;

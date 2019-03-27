@@ -1,4 +1,4 @@
-use error::{self, Error};
+use error::{self, EvalexprError};
 use value::Value;
 
 pub(crate) mod builtin;
@@ -19,7 +19,7 @@ pub(crate) mod builtin;
 /// ```
 pub struct Function {
     argument_amount: Option<usize>,
-    function: Box<Fn(&[Value]) -> Result<Value, Error>>,
+    function: Box<Fn(&[Value]) -> Result<Value, EvalexprError>>,
 }
 
 impl Function {
@@ -31,7 +31,7 @@ impl Function {
     /// The `function` is a boxed function that takes a slice of values and returns a `Result<Value, Error>`.
     pub fn new(
         argument_amount: Option<usize>,
-        function: Box<Fn(&[Value]) -> Result<Value, Error>>,
+        function: Box<Fn(&[Value]) -> Result<Value, EvalexprError>>,
     ) -> Self {
         Self {
             argument_amount,
@@ -39,7 +39,7 @@ impl Function {
         }
     }
 
-    pub(crate) fn call(&self, arguments: &[Value]) -> Result<Value, Error> {
+    pub(crate) fn call(&self, arguments: &[Value]) -> Result<Value, EvalexprError> {
         if let Some(argument_amount) = self.argument_amount {
             error::expect_function_argument_amount(arguments.len(), argument_amount)?;
         }

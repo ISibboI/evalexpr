@@ -1,9 +1,10 @@
-use crate::{configuration::Configuration, error::Error, operator::*, value::Value};
-use token::Token;
-use value::TupleType;
 use EmptyConfiguration;
 use FloatType;
 use IntType;
+use token::Token;
+use value::TupleType;
+
+use crate::{configuration::Configuration, error::EvalexprError, operator::*, value::Value};
 
 mod display;
 
@@ -45,7 +46,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node with the given configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_with_configuration(&self, configuration: &Configuration) -> Result<Value, Error> {
+    pub fn eval_with_configuration(&self, configuration: &Configuration) -> Result<Value, EvalexprError> {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_configuration(configuration)?);
@@ -56,7 +57,7 @@ impl Node {
     /// Evaluates the operator tree rooted at this node with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval(&self) -> Result<Value, Error> {
+    pub fn eval(&self) -> Result<Value, EvalexprError> {
         self.eval_with_configuration(&EmptyConfiguration)
     }
 
@@ -66,10 +67,10 @@ impl Node {
     pub fn eval_string_with_configuration(
         &self,
         configuration: &Configuration,
-    ) -> Result<String, Error> {
+    ) -> Result<String, EvalexprError> {
         match self.eval_with_configuration(configuration) {
             Ok(Value::String(string)) => Ok(string),
-            Ok(value) => Err(Error::expected_string(value)),
+            Ok(value) => Err(EvalexprError::expected_string(value)),
             Err(error) => Err(error),
         }
     }
@@ -80,10 +81,10 @@ impl Node {
     pub fn eval_float_with_configuration(
         &self,
         configuration: &Configuration,
-    ) -> Result<FloatType, Error> {
+    ) -> Result<FloatType, EvalexprError> {
         match self.eval_with_configuration(configuration) {
             Ok(Value::Float(float)) => Ok(float),
-            Ok(value) => Err(Error::expected_float(value)),
+            Ok(value) => Err(EvalexprError::expected_float(value)),
             Err(error) => Err(error),
         }
     }
@@ -94,10 +95,10 @@ impl Node {
     pub fn eval_int_with_configuration(
         &self,
         configuration: &Configuration,
-    ) -> Result<IntType, Error> {
+    ) -> Result<IntType, EvalexprError> {
         match self.eval_with_configuration(configuration) {
             Ok(Value::Int(int)) => Ok(int),
-            Ok(value) => Err(Error::expected_int(value)),
+            Ok(value) => Err(EvalexprError::expected_int(value)),
             Err(error) => Err(error),
         }
     }
@@ -108,10 +109,10 @@ impl Node {
     pub fn eval_boolean_with_configuration(
         &self,
         configuration: &Configuration,
-    ) -> Result<bool, Error> {
+    ) -> Result<bool, EvalexprError> {
         match self.eval_with_configuration(configuration) {
             Ok(Value::Boolean(boolean)) => Ok(boolean),
-            Ok(value) => Err(Error::expected_boolean(value)),
+            Ok(value) => Err(EvalexprError::expected_boolean(value)),
             Err(error) => Err(error),
         }
     }
@@ -122,10 +123,10 @@ impl Node {
     pub fn eval_tuple_with_configuration(
         &self,
         configuration: &Configuration,
-    ) -> Result<TupleType, Error> {
+    ) -> Result<TupleType, EvalexprError> {
         match self.eval_with_configuration(configuration) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
-            Ok(value) => Err(Error::expected_tuple(value)),
+            Ok(value) => Err(EvalexprError::expected_tuple(value)),
             Err(error) => Err(error),
         }
     }
@@ -133,35 +134,35 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a string with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string(&self) -> Result<String, Error> {
+    pub fn eval_string(&self) -> Result<String, EvalexprError> {
         self.eval_string_with_configuration(&EmptyConfiguration)
     }
 
     /// Evaluates the operator tree rooted at this node into a float with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float(&self) -> Result<FloatType, Error> {
+    pub fn eval_float(&self) -> Result<FloatType, EvalexprError> {
         self.eval_float_with_configuration(&EmptyConfiguration)
     }
 
     /// Evaluates the operator tree rooted at this node into an integer with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int(&self) -> Result<IntType, Error> {
+    pub fn eval_int(&self) -> Result<IntType, EvalexprError> {
         self.eval_int_with_configuration(&EmptyConfiguration)
     }
 
     /// Evaluates the operator tree rooted at this node into a boolean with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_boolean(&self) -> Result<bool, Error> {
+    pub fn eval_boolean(&self) -> Result<bool, EvalexprError> {
         self.eval_boolean_with_configuration(&EmptyConfiguration)
     }
 
     /// Evaluates the operator tree rooted at this node into a tuple with an empty configuration.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple(&self) -> Result<TupleType, Error> {
+    pub fn eval_tuple(&self) -> Result<TupleType, EvalexprError> {
         self.eval_tuple_with_configuration(&EmptyConfiguration)
     }
 
@@ -177,13 +178,13 @@ impl Node {
         self.children().len() == self.operator().argument_amount()
     }
 
-    fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> Result<(), Error> {
+    fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> Result<(), EvalexprError> {
         if self.operator().precedence() < node.operator().precedence() || is_root_node
             // Right-to-left chaining
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
         {
             if self.operator().is_leaf() {
-                Err(Error::AppendedToLeafNode)
+                Err(EvalexprError::AppendedToLeafNode)
             } else if self.has_correct_amount_of_children() {
                 if self.children.last().unwrap().operator().precedence()
                     < node.operator().precedence()
@@ -197,7 +198,7 @@ impl Node {
                         .insert_back_prioritized(node, false)
                 } else {
                     if node.operator().is_leaf() {
-                        return Err(Error::AppendedToLeafNode);
+                        return Err(EvalexprError::AppendedToLeafNode);
                     }
 
                     let last_child = self.children.pop().unwrap();
@@ -212,12 +213,12 @@ impl Node {
                 Ok(())
             }
         } else {
-            Err(Error::PrecedenceViolation)
+            Err(EvalexprError::PrecedenceViolation)
         }
     }
 }
 
-pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error> {
+pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, EvalexprError> {
     let mut root = vec![Node::root_node()];
     let mut last_token_is_rightsided_value = false;
     let mut token_iter = tokens.iter().peekable();
@@ -255,7 +256,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error>
             },
             Token::RBrace => {
                 if root.len() < 2 {
-                    return Err(Error::UnmatchedRBrace);
+                    return Err(EvalexprError::UnmatchedRBrace);
                 } else {
                     root.pop()
                 }
@@ -281,7 +282,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error>
             if let Some(root) = root.last_mut() {
                 root.insert_back_prioritized(node, true)?;
             } else {
-                return Err(Error::UnmatchedRBrace);
+                return Err(EvalexprError::UnmatchedRBrace);
             }
         }
 
@@ -289,19 +290,19 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> Result<Node, Error>
     }
 
     if root.len() > 1 {
-        Err(Error::UnmatchedLBrace)
+        Err(EvalexprError::UnmatchedLBrace)
     } else if let Some(mut root) = root.pop() {
         if root.children().len() > 1 {
-            Err(Error::wrong_operator_argument_amount(
+            Err(EvalexprError::wrong_operator_argument_amount(
                 root.children().len(),
                 1,
             ))
         } else if let Some(child) = root.children.pop() {
             Ok(child)
         } else {
-            Err(Error::EmptyExpression)
+            Err(EvalexprError::EmptyExpression)
         }
     } else {
-        Err(Error::UnmatchedRBrace)
+        Err(EvalexprError::UnmatchedRBrace)
     }
 }

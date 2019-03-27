@@ -1,4 +1,4 @@
-use error::Error;
+use error::EvalexprError;
 use value::{FloatType, IntType};
 
 mod display;
@@ -173,7 +173,7 @@ fn str_to_tokens(string: &str) -> Vec<PartialToken> {
 }
 
 /// Resolves all partial tokens by converting them to complex tokens.
-fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
+fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, EvalexprError> {
     let mut result = Vec::new();
     while tokens.len() > 0 {
         let first = tokens[0].clone();
@@ -204,7 +204,7 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
                 },
                 PartialToken::Eq => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
                 PartialToken::ExclamationMark => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
@@ -229,11 +229,11 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
                 },
                 PartialToken::Ampersand => match second {
                     Some(PartialToken::Ampersand) => Some(Token::And),
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
                 PartialToken::VerticalBar => match second {
                     Some(PartialToken::VerticalBar) => Some(Token::Or),
-                    _ => return Err(Error::unmatched_partial_token(first, second)),
+                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
             }
             .into_iter(),
@@ -244,6 +244,6 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> Result<Vec<Token>, Error> {
     Ok(result)
 }
 
-pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>, Error> {
+pub(crate) fn tokenize(string: &str) -> Result<Vec<Token>, EvalexprError> {
     resolve_literals(&str_to_tokens(string))
 }

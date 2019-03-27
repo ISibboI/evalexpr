@@ -1,6 +1,6 @@
-use value::{FloatType, IntType};
-use Error;
+use EvalexprError;
 use Function;
+use value::{FloatType, IntType};
 use Value;
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
@@ -18,7 +18,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                     } else if let Value::Int(int) = argument {
                         min_int = min_int.min(*int);
                     } else {
-                        return Err(Error::expected_number(argument.clone()));
+                        return Err(EvalexprError::expected_number(argument.clone()));
                     }
                 }
 
@@ -42,7 +42,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                     } else if let Value::Int(int) = argument {
                         max_int = max_int.max(*int);
                     } else {
-                        return Err(Error::expected_number(argument.clone()));
+                        return Err(EvalexprError::expected_number(argument.clone()));
                     }
                 }
 

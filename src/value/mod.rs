@@ -1,4 +1,4 @@
-use error::Error;
+use error::EvalexprError;
 
 mod display;
 
@@ -68,44 +68,44 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
-    pub fn as_string(&self) -> Result<String, Error> {
+    pub fn as_string(&self) -> Result<String, EvalexprError> {
         match self {
             Value::String(string) => Ok(string.clone()),
-            value => Err(Error::expected_string(value.clone())),
+            value => Err(EvalexprError::expected_string(value.clone())),
         }
     }
 
     /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
-    pub fn as_int(&self) -> Result<IntType, Error> {
+    pub fn as_int(&self) -> Result<IntType, EvalexprError> {
         match self {
             Value::Int(i) => Ok(*i),
-            value => Err(Error::expected_int(value.clone())),
+            value => Err(EvalexprError::expected_int(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
     /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
-    pub fn as_float(&self) -> Result<FloatType, Error> {
+    pub fn as_float(&self) -> Result<FloatType, EvalexprError> {
         match self {
             Value::Float(f) => Ok(*f),
             Value::Int(i) => Ok(*i as FloatType),
-            value => Err(Error::expected_number(value.clone())),
+            value => Err(EvalexprError::expected_number(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
-    pub fn as_boolean(&self) -> Result<bool, Error> {
+    pub fn as_boolean(&self) -> Result<bool, EvalexprError> {
         match self {
             Value::Boolean(boolean) => Ok(*boolean),
-            value => Err(Error::expected_boolean(value.clone())),
+            value => Err(EvalexprError::expected_boolean(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `TupleType`, or  returns`Err` if `self` is not a `Value::Tuple`.
-    pub fn as_tuple(&self) -> Result<TupleType, Error> {
+    pub fn as_tuple(&self) -> Result<TupleType, EvalexprError> {
         match self {
             Value::Tuple(tuple) => Ok(tuple.clone()),
-            value => Err(Error::expected_tuple(value.clone())),
+            value => Err(EvalexprError::expected_tuple(value.clone())),
         }
     }
 }
@@ -146,7 +146,7 @@ impl From<TupleType> for Value {
     }
 }
 
-impl From<Value> for Result<Value, Error> {
+impl From<Value> for Result<Value, EvalexprError> {
     fn from(value: Value) -> Self {
         Ok(value)
     }
