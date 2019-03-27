@@ -4,18 +4,18 @@ use value::Value;
 pub(crate) mod builtin;
 
 /// A user-defined function.
-/// Functions can be used in expressions by storing them in a `Configuration`.
+/// Functions can be used in expressions by storing them in a `Context`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut configuration = HashMapConfiguration::new();
-/// configuration.insert_function("id", Function::new(Some(1), Box::new(|arguments| {
+/// let mut context = HashMapContext::new();
+/// context.set_function("id", Function::new(Some(1), Box::new(|arguments| {
 ///     Ok(arguments[0].clone())
-/// })));
-/// assert_eq!(eval_with_configuration("id(4)", &configuration), Ok(Value::from(4)));
+/// }))).unwrap(); // Do proper error handling here
+/// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
 /// ```
 pub struct Function {
     argument_amount: Option<usize>,

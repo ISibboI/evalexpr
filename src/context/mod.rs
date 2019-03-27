@@ -7,11 +7,11 @@ use value::value_type::ValueType;
 
 use crate::value::Value;
 
-/// A configuration for an expression tree.
+/// A context for an expression tree.
 ///
-/// A configuration defines methods to retrieve values and functions for literals in an expression tree.
-/// This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier, and the `HashMapContext`, that stores its mappings in hash maps.
-pub trait Configuration {
+/// A context defines methods to retrieve values and functions for literals in an expression tree.
+/// This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
+pub trait Context {
     /// Returns the value that is linked to the given identifier.
     fn get_value(&self, identifier: &str) -> Option<&Value>;
 
@@ -19,12 +19,12 @@ pub trait Configuration {
     fn get_function(&self, identifier: &str) -> Option<&Function>;
 }
 
-/// A context for an expression tree.
+/// A mutable context for an expression tree.
 ///
-/// In addition to all functionality of a `Configuration`, a context also allows the manipulation of values and functions.
-/// This crate implements two basic variants, the `EmptyContext`, that returns `Err` for each identifier, and the `HashMapContext`, that stores its mappings in hash maps.
+/// In addition to all functionality of a `Context`, a mutable context also allows the manipulation of values and functions.
+/// This crate implements two basic variants, the `EmptyContext`, that returns an error for each manipulation, and the `HashMapContext`, that stores its mappings in hash maps.
 /// The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
-pub trait Context: Configuration {
+pub trait ContextMut: Context {
     /// Links the given value to the given identifier.
     fn set_value<S: Into<String>, V: Into<Value>>(&mut self, identifier: S, value: V) -> EvalexprResult<()>;
 
@@ -32,10 +32,10 @@ pub trait Context: Configuration {
     fn set_function<S: Into<String>>(&mut self, identifier: S, function: Function) -> EvalexprResult<()>;
 }
 
-/// A configuration that returns `None` for each identifier.
+/// A context that returns `None` for each identifier.
 pub struct EmptyContext;
 
-impl Configuration for EmptyContext {
+impl Context for EmptyContext {
     fn get_value(&self, _identifier: &str) -> Option<&Value> {
         None
     }
@@ -45,7 +45,7 @@ impl Configuration for EmptyContext {
     }
 }
 
-impl Context for EmptyContext {
+impl ContextMut for EmptyContext {
     fn set_value<S: Into<String>, V: Into<Value>>(&mut self, _identifier: S, _value: V) -> EvalexprResult<()> {
         Err(EvalexprError::ContextNotManipulable)
     }
@@ -75,7 +75,7 @@ impl HashMapContext {
     }
 }
 
-impl Configuration for HashMapContext {
+impl Context for HashMapContext {
     fn get_value(&self, identifier: &str) -> Option<&Value> {
         self.variables.get(identifier)
     }
@@ -85,7 +85,7 @@ impl Configuration for HashMapContext {
     }
 }
 
-impl Context for HashMapContext {
+impl ContextMut for HashMapContext {
     fn set_value<S: Into<String>, V: Into<Value>>(&mut self, identifier: S, value: V) -> Result<(), EvalexprError> {
         let identifier = identifier.into();
         let value = value.into();

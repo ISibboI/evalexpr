@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 
 use function::builtin::builtin_function;
 
-use crate::{context::Configuration, error::*, value::Value};
+use crate::{context::Context, error::*, value::Value};
 
 mod display;
 
@@ -28,11 +28,11 @@ pub trait Operator: Debug + Display {
     // Make this a const fn once #57563 is resolved
     fn argument_amount(&self) -> usize;
 
-    /// Evaluates the operator with the given arguments and configuration.
+    /// Evaluates the operator with the given arguments and context.
     fn eval(
         &self,
         arguments: &[Value],
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<Value, EvalexprError>;
 }
 
@@ -125,7 +125,7 @@ impl Operator for RootNode {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 1)?;
         Ok(arguments[0].clone())
@@ -148,7 +148,7 @@ impl Operator for Add {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -188,7 +188,7 @@ impl Operator for Sub {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -228,7 +228,7 @@ impl Operator for Neg {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 1)?;
         expect_number(&arguments[0])?;
@@ -262,7 +262,7 @@ impl Operator for Mul {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -302,7 +302,7 @@ impl Operator for Div {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -342,7 +342,7 @@ impl Operator for Mod {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -382,7 +382,7 @@ impl Operator for Exp {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -413,7 +413,7 @@ impl Operator for Eq {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
 
@@ -441,7 +441,7 @@ impl Operator for Neq {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
 
@@ -469,7 +469,7 @@ impl Operator for Gt {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -507,7 +507,7 @@ impl Operator for Lt {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -545,7 +545,7 @@ impl Operator for Geq {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -583,7 +583,7 @@ impl Operator for Leq {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         expect_number(&arguments[0])?;
@@ -621,7 +621,7 @@ impl Operator for And {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         let a = expect_boolean(&arguments[0])?;
@@ -651,7 +651,7 @@ impl Operator for Or {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 2)?;
         let a = expect_boolean(&arguments[0])?;
@@ -681,7 +681,7 @@ impl Operator for Not {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 1)?;
         let a = expect_boolean(&arguments[0])?;
@@ -710,7 +710,7 @@ impl Operator for Tuple {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         if let Value::Tuple(tuple) = &arguments[0] {
             let mut tuple = tuple.clone();
@@ -751,7 +751,7 @@ impl Operator for Const {
     fn eval(
         &self,
         arguments: &[Value],
-        _configuration: &Configuration,
+        _context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 0)?;
 
@@ -775,9 +775,9 @@ impl Operator for VariableIdentifier {
     fn eval(
         &self,
         _arguments: &[Value],
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<Value, EvalexprError> {
-        if let Some(value) = configuration.get_value(&self.identifier).cloned() {
+        if let Some(value) = context.get_value(&self.identifier).cloned() {
             Ok(value)
         } else {
             Err(EvalexprError::VariableIdentifierNotFound(
@@ -803,7 +803,7 @@ impl Operator for FunctionIdentifier {
     fn eval(
         &self,
         arguments: &[Value],
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<Value, EvalexprError> {
         expect_operator_argument_amount(arguments.len(), 1)?;
 
@@ -813,7 +813,7 @@ impl Operator for FunctionIdentifier {
             arguments
         };
 
-        if let Some(function) = configuration.get_function(&self.identifier) {
+        if let Some(function) = context.get_function(&self.identifier) {
             function.call(arguments)
         } else if let Some(builtin_function) = builtin_function(&self.identifier) {
             builtin_function.call(arguments)

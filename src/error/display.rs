@@ -40,12 +40,12 @@ impl fmt::Display for EvalexprError {
             ),
             VariableIdentifierNotFound(identifier) => write!(
                 f,
-                "Variable identifier is not bound to anything by configuration: {:?}.",
+                "Variable identifier is not bound to anything by context: {:?}.",
                 identifier
             ),
             FunctionIdentifierNotFound(identifier) => write!(
                 f,
-                "Function identifier is not bound to anything by configuration: {:?}.",
+                "Function identifier is not bound to anything by context: {:?}.",
                 identifier
             ),
             TypeError { expected, actual } => {

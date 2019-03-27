@@ -81,10 +81,10 @@ pub enum EvalexprError {
     /// If it does, please file a bug report.
     PrecedenceViolation,
 
-    /// A `VariableIdentifier` operation did not find its value in the configuration.
+    /// A `VariableIdentifier` operation did not find its value in the context.
     VariableIdentifierNotFound(String),
 
-    /// A `FunctionIdentifier` operation did not find its value in the configuration.
+    /// A `FunctionIdentifier` operation did not find its value in the context.
     FunctionIdentifierNotFound(String),
 
     /// A value has the wrong type.

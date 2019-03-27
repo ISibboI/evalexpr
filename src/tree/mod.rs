@@ -4,25 +4,25 @@ use IntType;
 use token::Token;
 use value::TupleType;
 
-use crate::{context::Configuration, error::EvalexprError, operator::*, value::Value};
+use crate::{context::Context, error::EvalexprError, operator::*, value::Value};
 
 mod display;
 
 /// A node in the operator tree.
 /// The operator tree is created by the crate-level `build_operator_tree` method.
-/// It can be evaluated for a given configuration with the `Node::eval` method.
+/// It can be evaluated for a given context with the `Node::eval` method.
 ///
-/// The advantage of constructing the operator tree separately from the actual evaluation is that it can be evaluated arbitrarily often with different configurations.
+/// The advantage of constructing the operator tree separately from the actual evaluation is that it can be evaluated arbitrarily often with different contexts.
 ///
 /// # Examples
 ///
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut configuration = HashMapContext::new();
-/// configuration.set_value("alpha", 2).unwrap(); // Do proper error handling here
+/// let mut context = HashMapContext::new();
+/// context.set_value("alpha", 2).unwrap(); // Do proper error handling here
 /// let node = build_operator_tree("1 + alpha").unwrap(); // Do proper error handling here
-/// assert_eq!(node.eval_with_configuration(&configuration), Ok(Value::from(3)));
+/// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
 /// ```
 ///
 #[derive(Debug)]
@@ -43,130 +43,130 @@ impl Node {
         Self::new(RootNode)
     }
 
-    /// Evaluates the operator tree rooted at this node with the given configuration.
+    /// Evaluates the operator tree rooted at this node with the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_with_configuration(
+    pub fn eval_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<Value, EvalexprError> {
         let mut arguments = Vec::new();
         for child in self.children() {
-            arguments.push(child.eval_with_configuration(configuration)?);
+            arguments.push(child.eval_with_context(context)?);
         }
-        self.operator().eval(&arguments, configuration)
+        self.operator().eval(&arguments, context)
     }
 
-    /// Evaluates the operator tree rooted at this node with an empty configuration.
+    /// Evaluates the operator tree rooted at this node with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval(&self) -> Result<Value, EvalexprError> {
-        self.eval_with_configuration(&EmptyContext)
+        self.eval_with_context(&EmptyContext)
     }
 
-    /// Evaluates the operator tree rooted at this node into a string with an the given configuration.
+    /// Evaluates the operator tree rooted at this node into a string with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string_with_configuration(
+    pub fn eval_string_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<String, EvalexprError> {
-        match self.eval_with_configuration(configuration) {
+        match self.eval_with_context(context) {
             Ok(Value::String(string)) => Ok(string),
             Ok(value) => Err(EvalexprError::expected_string(value)),
             Err(error) => Err(error),
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into a float with an the given configuration.
+    /// Evaluates the operator tree rooted at this node into a float with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_configuration(
+    pub fn eval_float_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<FloatType, EvalexprError> {
-        match self.eval_with_configuration(configuration) {
+        match self.eval_with_context(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_float(value)),
             Err(error) => Err(error),
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into an integer with an the given configuration.
+    /// Evaluates the operator tree rooted at this node into an integer with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int_with_configuration(
+    pub fn eval_int_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<IntType, EvalexprError> {
-        match self.eval_with_configuration(configuration) {
+        match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(EvalexprError::expected_int(value)),
             Err(error) => Err(error),
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into a boolean with an the given configuration.
+    /// Evaluates the operator tree rooted at this node into a boolean with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_boolean_with_configuration(
+    pub fn eval_boolean_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<bool, EvalexprError> {
-        match self.eval_with_configuration(configuration) {
+        match self.eval_with_context(context) {
             Ok(Value::Boolean(boolean)) => Ok(boolean),
             Ok(value) => Err(EvalexprError::expected_boolean(value)),
             Err(error) => Err(error),
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into a tuple with an the given configuration.
+    /// Evaluates the operator tree rooted at this node into a tuple with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_configuration(
+    pub fn eval_tuple_with_context(
         &self,
-        configuration: &Configuration,
+        context: &Context,
     ) -> Result<TupleType, EvalexprError> {
-        match self.eval_with_configuration(configuration) {
+        match self.eval_with_context(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),
             Err(error) => Err(error),
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into a string with an empty configuration.
+    /// Evaluates the operator tree rooted at this node into a string with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_string(&self) -> Result<String, EvalexprError> {
-        self.eval_string_with_configuration(&EmptyContext)
+        self.eval_string_with_context(&EmptyContext)
     }
 
-    /// Evaluates the operator tree rooted at this node into a float with an empty configuration.
+    /// Evaluates the operator tree rooted at this node into a float with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_float(&self) -> Result<FloatType, EvalexprError> {
-        self.eval_float_with_configuration(&EmptyContext)
+        self.eval_float_with_context(&EmptyContext)
     }
 
-    /// Evaluates the operator tree rooted at this node into an integer with an empty configuration.
+    /// Evaluates the operator tree rooted at this node into an integer with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int(&self) -> Result<IntType, EvalexprError> {
-        self.eval_int_with_configuration(&EmptyContext)
+        self.eval_int_with_context(&EmptyContext)
     }
 
-    /// Evaluates the operator tree rooted at this node into a boolean with an empty configuration.
+    /// Evaluates the operator tree rooted at this node into a boolean with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_boolean(&self) -> Result<bool, EvalexprError> {
-        self.eval_boolean_with_configuration(&EmptyContext)
+        self.eval_boolean_with_context(&EmptyContext)
     }
 
-    /// Evaluates the operator tree rooted at this node into a tuple with an empty configuration.
+    /// Evaluates the operator tree rooted at this node into a tuple with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> Result<TupleType, EvalexprError> {
-        self.eval_tuple_with_configuration(&EmptyContext)
+        self.eval_tuple_with_context(&EmptyContext)
     }
 
     fn children(&self) -> &[Node] {

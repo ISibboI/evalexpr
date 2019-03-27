@@ -4,7 +4,7 @@
 
 ### Added
 
- * Add the `Context` trait, that is a manipulable configuration
+ * Add the `ContextMut` trait, that is a manipulable configuration/context
  * Add `ContextNotManipulable` error variant for the `EmptyContext`
 
 ### Removed
@@ -12,6 +12,7 @@
 ### Changed
 
  * Get rid of some unwraps to improve safety
+ * Rename `Configuration` to `Context`
  * Rename `HashMapConfiguration` to `HashMapContext` and `EmptyConfiguration` to `EmptyContext`
 
 ### Fixed

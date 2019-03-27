@@ -35,10 +35,10 @@
 //! use evalexpr::*;
 //! use evalexpr::error::expect_number;
 //!
-//! let mut configuration = HashMapContext::new();
-//! configuration.set_value("five", 5).unwrap(); // Do proper error handling here
-//! configuration.set_value("twelve", 12).unwrap(); // Do proper error handling here
-//! configuration.set_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
+//! let mut context = HashMapContext::new();
+//! context.set_value("five", 5).unwrap(); // Do proper error handling here
+//! context.set_value("twelve", 12).unwrap(); // Do proper error handling here
+//! context.set_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
 //!     if let Value::Int(int) = arguments[0] {
 //!         Ok(Value::Int(int / 2))
 //!     } else if let Value::Float(float) = arguments[0] {
@@ -47,7 +47,7 @@
 //!         Err(EvalexprError::expected_number(arguments[0].clone()))
 //!     }
 //! }))).unwrap(); // Do proper error handling here
-//! configuration.set_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+//! context.set_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
 //!     expect_number(&arguments[0])?;
 //!     expect_number(&arguments[1])?;
 //!
@@ -58,12 +58,12 @@
 //!     }
 //! }))).unwrap(); // Do proper error handling here
 //!
-//! assert_eq!(eval_with_configuration("five + 8 > f(twelve)", &configuration), Ok(Value::from(true)));
-//! // `eval_with_configuration` returns a variant of the `Value` enum,
-//! // while `eval_[type]_with_configuration` returns the respective type directly.
+//! assert_eq!(eval_with_context("five + 8 > f(twelve)", &context), Ok(Value::from(true)));
+//! // `eval_with_context` returns a variant of the `Value` enum,
+//! // while `eval_[type]_with_context` returns the respective type directly.
 //! // Both can be used interchangeably.
-//! assert_eq!(eval_boolean_with_configuration("five + 8 > f(twelve)", &configuration), Ok(true));
-//! assert_eq!(eval_with_configuration("avg(2, 4) == 3", &configuration), Ok(Value::from(true)));
+//! assert_eq!(eval_boolean_with_context("five + 8 > f(twelve)", &context), Ok(true));
+//! assert_eq!(eval_with_context("avg(2, 4) == 3", &context), Ok(Value::from(true)));
 //! ```
 //!
 //! You can also **precompile** expressions like this:
@@ -73,18 +73,18 @@
 //!
 //! let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
 //!
-//! let mut configuration = HashMapContext::new();
-//! configuration.set_value("a", 6).unwrap(); // Do proper error handling here
-//! configuration.set_value("b", 2).unwrap(); // Do proper error handling here
-//! configuration.set_value("c", 3).unwrap(); // Do proper error handling here
-//! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(true)));
+//! let mut context = HashMapContext::new();
+//! context.set_value("a", 6).unwrap(); // Do proper error handling here
+//! context.set_value("b", 2).unwrap(); // Do proper error handling here
+//! context.set_value("c", 3).unwrap(); // Do proper error handling here
+//! assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(true)));
 //!
-//! configuration.set_value("c", 8).unwrap(); // Do proper error handling here
-//! assert_eq!(precompiled.eval_with_configuration(&configuration), Ok(Value::from(false)));
-//! // `Node::eval_with_configuration` returns a variant of the `Value` enum,
-//! // while `Node::eval_[type]_with_configuration` returns the respective type directly.
+//! context.set_value("c", 8).unwrap(); // Do proper error handling here
+//! assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(false)));
+//! // `Node::eval_with_context` returns a variant of the `Value` enum,
+//! // while `Node::eval_[type]_with_context` returns the respective type directly.
 //! // Both can be used interchangeably.
-//! assert_eq!(precompiled.eval_boolean_with_configuration(&configuration), Ok(false));
+//! assert_eq!(precompiled.eval_boolean_with_context(&context), Ok(false));
 //! ```
 //!
 //! ## Features
@@ -187,12 +187,12 @@
 //! This crate allows to compile parameterizable formulas by using variables.
 //! A variable is a literal in the formula, that does not contain whitespace or can be parsed as value.
 //! The user needs to provide bindings to the variables for evaluation.
-//! This is done with the `Configuration` trait.
+//! This is done with the `Context` trait.
 //! Two structs implementing this trait are predefined.
-//! There is `EmptyConfiguration`, that returns `None` for each request, and `HashMapConfiguration`, that stores mappings from literals to variables in a hash map.
+//! There is `EmptyContext`, that returns `None` for each request, and `HashMapContext`, that stores mappings from literals to variables in a hash map.
 //!
-//! Variables do not have fixed types in the expression itself, but aer typed by the configuration.
-//! The `Configuration` trait contains a function that takes a string literal and returns a `Value` enum.
+//! Variables do not have fixed types in the expression itself, but aer typed by the context.
+//! The `Context` trait contains a function that takes a string literal and returns a `Value` enum.
 //! The variant of this enum decides the type on evaluation.
 //!
 //! Variables have a precedence of 200.
@@ -216,7 +216,7 @@
 //! Functions are identified by literals, like variables as well.
 //! A literal identifies a function, if it is followed by an opening brace `(`, another literal, or a value.
 //!
-//! Same as variables, function bindings are provided by the user via a `Configuration`.
+//! Same as variables, function bindings are provided by the user via a `Context`.
 //! Functions have a precedence of 190.
 //!
 //! ### Examplary variables and functions in expressions:
@@ -241,15 +241,15 @@
 //! extern crate ron;
 //! use evalexpr::*;
 //!
-//! let mut configuration = HashMapContext::new();
-//! configuration.set_value("five", 5).unwrap(); // Do proper error handling here
+//! let mut context = HashMapContext::new();
+//! context.set_value("five", 5).unwrap(); // Do proper error handling here
 //!
 //! // In ron format, strings are surrounded by "
 //! let serialized_free = "\"five * five\"";
 //! match ron::de::from_str::<Node>(serialized_free) {
-//!     Ok(free) => assert_eq!(free.eval_with_configuration(&configuration), Ok(Value::from(25))),
+//!     Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from(25))),
 //!     Err(error) => {
-//!         // Handle error
+//!         () // Handle error
 //!     },
 //! }
 //! ```
@@ -269,7 +269,7 @@ extern crate ron;
 #[cfg(feature = "serde")]
 extern crate serde;
 
-pub use context::{Configuration, Context, EmptyContext, HashMapContext};
+pub use context::{Context, ContextMut, EmptyContext, HashMapContext};
 pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
