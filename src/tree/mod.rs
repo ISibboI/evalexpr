@@ -94,6 +94,19 @@ impl Node {
         }
     }
 
+    /// Evaluates the operator tree rooted at this node into a float with an the given context.
+    /// If the result of the expression is an integer, it is silently converted into a float.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_number_with_context(&self, context: &Context) -> Result<FloatType, EvalexprError> {
+        match self.eval_with_context(context) {
+            Ok(Value::Int(int)) => Ok(int as FloatType),
+            Ok(Value::Float(float)) => Ok(float),
+            Ok(value) => Err(EvalexprError::expected_int(value)),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Evaluates the operator tree rooted at this node into a boolean with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
@@ -135,6 +148,14 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int(&self) -> Result<IntType, EvalexprError> {
         self.eval_int_with_context(&EmptyContext)
+    }
+
+    /// Evaluates the operator tree rooted at this node into a float with an empty context.
+    /// If the result of the expression is an integer, it is silently converted into a float.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_number(&self) -> Result<FloatType, EvalexprError> {
+        self.eval_number_with_context(&EmptyContext)
     }
 
     /// Evaluates the operator tree rooted at this node into a boolean with an empty context.

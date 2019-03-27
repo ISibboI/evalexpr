@@ -375,6 +375,12 @@ fn test_shortcut_functions() {
         Ok(3)
     );
     assert_eq!(
+        build_operator_tree("3")
+            .unwrap()
+            .eval_number_with_context(&context),
+        Ok(3.0)
+    );
+    assert_eq!(
         build_operator_tree("true").unwrap().eval_boolean(),
         Ok(true)
     );
