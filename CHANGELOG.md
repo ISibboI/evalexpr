@@ -6,12 +6,16 @@
 
  * Add the `ContextMut` trait, that is a manipulable configuration/context
  * Add `ContextNotManipulable` error variant for the `EmptyContext`
+ * Make the `TupleType` alias public
+ * Add the `ValueType` enum that represents the type of a value for easier comparisons and matchings
+ * Add `EvalexprResult<T>` type that uses the `EvalexprError` type (renamed from `Error`)
 
 ### Removed
 
 ### Changed
 
  * Get rid of some unwraps to improve safety
+ * Rename `Error` to `EvalexprError`
  * Rename `Configuration` to `Context`
  * Rename `HashMapConfiguration` to `HashMapContext` and `EmptyConfiguration` to `EmptyContext`
 
