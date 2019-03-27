@@ -233,6 +233,14 @@
 //!
 //! ### [Serde](https://serde.rs)
 //!
+//! To use this crate with serde, the serde feature flag has to be set.
+//! This can be done like this in the `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! evalexpr = {version = "1", features = ["serde"]}
+//! ```
+//!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
 //! The implementation expects a [serde `string`](https://serde.rs/data-model.html) as input.
 //! Example parsing with [ron format](docs.rs/ron):
