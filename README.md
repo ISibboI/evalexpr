@@ -18,7 +18,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "2"
+evalexpr = "3"
 ```
 
 Add the `extern crate` definition to your `main.rs` or `lib.rs`:
@@ -299,7 +299,7 @@ This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "2", features = ["serde"]}
+evalexpr = {version = "3", features = ["serde"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
