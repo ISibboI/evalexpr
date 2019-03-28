@@ -156,7 +156,7 @@ They return the result as the type it was passed into the function.
 ### Values
 
 Operators take values as arguments and produce values as results.
-Values can be boolean, integer or floating point numbers.
+Values can be boolean, integer or floating point numbers, tuples or the empty type.
 Strings are supported as well, but there are no operations defined for them yet.
 Values are denoted as displayed in the following table.
 
@@ -165,8 +165,15 @@ Values are denoted as displayed in the following table.
 | `Value::Boolean` | `true`, `false` |
 | `Value::Int` | `3`, `-9`, `0`, `135412` |
 | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |
+| `Value::Tuple` | `(3, 55.0, false, ())`, `(1, 2)` |
+| `Value::Empty` | `()` |
 
 Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+Tuples are represented as `Vec<Value>` and empty values are not stored, but represented by rust's unit type `()` where necessary.
+
+There exist type aliases for some of the types.
+They include `IntType`, `FloatType`, `TupleType` and `EmptyType`.
+
 Values can be constructed either directly or using the `From` trait.
 Values can be decomposed using the `Value::as_[type]` methods.
 The type of a value can be checked using the `Value::is_[type]` methods.
