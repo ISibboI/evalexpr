@@ -380,6 +380,7 @@ fn test_shortcut_functions() {
             .eval_int_with_context(&context),
         Ok(3)
     );
+    assert_eq!(build_operator_tree("3").unwrap().eval_number(), Ok(3.0));
     assert_eq!(
         build_operator_tree("3")
             .unwrap()
@@ -404,6 +405,60 @@ fn test_shortcut_functions() {
         build_operator_tree("3,3")
             .unwrap()
             .eval_tuple_with_context(&context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+
+    assert_eq!(
+        eval_string_with_context_mut("string", &mut context),
+        Ok("a string".to_string())
+    );
+    assert_eq!(eval_float_with_context_mut("3.3", &mut context), Ok(3.3));
+    assert_eq!(eval_int_with_context_mut("3", &mut context), Ok(3));
+    assert_eq!(eval_number_with_context_mut("3", &mut context), Ok(3.0));
+    assert_eq!(
+        eval_boolean_with_context_mut("true", &mut context),
+        Ok(true)
+    );
+    assert_eq!(
+        eval_tuple_with_context_mut("3,3", &mut context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+
+    assert_eq!(
+        build_operator_tree("string")
+            .unwrap()
+            .eval_string_with_context_mut(&mut context),
+        Ok("a string".to_string())
+    );
+    ;
+    assert_eq!(
+        build_operator_tree("3.3")
+            .unwrap()
+            .eval_float_with_context_mut(&mut context),
+        Ok(3.3)
+    );
+    assert_eq!(
+        build_operator_tree("3")
+            .unwrap()
+            .eval_int_with_context_mut(&mut context),
+        Ok(3)
+    );
+    assert_eq!(
+        build_operator_tree("3")
+            .unwrap()
+            .eval_number_with_context_mut(&mut context),
+        Ok(3.0)
+    );
+    assert_eq!(
+        build_operator_tree("true")
+            .unwrap()
+            .eval_boolean_with_context_mut(&mut context),
+        Ok(true)
+    );
+    assert_eq!(
+        build_operator_tree("3,3")
+            .unwrap()
+            .eval_tuple_with_context(&mut context),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
 }
