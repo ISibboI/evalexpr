@@ -127,17 +127,25 @@ The precedence of variables and values is 200, and the precedence of function li
 
 Supported binary operators:
 
-| Operator | Precedence | Description |   | Operator | Precedence | Description |
-|----------|------------|-------------|---|----------|------------|-------------|
-| + | 95 | Sum | | < | 80 | Lower than |
-| - | 95 | Difference | | \> | 80 | Greater than |
-| * | 100 | Product | | <= | 80 | Lower than or equal |
-| / | 100 | Division | | \>= | 80 | Greater than or equal |
-| % | 100 | Modulo | | == | 80 | Equal |
-| ^ | 120 | Exponentiation | | != | 80 | Not equal |
-| && | 75 | Logical and | | , | 40 | Aggregation |
-| &#124;&#124; | 70 | Logical or | | = | 50 | Assignment |
-| | | | | ; | 0 | Expression Chaining |
+| Operator | Precedence | Description |
+|----------|------------|-------------|
+| ^ | 120 | Exponentiation |
+| * | 100 | Product |
+| / | 100 | Division |
+| % | 100 | Modulo |
+| + | 95 | Sum |
+| - | 95 | Difference |
+| < | 80 | Lower than |
+| \> | 80 | Greater than |
+| <= | 80 | Lower than or equal |
+| \>= | 80 | Greater than or equal |
+| == | 80 | Equal |
+| != | 80 | Not equal |
+| && | 75 | Logical and |
+| &#124;&#124; | 70 | Logical or |
+| = | 50 | Assignment |
+| , | 40 | Aggregation |
+| ; | 0 | Expression Chaining |
 
 Supported unary operators:
 
