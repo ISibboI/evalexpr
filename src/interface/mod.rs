@@ -1,6 +1,3 @@
-use token;
-use tree;
-use value::TupleType;
 use Context;
 use EmptyContext;
 use EvalexprError;
@@ -8,7 +5,10 @@ use EvalexprResult;
 use FloatType;
 use IntType;
 use Node;
+use token;
+use tree;
 use Value;
+use value::TupleType;
 
 /// Evaluate the given expression string.
 ///
@@ -33,9 +33,9 @@ pub fn eval(string: &str) -> EvalexprResult<Value> {
 /// use evalexpr::*;
 ///
 /// let mut context = HashMapContext::new();
-/// context.set_value("one", 1).unwrap(); // Do proper error handling here
-/// context.set_value("two", 2).unwrap(); // Do proper error handling here
-/// context.set_value("three", 3).unwrap(); // Do proper error handling here
+/// context.set_value("one".into(), 1.into()).unwrap(); // Do proper error handling here
+/// context.set_value("two".into(), 2.into()).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), 3.into()).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_context("one + two + three", &context), Ok(Value::from(6)));
 /// ```
 ///
@@ -57,13 +57,13 @@ pub fn eval_with_context(string: &str, context: &Context) -> EvalexprResult<Valu
 /// let precomputed = build_operator_tree("one + two + three").unwrap(); // Do proper error handling here
 ///
 /// let mut context = HashMapContext::new();
-/// context.set_value("one", 1).unwrap(); // Do proper error handling here
-/// context.set_value("two", 2).unwrap(); // Do proper error handling here
-/// context.set_value("three", 3).unwrap(); // Do proper error handling here
+/// context.set_value("one".into(), 1.into()).unwrap(); // Do proper error handling here
+/// context.set_value("two".into(), 2.into()).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), 3.into()).unwrap(); // Do proper error handling here
 ///
 /// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from(6)));
 ///
-/// context.set_value("three", 5).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), 5.into()).unwrap(); // Do proper error handling here
 /// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from(8)));
 /// ```
 ///

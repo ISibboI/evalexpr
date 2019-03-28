@@ -36,9 +36,9 @@
 //! use evalexpr::error::expect_number;
 //!
 //! let mut context = HashMapContext::new();
-//! context.set_value("five", 5).unwrap(); // Do proper error handling here
-//! context.set_value("twelve", 12).unwrap(); // Do proper error handling here
-//! context.set_function("f", Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
+//! context.set_value("five".into(), 5.into()).unwrap(); // Do proper error handling here
+//! context.set_value("twelve".into(), 12.into()).unwrap(); // Do proper error handling here
+//! context.set_function("f".into(), Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
 //!     if let Value::Int(int) = arguments[0] {
 //!         Ok(Value::Int(int / 2))
 //!     } else if let Value::Float(float) = arguments[0] {
@@ -47,7 +47,7 @@
 //!         Err(EvalexprError::expected_number(arguments[0].clone()))
 //!     }
 //! }))).unwrap(); // Do proper error handling here
-//! context.set_function("avg", Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+//! context.set_function("avg".into(), Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
 //!     expect_number(&arguments[0])?;
 //!     expect_number(&arguments[1])?;
 //!
@@ -74,12 +74,12 @@
 //! let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
 //!
 //! let mut context = HashMapContext::new();
-//! context.set_value("a", 6).unwrap(); // Do proper error handling here
-//! context.set_value("b", 2).unwrap(); // Do proper error handling here
-//! context.set_value("c", 3).unwrap(); // Do proper error handling here
+//! context.set_value("a".into(), 6.into()).unwrap(); // Do proper error handling here
+//! context.set_value("b".into(), 2.into()).unwrap(); // Do proper error handling here
+//! context.set_value("c".into(), 3.into()).unwrap(); // Do proper error handling here
 //! assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(true)));
 //!
-//! context.set_value("c", 8).unwrap(); // Do proper error handling here
+//! context.set_value("c".into(), 8.into()).unwrap(); // Do proper error handling here
 //! assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(false)));
 //! // `Node::eval_with_context` returns a variant of the `Value` enum,
 //! // while `Node::eval_[type]_with_context` returns the respective type directly.
@@ -250,7 +250,7 @@
 //! use evalexpr::*;
 //!
 //! let mut context = HashMapContext::new();
-//! context.set_value("five", 5).unwrap(); // Do proper error handling here
+//! context.set_value("five".into(), 5.into()).unwrap(); // Do proper error handling here
 //!
 //! // In ron format, strings are surrounded by "
 //! let serialized_free = "\"five * five\"";
@@ -277,12 +277,12 @@ extern crate ron;
 #[cfg(feature = "serde")]
 extern crate serde;
 
-pub use context::{Context, ContextMut, EmptyContext, HashMapContext};
+pub use context::{Context, EmptyContext, HashMapContext};
 pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
-pub use value::{value_type::ValueType, FloatType, IntType, TupleType, Value};
+pub use value::{FloatType, IntType, TupleType, Value, value_type::ValueType};
 
 mod context;
 pub mod error;

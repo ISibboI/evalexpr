@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{error::*, *};
+use evalexpr::{*, error::*};
 
 #[test]
 fn test_unary_examples() {
@@ -100,12 +100,16 @@ fn test_boolean_examples() {
 #[test]
 fn test_with_context() {
     let mut context = HashMapContext::new();
-    context.set_value("tr", Value::Boolean(true)).unwrap();
-    context.set_value("fa", Value::Boolean(false)).unwrap();
-    context.set_value("five", Value::Int(5)).unwrap();
-    context.set_value("six", Value::Int(6)).unwrap();
-    context.set_value("half", Value::Float(0.5)).unwrap();
-    context.set_value("zero", Value::Int(0)).unwrap();
+    context
+        .set_value("tr".into(), Value::Boolean(true))
+        .unwrap();
+    context
+        .set_value("fa".into(), Value::Boolean(false))
+        .unwrap();
+    context.set_value("five".into(), Value::Int(5)).unwrap();
+    context.set_value("six".into(), Value::Int(6)).unwrap();
+    context.set_value("half".into(), Value::Float(0.5)).unwrap();
+    context.set_value("zero".into(), Value::Int(0)).unwrap();
 
     assert_eq!(eval_with_context("tr", &context), Ok(Value::Boolean(true)));
     assert_eq!(eval_with_context("fa", &context), Ok(Value::Boolean(false)));
@@ -166,7 +170,7 @@ fn test_n_ary_functions() {
     let mut context = HashMapContext::new();
     context
         .set_function(
-            "sub2",
+            "sub2".into(),
             Function::new(
                 Some(1),
                 Box::new(|arguments| {
@@ -183,7 +187,7 @@ fn test_n_ary_functions() {
         .unwrap();
     context
         .set_function(
-            "avg",
+            "avg".into(),
             Function::new(
                 Some(2),
                 Box::new(|arguments| {
@@ -203,7 +207,7 @@ fn test_n_ary_functions() {
         .unwrap();
     context
         .set_function(
-            "muladd",
+            "muladd".into(),
             Function::new(
                 Some(3),
                 Box::new(|arguments| {
@@ -227,7 +231,7 @@ fn test_n_ary_functions() {
         .unwrap();
     context
         .set_function(
-            "count",
+            "count".into(),
             Function::new(
                 None,
                 Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
@@ -333,7 +337,7 @@ fn test_no_panic() {
 fn test_shortcut_functions() {
     let mut context = HashMapContext::new();
     context
-        .set_value("string", Value::from("a string"))
+        .set_value("string".into(), Value::from("a string"))
         .unwrap();
 
     // assert_eq!(eval_string("???"));

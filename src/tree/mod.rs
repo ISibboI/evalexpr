@@ -1,8 +1,8 @@
-use token::Token;
-use value::TupleType;
 use EmptyContext;
 use FloatType;
 use IntType;
+use token::Token;
+use value::TupleType;
 
 use crate::{
     context::Context,
@@ -25,7 +25,7 @@ mod display;
 /// use evalexpr::*;
 ///
 /// let mut context = HashMapContext::new();
-/// context.set_value("alpha", 2).unwrap(); // Do proper error handling here
+/// context.set_value("alpha".into(), 2.into()).unwrap(); // Do proper error handling here
 /// let node = build_operator_tree("1 + alpha").unwrap(); // Do proper error handling here
 /// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
 /// ```
@@ -55,6 +55,17 @@ impl Node {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_context(context)?);
+        }
+        self.operator().eval(&arguments, context)
+    }
+
+    /// Evaluates the operator tree rooted at this node with the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_with_context_mut(&self, context: &mut Context) -> EvalexprResult<Value> {
+        let mut arguments = Vec::new();
+        for child in self.children() {
+            arguments.push(child.eval_with_context_mut(context)?);
         }
         self.operator().eval(&arguments, context)
     }
@@ -128,6 +139,74 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple_with_context(&self, context: &Context) -> EvalexprResult<TupleType> {
         match self.eval_with_context(context) {
+            Ok(Value::Tuple(tuple)) => Ok(tuple),
+            Ok(value) => Err(EvalexprError::expected_tuple(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a string with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_string_with_context_mut(&self, context: &mut Context) -> EvalexprResult<String> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::String(string)) => Ok(string),
+            Ok(value) => Err(EvalexprError::expected_string(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a float with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_float_with_context_mut(&self, context: &mut Context) -> EvalexprResult<FloatType> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Float(float)) => Ok(float),
+            Ok(value) => Err(EvalexprError::expected_float(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into an integer with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_int_with_context_mut(&self, context: &mut Context) -> EvalexprResult<IntType> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Int(int)) => Ok(int),
+            Ok(value) => Err(EvalexprError::expected_int(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a float with an the given mutable context.
+    /// If the result of the expression is an integer, it is silently converted into a float.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_number_with_context_mut(&self, context: &mut Context) -> EvalexprResult<FloatType> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Int(int)) => Ok(int as FloatType),
+            Ok(Value::Float(float)) => Ok(float),
+            Ok(value) => Err(EvalexprError::expected_int(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a boolean with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_boolean_with_context_mut(&self, context: &mut Context) -> EvalexprResult<bool> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Boolean(boolean)) => Ok(boolean),
+            Ok(value) => Err(EvalexprError::expected_boolean(value)),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Evaluates the operator tree rooted at this node into a tuple with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_tuple_with_context_mut(&self, context: &mut Context) -> EvalexprResult<TupleType> {
+        match self.eval_with_context_mut(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),
             Err(error) => Err(error),

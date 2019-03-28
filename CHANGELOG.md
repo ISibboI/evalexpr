@@ -2,11 +2,22 @@
 
 ## Unreleased
 
+### Notes
+
+The 3.0.0 update includes further breaking changes that are necessary to allow assignments and chaining of expressions.
+Rust does not allow trait objects to be converted into one another, even if one requires the other, so `ContextMut` had to be merged into `Context` for a more generic implementation of the (internal) `Operator` trait.
+
 ### Added
+
+ * Methods `Node::eval_<type>_with_context_mut`
 
 ### Removed
 
+ * Generic arguments from `Context` traits are now static to allow using trait objects of `Context`
+
 ### Changed
+
+ * Merge `ContextMut` trait into `Context` trait
 
 ### Fixed
 
