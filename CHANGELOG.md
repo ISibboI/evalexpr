@@ -19,7 +19,7 @@
 ### Added
 
  * Add serde support to `HashMapContext`
- * Make `HashMapContext` derive default
+ * Make `HashMapContext` derive `Default` and `Debug`
 
 ### Changed
 
