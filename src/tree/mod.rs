@@ -1,9 +1,9 @@
+use token::Token;
+use value::{TupleType, EMPTY_VALUE};
 use EmptyContext;
 use EmptyType;
 use FloatType;
 use IntType;
-use token::Token;
-use value::{EMPTY_VALUE, TupleType};
 
 use crate::{
     context::Context,

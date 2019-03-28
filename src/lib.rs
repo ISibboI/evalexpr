@@ -283,7 +283,7 @@ pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
 pub use value::{
-    EMPTY_VALUE, EmptyType, FloatType, IntType, TupleType, Value, value_type::ValueType,
+    value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE,
 };
 
 mod context;

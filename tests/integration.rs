@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{*, error::*};
+use evalexpr::{error::*, *};
 
 #[test]
 fn test_unary_examples() {
@@ -362,6 +362,8 @@ fn test_shortcut_functions() {
         eval_tuple_with_context("3,3", &context),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
+    assert_eq!(eval_empty(""), Ok(EMPTY_VALUE));
+    assert_eq!(eval_empty_with_context("", &context), Ok(EMPTY_VALUE));
 
     // assert_eq!(build_operator_tree("???").unwrap().eval_string());
     assert_eq!(
@@ -432,6 +434,10 @@ fn test_shortcut_functions() {
     assert_eq!(
         eval_tuple_with_context_mut("3,3", &mut context),
         Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("", &mut context),
+        Ok(EMPTY_VALUE)
     );
 
     assert_eq!(

@@ -1,14 +1,16 @@
+use token;
+use tree;
+use value::TupleType;
 use Context;
 use EmptyContext;
+use EmptyType;
 use EvalexprError;
 use EvalexprResult;
 use FloatType;
 use IntType;
 use Node;
-use token;
-use tree;
 use Value;
-use value::TupleType;
+use EMPTY_VALUE;
 
 /// Evaluate the given expression string.
 ///
@@ -134,6 +136,13 @@ pub fn eval_tuple(string: &str) -> EvalexprResult<TupleType> {
     eval_tuple_with_context(string, &EmptyContext)
 }
 
+/// Evaluate the given expression string into an empty value.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_empty(string: &str) -> EvalexprResult<EmptyType> {
+    eval_empty_with_context(string, &EmptyContext)
+}
+
 /// Evaluate the given expression string into a string with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -198,6 +207,17 @@ pub fn eval_tuple_with_context(string: &str, context: &Context) -> EvalexprResul
     match eval_with_context(string, context) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string into an empty value with the given context.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_empty_with_context(string: &str, context: &Context) -> EvalexprResult<EmptyType> {
+    match eval_with_context(string, context) {
+        Ok(Value::Empty) => Ok(EMPTY_VALUE),
+        Ok(value) => Err(EvalexprError::expected_empty(value)),
         Err(error) => Err(error),
     }
 }
@@ -275,6 +295,20 @@ pub fn eval_tuple_with_context_mut(
     match eval_with_context_mut(string, context) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string into an empty value with the given mutable context.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_empty_with_context_mut(
+    string: &str,
+    context: &mut Context,
+) -> EvalexprResult<EmptyType> {
+    match eval_with_context_mut(string, context) {
+        Ok(Value::Empty) => Ok(EMPTY_VALUE),
+        Ok(value) => Err(EvalexprError::expected_empty(value)),
         Err(error) => Err(error),
     }
 }
