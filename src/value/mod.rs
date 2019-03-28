@@ -15,6 +15,9 @@ pub type TupleType = Vec<Value>;
 /// The type used to represent empty values in `Value::Empty`.
 pub type EmptyType = ();
 
+/// The value of the empty type to be used in rust.
+pub const EMPTY_VALUE: () = ();
+
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]

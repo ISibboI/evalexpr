@@ -282,7 +282,9 @@ pub use error::{EvalexprError, EvalexprResult};
 pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
-pub use value::{EmptyType, FloatType, IntType, TupleType, Value, value_type::ValueType};
+pub use value::{
+    EMPTY_VALUE, EmptyType, FloatType, IntType, TupleType, Value, value_type::ValueType,
+};
 
 mod context;
 pub mod error;

@@ -234,7 +234,17 @@ fn test_n_ary_functions() {
             "count".into(),
             Function::new(
                 None,
-                Box::new(|arguments| Ok(Value::Int(arguments.len() as IntType))),
+                Box::new(|arguments| {
+                    if arguments.len() == 1 {
+                        if arguments[0] == Value::Empty {
+                            Ok(Value::Int(0))
+                        } else {
+                            Ok(Value::Int(1))
+                        }
+                    } else {
+                        Ok(Value::Int(arguments.len() as IntType))
+                    }
+                }),
             ),
         )
         .unwrap();
@@ -259,13 +269,7 @@ fn test_n_ary_functions() {
         eval_with_context("muladd(3, 6, -4)", &context),
         Ok(Value::Int(14))
     );
-    assert_eq!(
-        eval_with_context("count()", &context),
-        Err(EvalexprError::WrongOperatorArgumentAmount {
-            actual: 0,
-            expected: 1
-        })
-    );
+    assert_eq!(eval_with_context("count()", &context), Ok(Value::Int(0)));
     assert_eq!(
         eval_with_context("count(3, 5.5, 2)", &context),
         Ok(Value::Int(3))
@@ -407,6 +411,12 @@ fn test_shortcut_functions() {
             .eval_tuple_with_context(&context),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
+    assert_eq!(
+        build_operator_tree("")
+            .unwrap()
+            .eval_empty_with_context(&context),
+        Ok(EMPTY_VALUE)
+    );
 
     assert_eq!(
         eval_string_with_context_mut("string", &mut context),
@@ -458,9 +468,20 @@ fn test_shortcut_functions() {
     assert_eq!(
         build_operator_tree("3,3")
             .unwrap()
-            .eval_tuple_with_context(&mut context),
+            .eval_tuple_with_context_mut(&mut context),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
+    assert_eq!(
+        build_operator_tree("")
+            .unwrap()
+            .eval_empty_with_context_mut(&mut context),
+        Ok(EMPTY_VALUE)
+    );
+}
+
+#[test]
+fn test_whitespace() {
+    assert!(eval_boolean("2 < = 3").is_err());
 }
 
 #[cfg(feature = "serde")]

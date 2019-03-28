@@ -1,8 +1,9 @@
 use EmptyContext;
+use EmptyType;
 use FloatType;
 use IntType;
 use token::Token;
-use value::TupleType;
+use value::{EMPTY_VALUE, TupleType};
 
 use crate::{
     context::Context,
@@ -145,6 +146,17 @@ impl Node {
         }
     }
 
+    /// Evaluates the operator tree rooted at this node into an empty value with an the given context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_empty_with_context(&self, context: &Context) -> EvalexprResult<EmptyType> {
+        match self.eval_with_context(context) {
+            Ok(Value::Empty) => Ok(EMPTY_VALUE),
+            Ok(value) => Err(EvalexprError::expected_empty(value)),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Evaluates the operator tree rooted at this node into a string with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
@@ -213,6 +225,17 @@ impl Node {
         }
     }
 
+    /// Evaluates the operator tree rooted at this node into an empty value with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_empty_with_context_mut(&self, context: &mut Context) -> EvalexprResult<EmptyType> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Empty) => Ok(EMPTY_VALUE),
+            Ok(value) => Err(EvalexprError::expected_empty(value)),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Evaluates the operator tree rooted at this node into a string with an empty context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
@@ -254,6 +277,13 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> EvalexprResult<TupleType> {
         self.eval_tuple_with_context(&EmptyContext)
+    }
+
+    /// Evaluates the operator tree rooted at this node into an empty value with an empty context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_empty(&self) -> EvalexprResult<EmptyType> {
+        self.eval_empty_with_context(&EmptyContext)
     }
 
     fn children(&self) -> &[Node] {

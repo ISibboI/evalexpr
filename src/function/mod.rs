@@ -12,7 +12,7 @@ pub(crate) mod builtin;
 /// use evalexpr::*;
 ///
 /// let mut context = HashMapContext::new();
-/// context.set_function("id", Function::new(Some(1), Box::new(|arguments| {
+/// context.set_function("id".into(), Function::new(Some(1), Box::new(|arguments| {
 ///     Ok(arguments[0].clone())
 /// }))).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
