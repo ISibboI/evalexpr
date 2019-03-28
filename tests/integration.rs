@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{error::*, *};
+use evalexpr::{*, error::*};
 
 #[test]
 fn test_unary_examples() {
@@ -488,6 +488,40 @@ fn test_shortcut_functions() {
 #[test]
 fn test_whitespace() {
     assert!(eval_boolean("2 < = 3").is_err());
+}
+
+#[test]
+fn test_assignment() {
+    let mut context = HashMapContext::new();
+    assert_eq!(
+        eval_empty_with_context_mut("int = 3", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("float = 2.0", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("tuple = (1,1)", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("empty = ()", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("boolean = false", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+
+    assert_eq!(eval_int_with_context("int", &context), Ok(3));
+    assert_eq!(eval_float_with_context("float", &context), Ok(2.0));
+    assert_eq!(
+        eval_tuple_with_context("tuple", &context),
+        Ok(vec![1.into(), 1.into()])
+    );
+    assert_eq!(eval_empty_with_context("empty", &context), Ok(EMPTY_VALUE));
+    assert_eq!(eval_boolean_with_context("boolean", &context), Ok(false));
 }
 
 #[cfg(feature = "serde")]

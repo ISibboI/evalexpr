@@ -1,4 +1,5 @@
 use std::fmt;
+
 use token::{PartialToken, Token};
 
 impl fmt::Display for Token {
@@ -29,6 +30,9 @@ impl fmt::Display for Token {
 
             // Aggregation
             Comma => write!(f, ","),
+
+            // Assignment
+            Assign => write!(f, "="),
 
             // Values => write!(f, ""), Variables and Functions
             Identifier(identifier) => identifier.fmt(f),

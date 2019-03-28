@@ -78,6 +78,9 @@ pub struct Not;
 pub struct Tuple;
 
 #[derive(Debug)]
+pub struct Assign;
+
+#[derive(Debug)]
 pub struct Const {
     value: Value,
 }
@@ -644,6 +647,7 @@ impl Operator for Tuple {
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
+        expect_operator_argument_amount(arguments.len(), 2)?;
         if let Value::Tuple(tuple) = &arguments[0] {
             let mut tuple = tuple.clone();
             if let Value::Tuple(tuple2) = &arguments[1] {
@@ -664,6 +668,32 @@ impl Operator for Tuple {
                 ]))
             }
         }
+    }
+}
+
+impl Operator for Assign {
+    fn precedence(&self) -> i32 {
+        50
+    }
+
+    fn is_left_to_right(&self) -> bool {
+        false
+    }
+
+    fn max_argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, _arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
+        Err(EvalexprError::ContextNotManipulable)
+    }
+
+    fn eval_mut(&self, arguments: &[Value], context: &mut Context) -> EvalexprResult<Value> {
+        expect_operator_argument_amount(arguments.len(), 2)?;
+        let target = expect_string(&arguments[0])?;
+        context.set_value(target.into(), arguments[1].clone())?;
+
+        Ok(Value::Empty)
     }
 }
 

@@ -31,6 +31,9 @@ pub enum Token {
     // Aggregation
     Comma,
 
+    // Assignment
+    Assign,
+
     // Values, Variables and Functions
     Identifier(String),
     Float(FloatType),
@@ -109,6 +112,8 @@ impl Token {
 
             Token::Comma => false,
 
+            Token::Assign => false,
+
             Token::Identifier(_) => true,
             Token::Float(_) => true,
             Token::Int(_) => true,
@@ -140,6 +145,8 @@ impl Token {
             Token::RBrace => true,
 
             Token::Comma => false,
+
+            Token::Assign => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,
@@ -173,7 +180,7 @@ fn str_to_tokens(string: &str) -> Vec<PartialToken> {
 }
 
 /// Resolves all partial tokens by converting them to complex tokens.
-fn resolve_literals(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
+fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
     let mut result = Vec::new();
     while tokens.len() > 0 {
         let first = tokens[0].clone();
@@ -204,7 +211,10 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
                 },
                 PartialToken::Eq => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
-                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Assign)
+                    },
                 },
                 PartialToken::ExclamationMark => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
@@ -245,5 +255,5 @@ fn resolve_literals(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
 }
 
 pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
-    resolve_literals(&str_to_tokens(string))
+    partial_tokens_to_tokens(&str_to_tokens(string))
 }

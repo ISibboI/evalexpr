@@ -1,9 +1,9 @@
-use token::Token;
-use value::{TupleType, EMPTY_VALUE};
 use EmptyContext;
 use EmptyType;
 use FloatType;
 use IntType;
+use token::Token;
+use value::{EMPTY_VALUE, TupleType};
 
 use crate::{
     context::Context,
@@ -68,7 +68,7 @@ impl Node {
         for child in self.children() {
             arguments.push(child.eval_with_context_mut(context)?);
         }
-        self.operator().eval(&arguments, context)
+        self.operator().eval_mut(&arguments, context)
     }
 
     /// Evaluates the operator tree rooted at this node with an empty context.
@@ -384,10 +384,14 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
 
             Token::Comma => Some(Node::new(Tuple)),
 
+            Token::Assign => Some(Node::new(Assign)),
+
             Token::Identifier(identifier) => {
                 let mut result = Some(Node::new(VariableIdentifier::new(identifier.clone())));
                 if let Some(next) = next {
-                    if next.is_leftsided_value() {
+                    if next == &Token::Assign {
+                        result = Some(Node::new(Const::new(identifier.clone().into())));
+                    } else if next.is_leftsided_value() {
                         result = Some(Node::new(FunctionIdentifier::new(identifier)));
                     }
                 }

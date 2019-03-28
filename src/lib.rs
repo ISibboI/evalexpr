@@ -107,7 +107,7 @@
 //! | % | 100 | Modulo | | == | 80 | Equal |
 //! | ^ | 120 | Exponentiation | | != | 80 | Not equal |
 //! | && | 75 | Logical and | | , | 40 | Aggregation |
-//! | &#124;&#124; | 70 | Logical or | | | | |
+//! | &#124;&#124; | 70 | Logical or | | = | 50 | Assignment |
 //!
 //! Supported unary operators:
 //!
@@ -237,6 +237,21 @@
 //! | `123` | no | Expression is interpreted as `Value::Int` |
 //! | `true` | no | Expression is interpreted as `Value::Bool` |
 //! | `.34` | no | Expression is interpreted as `Value::Float` |
+//!
+//! ### Assignments
+//!
+//! This crate features the assignment operator, that allows expressions to store their result in a variable in the expression context.
+//! If an expression uses the assignment operator, it must be evaluated with a mutable context.
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! let mut context = HashMapContext::new();
+//! assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
+//! assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
+//! assert_eq!(eval_int_with_context("a", &context), Ok(5));
+//! assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
+//! ```
 //!
 //! ### [Serde](https://serde.rs)
 //!

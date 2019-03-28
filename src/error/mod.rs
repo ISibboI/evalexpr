@@ -6,7 +6,7 @@
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
 use token::PartialToken;
-use value::{value_type::ValueType, TupleType};
+use value::{TupleType, value_type::ValueType};
 
 use crate::value::Value;
 
@@ -160,7 +160,7 @@ pub enum EvalexprError {
         divisor: Value,
     },
 
-    /// A `set_`-function was called on a `Context` that does not allow modifications.
+    /// A modification was attempted on a `Context` that does not allow modifications.
     ContextNotManipulable,
 
     /// A custom error explained by its message.
@@ -294,6 +294,14 @@ pub(crate) fn expect_function_argument_amount(
     }
 }
 
+/// Returns `Ok(&str)` if the given value is a `Value::String`, or `Err(Error::ExpectedString)` otherwise.
+pub fn expect_string(actual: &Value) -> EvalexprResult<&str> {
+    match actual {
+        Value::String(string) => Ok(string),
+        _ => Err(EvalexprError::expected_string(actual.clone())),
+    }
+}
+
 /// Returns `Ok(())` if the given value is numeric.
 /// Numeric types are `Value::Int` and `Value::Float`.
 /// Otherwise, `Err(Error::ExpectedNumber)` is returned.
@@ -304,7 +312,7 @@ pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
     }
 }
 
-/// Returns `Ok(())` if the given value is a `Value::Boolean`, or `Err(Error::ExpectedBoolean)` otherwise.
+/// Returns `Ok(bool)` if the given value is a `Value::Boolean`, or `Err(Error::ExpectedBoolean)` otherwise.
 pub fn expect_boolean(actual: &Value) -> EvalexprResult<bool> {
     match actual {
         Value::Boolean(boolean) => Ok(*boolean),

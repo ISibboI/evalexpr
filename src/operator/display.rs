@@ -1,5 +1,6 @@
-use operator::*;
 use std::fmt::{Display, Error, Formatter};
+
+use operator::*;
 
 impl Display for RootNode {
     fn fmt(&self, _f: &mut Formatter) -> Result<(), Error> {
@@ -106,6 +107,12 @@ impl Display for Not {
 impl Display for Tuple {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, ", ")
+    }
+}
+
+impl Display for Assign {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, " = ")
     }
 }
 
