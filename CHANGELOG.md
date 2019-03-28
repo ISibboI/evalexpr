@@ -4,6 +4,20 @@
 
 ### Notes
 
+### Added
+
+### Removed
+
+### Changed
+
+### Fixed
+
+### Deprecated
+
+## [3.0.0](https://github.com/ISibboI/evalexpr/compare/2.0.0...3.0.0) - 2019-03-28
+
+### Notes
+
 The 3.0.0 update transforms the expression evaluator `evalexpr` to a tiny scripting language.
 It allows assignments and chaining of expressions.
 Some changes in this update are breaking, hence the major release.
@@ -23,10 +37,6 @@ Some changes in this update are breaking, hence the major release.
 ### Changed
 
  * Merge `ContextMut` trait into `Context` trait
-
-### Fixed
-
-### Deprecated
 
 ## [2.0.0](https://github.com/ISibboI/evalexpr/compare/1.2.0...2.0.0) - 2019-03-28
 
