@@ -121,6 +121,7 @@ Supported binary operators:
 | ^ | 120 | Exponentiation | | != | 80 | Not equal |
 | && | 75 | Logical and | | , | 40 | Aggregation |
 | &#124;&#124; | 70 | Logical or | | = | 50 | Assignment |
+| | | | | ; | 0 | Expression Chaining |
 
 Supported unary operators:
 
@@ -139,6 +140,46 @@ Example:
 use evalexpr::*;
 
 assert_eq!(eval("1, 2, 3"), Ok(Value::from(vec![Value::from(1), Value::from(2), Value::from(3)])));
+```
+
+#### The Assignment Operator
+
+This crate features the assignment operator, that allows expressions to store their result in a variable in the expression context.
+If an expression uses the assignment operator, it must be evaluated with a mutable context.
+Note that assignments are type safe, meaning if an identifier is assigned a value of a type once, it cannot be assigned a value of another type.
+
+```rust
+use evalexpr::*;
+
+let mut context = HashMapContext::new();
+assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
+assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
+assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context), Err(EvalexprError::expected_int(5.0.into())));
+assert_eq!(eval_int_with_context("a", &context), Ok(5));
+assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
+```
+
+#### The Expression Chaining Operator
+
+The expression chaining operator works as one would expect from programming languages that use the semicolon to end statements, like `Rust`, `C` or `Java`.
+It has the special feature that it returns the value of the last expression in the expression chain.
+If the last expression is terminated by a semicolon as well, then `Value::Empty` is returned.
+Expression chaining is useful together with assignment to create small scripts.
+
+```rust
+use evalexpr::*;
+
+let mut context = HashMapContext::new();
+assert_eq!(eval("1;2;3;4;"), Ok(Value::Empty));
+assert_eq!(eval("1;2;3;4"), Ok(4.into()));
+
+// Initialization of variables via script.
+assert_eq!(eval_empty_with_context_mut("hp = 1; max_hp = 5; heal_amount = 3;", &mut context), Ok(EMPTY_VALUE));
+// Precompile healing script.
+let healing_script = build_operator_tree("hp = min(hp + heal_amount, max_hp); hp").unwrap(); // Do proper error handling here
+// Execute precompiled healing script.
+assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(4));
+assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(5));
 ```
 
 ### Builtin Functions
@@ -250,21 +291,6 @@ Functions have a precedence of 190.
 | `123` | no | Expression is interpreted as `Value::Int` |
 | `true` | no | Expression is interpreted as `Value::Bool` |
 | `.34` | no | Expression is interpreted as `Value::Float` |
-
-### Assignments
-
-This crate features the assignment operator, that allows expressions to store their result in a variable in the expression context.
-If an expression uses the assignment operator, it must be evaluated with a mutable context.
-
-```rust
-use evalexpr::*;
-
-let mut context = HashMapContext::new();
-assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
-assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
-assert_eq!(eval_int_with_context("a", &context), Ok(5));
-assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
-```
 
 ### [Serde](https://serde.rs)
 
