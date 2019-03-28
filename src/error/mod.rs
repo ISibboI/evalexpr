@@ -6,7 +6,7 @@
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
 use token::PartialToken;
-use value::{value_type::ValueType, TupleType};
+use value::{TupleType, value_type::ValueType};
 
 use crate::value::Value;
 
@@ -64,6 +64,12 @@ pub enum EvalexprError {
 
     /// A tuple value was expected.
     ExpectedTuple {
+        /// The actual value.
+        actual: Value,
+    },
+
+    /// An empty value was expected.
+    ExpectedEmpty {
         /// The actual value.
         actual: Value,
     },
@@ -178,34 +184,39 @@ impl EvalexprError {
         EvalexprError::TypeError { actual, expected }
     }
 
-    /// Constructs `Error::ExpectedString(actual)`.
+    /// Constructs `Error::ExpectedString{actual}`.
     pub fn expected_string(actual: Value) -> Self {
         EvalexprError::ExpectedString { actual }
     }
 
-    /// Constructs `Error::ExpectedInt(actual)`.
+    /// Constructs `Error::ExpectedInt{actual}`.
     pub fn expected_int(actual: Value) -> Self {
         EvalexprError::ExpectedInt { actual }
     }
 
-    /// Constructs `Error::ExpectedFloat(actual)`.
+    /// Constructs `Error::ExpectedFloat{actual}`.
     pub fn expected_float(actual: Value) -> Self {
         EvalexprError::ExpectedFloat { actual }
     }
 
-    /// Constructs `Error::ExpectedNumber(actual)`.
+    /// Constructs `Error::ExpectedNumber{actual}`.
     pub fn expected_number(actual: Value) -> Self {
         EvalexprError::ExpectedNumber { actual }
     }
 
-    /// Constructs `Error::ExpectedBoolean(actual)`.
+    /// Constructs `Error::ExpectedBoolean{actual}`.
     pub fn expected_boolean(actual: Value) -> Self {
         EvalexprError::ExpectedBoolean { actual }
     }
 
-    /// Constructs `Error::ExpectedTuple(actual)`.
+    /// Constructs `Error::ExpectedTuple{actual}`.
     pub fn expected_tuple(actual: Value) -> Self {
         EvalexprError::ExpectedTuple { actual }
+    }
+
+    /// Constructs `Error::ExpectedEmpty{actual}`.
+    pub fn expected_empty(actual: Value) -> Self {
+        EvalexprError::ExpectedEmpty { actual }
     }
 
     /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
@@ -216,6 +227,7 @@ impl EvalexprError {
             ValueType::Float => Self::expected_float(actual),
             ValueType::Boolean => Self::expected_boolean(actual),
             ValueType::Tuple => Self::expected_tuple(actual),
+            ValueType::Empty => Self::expected_empty(actual),
         }
     }
 

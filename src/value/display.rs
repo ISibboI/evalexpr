@@ -1,4 +1,5 @@
 use std::fmt::{Display, Error, Formatter};
+
 use Value;
 
 impl Display for Value {
@@ -21,6 +22,7 @@ impl Display for Value {
                 }
                 write!(f, ")")
             },
+            Value::Empty => write!(f, "()"),
         }
     }
 }

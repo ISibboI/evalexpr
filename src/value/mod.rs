@@ -12,6 +12,9 @@ pub type FloatType = f64;
 /// The type used to represent tuples in `Value::Tuple`.
 pub type TupleType = Vec<Value>;
 
+/// The type used to represent empty values in `Value::Empty`.
+pub type EmptyType = ();
+
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]
@@ -26,6 +29,8 @@ pub enum Value {
     Boolean(bool),
     /// A tuple value.
     Tuple(TupleType),
+    /// An empty value.
+    Empty,
 }
 
 impl Value {
@@ -76,6 +81,14 @@ impl Value {
         }
     }
 
+    /// Returns true if `self` is a `Value::Empty`.
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Value::Empty => true,
+            _ => false,
+        }
+    }
+
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
     pub fn as_string(&self) -> EvalexprResult<String> {
         match self {
@@ -118,11 +131,19 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in  `self` as `TupleType`, or  returns`Err` if `self` is not a `Value::Tuple`.
+    /// Clones the value stored in  `self` as `TupleType`, or returns`Err` if `self` is not a `Value::Tuple`.
     pub fn as_tuple(&self) -> EvalexprResult<TupleType> {
         match self {
             Value::Tuple(tuple) => Ok(tuple.clone()),
             value => Err(EvalexprError::expected_tuple(value.clone())),
+        }
+    }
+
+    /// Returns `()`, or returns`Err` if `self` is not a `Value::Tuple`.
+    pub fn as_empty(&self) -> EvalexprResult<()> {
+        match self {
+            Value::Empty => Ok(()),
+            value => Err(EvalexprError::expected_empty(value.clone())),
         }
     }
 }
