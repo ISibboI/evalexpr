@@ -4,16 +4,21 @@
 
 ### Notes
 
-The 3.0.0 update includes further breaking changes that are necessary to allow assignments and chaining of expressions.
-Rust does not allow trait objects to be converted into one another, even if one requires the other, so `ContextMut` had to be merged into `Context` for a more generic implementation of the (internal) `Operator` trait.
+The 3.0.0 update transforms the expression evaluator `evalexpr` to a tiny scripting language.
+It allows assignments and chaining of expressions.
+Some changes in this update are breaking, hence the major release.
 
 ### Added
 
- * Methods `Node::eval_<type>_with_context_mut`
+ * Methods `Node::eval_<type>_with_context_mut` and crate level `eval_<type>_with_context_mut`
+ * Empty type and corresponding shortcut methods. The empty type is emitted by empty expressions or empty subexpressions `()`.
+ * The assignment operator `=`
+ * The expression chaining operator `;`
 
 ### Removed
 
  * Generic arguments from `Context` traits are now static to allow using trait objects of `Context`
+ * `EvalexprError::EmptyExpression` is not required anymore since empty expressions now evaluate to the empty type
 
 ### Changed
 
