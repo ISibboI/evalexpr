@@ -21,12 +21,12 @@ pub trait Operator: Debug + Display {
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
     fn is_leaf(&self) -> bool {
-        self.argument_amount() == 0
+        self.max_argument_amount() == 0
     }
 
-    /// Returns the amount of arguments required by this operator.
+    /// Returns the maximum amount of arguments required by this operator.
     // Make this a const fn once #57563 is resolved
-    fn argument_amount(&self) -> usize;
+    fn max_argument_amount(&self) -> usize;
 
     /// Evaluates the operator with the given arguments and context.
     fn eval(&self, arguments: &[Value], context: &dyn Context) -> EvalexprResult<Value>;
@@ -119,13 +119,16 @@ impl Operator for RootNode {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         1
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 1)?;
-        Ok(arguments[0].clone())
+        if let Some(first) = arguments.first() {
+            Ok(first.clone())
+        } else {
+            Ok(Value::Empty)
+        }
     }
 }
 
@@ -138,7 +141,7 @@ impl Operator for Add {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -174,7 +177,7 @@ impl Operator for Sub {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -210,7 +213,7 @@ impl Operator for Neg {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         1
     }
 
@@ -240,7 +243,7 @@ impl Operator for Mul {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -276,7 +279,7 @@ impl Operator for Div {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -312,7 +315,7 @@ impl Operator for Mod {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -348,7 +351,7 @@ impl Operator for Exp {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -375,7 +378,7 @@ impl Operator for Eq {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -399,7 +402,7 @@ impl Operator for Neq {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -423,7 +426,7 @@ impl Operator for Gt {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -457,7 +460,7 @@ impl Operator for Lt {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -491,7 +494,7 @@ impl Operator for Geq {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -525,7 +528,7 @@ impl Operator for Leq {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -559,7 +562,7 @@ impl Operator for And {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -585,7 +588,7 @@ impl Operator for Or {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -611,7 +614,7 @@ impl Operator for Not {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         1
     }
 
@@ -636,7 +639,7 @@ impl Operator for Tuple {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         2
     }
 
@@ -673,7 +676,7 @@ impl Operator for Const {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         0
     }
 
@@ -693,7 +696,7 @@ impl Operator for VariableIdentifier {
         true
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         0
     }
 
@@ -717,7 +720,7 @@ impl Operator for FunctionIdentifier {
         false
     }
 
-    fn argument_amount(&self) -> usize {
+    fn max_argument_amount(&self) -> usize {
         1
     }
 

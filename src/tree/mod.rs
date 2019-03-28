@@ -264,8 +264,8 @@ impl Node {
         &self.operator
     }
 
-    fn has_correct_amount_of_children(&self) -> bool {
-        self.children().len() == self.operator().argument_amount()
+    fn has_enough_children(&self) -> bool {
+        self.children().len() == self.operator().max_argument_amount()
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
@@ -275,7 +275,7 @@ impl Node {
         {
             if self.operator().is_leaf() {
                 Err(EvalexprError::AppendedToLeafNode)
-            } else if self.has_correct_amount_of_children() {
+            } else if self.has_enough_children() {
                 if self.children.last().unwrap().operator().precedence()
                     < node.operator().precedence()
                     // Right-to-left chaining
@@ -381,17 +381,8 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
 
     if root.len() > 1 {
         Err(EvalexprError::UnmatchedLBrace)
-    } else if let Some(mut root) = root.pop() {
-        if root.children().len() > 1 {
-            Err(EvalexprError::wrong_operator_argument_amount(
-                root.children().len(),
-                1,
-            ))
-        } else if let Some(child) = root.children.pop() {
-            Ok(child)
-        } else {
-            Err(EvalexprError::EmptyExpression)
-        }
+    } else if let Some(root) = root.pop() {
+        Ok(root)
     } else {
         Err(EvalexprError::UnmatchedRBrace)
     }

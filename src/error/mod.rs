@@ -74,9 +74,6 @@ pub enum EvalexprError {
         actual: Value,
     },
 
-    /// The given expression is empty
-    EmptyExpression,
-
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
     AppendedToLeafNode,

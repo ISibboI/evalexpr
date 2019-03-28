@@ -29,11 +29,6 @@ impl fmt::Display for EvalexprError {
             },
             ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
-            EmptyExpression => write!(
-                f,
-                "Got an empty expression that cannot be parsed into a node tree, because it \
-                 returns nothing."
-            ),
             AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),
             PrecedenceViolation => write!(
                 f,
