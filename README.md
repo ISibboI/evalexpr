@@ -4,7 +4,7 @@
 [![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
 [![](https://docs.rs/evalexpr/badge.svg)](https://docs.rs/evalexpr)
 
-Evalexpr is an expression evaluator in Rust.
+Evalexpr is an expression evaluator and tiny scripting language in Rust.
 It has a small and easy to use interface and can be easily integrated into any application.
 It is very lightweight and comes with no further dependencies.
 Evalexpr is [available on crates.io](https://crates.io/crates/evalexpr), and its [API Documentation is available on docs.rs](https://docs.rs/evalexpr).
@@ -40,6 +40,22 @@ assert_eq!(eval_int("1 + 2 + 3"), Ok(6));
 assert_eq!(eval("1 - 2 * 3"), Ok(Value::from(-5)));
 assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
 assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
+```
+
+You can **chain** expressions and **assign** to variables like this:
+
+```rust
+use evalexpr::*;
+
+let mut context = HashMapContext::new();
+// Assign 5 to a like this
+assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
+// The HashMapContext is type safe, so this will fail now
+assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context), Err(EvalexprError::expected_int(Value::from(5.0))));
+// We can check which value the context stores for a like this
+assert_eq!(context.get_value("a"), Some(&Value::from(5)));
+// And use the value in another expression like this
+assert_eq!(eval_int_with_context_mut("a = a + 2; a", &mut context), Ok(7));
 ```
 
 And you can use **variables** and **functions** in expressions like this:
