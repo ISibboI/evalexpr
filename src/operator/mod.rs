@@ -16,7 +16,9 @@ pub trait Operator: Debug + Display {
     /// and false if they should be evaluated right-to-left.
     /// Left-to-right chaining has priority if operators with different order but same precedence are chained.
     // Make this a const fn once #57563 is resolved
-    fn is_left_to_right(&self) -> bool;
+    fn is_left_to_right(&self) -> bool {
+        true
+    }
 
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
@@ -118,10 +120,6 @@ impl Operator for RootNode {
         200
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         1
     }
@@ -138,10 +136,6 @@ impl Operator for RootNode {
 impl Operator for Add {
     fn precedence(&self) -> i32 {
         95
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -176,10 +170,6 @@ impl Operator for Sub {
         95
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -212,10 +202,6 @@ impl Operator for Neg {
         110
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         1
     }
@@ -240,10 +226,6 @@ impl Operator for Neg {
 impl Operator for Mul {
     fn precedence(&self) -> i32 {
         100
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -278,10 +260,6 @@ impl Operator for Div {
         100
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -312,10 +290,6 @@ impl Operator for Div {
 impl Operator for Mod {
     fn precedence(&self) -> i32 {
         100
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -350,10 +324,6 @@ impl Operator for Exp {
         120
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -377,10 +347,6 @@ impl Operator for Eq {
         80
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -401,10 +367,6 @@ impl Operator for Neq {
         80
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -423,10 +385,6 @@ impl Operator for Neq {
 impl Operator for Gt {
     fn precedence(&self) -> i32 {
         80
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -459,10 +417,6 @@ impl Operator for Lt {
         80
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -491,10 +445,6 @@ impl Operator for Lt {
 impl Operator for Geq {
     fn precedence(&self) -> i32 {
         80
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -527,10 +477,6 @@ impl Operator for Leq {
         80
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -561,10 +507,6 @@ impl Operator for And {
         75
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         2
     }
@@ -585,10 +527,6 @@ impl Operator for And {
 impl Operator for Or {
     fn precedence(&self) -> i32 {
         70
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -613,10 +551,6 @@ impl Operator for Not {
         110
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         1
     }
@@ -636,10 +570,6 @@ impl Operator for Not {
 impl Operator for Tuple {
     fn precedence(&self) -> i32 {
         40
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
@@ -702,10 +632,6 @@ impl Operator for Const {
         200
     }
 
-    fn is_left_to_right(&self) -> bool {
-        true
-    }
-
     fn max_argument_amount(&self) -> usize {
         0
     }
@@ -720,10 +646,6 @@ impl Operator for Const {
 impl Operator for VariableIdentifier {
     fn precedence(&self) -> i32 {
         200
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        true
     }
 
     fn max_argument_amount(&self) -> usize {
