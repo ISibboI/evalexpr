@@ -14,6 +14,17 @@
 
 ### Deprecated
 
+## [3.1.0](https://github.com/ISibboI/evalexpr/compare/3.0.0...3.1.0) - 2019-03-28
+
+### Added
+
+ * Add serde support to `HashMapContext`
+ * Make `HashMapContext` derive default
+
+### Changed
+
+ * Changed name of serde feature flag to `serde_support`
+
 ## [3.0.0](https://github.com/ISibboI/evalexpr/compare/2.0.0...3.0.0) - 2019-03-28
 
 ### Notes
