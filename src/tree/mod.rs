@@ -1,8 +1,8 @@
+use token::Token;
+use value::TupleType;
 use EmptyContext;
 use FloatType;
 use IntType;
-use token::Token;
-use value::TupleType;
 
 use crate::{
     context::Context,

@@ -1,6 +1,6 @@
+use value::{FloatType, IntType};
 use EvalexprError;
 use Function;
-use value::{FloatType, IntType};
 use Value;
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {

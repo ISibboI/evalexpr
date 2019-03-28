@@ -1,3 +1,6 @@
+use token;
+use tree;
+use value::TupleType;
 use Context;
 use EmptyContext;
 use EvalexprError;
@@ -5,10 +8,7 @@ use EvalexprResult;
 use FloatType;
 use IntType;
 use Node;
-use token;
-use tree;
 use Value;
-use value::TupleType;
 
 /// Evaluate the given expression string.
 ///

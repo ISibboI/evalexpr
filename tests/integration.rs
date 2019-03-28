@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{*, error::*};
+use evalexpr::{error::*, *};
 
 #[test]
 fn test_unary_examples() {
@@ -212,7 +212,7 @@ fn test_n_ary_functions() {
                     expect_number(&arguments[2])?;
 
                     if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
-                    (&arguments[0], &arguments[1], &arguments[2])
+                        (&arguments[0], &arguments[1], &arguments[2])
                     {
                         Ok(Value::Int(a * b + c))
                     } else {

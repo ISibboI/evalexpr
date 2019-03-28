@@ -6,7 +6,7 @@
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
 use token::PartialToken;
-use value::{TupleType, value_type::ValueType};
+use value::{value_type::ValueType, TupleType};
 
 use crate::value::Value;
 
