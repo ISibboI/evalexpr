@@ -305,12 +305,12 @@
 //!
 //! ### [Serde](https://serde.rs)
 //!
-//! To use this crate with serde, the serde feature flag has to be set.
+//! To use this crate with serde, the `serde_support` feature flag has to be set.
 //! This can be done like this in the `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = {version = "3", features = ["serde"]}
+//! evalexpr = {version = "3", features = ["serde_support"]}
 //! ```
 //!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
@@ -336,6 +336,9 @@
 //!
 //! With `serde`, expressions can be integrated into arbitrarily complex data.
 //!
+//! The crate also implements `Serialize` and `Deserialize` for the `HashMapContext`.
+//! But note that only the variables get serialized, not the functions.
+//!
 //! ## License
 //!
 //! This crate is primarily distributed under the terms of the MIT license.
@@ -346,8 +349,11 @@
 
 #[cfg(test)]
 extern crate ron;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_support")]
 extern crate serde;
+#[cfg(feature = "serde_support")]
+#[macro_use]
+extern crate serde_derive;
 
 pub use context::{Context, EmptyContext, HashMapContext};
 pub use error::{EvalexprError, EvalexprResult};
@@ -360,7 +366,7 @@ pub use value::{
 
 mod context;
 pub mod error;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_support")]
 mod feature_serde;
 mod function;
 mod interface;

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use error::{self, EvalexprResult};
 use value::Value;
 
@@ -45,5 +47,15 @@ impl Function {
         }
 
         (self.function)(arguments)
+    }
+}
+
+impl fmt::Debug for Function {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "Function {{ argument_amount: {:?}, function: [...] }}",
+            self.argument_amount
+        )
     }
 }

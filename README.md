@@ -318,12 +318,12 @@ Functions have a precedence of 190.
 
 ### [Serde](https://serde.rs)
 
-To use this crate with serde, the serde feature flag has to be set.
+To use this crate with serde, the `serde_support` feature flag has to be set.
 This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "3", features = ["serde"]}
+evalexpr = {version = "3", features = ["serde_support"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
@@ -348,6 +348,9 @@ match ron::de::from_str::<Node>(serialized_free) {
 ```
 
 With `serde`, expressions can be integrated into arbitrarily complex data.
+
+The crate also implements `Serialize` and `Deserialize` for the `HashMapContext`.
+But note that only the variables get serialized, not the functions.
 
 ## License
 
