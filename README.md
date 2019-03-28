@@ -18,7 +18,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "1"
+evalexpr = "2"
 ```
 
 Add the `extern crate` definition to your `main.rs` or `lib.rs`:
@@ -67,7 +67,7 @@ context.set_function("avg", Function::new(Some(2) /* argument amount */, Box::ne
     if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
         Ok(Value::Int((a + b) / 2))
     } else {
-        Ok(Value::Float((arguments[0].as_float()? + arguments[1].as_float()?) / 2.0))
+        Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
     }
 }))).unwrap(); // Do proper error handling here
 
@@ -251,7 +251,7 @@ This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "1", features = ["serde"]}
+evalexpr = {version = "2", features = ["serde"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.

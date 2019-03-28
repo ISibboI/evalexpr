@@ -54,7 +54,7 @@
 //!     if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
 //!         Ok(Value::Int((a + b) / 2))
 //!     } else {
-//!         Ok(Value::Float((arguments[0].as_float()? + arguments[1].as_float()?) / 2.0))
+//!         Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
 //!     }
 //! }))).unwrap(); // Do proper error handling here
 //!
