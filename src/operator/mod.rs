@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Display};
 
+use ::{ContextMut, ValueType};
 use function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value};
@@ -30,6 +31,11 @@ pub trait Operator: Debug + Display {
 
     /// Evaluates the operator with the given arguments and context.
     fn eval(&self, arguments: &[Value], context: &Context) -> EvalexprResult<Value>;
+
+    /// Evaluates the operator with the given arguments and mutable context.
+    fn eval_mut(&self, arguments: &[Value], context: &mut ContextMut) -> EvalexprResult<Value> {
+        self.eval(arguments, context)
+    }
 }
 
 #[derive(Debug)]
