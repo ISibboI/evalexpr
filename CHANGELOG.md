@@ -12,7 +12,7 @@
 
 ### Deprecated
 
-## [2.0.0](https://github.com/ISibboI/evalexpr/compare/1.2.0...2.0.0) - 2019-03-27
+## [2.0.0](https://github.com/ISibboI/evalexpr/compare/1.2.0...2.0.0) - 2019-03-28
 
 ### Notes
 
