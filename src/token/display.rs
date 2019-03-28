@@ -28,11 +28,10 @@ impl fmt::Display for Token {
             LBrace => write!(f, "("),
             RBrace => write!(f, ")"),
 
-            // Aggregation
+            // Special
             Comma => write!(f, ","),
-
-            // Assignment
             Assign => write!(f, "="),
+            Semicolon => write!(f, ";"),
 
             // Values => write!(f, ""), Variables and Functions
             Identifier(identifier) => identifier.fmt(f),

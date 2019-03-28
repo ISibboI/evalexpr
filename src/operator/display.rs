@@ -112,6 +112,12 @@ impl Display for Tuple {
 
 impl Display for Assign {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "; ")
+    }
+}
+
+impl Display for Chain {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, " = ")
     }
 }

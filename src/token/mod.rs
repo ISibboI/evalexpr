@@ -28,11 +28,10 @@ pub enum Token {
     LBrace,
     RBrace,
 
-    // Aggregation
+    // Special
     Comma,
-
-    // Assignment
     Assign,
+    Semicolon,
 
     // Values, Variables and Functions
     Identifier(String),
@@ -75,6 +74,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
         ')' => PartialToken::Token(Token::RBrace),
 
         ',' => PartialToken::Token(Token::Comma),
+        ';' => PartialToken::Token(Token::Semicolon),
 
         c => {
             if c.is_whitespace() {
@@ -111,8 +111,8 @@ impl Token {
             Token::RBrace => false,
 
             Token::Comma => false,
-
             Token::Assign => false,
+            Token::Semicolon => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,
@@ -145,8 +145,8 @@ impl Token {
             Token::RBrace => true,
 
             Token::Comma => false,
-
             Token::Assign => false,
+            Token::Semicolon => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,

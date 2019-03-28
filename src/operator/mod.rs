@@ -78,9 +78,11 @@ pub struct Not;
 
 #[derive(Debug)]
 pub struct Tuple;
-
 #[derive(Debug)]
 pub struct Assign;
+
+#[derive(Debug)]
+pub struct Chain;
 
 #[derive(Debug)]
 pub struct Const {
@@ -624,6 +626,24 @@ impl Operator for Assign {
         context.set_value(target.into(), arguments[1].clone())?;
 
         Ok(Value::Empty)
+    }
+}
+
+impl Operator for Chain {
+    fn precedence(&self) -> i32 {
+        0
+    }
+
+    fn max_argument_amount(&self) -> usize {
+        2
+    }
+
+    fn eval(&self, arguments: &[Value], _context: &Context) -> Result<Value, EvalexprError> {
+        if arguments.is_empty() {
+            return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
+        }
+
+        Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
     }
 }
 

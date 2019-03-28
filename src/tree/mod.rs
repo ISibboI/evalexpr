@@ -383,8 +383,8 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             },
 
             Token::Comma => Some(Node::new(Tuple)),
-
             Token::Assign => Some(Node::new(Assign)),
+            Token::Semicolon => Some(Node::new(Chain)),
 
             Token::Identifier(identifier) => {
                 let mut result = Some(Node::new(VariableIdentifier::new(identifier.clone())));

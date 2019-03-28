@@ -522,6 +522,21 @@ fn test_assignment() {
     );
     assert_eq!(eval_empty_with_context("empty", &context), Ok(EMPTY_VALUE));
     assert_eq!(eval_boolean_with_context("boolean", &context), Ok(false));
+
+    assert_eq!(
+        eval_empty_with_context_mut("b = a = 5", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(eval_empty_with_context("b", &context), Ok(EMPTY_VALUE));
+}
+
+#[test]
+fn test_expression_chaining() {
+    let mut context = HashMapContext::new();
+    assert_eq!(
+        eval_int_with_context_mut("a = 5; a = a + 2; a", &mut context),
+        Ok(7)
+    );
 }
 
 #[cfg(feature = "serde")]
