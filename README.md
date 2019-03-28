@@ -204,7 +204,7 @@ This is done with the `Context` trait.
 Two structs implementing this trait are predefined.
 There is `EmptyContext`, that returns `None` for each request, and `HashMapContext`, that stores mappings from literals to variables in a hash map.
 
-Variables do not have fixed types in the expression itself, but aer typed by the context.
+Variables do not have fixed types in the expression itself, but are typed by the context.
 The `Context` trait contains a function that takes a string literal and returns a `Value` enum.
 The variant of this enum decides the type on evaluation.
 
