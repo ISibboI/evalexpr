@@ -221,12 +221,12 @@ They return the result as the type it was passed into the function.
 ### Values
 
 Operators take values as arguments and produce values as results.
-Values can be boolean, integer or floating point numbers, tuples or the empty type.
-Strings are supported as well, but there are no operations defined for them yet.
+Values can be boolean, integer or floating point numbers, strings, tuples or the empty type.
 Values are denoted as displayed in the following table.
 
 | Value type | Example |
 |------------|---------|
+| `Value::String` | `"abc"`, `""`, `"a\"b\\c"` |
 | `Value::Boolean` | `true`, `false` |
 | `Value::Int` | `3`, `-9`, `0`, `135412` |
 | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |

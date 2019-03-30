@@ -1,6 +1,6 @@
 extern crate evalexpr;
 
-use evalexpr::{*, error::*};
+use evalexpr::{error::*, *};
 
 #[test]
 fn test_unary_examples() {
@@ -536,6 +536,20 @@ fn test_expression_chaining() {
     assert_eq!(
         eval_int_with_context_mut("a = 5; a = a + 2; a", &mut context),
         Ok(7)
+    );
+}
+
+#[test]
+fn test_strings() {
+    let mut context = HashMapContext::new();
+    assert_eq!(eval("\"string\""), Ok(Value::from("string")));
+    assert_eq!(
+        eval_with_context_mut("a = \"a string\"", &mut context),
+        Ok(Value::Empty)
+    );
+    assert_eq!(
+        eval_boolean_with_context("a == \"a string\"", &context),
+        Ok(true)
     );
 }
 

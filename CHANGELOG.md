@@ -6,6 +6,8 @@
 
 ### Added
 
+ * String constants
+
 ### Removed
 
 ### Changed

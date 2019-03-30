@@ -38,6 +38,7 @@ impl fmt::Display for Token {
             Float(float) => float.fmt(f),
             Int(int) => int.fmt(f),
             Boolean(boolean) => boolean.fmt(f),
+            String(string) => fmt::Debug::fmt(string, f),
         }
     }
 }

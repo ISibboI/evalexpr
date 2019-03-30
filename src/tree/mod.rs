@@ -1,9 +1,9 @@
+use token::Token;
+use value::{TupleType, EMPTY_VALUE};
 use EmptyContext;
 use EmptyType;
 use FloatType;
 use IntType;
-use token::Token;
-use value::{EMPTY_VALUE, TupleType};
 
 use crate::{
     context::Context,
@@ -397,9 +397,10 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                 }
                 result
             },
-            Token::Float(number) => Some(Node::new(Const::new(Value::Float(number)))),
-            Token::Int(number) => Some(Node::new(Const::new(Value::Int(number)))),
+            Token::Float(float) => Some(Node::new(Const::new(Value::Float(float)))),
+            Token::Int(int) => Some(Node::new(Const::new(Value::Int(int)))),
             Token::Boolean(boolean) => Some(Node::new(Const::new(Value::Boolean(boolean)))),
+            Token::String(string) => Some(Node::new(Const::new(Value::String(string)))),
         };
 
         if let Some(node) = node {

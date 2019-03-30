@@ -38,6 +38,7 @@ pub enum Token {
     Float(FloatType),
     Int(IntType),
     Boolean(bool),
+    String(String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -63,18 +64,18 @@ fn char_to_partial_token(c: char) -> PartialToken {
         '%' => PartialToken::Token(Token::Percent),
         '^' => PartialToken::Token(Token::Hat),
 
+        '(' => PartialToken::Token(Token::LBrace),
+        ')' => PartialToken::Token(Token::RBrace),
+
+        ',' => PartialToken::Token(Token::Comma),
+        ';' => PartialToken::Token(Token::Semicolon),
+
         '=' => PartialToken::Eq,
         '!' => PartialToken::ExclamationMark,
         '>' => PartialToken::Gt,
         '<' => PartialToken::Lt,
         '&' => PartialToken::Ampersand,
         '|' => PartialToken::VerticalBar,
-
-        '(' => PartialToken::Token(Token::LBrace),
-        ')' => PartialToken::Token(Token::RBrace),
-
-        ',' => PartialToken::Token(Token::Comma),
-        ';' => PartialToken::Token(Token::Semicolon),
 
         c => {
             if c.is_whitespace() {
@@ -118,6 +119,7 @@ impl Token {
             Token::Float(_) => true,
             Token::Int(_) => true,
             Token::Boolean(_) => true,
+            Token::String(_) => true,
         }
     }
 
@@ -152,31 +154,70 @@ impl Token {
             Token::Float(_) => true,
             Token::Int(_) => true,
             Token::Boolean(_) => true,
+            Token::String(_) => true,
         }
     }
 }
 
-/// Converts a string to a vector of partial tokens.
-fn str_to_tokens(string: &str) -> Vec<PartialToken> {
-    let mut result = Vec::new();
-    for c in string.chars() {
-        let partial_token = char_to_partial_token(c);
+/// Parses an escape sequence within a string literal.
+fn parse_escape_sequence<Iter: Iterator<Item = char>>(iter: &mut Iter) -> EvalexprResult<char> {
+    match iter.next() {
+        Some('"') => Ok('"'),
+        Some('\\') => Ok('\\'),
+        Some(c) => Err(EvalexprError::IllegalEscapeSequence(format!("\\{}", c))),
+        None => Err(EvalexprError::IllegalEscapeSequence(format!("\\"))),
+    }
+}
 
-        let if_let_successful =
-            if let (Some(PartialToken::Literal(last)), PartialToken::Literal(literal)) =
-                (result.last_mut(), &partial_token)
-            {
-                last.push_str(literal);
-                true
-            } else {
-                false
-            };
+/// Parses a string value from the given character iterator.
+///
+/// The first character from the iterator is interpreted as first character of the string.
+/// The string is terminated by a double quote `"`.
+/// Occurrences of `"` within the string can be escaped with `\`.
+/// The backslash needs to be escaped with another backslash `\`.
+fn parse_string_literal<Iter: Iterator<Item = char>>(
+    mut iter: &mut Iter,
+) -> EvalexprResult<PartialToken> {
+    let mut result = String::new();
 
-        if !if_let_successful {
-            result.push(partial_token);
+    while let Some(c) = iter.next() {
+        match c {
+            '"' => break,
+            '\\' => result.push(parse_escape_sequence(&mut iter)?),
+            c => result.push(c),
         }
     }
-    result
+
+    Ok(PartialToken::Token(Token::String(result)))
+}
+
+/// Converts a string to a vector of partial tokens.
+fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
+    let mut result = Vec::new();
+    let mut iter = string.chars().peekable();
+
+    while let Some(c) = iter.next() {
+        if c == '"' {
+            result.push(parse_string_literal(&mut iter)?);
+        } else {
+            let partial_token = char_to_partial_token(c);
+
+            let if_let_successful =
+                if let (Some(PartialToken::Literal(last)), PartialToken::Literal(literal)) =
+                    (result.last_mut(), &partial_token)
+                {
+                    last.push_str(literal);
+                    true
+                } else {
+                    false
+                };
+
+            if !if_let_successful {
+                result.push(partial_token);
+            }
+        }
+    }
+    Ok(result)
 }
 
 /// Resolves all partial tokens by converting them to complex tokens.
@@ -255,5 +296,5 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
 }
 
 pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
-    partial_tokens_to_tokens(&str_to_tokens(string))
+    partial_tokens_to_tokens(&str_to_partial_tokens(string)?)
 }

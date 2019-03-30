@@ -208,12 +208,12 @@
 //! ### Values
 //!
 //! Operators take values as arguments and produce values as results.
-//! Values can be boolean, integer or floating point numbers, tuples or the empty type.
-//! Strings are supported as well, but there are no operations defined for them yet.
+//! Values can be boolean, integer or floating point numbers, strings, tuples or the empty type.
 //! Values are denoted as displayed in the following table.
 //!
 //! | Value type | Example |
 //! |------------|---------|
+//! | `Value::String` | `"abc"`, `""`, `"a\"b\\c"` |
 //! | `Value::Boolean` | `true`, `false` |
 //! | `Value::Int` | `3`, `-9`, `0`, `135412` |
 //! | `Value::Float` | `3.`, `.35`, `1.00`, `0.5`, `123.554` |
@@ -361,7 +361,7 @@ pub use function::Function;
 pub use interface::*;
 pub use tree::Node;
 pub use value::{
-    EMPTY_VALUE, EmptyType, FloatType, IntType, TupleType, Value, value_type::ValueType,
+    value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE,
 };
 
 mod context;

@@ -82,6 +82,7 @@ impl fmt::Display for EvalexprError {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
             },
             ContextNotManipulable => write!(f, "Cannot manipulate context"),
+            IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

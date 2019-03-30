@@ -6,7 +6,7 @@
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
 use token::PartialToken;
-use value::{TupleType, value_type::ValueType};
+use value::{value_type::ValueType, TupleType};
 
 use crate::value::Value;
 
@@ -162,6 +162,9 @@ pub enum EvalexprError {
 
     /// A modification was attempted on a `Context` that does not allow modifications.
     ContextNotManipulable,
+
+    /// An escape sequence within a string literal is illegal.
+    IllegalEscapeSequence(String),
 
     /// A custom error explained by its message.
     CustomMessage(String),
