@@ -284,7 +284,7 @@ pub(crate) fn expect_operator_argument_amount(
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub(crate) fn expect_function_argument_amount(
+pub fn expect_function_argument_amount(
     actual: usize,
     expected: usize,
 ) -> EvalexprResult<()> {
