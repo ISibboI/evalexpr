@@ -551,6 +551,9 @@ fn test_strings() {
         eval_boolean_with_context("a == \"a string\"", &context),
         Ok(true)
     );
+    assert_eq!(eval("\"a\" + \"b\""), Ok(Value::from("ab")));
+    assert_eq!(eval("\"a\" > \"b\""), Ok(Value::from(false)));
+    assert_eq!(eval("\"a\" < \"b\""), Ok(Value::from(true)));
 }
 
 #[cfg(feature = "serde")]

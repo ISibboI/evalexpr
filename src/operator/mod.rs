@@ -146,10 +146,15 @@ impl Operator for Add {
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
         expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+        expect_number_or_string(&arguments[0])?;
+        expect_number_or_string(&arguments[1])?;
 
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+            let mut result = String::with_capacity(a.len() + b.len());
+            result.push_str(&a);
+            result.push_str(&b);
+            Ok(Value::String(result))
+        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
             let result = a.checked_add(b);
             if let Some(result) = result {
                 Ok(Value::Int(result))
@@ -395,10 +400,16 @@ impl Operator for Gt {
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
         expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+        expect_number_or_string(&arguments[0])?;
+        expect_number_or_string(&arguments[1])?;
 
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+            if a > b {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
             if a > b {
                 Ok(Value::Boolean(true))
             } else {
@@ -425,10 +436,16 @@ impl Operator for Lt {
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
         expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+        expect_number_or_string(&arguments[0])?;
+        expect_number_or_string(&arguments[1])?;
 
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+            if a < b {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
             if a < b {
                 Ok(Value::Boolean(true))
             } else {
@@ -455,10 +472,16 @@ impl Operator for Geq {
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
         expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+        expect_number_or_string(&arguments[0])?;
+        expect_number_or_string(&arguments[1])?;
 
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+            if a >= b {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
             if a >= b {
                 Ok(Value::Boolean(true))
             } else {
@@ -485,10 +508,16 @@ impl Operator for Leq {
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
         expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+        expect_number_or_string(&arguments[0])?;
+        expect_number_or_string(&arguments[1])?;
 
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+            if a <= b {
+                Ok(Value::Boolean(true))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
             if a <= b {
                 Ok(Value::Boolean(true))
             } else {

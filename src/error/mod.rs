@@ -56,6 +56,13 @@ pub enum EvalexprError {
         actual: Value,
     },
 
+    /// A numeric or string value was expected.
+    /// Numeric values are the variants `Value::Int` and `Value::Float`.
+    ExpectedNumberOrString {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// A boolean value was expected.
     ExpectedBoolean {
         /// The actual value.
@@ -204,6 +211,11 @@ impl EvalexprError {
         EvalexprError::ExpectedNumber { actual }
     }
 
+    /// Constructs `Error::ExpectedNumberOrString{actual}`.
+    pub fn expected_number_or_string(actual: Value) -> Self {
+        EvalexprError::ExpectedNumberOrString { actual }
+    }
+
     /// Constructs `Error::ExpectedBoolean{actual}`.
     pub fn expected_boolean(actual: Value) -> Self {
         EvalexprError::ExpectedBoolean { actual }
@@ -312,6 +324,14 @@ pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
     match actual {
         Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(EvalexprError::expected_number(actual.clone())),
+    }
+}
+
+/// Returns Ok(()) if the given value is a string or a numeric
+pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
+    match actual {
+        Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),
+        _ => Err(EvalexprError::expected_number_or_string(actual.clone())),
     }
 }
 

@@ -24,6 +24,9 @@ impl fmt::Display for EvalexprError {
             ExpectedNumber { actual } => {
                 write!(f, "Expected a Value::Number, but got {:?}.", actual)
             },
+            ExpectedNumberOrString { actual } => {
+                write!(f, "Expected a Value::Number or a Value::String, but got {:?}.", actual)
+            },
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             },
