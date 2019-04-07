@@ -167,6 +167,14 @@ pub enum EvalexprError {
         divisor: Value,
     },
 
+    /// This regular expression could not be parsed
+    InvalidRegex {
+        /// The invalid regular expression
+        regex: String,
+        /// Failure message from the regex engine
+        message: String,
+    },
+
     /// A modification was attempted on a `Context` that does not allow modifications.
     ContextNotManipulable,
 
@@ -278,6 +286,11 @@ impl EvalexprError {
 
     pub(crate) fn modulation_error(dividend: Value, divisor: Value) -> Self {
         EvalexprError::ModulationError { dividend, divisor }
+    }
+
+    /// Constructs `EvalexprError::InvalidRegex(regex)`
+    pub fn invalid_regex(regex: String, message: String) -> Self {
+        EvalexprError::InvalidRegex{ regex, message }
     }
 }
 

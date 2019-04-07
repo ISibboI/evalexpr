@@ -275,14 +275,61 @@ fn test_n_ary_functions() {
         Ok(Value::Int(3))
     );
     assert_eq!(eval_with_context("count 5", &context), Ok(Value::Int(1)));
+}
 
+#[test]
+fn test_builtin_functions() {
     assert_eq!(
-        eval_with_context("min(4.0, 3)", &context),
+        eval("min(4.0, 3)"),
         Ok(Value::Int(3))
     );
     assert_eq!(
-        eval_with_context("max(4.0, 3)", &context),
+        eval("max(4.0, 3)"),
         Ok(Value::Float(4.0))
+    );
+    assert_eq!(
+        eval("downcase(\"FOOBAR\")"),
+        Ok(Value::from("foobar"))
+    );
+    assert_eq!(
+        eval("len(\"foobar\")"),
+        Ok(Value::Int(6))
+    );
+    assert_eq!(
+        eval("trim(\"  foo  bar \")"),
+        Ok(Value::from("foo  bar"))
+    );
+    assert_eq!(
+        eval("upcase(\"foobar\")"),
+        Ok(Value::from("FOOBAR"))
+    );
+}
+
+#[test]
+#[cfg(feature = "regex_support")]
+fn test_regex_functions() {
+    assert_eq!(
+        eval("match(\"foobar\", \"[ob]{3}\")"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("match(\"gazonk\", \"[ob]{3}\")"),
+        Ok(Value::Boolean(false))
+    );
+    match eval("match(\"foo\", \"[\")") {
+        Err(EvalexprError::InvalidRegex{ regex, message }) => {
+            assert_eq!(regex, "[");
+            assert!(message.contains("unclosed character class"));
+        },
+        v => panic!(v),
+    };
+    assert_eq!(
+        eval("replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
+        Ok(Value::String("boobar".to_owned()))
+    );
+    assert_eq!(
+        eval("replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
+        Ok(Value::String("foobar".to_owned()))
     );
 }
 
