@@ -340,7 +340,7 @@ pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
     }
 }
 
-/// Returns Ok(()) if the given value is a string or a numeric
+/// Returns `Ok(())` if the given value is a string or a numeric
 pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
     match actual {
         Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),

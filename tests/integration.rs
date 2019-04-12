@@ -288,7 +288,7 @@ fn test_builtin_functions() {
         Ok(Value::Float(4.0))
     );
     assert_eq!(
-        eval("downcase(\"FOOBAR\")"),
+        eval("to_lowercase(\"FOOBAR\")"),
         Ok(Value::from("foobar"))
     );
     assert_eq!(
@@ -300,7 +300,7 @@ fn test_builtin_functions() {
         Ok(Value::from("foo  bar"))
     );
     assert_eq!(
-        eval("upcase(\"foobar\")"),
+        eval("to_uppercase(\"foobar\")"),
         Ok(Value::from("FOOBAR"))
     );
 }

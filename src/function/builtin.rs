@@ -60,7 +60,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
 
         // string functions
 
-        "downcase" => Some(Function::new(
+        "to_lowercase" => Some(Function::new(
             Some(1),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
@@ -106,7 +106,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Ok(Value::from(subject.trim()))
             }),
         )),
-        "upcase" => Some(Function::new(
+        "to_uppercase" => Some(Function::new(
             Some(1),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
