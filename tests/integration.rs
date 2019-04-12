@@ -288,20 +288,20 @@ fn test_builtin_functions() {
         Ok(Value::Float(4.0))
     );
     assert_eq!(
-        eval("to_lowercase(\"FOOBAR\")"),
-        Ok(Value::from("foobar"))
-    );
-    assert_eq!(
         eval("len(\"foobar\")"),
         Ok(Value::Int(6))
     );
     assert_eq!(
-        eval("trim(\"  foo  bar \")"),
-        Ok(Value::from("foo  bar"))
+        eval("str::to_lowercase(\"FOOBAR\")"),
+        Ok(Value::from("foobar"))
     );
     assert_eq!(
-        eval("to_uppercase(\"foobar\")"),
+        eval("str::to_uppercase(\"foobar\")"),
         Ok(Value::from("FOOBAR"))
+    );
+    assert_eq!(
+        eval("str::trim(\"  foo  bar \")"),
+        Ok(Value::from("foo  bar"))
     );
 }
 
@@ -309,14 +309,14 @@ fn test_builtin_functions() {
 #[cfg(feature = "regex_support")]
 fn test_regex_functions() {
     assert_eq!(
-        eval("regex_matches(\"foobar\", \"[ob]{3}\")"),
+        eval("str::regex_matches(\"foobar\", \"[ob]{3}\")"),
         Ok(Value::Boolean(true))
     );
     assert_eq!(
-        eval("regex_matches(\"gazonk\", \"[ob]{3}\")"),
+        eval("str::regex_matches(\"gazonk\", \"[ob]{3}\")"),
         Ok(Value::Boolean(false))
     );
-    match eval("regex_matches(\"foo\", \"[\")") {
+    match eval("str::regex_matches(\"foo\", \"[\")") {
         Err(EvalexprError::InvalidRegex{ regex, message }) => {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
@@ -324,11 +324,11 @@ fn test_regex_functions() {
         v => panic!(v),
     };
     assert_eq!(
-        eval("regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
+        eval("str::regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
         Ok(Value::String("boobar".to_owned()))
     );
     assert_eq!(
-        eval("regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
+        eval("str::regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
         Ok(Value::String("foobar".to_owned()))
     );
 }

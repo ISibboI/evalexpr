@@ -58,15 +58,6 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }),
         )),
 
-        // string functions
-
-        "to_lowercase" => Some(Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                let subject = expect_string(&arguments[0])?;
-                Ok(Value::from(subject.to_lowercase()))
-            }),
-        )),
         "len" => Some(Function::new(
             Some(1),
             Box::new(|arguments| {
@@ -74,8 +65,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Ok(Value::from(subject.len() as i64))
             }),
         )),
+
+        // string functions
+
         #[cfg(feature = "regex_support")]
-        "regex_matches" => Some(Function::new(
+        "str::regex_matches" => Some(Function::new(
             Some(2),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
@@ -87,7 +81,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }),
         )),
         #[cfg(feature = "regex_support")]
-        "regex_replace" => Some(Function::new(
+        "str::regex_replace" => Some(Function::new(
             Some(3),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
@@ -99,18 +93,25 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 }
             }),
         )),
-        "trim" => Some(Function::new(
+        "str::to_lowercase" => Some(Function::new(
             Some(1),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
-                Ok(Value::from(subject.trim()))
+                Ok(Value::from(subject.to_lowercase()))
             }),
         )),
-        "to_uppercase" => Some(Function::new(
+        "str::to_uppercase" => Some(Function::new(
             Some(1),
             Box::new(|arguments| {
                 let subject = expect_string(&arguments[0])?;
                 Ok(Value::from(subject.to_uppercase()))
+            }),
+        )),
+        "str::trim" => Some(Function::new(
+            Some(1),
+            Box::new(|arguments| {
+                let subject = expect_string(&arguments[0])?;
+                Ok(Value::from(subject.trim()))
             }),
         )),
         _ => None,
