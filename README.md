@@ -222,7 +222,8 @@ This crate offers a set of builtin functions.
 | upcase | 1 | Returns upper-case version of string |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
-They return the result as the type it was passed into the function.
+They return the result as the type it was passed into the function. The regex functions require
+feature flag `regex_support`.
 
 ### Values
 
