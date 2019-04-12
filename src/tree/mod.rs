@@ -13,6 +13,7 @@ use crate::{
 };
 
 mod display;
+mod iter;
 
 /// A node in the operator tree.
 /// The operator tree is created by the crate-level `build_operator_tree` method.
@@ -47,6 +48,26 @@ impl Node {
 
     fn root_node() -> Self {
         Self::new(RootNode)
+    }
+
+    /// Returns an iterator over all identifiers in this expression.
+    /// Each occurrence of an identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    /// let mut iter = tree.iter_identifiers();
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.next(), Some("b"));
+    /// assert_eq!(iter.next(), Some("c"));
+    /// assert_eq!(iter.next(), Some("f"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_identifiers(&self) -> impl Iterator<Item = &str> {
+        self.iter().filter_map(|node| node.operator.identifier())
     }
 
     /// Evaluates the operator tree rooted at this node with the given context.

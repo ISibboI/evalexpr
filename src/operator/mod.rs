@@ -37,6 +37,11 @@ pub trait Operator: Debug + Display {
     fn eval_mut(&self, arguments: &[Value], context: &mut dyn Context) -> EvalexprResult<Value> {
         self.eval(arguments, context)
     }
+
+    /// Returns an identifier if this operator is a function or variable identifier, or `None` otherwise.
+    fn identifier(&self) -> Option<&str> {
+        None
+    }
 }
 
 #[derive(Debug)]
@@ -681,6 +686,10 @@ impl Operator for VariableIdentifier {
             ))
         }
     }
+
+    fn identifier(&self) -> Option<&str> {
+        Some(&self.identifier)
+    }
 }
 
 impl Operator for FunctionIdentifier {
@@ -714,5 +723,9 @@ impl Operator for FunctionIdentifier {
                 self.identifier.clone(),
             ))
         }
+    }
+
+    fn identifier(&self) -> Option<&str> {
+        Some(&self.identifier)
     }
 }
