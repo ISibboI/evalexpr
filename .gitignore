@@ -12,6 +12,5 @@
 *.exe
 *-test
 target/
-Cargo.lock
 .vscode
 .idea
