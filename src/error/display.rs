@@ -22,7 +22,7 @@ impl fmt::Display for EvalexprError {
             ExpectedInt { actual } => write!(f, "Expected a Value::Int, but got {:?}.", actual),
             ExpectedFloat { actual } => write!(f, "Expected a Value::Float, but got {:?}.", actual),
             ExpectedNumber { actual } => {
-                write!(f, "Expected a Value::Number, but got {:?}.", actual)
+                write!(f, "Expected a Value::Float or Value::Int, but got {:?}.", actual)
             },
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
