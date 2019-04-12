@@ -5,7 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "3"
+//! evalexpr = "5"
 //! ```
 //!
 //! Add the `extern crate` definition to your `main.rs` or `lib.rs`:
@@ -310,7 +310,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = {version = "3", features = ["serde_support"]}
+//! evalexpr = {version = "5", features = ["serde_support"]}
 //! ```
 //!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
