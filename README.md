@@ -216,8 +216,8 @@ This crate offers a set of builtin functions.
 | max | >= 1 | Returns the maximum of the arguments |
 | downcase | 1 | Returns lower-case version of string |
 | len | 1 | Return the character length of string argument |
-| match | 2 | Returns true if first string argument matches regex in second |
-| replace | 3 | Returns string with matches replaced by third argument |
+| regex_matches | 2 | Returns true if first string argument matches regex in second |
+| regex_replace | 3 | Returns string with matches replaced by third argument |
 | trim | 1 | Strips whitespace from start and end of string |
 | upcase | 1 | Returns upper-case version of string |
 

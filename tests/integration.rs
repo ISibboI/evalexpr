@@ -309,14 +309,14 @@ fn test_builtin_functions() {
 #[cfg(feature = "regex_support")]
 fn test_regex_functions() {
     assert_eq!(
-        eval("match(\"foobar\", \"[ob]{3}\")"),
+        eval("regex_matches(\"foobar\", \"[ob]{3}\")"),
         Ok(Value::Boolean(true))
     );
     assert_eq!(
-        eval("match(\"gazonk\", \"[ob]{3}\")"),
+        eval("regex_matches(\"gazonk\", \"[ob]{3}\")"),
         Ok(Value::Boolean(false))
     );
-    match eval("match(\"foo\", \"[\")") {
+    match eval("regex_matches(\"foo\", \"[\")") {
         Err(EvalexprError::InvalidRegex{ regex, message }) => {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
@@ -324,11 +324,11 @@ fn test_regex_functions() {
         v => panic!(v),
     };
     assert_eq!(
-        eval("replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
+        eval("regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
         Ok(Value::String("boobar".to_owned()))
     );
     assert_eq!(
-        eval("replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
+        eval("regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
         Ok(Value::String("foobar".to_owned()))
     );
 }

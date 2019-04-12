@@ -167,7 +167,7 @@ pub enum EvalexprError {
         divisor: Value,
     },
 
-    /// This regular expression could not be parsed
+    /// A regular expression could not be parsed
     InvalidRegex {
         /// The invalid regular expression
         regex: String,
