@@ -605,3 +605,17 @@ fn test_serde() {
         assert_eq!(manual_tree.eval(), serde_tree.eval());
     }
 }
+
+#[test]
+fn test_tuple_definitions() {
+    assert_eq!(eval_empty("()"), Ok(()));
+    assert_eq!(eval_int("(3)"), Ok(3));
+    assert_eq!(eval_tuple("(3, 4)"), Ok(vec![Value::from(3), Value::from(4)]));
+    assert_eq!(eval_tuple("2, (5, 6)"), Ok(vec![Value::from(2), Value::from(vec![Value::from(5), Value::from(6)])]));
+    assert_eq!(eval_tuple("1, 2"), Ok(vec![Value::from(1), Value::from(2)]));
+    assert_eq!(eval_tuple("1, 2, 3, 4"), Ok(vec![Value::from(1), Value::from(2), Value::from(3), Value::from(4)]));
+    assert_eq!(eval_tuple("(1, 2, 3), 5, 6, (true, false, 0)"), Ok(vec![Value::from(vec![Value::from(1), Value::from(2), Value::from(3)]), Value::from(5), Value::from(6), Value::from(vec![Value::from(true), Value::from(false), Value::from(0)])]));
+    assert_eq!(eval_tuple("1, (2)"), Ok(vec![Value::from(1), Value::from(2)]));
+    assert_eq!(eval_tuple("1, ()"), Ok(vec![Value::from(1), Value::from(())]));
+    assert_eq!(eval_tuple("1, ((2))"), Ok(vec![Value::from(1), Value::from(2)]));
+}

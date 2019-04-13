@@ -91,6 +91,15 @@ impl Operator {
         }
     }
 
+    /// Returns true if chains of this operator should be flattened into one operator with many arguments.
+    // Make this a const fn once #57563 is resolved
+    fn is_flatten_chains(&self) -> bool {
+        match self {
+            Operator::Chain => true,
+            _ => false,
+        }
+    }
+
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
     pub(crate) fn is_leaf(&self) -> bool {
