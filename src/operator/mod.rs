@@ -94,20 +94,20 @@ impl Operator {
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
     pub(crate) fn is_leaf(&self) -> bool {
-        self.max_argument_amount() == 0
+        self.max_argument_amount() == Some(0)
     }
 
     /// Returns the maximum amount of arguments required by this operator.
     // Make this a const fn once #57563 is resolved
-    pub(crate) fn max_argument_amount(&self) -> usize {
+    pub(crate) fn max_argument_amount(&self) -> Option<usize> {
         use crate::operator::Operator::*;
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
-            | Tuple | Assign | Chain => 2,
-            Not | Neg | RootNode => 1,
-            Const { value: _ } => 0,
-            VariableIdentifier { identifier: _ } => 0,
-            FunctionIdentifier { identifier: _ } => 1,
+            | Tuple | Assign | Chain => Some(2),
+            Not | Neg | RootNode => Some(1),
+            Const { value: _ } => Some(0),
+            VariableIdentifier { identifier: _ } => Some(0),
+            FunctionIdentifier { identifier: _ } => Some(1),
         }
     }
 
