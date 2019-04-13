@@ -316,7 +316,7 @@ impl Node {
     }
 
     fn has_enough_children(&self) -> bool {
-        self.children().len() == self.operator().max_argument_amount()
+        Some(self.children().len()) == self.operator().max_argument_amount()
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {

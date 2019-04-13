@@ -23,12 +23,12 @@ pub trait Operator: Debug + Display {
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
     fn is_leaf(&self) -> bool {
-        self.max_argument_amount() == 0
+        self.max_argument_amount() == Some(0)
     }
 
     /// Returns the maximum amount of arguments required by this operator.
     // Make this a const fn once #57563 is resolved
-    fn max_argument_amount(&self) -> usize;
+    fn max_argument_amount(&self) -> Option<usize>;
 
     /// Evaluates the operator with the given arguments and context.
     fn eval(&self, arguments: &[Value], context: &dyn Context) -> EvalexprResult<Value>;
@@ -127,8 +127,8 @@ impl Operator for RootNode {
         200
     }
 
-    fn max_argument_amount(&self) -> usize {
-        1
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(1)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -145,8 +145,8 @@ impl Operator for Add {
         95
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -182,8 +182,8 @@ impl Operator for Sub {
         95
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -214,8 +214,8 @@ impl Operator for Neg {
         110
     }
 
-    fn max_argument_amount(&self) -> usize {
-        1
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(1)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -240,8 +240,8 @@ impl Operator for Mul {
         100
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -272,8 +272,8 @@ impl Operator for Div {
         100
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -304,8 +304,8 @@ impl Operator for Mod {
         100
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -336,8 +336,8 @@ impl Operator for Exp {
         120
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -359,8 +359,8 @@ impl Operator for Eq {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -379,8 +379,8 @@ impl Operator for Neq {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -399,8 +399,8 @@ impl Operator for Gt {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -435,8 +435,8 @@ impl Operator for Lt {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -471,8 +471,8 @@ impl Operator for Geq {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -507,8 +507,8 @@ impl Operator for Leq {
         80
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -543,8 +543,8 @@ impl Operator for And {
         75
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -565,8 +565,8 @@ impl Operator for Or {
         70
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -587,8 +587,8 @@ impl Operator for Not {
         110
     }
 
-    fn max_argument_amount(&self) -> usize {
-        1
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(1)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -608,8 +608,8 @@ impl Operator for Tuple {
         40
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -646,8 +646,8 @@ impl Operator for Assign {
         false
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, _arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -668,8 +668,8 @@ impl Operator for Chain {
         0
     }
 
-    fn max_argument_amount(&self) -> usize {
-        2
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(2)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> Result<Value, EvalexprError> {
@@ -686,8 +686,8 @@ impl Operator for Const {
         200
     }
 
-    fn max_argument_amount(&self) -> usize {
-        0
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(0)
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
@@ -702,8 +702,8 @@ impl Operator for VariableIdentifier {
         200
     }
 
-    fn max_argument_amount(&self) -> usize {
-        0
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(0)
     }
 
     fn eval(&self, _arguments: &[Value], context: &Context) -> EvalexprResult<Value> {
@@ -730,8 +730,8 @@ impl Operator for FunctionIdentifier {
         false
     }
 
-    fn max_argument_amount(&self) -> usize {
-        1
+    fn max_argument_amount(&self) -> Option<usize> {
+        Some(1)
     }
 
     fn eval(&self, arguments: &[Value], context: &Context) -> EvalexprResult<Value> {
