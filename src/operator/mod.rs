@@ -42,6 +42,16 @@ pub trait Operator: Debug + Display {
     fn identifier(&self) -> Option<&str> {
         None
     }
+
+    /// Returns a variable identifier if this operator is a variable identifier, or `None` otherwise.
+    fn variable_identifier(&self) -> Option<&str> {
+        None
+    }
+
+    /// Returns a function identifier if this operator is a function identifier, or `None` otherwise.
+    fn function_identifier(&self) -> Option<&str> {
+        None
+    }
 }
 
 #[derive(Debug)]
@@ -719,6 +729,10 @@ impl Operator for VariableIdentifier {
     fn identifier(&self) -> Option<&str> {
         Some(&self.identifier)
     }
+
+    fn variable_identifier(&self) -> Option<&str> {
+        Some(&self.identifier)
+    }
 }
 
 impl Operator for FunctionIdentifier {
@@ -755,6 +769,10 @@ impl Operator for FunctionIdentifier {
     }
 
     fn identifier(&self) -> Option<&str> {
+        Some(&self.identifier)
+    }
+
+    fn function_identifier(&self) -> Option<&str> {
         Some(&self.identifier)
     }
 }

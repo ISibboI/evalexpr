@@ -70,6 +70,42 @@ impl Node {
         self.iter().filter_map(|node| node.operator.identifier())
     }
 
+    /// Returns an iterator over all variable identifiers in this expression.
+    /// Each occurrence of a variable identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let tree = build_operator_tree("a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let mut iter = tree.iter_variable_identifiers();
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.next(), Some("b"));
+    /// assert_eq!(iter.next(), Some("c"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_variable_identifiers(&self) -> impl Iterator<Item = &str> {
+        self.iter().filter_map(|node| node.operator.variable_identifier())
+    }
+
+    /// Returns an iterator over all function identifiers in this expression.
+    /// Each occurrence of a function identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let tree = build_operator_tree("a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let mut iter = tree.iter_function_identifiers();
+    /// assert_eq!(iter.next(), Some("f"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_function_identifiers(&self) -> impl Iterator<Item = &str> {
+        self.iter().filter_map(|node| node.operator.function_identifier())
+    }
+
     /// Evaluates the operator tree rooted at this node with the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.

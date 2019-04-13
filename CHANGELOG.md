@@ -7,6 +7,7 @@
 ### Added
 
  * Iterator over all identifiers within an expression, including duplicates
+ * Iterators over only variable or only function identifiers within an expression, including duplicates
  * Overload the `+` operator to concatenate strings
  * Overload `<`, `<=`, `>` and `>=` for strings using lexical ordering (Note: `==` and `!=` compare strings as expected)
  * Add `len`, `str::regex_matches`, `str::regex_replace`, `str::to_lowercase`, `str::to_uppercase`, `str::trim` functions for strings
