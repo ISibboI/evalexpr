@@ -18,7 +18,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "3"
+evalexpr = "5"
 ```
 
 Add the `extern crate` definition to your `main.rs` or `lib.rs`:
@@ -133,7 +133,7 @@ Supported binary operators:
 | * | 100 | Product |
 | / | 100 | Division |
 | % | 100 | Modulo |
-| + | 95 | Sum |
+| + | 95 | Sum or String Concatenation |
 | - | 95 | Difference |
 | < | 80 | Lower than |
 | \> | 80 | Greater than |
@@ -210,13 +210,22 @@ assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(5));
 
 This crate offers a set of builtin functions.
 
-| Identifier | Argument Amount | Description |
-|------------|-----------------|-------------|
-| min | >= 1 | Returns the minimum of the arguments |
-| max | >= 1 | Returns the maximum of the arguments |
+| Identifier | Argument Amount | Argument Types | Description |
+|------------|-----------------|----------------|-------------|
+| `min` | >= 1 | Numeric | Returns the minimum of the arguments |
+| `max` | >= 1 | Numeric | Returns the maximum of the arguments |
+| `len` | 1 | String | Returns the character length of a string |
+| `str::regex_matches` | 2 | String, String | Returns true if the first argument matches the regex in the second argument |
+| `str::regex_replace` | 3 | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument |
+| `str::to_lowercase` | 1 | String | Returns the lower-case version of the string |
+| `str::to_uppercase` | 1 | String | Returns the upper-case version of the string |
+| `str::trim` | 1 | String | Strips whitespace from the start and the end of the string |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
-They return the result as the type it was passed into the function.
+If the maximum or minimum is an integer, then an integer is returned.
+Otherwise, a float is returned.
+
+The regex functions require the feature flag `regex_support`.
 
 ### Values
 
@@ -323,7 +332,7 @@ This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "3", features = ["serde_support"]}
+evalexpr = {version = "5", features = ["serde_support"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
