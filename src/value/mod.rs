@@ -194,6 +194,10 @@ impl From<Value> for EvalexprResult<Value> {
     }
 }
 
+impl From<()> for Value {
+    fn from(_: ()) -> Self { Value::Empty }
+}
+
 #[cfg(test)]
 mod tests {
     use value::{TupleType, Value};

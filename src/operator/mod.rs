@@ -7,6 +7,10 @@ use crate::{context::Context, error::*, value::Value};
 mod display;
 
 pub trait Operator: Debug + Display {
+    /// A numeric id to compare operator types.
+    // Make this a const fn once #57563 is resolved
+    fn id(&self) -> i32;
+
     /// Returns the precedence of the operator.
     /// A high precedence means that the operator has priority to be deeper in the tree.
     // Make this a const fn once #57563 is resolved
@@ -18,6 +22,12 @@ pub trait Operator: Debug + Display {
     // Make this a const fn once #57563 is resolved
     fn is_left_to_right(&self) -> bool {
         true
+    }
+
+    /// Returns true if chains of this operator should be flattened into one operator with many arguments.
+    // Make this a const fn once #57563 is resolved
+    fn is_flatten_chains(&self) -> bool {
+        false
     }
 
     /// True if this operator is a leaf, meaning it accepts no arguments.
@@ -123,6 +133,10 @@ impl FunctionIdentifier {
 }
 
 impl Operator for RootNode {
+    fn id(&self) -> i32 {
+        1
+    }
+
     fn precedence(&self) -> i32 {
         200
     }
@@ -141,6 +155,10 @@ impl Operator for RootNode {
 }
 
 impl Operator for Add {
+    fn id(&self) -> i32 {
+        2
+    }
+
     fn precedence(&self) -> i32 {
         95
     }
@@ -178,6 +196,10 @@ impl Operator for Add {
 }
 
 impl Operator for Sub {
+    fn id(&self) -> i32 {
+        3
+    }
+
     fn precedence(&self) -> i32 {
         95
     }
@@ -210,6 +232,10 @@ impl Operator for Sub {
 }
 
 impl Operator for Neg {
+    fn id(&self) -> i32 {
+        4
+    }
+
     fn precedence(&self) -> i32 {
         110
     }
@@ -236,6 +262,10 @@ impl Operator for Neg {
 }
 
 impl Operator for Mul {
+    fn id(&self) -> i32 {
+        5
+    }
+
     fn precedence(&self) -> i32 {
         100
     }
@@ -268,6 +298,10 @@ impl Operator for Mul {
 }
 
 impl Operator for Div {
+    fn id(&self) -> i32 {
+        6
+    }
+
     fn precedence(&self) -> i32 {
         100
     }
@@ -300,6 +334,10 @@ impl Operator for Div {
 }
 
 impl Operator for Mod {
+    fn id(&self) -> i32 {
+        7
+    }
+
     fn precedence(&self) -> i32 {
         100
     }
@@ -332,6 +370,10 @@ impl Operator for Mod {
 }
 
 impl Operator for Exp {
+    fn id(&self) -> i32 {
+        8
+    }
+
     fn precedence(&self) -> i32 {
         120
     }
@@ -355,6 +397,10 @@ impl Operator for Exp {
 }
 
 impl Operator for Eq {
+    fn id(&self) -> i32 {
+        9
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -375,6 +421,10 @@ impl Operator for Eq {
 }
 
 impl Operator for Neq {
+    fn id(&self) -> i32 {
+        10
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -395,6 +445,10 @@ impl Operator for Neq {
 }
 
 impl Operator for Gt {
+    fn id(&self) -> i32 {
+        11
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -431,6 +485,10 @@ impl Operator for Gt {
 }
 
 impl Operator for Lt {
+    fn id(&self) -> i32 {
+        12
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -467,6 +525,10 @@ impl Operator for Lt {
 }
 
 impl Operator for Geq {
+    fn id(&self) -> i32 {
+        13
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -503,6 +565,10 @@ impl Operator for Geq {
 }
 
 impl Operator for Leq {
+    fn id(&self) -> i32 {
+        14
+    }
+
     fn precedence(&self) -> i32 {
         80
     }
@@ -539,6 +605,10 @@ impl Operator for Leq {
 }
 
 impl Operator for And {
+    fn id(&self) -> i32 {
+        15
+    }
+
     fn precedence(&self) -> i32 {
         75
     }
@@ -561,6 +631,10 @@ impl Operator for And {
 }
 
 impl Operator for Or {
+    fn id(&self) -> i32 {
+        16
+    }
+
     fn precedence(&self) -> i32 {
         70
     }
@@ -583,6 +657,10 @@ impl Operator for Or {
 }
 
 impl Operator for Not {
+    fn id(&self) -> i32 {
+        17
+    }
+
     fn precedence(&self) -> i32 {
         110
     }
@@ -604,17 +682,26 @@ impl Operator for Not {
 }
 
 impl Operator for Tuple {
+    fn id(&self) -> i32 {
+        18
+    }
+
     fn precedence(&self) -> i32 {
         40
     }
 
     fn max_argument_amount(&self) -> Option<usize> {
-        Some(2)
+        None
     }
 
     fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        if let Value::Tuple(tuple) = &arguments[0] {
+        if arguments.len() < 2 {
+            return Err(EvalexprError::wrong_operator_argument_amount(arguments.len(), 2));
+        }
+
+        Ok(Value::Tuple(arguments.iter().cloned().collect()))
+
+        /*if let Value::Tuple(tuple) = &arguments[0] {
             let mut tuple = tuple.clone();
             if let Value::Tuple(tuple2) = &arguments[1] {
                 tuple.extend(tuple2.iter().cloned());
@@ -633,11 +720,15 @@ impl Operator for Tuple {
                     arguments[1].clone(),
                 ]))
             }
-        }
+        }*/
     }
 }
 
 impl Operator for Assign {
+    fn id(&self) -> i32 {
+        19
+    }
+
     fn precedence(&self) -> i32 {
         50
     }
@@ -664,8 +755,16 @@ impl Operator for Assign {
 }
 
 impl Operator for Chain {
+    fn id(&self) -> i32 {
+        20
+    }
+
     fn precedence(&self) -> i32 {
         0
+    }
+
+    fn is_flatten_chains(&self) -> bool {
+        true
     }
 
     fn max_argument_amount(&self) -> Option<usize> {
@@ -682,6 +781,10 @@ impl Operator for Chain {
 }
 
 impl Operator for Const {
+    fn id(&self) -> i32 {
+        21
+    }
+
     fn precedence(&self) -> i32 {
         200
     }
@@ -698,6 +801,10 @@ impl Operator for Const {
 }
 
 impl Operator for VariableIdentifier {
+    fn id(&self) -> i32 {
+        22
+    }
+
     fn precedence(&self) -> i32 {
         200
     }
@@ -722,6 +829,10 @@ impl Operator for VariableIdentifier {
 }
 
 impl Operator for FunctionIdentifier {
+    fn id(&self) -> i32 {
+        23
+    }
+
     fn precedence(&self) -> i32 {
         190
     }

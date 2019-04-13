@@ -337,6 +337,9 @@ impl Node {
                         .last_mut()
                         .unwrap()
                         .insert_back_prioritized(node, false)
+                } else if self.children.last().unwrap().operator().id() == node.operator().id() && node.operator().is_flatten_chains() && !self.children.last().unwrap().has_enough_children() {
+                    // The operators will be chained together, and the next value will be added to this nodes last child.
+                    Ok(())
                 } else {
                     if node.operator().is_leaf() {
                         return Err(EvalexprError::AppendedToLeafNode);
