@@ -56,6 +56,13 @@ pub enum EvalexprError {
         actual: Value,
     },
 
+    /// A numeric or string value was expected.
+    /// Numeric values are the variants `Value::Int` and `Value::Float`.
+    ExpectedNumberOrString {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// A boolean value was expected.
     ExpectedBoolean {
         /// The actual value.
@@ -160,6 +167,14 @@ pub enum EvalexprError {
         divisor: Value,
     },
 
+    /// A regular expression could not be parsed
+    InvalidRegex {
+        /// The invalid regular expression
+        regex: String,
+        /// Failure message from the regex engine
+        message: String,
+    },
+
     /// A modification was attempted on a `Context` that does not allow modifications.
     ContextNotManipulable,
 
@@ -202,6 +217,11 @@ impl EvalexprError {
     /// Constructs `Error::ExpectedNumber{actual}`.
     pub fn expected_number(actual: Value) -> Self {
         EvalexprError::ExpectedNumber { actual }
+    }
+
+    /// Constructs `Error::ExpectedNumberOrString{actual}`.
+    pub fn expected_number_or_string(actual: Value) -> Self {
+        EvalexprError::ExpectedNumberOrString { actual }
     }
 
     /// Constructs `Error::ExpectedBoolean{actual}`.
@@ -267,6 +287,11 @@ impl EvalexprError {
     pub(crate) fn modulation_error(dividend: Value, divisor: Value) -> Self {
         EvalexprError::ModulationError { dividend, divisor }
     }
+
+    /// Constructs `EvalexprError::InvalidRegex(regex)`
+    pub fn invalid_regex(regex: String, message: String) -> Self {
+        EvalexprError::InvalidRegex{ regex, message }
+    }
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongOperatorArgumentAmount)` otherwise.
@@ -312,6 +337,14 @@ pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
     match actual {
         Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(EvalexprError::expected_number(actual.clone())),
+    }
+}
+
+/// Returns `Ok(())` if the given value is a string or a numeric
+pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
+    match actual {
+        Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),
+        _ => Err(EvalexprError::expected_number_or_string(actual.clone())),
     }
 }
 

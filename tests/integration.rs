@@ -275,14 +275,61 @@ fn test_n_ary_functions() {
         Ok(Value::Int(3))
     );
     assert_eq!(eval_with_context("count 5", &context), Ok(Value::Int(1)));
+}
 
+#[test]
+fn test_builtin_functions() {
     assert_eq!(
-        eval_with_context("min(4.0, 3)", &context),
+        eval("min(4.0, 3)"),
         Ok(Value::Int(3))
     );
     assert_eq!(
-        eval_with_context("max(4.0, 3)", &context),
+        eval("max(4.0, 3)"),
         Ok(Value::Float(4.0))
+    );
+    assert_eq!(
+        eval("len(\"foobar\")"),
+        Ok(Value::Int(6))
+    );
+    assert_eq!(
+        eval("str::to_lowercase(\"FOOBAR\")"),
+        Ok(Value::from("foobar"))
+    );
+    assert_eq!(
+        eval("str::to_uppercase(\"foobar\")"),
+        Ok(Value::from("FOOBAR"))
+    );
+    assert_eq!(
+        eval("str::trim(\"  foo  bar \")"),
+        Ok(Value::from("foo  bar"))
+    );
+}
+
+#[test]
+#[cfg(feature = "regex_support")]
+fn test_regex_functions() {
+    assert_eq!(
+        eval("str::regex_matches(\"foobar\", \"[ob]{3}\")"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("str::regex_matches(\"gazonk\", \"[ob]{3}\")"),
+        Ok(Value::Boolean(false))
+    );
+    match eval("str::regex_matches(\"foo\", \"[\")") {
+        Err(EvalexprError::InvalidRegex{ regex, message }) => {
+            assert_eq!(regex, "[");
+            assert!(message.contains("unclosed character class"));
+        },
+        v => panic!(v),
+    };
+    assert_eq!(
+        eval("str::regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
+        Ok(Value::String("boobar".to_owned()))
+    );
+    assert_eq!(
+        eval("str::regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
+        Ok(Value::String("foobar".to_owned()))
     );
 }
 
@@ -551,6 +598,9 @@ fn test_strings() {
         eval_boolean_with_context("a == \"a string\"", &context),
         Ok(true)
     );
+    assert_eq!(eval("\"a\" + \"b\""), Ok(Value::from("ab")));
+    assert_eq!(eval("\"a\" > \"b\""), Ok(Value::from(false)));
+    assert_eq!(eval("\"a\" < \"b\""), Ok(Value::from(true)));
 }
 
 #[cfg(feature = "serde")]

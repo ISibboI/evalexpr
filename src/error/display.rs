@@ -24,6 +24,9 @@ impl fmt::Display for EvalexprError {
             ExpectedNumber { actual } => {
                 write!(f, "Expected a Value::Float or Value::Int, but got {:?}.", actual)
             },
+            ExpectedNumberOrString { actual } => {
+                write!(f, "Expected a Value::Number or a Value::String, but got {:?}.", actual)
+            },
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             },
@@ -81,6 +84,7 @@ impl fmt::Display for EvalexprError {
             ModulationError { dividend, divisor } => {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
             },
+            InvalidRegex { regex, message } => write!(f, "Regular expression {:?} is invalid: {:?}", regex, message),
             ContextNotManipulable => write!(f, "Cannot manipulate context"),
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),

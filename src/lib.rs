@@ -347,6 +347,8 @@
 
 #![warn(missing_docs)]
 
+#[cfg(feature = "regex_support")]
+extern crate regex;
 #[cfg(test)]
 extern crate ron;
 #[cfg(feature = "serde_support")]

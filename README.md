@@ -214,9 +214,16 @@ This crate offers a set of builtin functions.
 |------------|-----------------|-------------|
 | min | >= 1 | Returns the minimum of the arguments |
 | max | >= 1 | Returns the maximum of the arguments |
+| len | 1 | Return the character length of string argument |
+| str::regex_matches | 2 | Returns true if first string argument matches regex in second |
+| str::regex_replace | 3 | Returns string with matches replaced by third argument |
+| str::to_lowercase | 1 | Returns lower-case version of string |
+| str::to_uppercase | 1 | Returns upper-case version of string |
+| str::trim | 1 | Strips whitespace from start and end of string |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
-They return the result as the type it was passed into the function.
+They return the result as the type it was passed into the function. The regex functions require
+feature flag `regex_support`.
 
 ### Values
 

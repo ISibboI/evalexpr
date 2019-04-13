@@ -16,11 +16,13 @@ name = "evalexpr"
 path = "src/lib.rs"
 
 [dependencies]
+regex = { version = "1", optional = true}
 serde = { version = "1", optional = true}
 serde_derive = { version = "1", optional = true}
 
 [features]
 serde_support = ["serde", "serde_derive"]
+regex_support = ["regex"]
 
 [dev-dependencies]
 ron = "0.4"
