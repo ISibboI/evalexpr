@@ -11,6 +11,8 @@ use crate::{
     operator::*,
     value::Value,
 };
+use std::error::Error;
+use std::any::Any;
 
 mod display;
 mod iter;
@@ -337,7 +339,7 @@ impl Node {
                         .last_mut()
                         .unwrap()
                         .insert_back_prioritized(node, false)
-                } else if self.children.last().unwrap().operator().id() == node.operator().id() && node.operator().is_flatten_chains() && !self.children.last().unwrap().has_enough_children() {
+                } else if self.children.last().unwrap().operator().type_id() == node.operator().type_id() && node.operator().is_flatten_chains() && !self.children.last().unwrap().has_enough_children() {
                     // The operators will be chained together, and the next value will be added to this nodes last child.
                     Ok(())
                 } else {
