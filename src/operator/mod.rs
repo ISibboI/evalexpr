@@ -95,7 +95,7 @@ impl Operator {
     // Make this a const fn once #57563 is resolved
     fn is_flatten_chains(&self) -> bool {
         match self {
-            Operator::Chain => true,
+            Operator::Tuple => true,
             _ => false,
         }
     }
@@ -112,7 +112,8 @@ impl Operator {
         use crate::operator::Operator::*;
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
-            | Tuple | Assign | Chain => Some(2),
+            | Assign | Chain => Some(2),
+            Tuple => None,
             Not | Neg | RootNode => Some(1),
             Const { value: _ } => Some(0),
             VariableIdentifier { identifier: _ } => Some(0),
