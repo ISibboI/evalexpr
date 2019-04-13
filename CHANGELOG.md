@@ -6,7 +6,10 @@
 
 ### Added
 
- * String constants
+ * Iterator over all identifiers within an expression, including duplicates
+ * Overload the `+` operator to concatenate strings
+ * Overload `<`, `<=`, `>` and `>=` for strings using lexical ordering (Note: `==` and `!=` compare strings as expected)
+ * Add `len`, `str::regex_matches`, `str::regex_replace`, `str::to_lowercase`, `str::to_uppercase`, `str::trim` functions for strings
 
 ### Removed
 
@@ -15,6 +18,18 @@
 ### Fixed
 
 ### Deprecated
+
+## [4.1.0](https://github.com/ISibboI/evalexpr/compare/4.0.0...4.1.0) - 2019-03-31
+
+### Added
+
+ * Export `expect_function_argument_amount`
+
+## [4.0.0](https://github.com/ISibboI/evalexpr/compare/3.1.0...4.0.0) - 2019-03-30
+
+### Added
+
+ * String constants
 
 ## [3.1.0](https://github.com/ISibboI/evalexpr/compare/3.0.0...3.1.0) - 2019-03-28
 
