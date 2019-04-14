@@ -35,19 +35,19 @@ mod iter;
 #[derive(Debug)]
 pub struct Node {
     children: Vec<Node>,
-    operator: Box<dyn Operator>,
+    operator: Operator,
 }
 
 impl Node {
-    fn new<T: Operator + 'static>(operator: T) -> Self {
+    fn new(operator: Operator) -> Self {
         Self {
             children: Vec::new(),
-            operator: Box::new(operator),
+            operator,
         }
     }
 
     fn root_node() -> Self {
-        Self::new(RootNode)
+        Self::new(Operator::RootNode)
     }
 
     /// Returns an iterator over all identifiers in this expression.
@@ -67,7 +67,11 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_identifiers(&self) -> impl Iterator<Item = &str> {
-        self.iter().filter_map(|node| node.operator.identifier())
+        self.iter().filter_map(|node| match node.operator() {
+            Operator::VariableIdentifier { identifier }
+            | Operator::FunctionIdentifier { identifier } => Some(identifier.as_str()),
+            _ => None,
+        })
     }
 
     /// Returns an iterator over all variable identifiers in this expression.
@@ -86,7 +90,10 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_variable_identifiers(&self) -> impl Iterator<Item = &str> {
-        self.iter().filter_map(|node| node.operator.variable_identifier())
+        self.iter().filter_map(|node| match node.operator() {
+            Operator::VariableIdentifier { identifier } => Some(identifier.as_str()),
+            _ => None,
+        })
     }
 
     /// Returns an iterator over all function identifiers in this expression.
@@ -103,7 +110,10 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_function_identifiers(&self) -> impl Iterator<Item = &str> {
-        self.iter().filter_map(|node| node.operator.function_identifier())
+        self.iter().filter_map(|node| match node.operator() {
+            Operator::FunctionIdentifier { identifier } => Some(identifier.as_str()),
+            _ => None,
+        })
     }
 
     /// Evaluates the operator tree rooted at this node with the given context.
@@ -347,7 +357,7 @@ impl Node {
         &self.children
     }
 
-    fn operator(&self) -> &Box<dyn Operator> {
+    fn operator(&self) -> &Operator {
         &self.operator
     }
 
@@ -404,60 +414,60 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
         let next = token_iter.peek().cloned();
 
         let node = match token.clone() {
-            Token::Plus => Some(Node::new(Add)),
+            Token::Plus => Some(Node::new(Operator::Add)),
             Token::Minus => {
                 if last_token_is_rightsided_value {
-                    Some(Node::new(Sub))
+                    Some(Node::new(Operator::Sub))
                 } else {
-                    Some(Node::new(Neg))
+                    Some(Node::new(Operator::Neg))
                 }
-            },
-            Token::Star => Some(Node::new(Mul)),
-            Token::Slash => Some(Node::new(Div)),
-            Token::Percent => Some(Node::new(Mod)),
-            Token::Hat => Some(Node::new(Exp)),
+            }
+            Token::Star => Some(Node::new(Operator::Mul)),
+            Token::Slash => Some(Node::new(Operator::Div)),
+            Token::Percent => Some(Node::new(Operator::Mod)),
+            Token::Hat => Some(Node::new(Operator::Exp)),
 
-            Token::Eq => Some(Node::new(Eq)),
-            Token::Neq => Some(Node::new(Neq)),
-            Token::Gt => Some(Node::new(Gt)),
-            Token::Lt => Some(Node::new(Lt)),
-            Token::Geq => Some(Node::new(Geq)),
-            Token::Leq => Some(Node::new(Leq)),
-            Token::And => Some(Node::new(And)),
-            Token::Or => Some(Node::new(Or)),
-            Token::Not => Some(Node::new(Not)),
+            Token::Eq => Some(Node::new(Operator::Eq)),
+            Token::Neq => Some(Node::new(Operator::Neq)),
+            Token::Gt => Some(Node::new(Operator::Gt)),
+            Token::Lt => Some(Node::new(Operator::Lt)),
+            Token::Geq => Some(Node::new(Operator::Geq)),
+            Token::Leq => Some(Node::new(Operator::Leq)),
+            Token::And => Some(Node::new(Operator::And)),
+            Token::Or => Some(Node::new(Operator::Or)),
+            Token::Not => Some(Node::new(Operator::Not)),
 
             Token::LBrace => {
                 root.push(Node::root_node());
                 None
-            },
+            }
             Token::RBrace => {
                 if root.len() < 2 {
                     return Err(EvalexprError::UnmatchedRBrace);
                 } else {
                     root.pop()
                 }
-            },
+            }
 
-            Token::Comma => Some(Node::new(Tuple)),
-            Token::Assign => Some(Node::new(Assign)),
-            Token::Semicolon => Some(Node::new(Chain)),
+            Token::Comma => Some(Node::new(Operator::Tuple)),
+            Token::Assign => Some(Node::new(Operator::Assign)),
+            Token::Semicolon => Some(Node::new(Operator::Chain)),
 
             Token::Identifier(identifier) => {
-                let mut result = Some(Node::new(VariableIdentifier::new(identifier.clone())));
+                let mut result = Some(Node::new(Operator::variable_identifier(identifier.clone())));
                 if let Some(next) = next {
                     if next == &Token::Assign {
-                        result = Some(Node::new(Const::new(identifier.clone().into())));
+                        result = Some(Node::new(Operator::value(identifier.clone().into())));
                     } else if next.is_leftsided_value() {
-                        result = Some(Node::new(FunctionIdentifier::new(identifier)));
+                        result = Some(Node::new(Operator::function_identifier(identifier)));
                     }
                 }
                 result
-            },
-            Token::Float(float) => Some(Node::new(Const::new(Value::Float(float)))),
-            Token::Int(int) => Some(Node::new(Const::new(Value::Int(int)))),
-            Token::Boolean(boolean) => Some(Node::new(Const::new(Value::Boolean(boolean)))),
-            Token::String(string) => Some(Node::new(Const::new(Value::String(string)))),
+            }
+            Token::Float(float) => Some(Node::new(Operator::value(Value::Float(float)))),
+            Token::Int(int) => Some(Node::new(Operator::value(Value::Int(int)))),
+            Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),
+            Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
         };
 
         if let Some(node) = node {

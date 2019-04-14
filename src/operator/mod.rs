@@ -1,778 +1,497 @@
-use std::fmt::{Debug, Display};
-
 use function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value};
 
 mod display;
 
-pub trait Operator: Debug + Display {
+#[derive(Debug)]
+pub enum Operator {
+    RootNode,
+
+    Add,
+    Sub,
+    Neg,
+    Mul,
+    Div,
+    Mod,
+    Exp,
+
+    Eq,
+    Neq,
+    Gt,
+    Lt,
+    Geq,
+    Leq,
+    And,
+    Or,
+    Not,
+
+    Tuple,
+    Assign,
+
+    Chain,
+
+    Const { value: Value },
+    VariableIdentifier { identifier: String },
+    FunctionIdentifier { identifier: String },
+}
+
+impl Operator {
+    pub(crate) fn value(value: Value) -> Self {
+        Operator::Const { value }
+    }
+
+    pub(crate) fn variable_identifier(identifier: String) -> Self {
+        Operator::VariableIdentifier { identifier }
+    }
+
+    pub(crate) fn function_identifier(identifier: String) -> Self {
+        Operator::FunctionIdentifier { identifier }
+    }
+
     /// Returns the precedence of the operator.
     /// A high precedence means that the operator has priority to be deeper in the tree.
     // Make this a const fn once #57563 is resolved
-    fn precedence(&self) -> i32;
+    pub(crate) fn precedence(&self) -> i32 {
+        use crate::operator::Operator::*;
+        match self {
+            RootNode => 200,
+
+            Add | Sub => 95,
+            Neg => 110,
+            Mul | Div | Mod => 100,
+            Exp => 120,
+
+            Eq | Neq | Gt | Lt | Geq | Leq => 80,
+            And => 75,
+            Or => 70,
+            Not => 110,
+
+            Tuple => 40,
+            Assign => 50,
+
+            Chain => 0,
+
+            Const { value: _ } => 200,
+            VariableIdentifier { identifier: _ } => 200,
+            FunctionIdentifier { identifier: _ } => 190,
+        }
+    }
 
     /// Returns true if chains of operators with the same precedence as this one should be evaluated left-to-right,
     /// and false if they should be evaluated right-to-left.
     /// Left-to-right chaining has priority if operators with different order but same precedence are chained.
     // Make this a const fn once #57563 is resolved
-    fn is_left_to_right(&self) -> bool {
-        true
+    pub(crate) fn is_left_to_right(&self) -> bool {
+        use crate::operator::Operator::*;
+        match self {
+            Assign => false,
+            FunctionIdentifier { identifier: _ } => false,
+            _ => true,
+        }
     }
 
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
-    fn is_leaf(&self) -> bool {
+    pub(crate) fn is_leaf(&self) -> bool {
         self.max_argument_amount() == 0
     }
 
     /// Returns the maximum amount of arguments required by this operator.
     // Make this a const fn once #57563 is resolved
-    fn max_argument_amount(&self) -> usize;
+    pub(crate) fn max_argument_amount(&self) -> usize {
+        use crate::operator::Operator::*;
+        match self {
+            Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
+            | Tuple | Assign | Chain => 2,
+            Not | Neg | RootNode => 1,
+            Const { value: _ } => 0,
+            VariableIdentifier { identifier: _ } => 0,
+            FunctionIdentifier { identifier: _ } => 1,
+        }
+    }
 
     /// Evaluates the operator with the given arguments and context.
-    fn eval(&self, arguments: &[Value], context: &dyn Context) -> EvalexprResult<Value>;
+    pub(crate) fn eval(&self, arguments: &[Value], context: &dyn Context) -> EvalexprResult<Value> {
+        use crate::operator::Operator::*;
+        match self {
+            RootNode => {
+                if let Some(first) = arguments.first() {
+                    Ok(first.clone())
+                } else {
+                    Ok(Value::Empty)
+                }
+            }
+            Add => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number_or_string(&arguments[0])?;
+                expect_number_or_string(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+                    let mut result = String::with_capacity(a.len() + b.len());
+                    result.push_str(&a);
+                    result.push_str(&b);
+                    Ok(Value::String(result))
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    let result = a.checked_add(b);
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::addition_error(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ))
+                    }
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_number().unwrap() + arguments[1].as_number().unwrap(),
+                    ))
+                }
+            }
+            Sub => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    let result = a.checked_sub(b);
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::subtraction_error(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ))
+                    }
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_number().unwrap() - arguments[1].as_number().unwrap(),
+                    ))
+                }
+            }
+            Neg => {
+                expect_operator_argument_amount(arguments.len(), 1)?;
+                expect_number(&arguments[0])?;
+
+                if let Ok(a) = arguments[0].as_int() {
+                    let result = a.checked_neg();
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::negation_error(arguments[0].clone()))
+                    }
+                } else {
+                    Ok(Value::Float(-arguments[0].as_number().unwrap()))
+                }
+            }
+            Mul => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    let result = a.checked_mul(b);
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::multiplication_error(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ))
+                    }
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_number().unwrap() * arguments[1].as_number().unwrap(),
+                    ))
+                }
+            }
+            Div => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    let result = a.checked_div(b);
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::division_error(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ))
+                    }
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_number().unwrap() / arguments[1].as_number().unwrap(),
+                    ))
+                }
+            }
+            Mod => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    let result = a.checked_rem(b);
+                    if let Some(result) = result {
+                        Ok(Value::Int(result))
+                    } else {
+                        Err(EvalexprError::modulation_error(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ))
+                    }
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_number().unwrap() % arguments[1].as_number().unwrap(),
+                    ))
+                }
+            }
+            Exp => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+
+                Ok(Value::Float(
+                    arguments[0]
+                        .as_number()
+                        .unwrap()
+                        .powf(arguments[1].as_number().unwrap()),
+                ))
+            }
+            Eq => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+
+                if arguments[0] == arguments[1] {
+                    Ok(Value::Boolean(true))
+                } else {
+                    Ok(Value::Boolean(false))
+                }
+            }
+            Neq => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+
+                if arguments[0] != arguments[1] {
+                    Ok(Value::Boolean(true))
+                } else {
+                    Ok(Value::Boolean(false))
+                }
+            }
+            Gt => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number_or_string(&arguments[0])?;
+                expect_number_or_string(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+                    if a > b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    if a > b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else {
+                    if arguments[0].as_number().unwrap() > arguments[1].as_number().unwrap() {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                }
+            }
+            Lt => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number_or_string(&arguments[0])?;
+                expect_number_or_string(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+                    if a < b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    if a < b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else {
+                    if arguments[0].as_number().unwrap() < arguments[1].as_number().unwrap() {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                }
+            }
+            Geq => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number_or_string(&arguments[0])?;
+                expect_number_or_string(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+                    if a >= b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    if a >= b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else {
+                    if arguments[0].as_number().unwrap() >= arguments[1].as_number().unwrap() {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                }
+            }
+            Leq => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                expect_number_or_string(&arguments[0])?;
+                expect_number_or_string(&arguments[1])?;
+
+                if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
+                    if a <= b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                    if a <= b {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                } else {
+                    if arguments[0].as_number().unwrap() <= arguments[1].as_number().unwrap() {
+                        Ok(Value::Boolean(true))
+                    } else {
+                        Ok(Value::Boolean(false))
+                    }
+                }
+            }
+            And => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                let a = expect_boolean(&arguments[0])?;
+                let b = expect_boolean(&arguments[1])?;
+
+                if a && b {
+                    Ok(Value::Boolean(true))
+                } else {
+                    Ok(Value::Boolean(false))
+                }
+            }
+            Or => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                let a = expect_boolean(&arguments[0])?;
+                let b = expect_boolean(&arguments[1])?;
+
+                if a || b {
+                    Ok(Value::Boolean(true))
+                } else {
+                    Ok(Value::Boolean(false))
+                }
+            }
+            Not => {
+                expect_operator_argument_amount(arguments.len(), 1)?;
+                let a = expect_boolean(&arguments[0])?;
+
+                if !a {
+                    Ok(Value::Boolean(true))
+                } else {
+                    Ok(Value::Boolean(false))
+                }
+            }
+            Tuple => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                if let Value::Tuple(tuple) = &arguments[0] {
+                    let mut tuple = tuple.clone();
+                    if let Value::Tuple(tuple2) = &arguments[1] {
+                        tuple.extend(tuple2.iter().cloned());
+                    } else {
+                        tuple.push(arguments[1].clone());
+                    }
+                    Ok(Value::from(tuple))
+                } else {
+                    if let Value::Tuple(tuple) = &arguments[1] {
+                        let mut tuple = tuple.clone();
+                        tuple.insert(0, arguments[0].clone());
+                        Ok(Value::from(tuple))
+                    } else {
+                        Ok(Value::from(vec![
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ]))
+                    }
+                }
+            }
+            Assign => Err(EvalexprError::ContextNotManipulable),
+            Chain => {
+                if arguments.is_empty() {
+                    return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
+                }
+
+                Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
+            }
+            Const { value } => {
+                expect_operator_argument_amount(arguments.len(), 0)?;
+
+                Ok(value.clone())
+            }
+            VariableIdentifier { identifier } => {
+                if let Some(value) = context.get_value(&identifier).cloned() {
+                    Ok(value)
+                } else {
+                    Err(EvalexprError::VariableIdentifierNotFound(
+                        identifier.clone(),
+                    ))
+                }
+            }
+            FunctionIdentifier { identifier } => {
+                expect_operator_argument_amount(arguments.len(), 1)?;
+
+                let arguments = if let Value::Tuple(arguments) = &arguments[0] {
+                    arguments
+                } else {
+                    arguments
+                };
+
+                if let Some(function) = context.get_function(&identifier) {
+                    function.call(arguments)
+                } else if let Some(builtin_function) = builtin_function(&identifier) {
+                    builtin_function.call(arguments)
+                } else {
+                    Err(EvalexprError::FunctionIdentifierNotFound(
+                        identifier.clone(),
+                    ))
+                }
+            }
+        }
+    }
 
     /// Evaluates the operator with the given arguments and mutable context.
-    fn eval_mut(&self, arguments: &[Value], context: &mut dyn Context) -> EvalexprResult<Value> {
-        self.eval(arguments, context)
-    }
+    pub(crate) fn eval_mut(
+        &self,
+        arguments: &[Value],
+        context: &mut dyn Context,
+    ) -> EvalexprResult<Value> {
+        use crate::operator::Operator::*;
+        match self {
+            Assign => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                let target = expect_string(&arguments[0])?;
+                context.set_value(target.into(), arguments[1].clone())?;
 
-    /// Returns an identifier if this operator is a function or variable identifier, or `None` otherwise.
-    fn identifier(&self) -> Option<&str> {
-        None
-    }
-
-    /// Returns a variable identifier if this operator is a variable identifier, or `None` otherwise.
-    fn variable_identifier(&self) -> Option<&str> {
-        None
-    }
-
-    /// Returns a function identifier if this operator is a function identifier, or `None` otherwise.
-    fn function_identifier(&self) -> Option<&str> {
-        None
-    }
-}
-
-#[derive(Debug)]
-pub struct RootNode;
-
-#[derive(Debug)]
-pub struct Add;
-#[derive(Debug)]
-pub struct Sub;
-#[derive(Debug)]
-pub struct Neg;
-#[derive(Debug)]
-pub struct Mul;
-#[derive(Debug)]
-pub struct Div;
-#[derive(Debug)]
-pub struct Mod;
-#[derive(Debug)]
-pub struct Exp;
-
-#[derive(Debug)]
-pub struct Eq;
-#[derive(Debug)]
-pub struct Neq;
-#[derive(Debug)]
-pub struct Gt;
-#[derive(Debug)]
-pub struct Lt;
-#[derive(Debug)]
-pub struct Geq;
-#[derive(Debug)]
-pub struct Leq;
-#[derive(Debug)]
-pub struct And;
-#[derive(Debug)]
-pub struct Or;
-#[derive(Debug)]
-pub struct Not;
-
-#[derive(Debug)]
-pub struct Tuple;
-#[derive(Debug)]
-pub struct Assign;
-
-#[derive(Debug)]
-pub struct Chain;
-
-#[derive(Debug)]
-pub struct Const {
-    value: Value,
-}
-
-impl Const {
-    pub fn new(value: Value) -> Self {
-        Self { value }
-    }
-}
-
-#[derive(Debug)]
-pub struct VariableIdentifier {
-    identifier: String,
-}
-
-impl VariableIdentifier {
-    pub fn new(identifier: String) -> Self {
-        Self { identifier }
-    }
-}
-
-#[derive(Debug)]
-pub struct FunctionIdentifier {
-    identifier: String,
-}
-
-impl FunctionIdentifier {
-    pub fn new(identifier: String) -> Self {
-        Self { identifier }
-    }
-}
-
-impl Operator for RootNode {
-    fn precedence(&self) -> i32 {
-        200
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        1
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        if let Some(first) = arguments.first() {
-            Ok(first.clone())
-        } else {
-            Ok(Value::Empty)
-        }
-    }
-}
-
-impl Operator for Add {
-    fn precedence(&self) -> i32 {
-        95
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number_or_string(&arguments[0])?;
-        expect_number_or_string(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-            let mut result = String::with_capacity(a.len() + b.len());
-            result.push_str(&a);
-            result.push_str(&b);
-            Ok(Value::String(result))
-        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            let result = a.checked_add(b);
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::addition_error(
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ))
+                Ok(Value::Empty)
             }
-        } else {
-            Ok(Value::Float(
-                arguments[0].as_number().unwrap() + arguments[1].as_number().unwrap(),
-            ))
+            _ => self.eval(arguments, context),
         }
-    }
-}
-
-impl Operator for Sub {
-    fn precedence(&self) -> i32 {
-        95
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            let result = a.checked_sub(b);
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::subtraction_error(
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ))
-            }
-        } else {
-            Ok(Value::Float(
-                arguments[0].as_number().unwrap() - arguments[1].as_number().unwrap(),
-            ))
-        }
-    }
-}
-
-impl Operator for Neg {
-    fn precedence(&self) -> i32 {
-        110
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        1
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 1)?;
-        expect_number(&arguments[0])?;
-
-        if let Ok(a) = arguments[0].as_int() {
-            let result = a.checked_neg();
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::negation_error(arguments[0].clone()))
-            }
-        } else {
-            Ok(Value::Float(-arguments[0].as_number().unwrap()))
-        }
-    }
-}
-
-impl Operator for Mul {
-    fn precedence(&self) -> i32 {
-        100
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            let result = a.checked_mul(b);
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::multiplication_error(
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ))
-            }
-        } else {
-            Ok(Value::Float(
-                arguments[0].as_number().unwrap() * arguments[1].as_number().unwrap(),
-            ))
-        }
-    }
-}
-
-impl Operator for Div {
-    fn precedence(&self) -> i32 {
-        100
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            let result = a.checked_div(b);
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::division_error(
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ))
-            }
-        } else {
-            Ok(Value::Float(
-                arguments[0].as_number().unwrap() / arguments[1].as_number().unwrap(),
-            ))
-        }
-    }
-}
-
-impl Operator for Mod {
-    fn precedence(&self) -> i32 {
-        100
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            let result = a.checked_rem(b);
-            if let Some(result) = result {
-                Ok(Value::Int(result))
-            } else {
-                Err(EvalexprError::modulation_error(
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ))
-            }
-        } else {
-            Ok(Value::Float(
-                arguments[0].as_number().unwrap() % arguments[1].as_number().unwrap(),
-            ))
-        }
-    }
-}
-
-impl Operator for Exp {
-    fn precedence(&self) -> i32 {
-        120
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
-
-        Ok(Value::Float(
-            arguments[0]
-                .as_number()
-                .unwrap()
-                .powf(arguments[1].as_number().unwrap()),
-        ))
-    }
-}
-
-impl Operator for Eq {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-
-        if arguments[0] == arguments[1] {
-            Ok(Value::Boolean(true))
-        } else {
-            Ok(Value::Boolean(false))
-        }
-    }
-}
-
-impl Operator for Neq {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-
-        if arguments[0] != arguments[1] {
-            Ok(Value::Boolean(true))
-        } else {
-            Ok(Value::Boolean(false))
-        }
-    }
-}
-
-impl Operator for Gt {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number_or_string(&arguments[0])?;
-        expect_number_or_string(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-            if a > b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            if a > b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else {
-            if arguments[0].as_number().unwrap() > arguments[1].as_number().unwrap() {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        }
-    }
-}
-
-impl Operator for Lt {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number_or_string(&arguments[0])?;
-        expect_number_or_string(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-            if a < b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            if a < b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else {
-            if arguments[0].as_number().unwrap() < arguments[1].as_number().unwrap() {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        }
-    }
-}
-
-impl Operator for Geq {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number_or_string(&arguments[0])?;
-        expect_number_or_string(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-            if a >= b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            if a >= b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else {
-            if arguments[0].as_number().unwrap() >= arguments[1].as_number().unwrap() {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        }
-    }
-}
-
-impl Operator for Leq {
-    fn precedence(&self) -> i32 {
-        80
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        expect_number_or_string(&arguments[0])?;
-        expect_number_or_string(&arguments[1])?;
-
-        if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-            if a <= b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-            if a <= b {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        } else {
-            if arguments[0].as_number().unwrap() <= arguments[1].as_number().unwrap() {
-                Ok(Value::Boolean(true))
-            } else {
-                Ok(Value::Boolean(false))
-            }
-        }
-    }
-}
-
-impl Operator for And {
-    fn precedence(&self) -> i32 {
-        75
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        let a = expect_boolean(&arguments[0])?;
-        let b = expect_boolean(&arguments[1])?;
-
-        if a && b {
-            Ok(Value::Boolean(true))
-        } else {
-            Ok(Value::Boolean(false))
-        }
-    }
-}
-
-impl Operator for Or {
-    fn precedence(&self) -> i32 {
-        70
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        let a = expect_boolean(&arguments[0])?;
-        let b = expect_boolean(&arguments[1])?;
-
-        if a || b {
-            Ok(Value::Boolean(true))
-        } else {
-            Ok(Value::Boolean(false))
-        }
-    }
-}
-
-impl Operator for Not {
-    fn precedence(&self) -> i32 {
-        110
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        1
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 1)?;
-        let a = expect_boolean(&arguments[0])?;
-
-        if !a {
-            Ok(Value::Boolean(true))
-        } else {
-            Ok(Value::Boolean(false))
-        }
-    }
-}
-
-impl Operator for Tuple {
-    fn precedence(&self) -> i32 {
-        40
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        if let Value::Tuple(tuple) = &arguments[0] {
-            let mut tuple = tuple.clone();
-            if let Value::Tuple(tuple2) = &arguments[1] {
-                tuple.extend(tuple2.iter().cloned());
-            } else {
-                tuple.push(arguments[1].clone());
-            }
-            Ok(Value::from(tuple))
-        } else {
-            if let Value::Tuple(tuple) = &arguments[1] {
-                let mut tuple = tuple.clone();
-                tuple.insert(0, arguments[0].clone());
-                Ok(Value::from(tuple))
-            } else {
-                Ok(Value::from(vec![
-                    arguments[0].clone(),
-                    arguments[1].clone(),
-                ]))
-            }
-        }
-    }
-}
-
-impl Operator for Assign {
-    fn precedence(&self) -> i32 {
-        50
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        false
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, _arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        Err(EvalexprError::ContextNotManipulable)
-    }
-
-    fn eval_mut(&self, arguments: &[Value], context: &mut Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 2)?;
-        let target = expect_string(&arguments[0])?;
-        context.set_value(target.into(), arguments[1].clone())?;
-
-        Ok(Value::Empty)
-    }
-}
-
-impl Operator for Chain {
-    fn precedence(&self) -> i32 {
-        0
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        2
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> Result<Value, EvalexprError> {
-        if arguments.is_empty() {
-            return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
-        }
-
-        Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
-    }
-}
-
-impl Operator for Const {
-    fn precedence(&self) -> i32 {
-        200
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        0
-    }
-
-    fn eval(&self, arguments: &[Value], _context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 0)?;
-
-        Ok(self.value.clone())
-    }
-}
-
-impl Operator for VariableIdentifier {
-    fn precedence(&self) -> i32 {
-        200
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        0
-    }
-
-    fn eval(&self, _arguments: &[Value], context: &Context) -> EvalexprResult<Value> {
-        if let Some(value) = context.get_value(&self.identifier).cloned() {
-            Ok(value)
-        } else {
-            Err(EvalexprError::VariableIdentifierNotFound(
-                self.identifier.clone(),
-            ))
-        }
-    }
-
-    fn identifier(&self) -> Option<&str> {
-        Some(&self.identifier)
-    }
-
-    fn variable_identifier(&self) -> Option<&str> {
-        Some(&self.identifier)
-    }
-}
-
-impl Operator for FunctionIdentifier {
-    fn precedence(&self) -> i32 {
-        190
-    }
-
-    fn is_left_to_right(&self) -> bool {
-        false
-    }
-
-    fn max_argument_amount(&self) -> usize {
-        1
-    }
-
-    fn eval(&self, arguments: &[Value], context: &Context) -> EvalexprResult<Value> {
-        expect_operator_argument_amount(arguments.len(), 1)?;
-
-        let arguments = if let Value::Tuple(arguments) = &arguments[0] {
-            arguments
-        } else {
-            arguments
-        };
-
-        if let Some(function) = context.get_function(&self.identifier) {
-            function.call(arguments)
-        } else if let Some(builtin_function) = builtin_function(&self.identifier) {
-            builtin_function.call(arguments)
-        } else {
-            Err(EvalexprError::FunctionIdentifierNotFound(
-                self.identifier.clone(),
-            ))
-        }
-    }
-
-    fn identifier(&self) -> Option<&str> {
-        Some(&self.identifier)
-    }
-
-    fn function_identifier(&self) -> Option<&str> {
-        Some(&self.identifier)
     }
 }

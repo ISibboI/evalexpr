@@ -1,5 +1,5 @@
-use Node;
 use std::slice::Iter;
+use Node;
 
 /// An iterator that traverses an operator tree in pre-order.
 pub struct NodeIter<'a> {
@@ -47,7 +47,7 @@ impl<'a> Iterator for NodeIter<'a> {
 
 impl Node {
     /// Returns an iterator over all nodes in this tree.
-    pub fn iter(&self) -> impl Iterator<Item=&Node> {
+    pub fn iter(&self) -> impl Iterator<Item = &Node> {
         NodeIter::new(self)
     }
 }

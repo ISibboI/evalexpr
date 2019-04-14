@@ -290,7 +290,7 @@ impl EvalexprError {
 
     /// Constructs `EvalexprError::InvalidRegex(regex)`
     pub fn invalid_regex(regex: String, message: String) -> Self {
-        EvalexprError::InvalidRegex{ regex, message }
+        EvalexprError::InvalidRegex { regex, message }
     }
 }
 
@@ -309,10 +309,7 @@ pub(crate) fn expect_operator_argument_amount(
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_amount(
-    actual: usize,
-    expected: usize,
-) -> EvalexprResult<()> {
+pub fn expect_function_argument_amount(actual: usize, expected: usize) -> EvalexprResult<()> {
     if actual == expected {
         Ok(())
     } else {

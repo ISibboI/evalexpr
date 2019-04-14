@@ -2,140 +2,37 @@ use std::fmt::{Display, Error, Formatter};
 
 use operator::*;
 
-impl Display for RootNode {
-    fn fmt(&self, _f: &mut Formatter) -> Result<(), Error> {
-        Ok(())
-    }
-}
-
-impl Display for Add {
+impl Display for Operator {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "+")
-    }
-}
+        use crate::operator::Operator::*;
+        match self {
+            RootNode => Ok(()),
+            Add => write!(f, "+"),
+            Sub => write!(f, "-"),
+            Neg => write!(f, "-"),
+            Mul => write!(f, "*"),
+            Div => write!(f, "/"),
+            Mod => write!(f, "%"),
+            Exp => write!(f, "^"),
 
-impl Display for Sub {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "-")
-    }
-}
+            Eq => write!(f, "=="),
+            Neq => write!(f, "!="),
+            Gt => write!(f, ">"),
+            Lt => write!(f, "<"),
+            Geq => write!(f, ">="),
+            Leq => write!(f, "<="),
+            And => write!(f, "&&"),
+            Or => write!(f, "||"),
+            Not => write!(f, "!"),
 
-impl Display for Neg {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "-")
-    }
-}
+            Tuple => write!(f, ", "),
+            Assign => write!(f, " = "),
 
-impl Display for Mul {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "*")
-    }
-}
+            Chain => write!(f, "; "),
 
-impl Display for Div {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "/")
-    }
-}
-
-impl Display for Mod {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "%")
-    }
-}
-
-impl Display for Exp {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "^")
-    }
-}
-
-impl Display for Eq {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "==")
-    }
-}
-
-impl Display for Neq {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "!=")
-    }
-}
-
-impl Display for Gt {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, ">")
-    }
-}
-
-impl Display for Lt {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "<")
-    }
-}
-
-impl Display for Geq {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, ">=")
-    }
-}
-
-impl Display for Leq {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "<=")
-    }
-}
-
-impl Display for And {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "&&")
-    }
-}
-
-impl Display for Or {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "||")
-    }
-}
-
-impl Display for Not {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "!")
-    }
-}
-
-impl Display for Tuple {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, ", ")
-    }
-}
-
-impl Display for Assign {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "; ")
-    }
-}
-
-impl Display for Chain {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, " = ")
-    }
-}
-
-impl Display for Const {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "{}", self.value)
-    }
-}
-
-impl Display for VariableIdentifier {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "{}", self.identifier)
-    }
-}
-
-impl Display for FunctionIdentifier {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "{}", self.identifier)
+            Const { value } => write!(f, "{}", value),
+            VariableIdentifier { identifier } => write!(f, "{}", identifier),
+            FunctionIdentifier { identifier } => write!(f, "{}", identifier),
+        }
     }
 }

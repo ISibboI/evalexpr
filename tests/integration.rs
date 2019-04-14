@@ -279,18 +279,9 @@ fn test_n_ary_functions() {
 
 #[test]
 fn test_builtin_functions() {
-    assert_eq!(
-        eval("min(4.0, 3)"),
-        Ok(Value::Int(3))
-    );
-    assert_eq!(
-        eval("max(4.0, 3)"),
-        Ok(Value::Float(4.0))
-    );
-    assert_eq!(
-        eval("len(\"foobar\")"),
-        Ok(Value::Int(6))
-    );
+    assert_eq!(eval("min(4.0, 3)"), Ok(Value::Int(3)));
+    assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
+    assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
     assert_eq!(
         eval("str::to_lowercase(\"FOOBAR\")"),
         Ok(Value::from("foobar"))
@@ -317,10 +308,10 @@ fn test_regex_functions() {
         Ok(Value::Boolean(false))
     );
     match eval("str::regex_matches(\"foo\", \"[\")") {
-        Err(EvalexprError::InvalidRegex{ regex, message }) => {
+        Err(EvalexprError::InvalidRegex { regex, message }) => {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
-        },
+        }
         v => panic!(v),
     };
     assert_eq!(

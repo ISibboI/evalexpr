@@ -18,18 +18,22 @@ impl fmt::Display for EvalexprError {
             ),
             ExpectedString { actual } => {
                 write!(f, "Expected a Value::String, but got {:?}.", actual)
-            },
+            }
             ExpectedInt { actual } => write!(f, "Expected a Value::Int, but got {:?}.", actual),
             ExpectedFloat { actual } => write!(f, "Expected a Value::Float, but got {:?}.", actual),
-            ExpectedNumber { actual } => {
-                write!(f, "Expected a Value::Float or Value::Int, but got {:?}.", actual)
-            },
-            ExpectedNumberOrString { actual } => {
-                write!(f, "Expected a Value::Number or a Value::String, but got {:?}.", actual)
-            },
+            ExpectedNumber { actual } => write!(
+                f,
+                "Expected a Value::Float or Value::Int, but got {:?}.",
+                actual
+            ),
+            ExpectedNumberOrString { actual } => write!(
+                f,
+                "Expected a Value::Number or a Value::String, but got {:?}.",
+                actual
+            ),
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
-            },
+            }
             ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
             AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),
@@ -49,7 +53,7 @@ impl fmt::Display for EvalexprError {
             ),
             TypeError { expected, actual } => {
                 write!(f, "Expected one of {:?}, but got {:?}.", expected, actual)
-            },
+            }
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
             UnmatchedPartialToken { first, second } => {
@@ -67,7 +71,7 @@ impl fmt::Display for EvalexprError {
                         first
                     )
                 }
-            },
+            }
             AdditionError { augend, addend } => write!(f, "Error adding {} + {}", augend, addend),
             SubtractionError {
                 minuend,
@@ -80,11 +84,15 @@ impl fmt::Display for EvalexprError {
             } => write!(f, "Error multiplying {} * {}", multiplicand, multiplier),
             DivisionError { dividend, divisor } => {
                 write!(f, "Error dividing {} / {}", dividend, divisor)
-            },
+            }
             ModulationError { dividend, divisor } => {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
-            },
-            InvalidRegex { regex, message } => write!(f, "Regular expression {:?} is invalid: {:?}", regex, message),
+            }
+            InvalidRegex { regex, message } => write!(
+                f,
+                "Regular expression {:?} is invalid: {:?}",
+                regex, message
+            ),
             ContextNotManipulable => write!(f, "Cannot manipulate context"),
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),

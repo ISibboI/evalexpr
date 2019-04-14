@@ -67,7 +67,6 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         )),
 
         // string functions
-
         #[cfg(feature = "regex_support")]
         "str::regex_matches" => Some(Function::new(
             Some(2),
@@ -76,7 +75,10 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 let re_str = expect_string(&arguments[1])?;
                 match Regex::new(re_str) {
                     Ok(re) => Ok(Value::Boolean(re.is_match(subject))),
-                    Err(err) => Err(EvalexprError::invalid_regex(re_str.to_string(), format!("{}", err)))
+                    Err(err) => Err(EvalexprError::invalid_regex(
+                        re_str.to_string(),
+                        format!("{}", err),
+                    )),
                 }
             }),
         )),
@@ -89,7 +91,10 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 let repl = expect_string(&arguments[2])?;
                 match Regex::new(re_str) {
                     Ok(re) => Ok(Value::String(re.replace_all(subject, repl).to_string())),
-                    Err(err) => Err(EvalexprError::invalid_regex(re_str.to_string(), format!("{}", err))),
+                    Err(err) => Err(EvalexprError::invalid_regex(
+                        re_str.to_string(),
+                        format!("{}", err),
+                    )),
                 }
             }),
         )),
