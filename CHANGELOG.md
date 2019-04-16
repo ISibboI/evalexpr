@@ -11,6 +11,7 @@
  * Overload the `+` operator to concatenate strings
  * Overload `<`, `<=`, `>` and `>=` for strings using lexical ordering (Note: `==` and `!=` compare strings as expected)
  * Add `len`, `str::regex_matches`, `str::regex_replace`, `str::to_lowercase`, `str::to_uppercase`, `str::trim` functions for strings
+ * Add a macro for more convenient definition of contexts including the direct definition of static contexts
 
 ### Removed
 
@@ -19,6 +20,14 @@
 ### Fixed
 
 ### Deprecated
+
+### Contributors
+
+My warmhearted thanks goes to 
+
+ * [bittrance](https://github.com/bittrance)
+ * [lovasoa](https://github.com/lovasoa)
+ * [mestachs](https://github.com/mestachs)
 
 ## [4.1.0](https://github.com/ISibboI/evalexpr/compare/4.0.0...4.1.0) - 2019-03-31
 
