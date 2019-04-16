@@ -94,7 +94,9 @@ impl Context for HashMapContext {
     }
 }
 
-/// This macro provides a convenient syntax for creating a static context
+/// This macro provides a convenient syntax for creating a static context.
+///
+/// # Examples
 ///
 /// ```rust
 /// use evalexpr::*;
