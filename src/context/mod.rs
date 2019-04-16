@@ -93,3 +93,45 @@ impl Context for HashMapContext {
         Ok(())
     }
 }
+
+/// This macro provides a convenient syntax for creating a static context
+///
+/// ```rust
+/// use evalexpr::*;
+///
+/// let ctx = evalexpr::context_map! {
+///     "x" => 8,
+///     "f" => Function::new(None, Box::new(|_| Ok(42.into()) )) 
+/// }.unwrap();
+///
+/// assert_eq!(eval_with_context("x + f()", &ctx), Ok(50.into()));
+/// ```
+#[macro_export]
+macro_rules! context_map {
+    // Termination (allow missing comma at the end of the argument list)
+    ( ($ctx:expr) $k:expr => Function::new($($v:tt)*) ) =>
+        { $crate::context_map!(($ctx) $k => Function::new($($v)*),) };
+    ( ($ctx:expr) $k:expr => $v:expr ) =>
+        { $crate::context_map!(($ctx) $k => $v,)  };
+    // Termination
+    ( ($ctx:expr) ) => { Ok(()) };
+
+    // The user has to specify a literal 'Function::new' in order to create a function
+    ( ($ctx:expr) $k:expr => Function::new($($v:tt)*) , $($tt:tt)*) => {{
+        $ctx.set_function($k.into(), $crate::Function::new($($v)*))
+            .and($crate::context_map!(($ctx) $($tt)*))
+    }};
+    // add a value, and chain the eventual error with the ones in the next values
+    ( ($ctx:expr) $k:expr => $v:expr , $($tt:tt)*) => {{
+        $ctx.set_value($k.into(), $v.into())
+            .and($crate::context_map!(($ctx) $($tt)*))
+    }};
+
+    // Create a context, then recurse to add the values in it
+    ( $($tt:tt)* ) => {{
+        use $crate::Context;
+        let mut context = $crate::HashMapContext::new();
+        $crate::context_map!((context) $($tt)*)
+            .map(|_| context)
+    }};
+}
