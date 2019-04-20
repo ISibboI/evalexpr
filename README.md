@@ -380,7 +380,13 @@ Please report a panic in this crate immediately as issue on [github](https://git
 Even if the crate itself is panic free, it allows the user to define custom functions that are executed by the crate.
 The user needs to ensure that the function he provides to the crate never panic.
 
-## Closing Notes
+## Contribution
 
 If you have any ideas for features or see any problems in the code, architecture, interface, algorithmics or documentation, please open an issue on github.
 If there is already an issue describing what you want to say, please add a thumbs up or whatever emoji you think fits to the issue, so I know which ones I should prioritize.
+
+**Notes for contributors:**
+
+ * This crate uses the [`sync-readme`](https://github.com/phaazon/cargo-sync-readme) cargo subcommand to keep the documentation in `src/lib.rs` and `README.md` in sync.
+   The subcommand only syncs from the documentation in `src/lib.rs` to `README.md`.
+   So please alter the documentation in the `src/lib.rs` rather than altering anything in between `<!-- cargo-sync-readme start -->` and `<!-- cargo-sync-readme end -->` in the `README.md`.
