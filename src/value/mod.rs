@@ -195,7 +195,9 @@ impl From<Value> for EvalexprResult<Value> {
 }
 
 impl From<()> for Value {
-    fn from(_: ()) -> Self { Value::Empty }
+    fn from(_: ()) -> Self {
+        Value::Empty
+    }
 }
 
 #[cfg(test)]

@@ -4,7 +4,7 @@ use crate::{context::Context, error::*, value::Value};
 
 mod display;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Operator {
     RootNode,
 
@@ -93,9 +93,10 @@ impl Operator {
 
     /// Returns true if chains of this operator should be flattened into one operator with many arguments.
     // Make this a const fn once #57563 is resolved
-    fn is_flatten_chains(&self) -> bool {
+    pub(crate) fn is_sequence(&self) -> bool {
+        use crate::operator::Operator::*;
         match self {
-            Operator::Tuple => true,
+            Tuple | Chain => true,
             _ => false,
         }
     }
@@ -112,8 +113,8 @@ impl Operator {
         use crate::operator::Operator::*;
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
-            | Assign | Chain => Some(2),
-            Tuple => None,
+            | Assign => Some(2),
+            Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
             Const { value: _ } => Some(0),
             VariableIdentifier { identifier: _ } => Some(0),
@@ -420,7 +421,9 @@ impl Operator {
                 }
             }
             Tuple => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
+                Ok(Value::Tuple(arguments.into()))
+
+                /*expect_operator_argument_amount(arguments.len(), 2)?;
                 if let Value::Tuple(tuple) = &arguments[0] {
                     let mut tuple = tuple.clone();
                     if let Value::Tuple(tuple2) = &arguments[1] {
@@ -440,7 +443,7 @@ impl Operator {
                             arguments[1].clone(),
                         ]))
                     }
-                }
+                }*/
             }
             Assign => Err(EvalexprError::ContextNotManipulable),
             Chain => {
@@ -448,7 +451,7 @@ impl Operator {
                     return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
                 }
 
-                Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
+                Ok(arguments.last().cloned().unwrap_or(Value::Empty))
             }
             Const { value } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;

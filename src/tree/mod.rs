@@ -11,8 +11,7 @@ use crate::{
     operator::*,
     value::Value,
 };
-use std::error::Error;
-use std::any::Any;
+use std::mem;
 
 mod display;
 mod iter;
@@ -34,10 +33,10 @@ mod iter;
 /// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
 /// ```
 ///
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Node {
-    children: Vec<Node>,
     operator: Operator,
+    children: Vec<Node>,
 }
 
 impl Node {
@@ -368,6 +367,7 @@ impl Node {
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
+        println!("Inserting {:?} into {:?}", node.operator, self.operator());
         if self.operator().precedence() < node.operator().precedence() || is_root_node
             // Right-to-left chaining
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
@@ -381,14 +381,13 @@ impl Node {
                     || (self.children.last().unwrap().operator().precedence()
                     == node.operator().precedence() && !self.children.last().unwrap().operator().is_left_to_right() && !node.operator().is_left_to_right())
                 {
+                    println!("Recursing into {:?}", self.children.last().unwrap().operator());
                     self.children
                         .last_mut()
                         .unwrap()
                         .insert_back_prioritized(node, false)
-                } else if self.children.last().unwrap().operator().type_id() == node.operator().type_id() && node.operator().is_flatten_chains() && !self.children.last().unwrap().has_enough_children() {
-                    // The operators will be chained together, and the next value will be added to this nodes last child.
-                    Ok(())
                 } else {
+                    println!("Rotating");
                     if node.operator().is_leaf() {
                         return Err(EvalexprError::AppendedToLeafNode);
                     }
@@ -401,6 +400,7 @@ impl Node {
                     Ok(())
                 }
             } else {
+                println!("Inserting as specified");
                 self.children.push(node);
                 Ok(())
             }
@@ -410,8 +410,63 @@ impl Node {
     }
 }
 
+fn collapse_root_stack_to(root_stack: &mut Vec<Node>, mut root: Node, collapse_goal: &Node) -> EvalexprResult<Node> {
+    loop {
+        if let Some(mut potential_higher_root) = root_stack.pop() {
+            // TODO I'm not sure about this >, as I have no example for different sequence operators with the same precedence
+            if potential_higher_root.operator().precedence() > collapse_goal.operator().precedence() {
+                potential_higher_root.children.push(root);
+                root = potential_higher_root;
+            } else {
+                root_stack.push(potential_higher_root);
+                break;
+            }
+        } else {
+            // This is the only way the topmost root node could have been removed
+            return Err(EvalexprError::UnmatchedRBrace);
+        }
+    }
+
+    Ok(root)
+}
+
+fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
+    println!("Collapsing all sequences");
+    println!("Initial root stack is: {:?}", root_stack);
+    let mut root = if let Some(root) = root_stack.pop() {
+        root
+    } else {
+        return Err(EvalexprError::UnmatchedRBrace);
+    };
+
+    loop {
+        println!("Root is: {:?}", root);
+        if root.operator() == &Operator::RootNode {
+            root_stack.push(root);
+            break;
+        }
+
+        if let Some(mut potential_higher_root) = root_stack.pop() {
+            if root.operator().is_sequence() {
+                potential_higher_root.children.push(root);
+                root = potential_higher_root;
+            } else {
+                root_stack.push(potential_higher_root);
+                root_stack.push(root);
+                break;
+            }
+        } else {
+            // This is the only way the topmost root node could have been removed
+            return Err(EvalexprError::UnmatchedRBrace);
+        }
+    }
+
+    println!("Root stack after collapsing all sequences is: {:?}", root_stack);
+    Ok(())
+}
+
 pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node> {
-    let mut root = vec![Node::root_node()];
+    let mut root_stack = vec![Node::root_node()];
     let mut last_token_is_rightsided_value = false;
     let mut token_iter = tokens.iter().peekable();
 
@@ -443,14 +498,15 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::Not => Some(Node::new(Operator::Not)),
 
             Token::LBrace => {
-                root.push(Node::root_node());
+                root_stack.push(Node::root_node());
                 None
             }
             Token::RBrace => {
-                if root.len() < 2 {
+                if root_stack.len() <= 1 {
                     return Err(EvalexprError::UnmatchedRBrace);
                 } else {
-                    root.pop()
+                    collapse_all_sequences(&mut root_stack)?;
+                    root_stack.pop()
                 }
             }
 
@@ -475,9 +531,58 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
         };
 
-        if let Some(node) = node {
-            if let Some(root) = root.last_mut() {
-                root.insert_back_prioritized(node, true)?;
+        if let Some(mut node) = node {
+            // Need to pop and then repush here, because Rust 1.33.0 cannot release the mutable borrow of root_stack before the end of this complete if-statement
+            if let Some(mut root) = root_stack.pop() {
+                if node.operator().is_sequence() {
+                    println!("Found a sequence operator");
+                    println!("Stack before sequence operation: {:?}, {:?}", root_stack, root);
+                    // If root.operator() and node.operator() are of the same variant, ...
+                    if mem::discriminant(root.operator()) == mem::discriminant(node.operator()) {
+                        // ... we create a new root node for the next expression in the sequence
+                        root.children.push(Node::root_node());
+                        root_stack.push(root);
+                    } else if root.operator() == &Operator::RootNode {
+                        // If the current root is an actual root node, we start a new sequence
+                        node.children.push(root);
+                        node.children.push(Node::root_node());
+                        root_stack.push(Node::root_node());
+                        root_stack.push(node);
+                    } else {
+                        // Otherwise, we combine the sequences based on their precedences
+                        // TODO I'm not sure about this <, as I have no example for different sequence operators with the same precedence
+                        if root.operator().precedence() < node.operator().precedence() {
+                            // If the new sequence has a higher precedence, it is part of the last element of the current root sequence
+                            if let Some(last_root_child) = root.children.pop() {
+                                node.children.push(last_root_child);
+                                node.children.push(Node::root_node());
+                                root_stack.push(root);
+                                root_stack.push(node);
+                            } else {
+                                // Once a sequence has been pushed on top of the stack, it also gets a child
+                                unreachable!()
+                            }
+                        } else {
+                            // If the new sequence doesn't have a higher precedence, then all sequences with a higher precedence are collapsed below this one
+                            root = collapse_root_stack_to(&mut root_stack, root, &node)?;
+                            node.children.push(root);
+                            root_stack.push(node);
+                        }
+                    }
+                    println!("Stack after sequence operation: {:?}", root_stack);
+                } else if root.operator().is_sequence() {
+                    if let Some(mut last_root_child) = root.children.pop() {
+                        last_root_child.insert_back_prioritized(node, true)?;
+                        root.children.push(last_root_child);
+                        root_stack.push(root);
+                    } else {
+                        // Once a sequence has been pushed on top of the stack, it also gets a child
+                        unreachable!()
+                    }
+                } else {
+                    root.insert_back_prioritized(node, true)?;
+                    root_stack.push(root);
+                }
             } else {
                 return Err(EvalexprError::UnmatchedRBrace);
             }
@@ -486,9 +591,12 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
         last_token_is_rightsided_value = token.is_rightsided_value();
     }
 
-    if root.len() > 1 {
+    // In the end, all sequences are implicitly terminated
+    collapse_all_sequences(&mut root_stack)?;
+
+    if root_stack.len() > 1 {
         Err(EvalexprError::UnmatchedLBrace)
-    } else if let Some(root) = root.pop() {
+    } else if let Some(root) = root_stack.pop() {
         Ok(root)
     } else {
         Err(EvalexprError::UnmatchedRBrace)
