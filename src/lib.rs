@@ -327,6 +327,7 @@
 //! Example parsing with [ron format](docs.rs/ron):
 //!
 //! ```rust
+//! # #[cfg(feature = "serde_support")] {
 //! extern crate ron;
 //! use evalexpr::*;
 //!
@@ -341,6 +342,7 @@
 //!         () // Handle error
 //!     },
 //! }
+//! # }
 //! ```
 //!
 //! With `serde`, expressions can be integrated into arbitrarily complex data.
