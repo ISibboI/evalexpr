@@ -340,6 +340,7 @@ The implementation expects a [serde `string`](https://serde.rs/data-model.html) 
 Example parsing with [ron format](docs.rs/ron):
 
 ```rust
+# #[cfg(feature = "serde_support")] {
 extern crate ron;
 use evalexpr::*;
 
@@ -354,6 +355,7 @@ match ron::de::from_str::<Node>(serialized_free) {
         () // Handle error
     },
 }
+# }
 ```
 
 With `serde`, expressions can be integrated into arbitrarily complex data.
