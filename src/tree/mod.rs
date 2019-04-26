@@ -421,7 +421,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                 } else {
                     Some(Node::new(Operator::Neg))
                 }
-            }
+            },
             Token::Star => Some(Node::new(Operator::Mul)),
             Token::Slash => Some(Node::new(Operator::Div)),
             Token::Percent => Some(Node::new(Operator::Mod)),
@@ -440,14 +440,14 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::LBrace => {
                 root.push(Node::root_node());
                 None
-            }
+            },
             Token::RBrace => {
                 if root.len() < 2 {
                     return Err(EvalexprError::UnmatchedRBrace);
                 } else {
                     root.pop()
                 }
-            }
+            },
 
             Token::Comma => Some(Node::new(Operator::Tuple)),
             Token::Assign => Some(Node::new(Operator::Assign)),
@@ -463,7 +463,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                     }
                 }
                 result
-            }
+            },
             Token::Float(float) => Some(Node::new(Operator::value(Value::Float(float)))),
             Token::Int(int) => Some(Node::new(Operator::value(Value::Int(int)))),
             Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),

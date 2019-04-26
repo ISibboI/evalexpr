@@ -83,7 +83,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
             } else {
                 PartialToken::Literal(c.to_string())
             }
-        }
+        },
     }
 }
 
@@ -233,7 +233,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                 PartialToken::Token(token) => {
                     cutoff = 1;
                     Some(token)
-                }
+                },
                 PartialToken::Literal(literal) => {
                     cutoff = 1;
                     if let Ok(number) = literal.parse::<IntType>() {
@@ -245,38 +245,38 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     } else {
                         Some(Token::Identifier(literal.to_string()))
                     }
-                }
+                },
                 PartialToken::Whitespace => {
                     cutoff = 1;
                     None
-                }
+                },
                 PartialToken::Eq => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
                     _ => {
                         cutoff = 1;
                         Some(Token::Assign)
-                    }
+                    },
                 },
                 PartialToken::ExclamationMark => match second {
                     Some(PartialToken::Eq) => Some(Token::Eq),
                     _ => {
                         cutoff = 1;
                         Some(Token::Not)
-                    }
+                    },
                 },
                 PartialToken::Gt => match second {
                     Some(PartialToken::Eq) => Some(Token::Geq),
                     _ => {
                         cutoff = 1;
                         Some(Token::Gt)
-                    }
+                    },
                 },
                 PartialToken::Lt => match second {
                     Some(PartialToken::Eq) => Some(Token::Leq),
                     _ => {
                         cutoff = 1;
                         Some(Token::Lt)
-                    }
+                    },
                 },
                 PartialToken::Ampersand => match second {
                     Some(PartialToken::Ampersand) => Some(Token::And),

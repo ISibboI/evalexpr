@@ -121,7 +121,7 @@ impl Operator {
                 } else {
                     Ok(Value::Empty)
                 }
-            }
+            },
             Add => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
@@ -147,7 +147,7 @@ impl Operator {
                         arguments[0].as_number().unwrap() + arguments[1].as_number().unwrap(),
                     ))
                 }
-            }
+            },
             Sub => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number(&arguments[0])?;
@@ -168,7 +168,7 @@ impl Operator {
                         arguments[0].as_number().unwrap() - arguments[1].as_number().unwrap(),
                     ))
                 }
-            }
+            },
             Neg => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 expect_number(&arguments[0])?;
@@ -183,7 +183,7 @@ impl Operator {
                 } else {
                     Ok(Value::Float(-arguments[0].as_number().unwrap()))
                 }
-            }
+            },
             Mul => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number(&arguments[0])?;
@@ -204,7 +204,7 @@ impl Operator {
                         arguments[0].as_number().unwrap() * arguments[1].as_number().unwrap(),
                     ))
                 }
-            }
+            },
             Div => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number(&arguments[0])?;
@@ -225,7 +225,7 @@ impl Operator {
                         arguments[0].as_number().unwrap() / arguments[1].as_number().unwrap(),
                     ))
                 }
-            }
+            },
             Mod => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number(&arguments[0])?;
@@ -246,7 +246,7 @@ impl Operator {
                         arguments[0].as_number().unwrap() % arguments[1].as_number().unwrap(),
                     ))
                 }
-            }
+            },
             Exp => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number(&arguments[0])?;
@@ -258,7 +258,7 @@ impl Operator {
                         .unwrap()
                         .powf(arguments[1].as_number().unwrap()),
                 ))
-            }
+            },
             Eq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
@@ -267,7 +267,7 @@ impl Operator {
                 } else {
                     Ok(Value::Boolean(false))
                 }
-            }
+            },
             Neq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
@@ -276,7 +276,7 @@ impl Operator {
                 } else {
                     Ok(Value::Boolean(false))
                 }
-            }
+            },
             Gt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
@@ -301,7 +301,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 }
-            }
+            },
             Lt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
@@ -326,7 +326,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 }
-            }
+            },
             Geq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
@@ -351,7 +351,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 }
-            }
+            },
             Leq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 expect_number_or_string(&arguments[0])?;
@@ -376,7 +376,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 }
-            }
+            },
             And => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let a = expect_boolean(&arguments[0])?;
@@ -387,7 +387,7 @@ impl Operator {
                 } else {
                     Ok(Value::Boolean(false))
                 }
-            }
+            },
             Or => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let a = expect_boolean(&arguments[0])?;
@@ -398,7 +398,7 @@ impl Operator {
                 } else {
                     Ok(Value::Boolean(false))
                 }
-            }
+            },
             Not => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let a = expect_boolean(&arguments[0])?;
@@ -408,7 +408,7 @@ impl Operator {
                 } else {
                     Ok(Value::Boolean(false))
                 }
-            }
+            },
             Tuple => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 if let Value::Tuple(tuple) = &arguments[0] {
@@ -431,7 +431,7 @@ impl Operator {
                         ]))
                     }
                 }
-            }
+            },
             Assign => Err(EvalexprError::ContextNotManipulable),
             Chain => {
                 if arguments.is_empty() {
@@ -439,12 +439,12 @@ impl Operator {
                 }
 
                 Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
-            }
+            },
             Const { value } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
                 Ok(value.clone())
-            }
+            },
             VariableIdentifier { identifier } => {
                 if let Some(value) = context.get_value(&identifier).cloned() {
                     Ok(value)
@@ -453,7 +453,7 @@ impl Operator {
                         identifier.clone(),
                     ))
                 }
-            }
+            },
             FunctionIdentifier { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
 
@@ -472,7 +472,7 @@ impl Operator {
                         identifier.clone(),
                     ))
                 }
-            }
+            },
         }
     }
 
@@ -490,7 +490,7 @@ impl Operator {
                 context.set_value(target.into(), arguments[1].clone())?;
 
                 Ok(Value::Empty)
-            }
+            },
             _ => self.eval(arguments, context),
         }
     }

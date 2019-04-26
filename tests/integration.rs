@@ -311,7 +311,7 @@ fn test_regex_functions() {
         Err(EvalexprError::InvalidRegex { regex, message }) => {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
-        }
+        },
         v => panic!(v),
     };
     assert_eq!(
