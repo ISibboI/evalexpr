@@ -65,28 +65,28 @@ use evalexpr::*;
 use evalexpr::error::expect_number;
 
 let context = context_map! {
-  "five" => 5,
-  "twelve" => 12,
-  "f" => Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
-      if let Value::Int(int) = arguments[0] {
-          Ok(Value::Int(int / 2))
-      } else if let Value::Float(float) = arguments[0] {
-          Ok(Value::Float(float / 2.0))
-      } else {
-          Err(EvalexprError::expected_number(arguments[0].clone()))
-      }
-  })),
-  "avg" => Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
-      expect_number(&arguments[0])?;
-      expect_number(&arguments[1])?;
+    "five" => 5,
+    "twelve" => 12,
+    "f" => Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
+        if let Value::Int(int) = arguments[0] {
+            Ok(Value::Int(int / 2))
+        } else if let Value::Float(float) = arguments[0] {
+            Ok(Value::Float(float / 2.0))
+        } else {
+            Err(EvalexprError::expected_number(arguments[0].clone()))
+        }
+    })),
+    "avg" => Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+        expect_number(&arguments[0])?;
+        expect_number(&arguments[1])?;
 
-      if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
-          Ok(Value::Int((a + b) / 2))
-      } else {
-          Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
-      }
-  }))
- }.unwrap();
+        if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+            Ok(Value::Int((a + b) / 2))
+        } else {
+            Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
+        }
+    }))
+}.unwrap(); // Do proper error handling here
 
 assert_eq!(eval_with_context("five + 8 > f(twelve)", &context), Ok(Value::from(true)));
 // `eval_with_context` returns a variant of the `Value` enum,
@@ -104,10 +104,10 @@ use evalexpr::*;
 let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
 
 let mut context = context_map! {
-  "a" => 6,
-  "b" => 2,
-  "c" => 3
-}.unwrap();
+    "a" => 6,
+    "b" => 2,
+    "c" => 3
+}.unwrap(); // Do proper error handling here
 assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(true)));
 
 context.set_value("c".into(), 8.into()).unwrap(); // Do proper error handling here
@@ -345,8 +345,9 @@ Example parsing with [ron format](docs.rs/ron):
 extern crate ron;
 use evalexpr::*;
 
-let mut context = HashMapContext::new();
-context.set_value("five".into(), 5.into()).unwrap(); // Do proper error handling here
+let mut context = context_map!{
+    "five" => 5
+}.unwrap(); // Do proper error handling here
 
 // In ron format, strings are surrounded by "
 let serialized_free = "\"five * five\"";
