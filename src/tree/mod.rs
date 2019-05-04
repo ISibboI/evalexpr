@@ -367,7 +367,7 @@ impl Node {
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
-        println!("Inserting {:?} into {:?}", node.operator, self.operator());
+        // println!("Inserting {:?} into {:?}", node.operator, self.operator());
         if self.operator().precedence() < node.operator().precedence() || is_root_node
             // Right-to-left chaining
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
@@ -381,13 +381,13 @@ impl Node {
                     || (self.children.last().unwrap().operator().precedence()
                     == node.operator().precedence() && !self.children.last().unwrap().operator().is_left_to_right() && !node.operator().is_left_to_right())
                 {
-                    println!("Recursing into {:?}", self.children.last().unwrap().operator());
+                    // println!("Recursing into {:?}", self.children.last().unwrap().operator());
                     self.children
                         .last_mut()
                         .unwrap()
                         .insert_back_prioritized(node, false)
                 } else {
-                    println!("Rotating");
+                    // println!("Rotating");
                     if node.operator().is_leaf() {
                         return Err(EvalexprError::AppendedToLeafNode);
                     }
@@ -400,7 +400,7 @@ impl Node {
                     Ok(())
                 }
             } else {
-                println!("Inserting as specified");
+                // println!("Inserting as specified");
                 self.children.push(node);
                 Ok(())
             }
@@ -431,8 +431,8 @@ fn collapse_root_stack_to(root_stack: &mut Vec<Node>, mut root: Node, collapse_g
 }
 
 fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
-    println!("Collapsing all sequences");
-    println!("Initial root stack is: {:?}", root_stack);
+    // println!("Collapsing all sequences");
+    // println!("Initial root stack is: {:?}", root_stack);
     let mut root = if let Some(root) = root_stack.pop() {
         root
     } else {
@@ -440,7 +440,7 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
     };
 
     loop {
-        println!("Root is: {:?}", root);
+        // println!("Root is: {:?}", root);
         if root.operator() == &Operator::RootNode {
             root_stack.push(root);
             break;
@@ -461,7 +461,7 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
         }
     }
 
-    println!("Root stack after collapsing all sequences is: {:?}", root_stack);
+    // println!("Root stack after collapsing all sequences is: {:?}", root_stack);
     Ok(())
 }
 
@@ -535,8 +535,8 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             // Need to pop and then repush here, because Rust 1.33.0 cannot release the mutable borrow of root_stack before the end of this complete if-statement
             if let Some(mut root) = root_stack.pop() {
                 if node.operator().is_sequence() {
-                    println!("Found a sequence operator");
-                    println!("Stack before sequence operation: {:?}, {:?}", root_stack, root);
+                    // println!("Found a sequence operator");
+                    // println!("Stack before sequence operation: {:?}, {:?}", root_stack, root);
                     // If root.operator() and node.operator() are of the same variant, ...
                     if mem::discriminant(root.operator()) == mem::discriminant(node.operator()) {
                         // ... we create a new root node for the next expression in the sequence
@@ -569,7 +569,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                             root_stack.push(node);
                         }
                     }
-                    println!("Stack after sequence operation: {:?}", root_stack);
+                    // println!("Stack after sequence operation: {:?}", root_stack);
                 } else if root.operator().is_sequence() {
                     if let Some(mut last_root_child) = root.children.pop() {
                         last_root_child.insert_back_prioritized(node, true)?;
