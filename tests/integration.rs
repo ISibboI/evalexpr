@@ -137,17 +137,15 @@ fn test_functions() {
     context
         .set_function(
             "sub2".to_string(),
-            Function::new(
-                Box::new(|argument| {
-                    if let Value::Int(int) = argument {
-                        Ok(Value::Int(int - 2))
-                    } else if let Value::Float(float) = argument {
-                        Ok(Value::Float(float - 2.0))
-                    } else {
-                        Err(EvalexprError::expected_number(argument.clone()))
-                    }
-                }),
-            ),
+            Function::new(Box::new(|argument| {
+                if let Value::Int(int) = argument {
+                    Ok(Value::Int(int - 2))
+                } else if let Value::Float(float) = argument {
+                    Ok(Value::Float(float - 2.0))
+                } else {
+                    Err(EvalexprError::expected_number(argument.clone()))
+                }
+            })),
         )
         .unwrap();
     context
@@ -170,81 +168,76 @@ fn test_n_ary_functions() {
     context
         .set_function(
             "sub2".into(),
-            Function::new(
-                Box::new(|argument| {
-                    if let Value::Int(int) = argument {
-                        Ok(Value::Int(int - 2))
-                    } else if let Value::Float(float) = argument {
-                        Ok(Value::Float(float - 2.0))
-                    } else {
-                        Err(EvalexprError::expected_number(argument.clone()))
-                    }
-                }),
-            ),
+            Function::new(Box::new(|argument| {
+                if let Value::Int(int) = argument {
+                    Ok(Value::Int(int - 2))
+                } else if let Value::Float(float) = argument {
+                    Ok(Value::Float(float - 2.0))
+                } else {
+                    Err(EvalexprError::expected_number(argument.clone()))
+                }
+            })),
         )
         .unwrap();
     context
         .set_function(
             "avg".into(),
-            Function::new(
-                Box::new(|argument| {
-                    let arguments = expect_tuple(argument)?;
-                    expect_number(&arguments[0])?;
-                    expect_number(&arguments[1])?;
+            Function::new(Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
 
-                    if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
-                        Ok(Value::Int((a + b) / 2))
-                    } else {
-                        Ok(Value::Float(
-                            (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
-                        ))
-                    }
-                }),
-            ),
+                if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
+                    Ok(Value::Int((a + b) / 2))
+                } else {
+                    Ok(Value::Float(
+                        (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
+                    ))
+                }
+            })),
         )
         .unwrap();
     context
         .set_function(
             "muladd".into(),
-            Function::new(
-                Box::new(|argument| {
-                    let arguments = expect_tuple(argument)?;
-                    expect_number(&arguments[0])?;
-                    expect_number(&arguments[1])?;
-                    expect_number(&arguments[2])?;
+            Function::new(Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
+                expect_number(&arguments[0])?;
+                expect_number(&arguments[1])?;
+                expect_number(&arguments[2])?;
 
-                    if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
-                        (&arguments[0], &arguments[1], &arguments[2])
-                    {
-                        Ok(Value::Int(a * b + c))
-                    } else {
-                        Ok(Value::Float(
-                            arguments[0].as_float()? * arguments[1].as_float()?
-                                + arguments[2].as_float()?,
-                        ))
-                    }
-                }),
-            ),
+                if let (Value::Int(a), Value::Int(b), Value::Int(c)) =
+                    (&arguments[0], &arguments[1], &arguments[2])
+                {
+                    Ok(Value::Int(a * b + c))
+                } else {
+                    Ok(Value::Float(
+                        arguments[0].as_float()? * arguments[1].as_float()?
+                            + arguments[2].as_float()?,
+                    ))
+                }
+            })),
         )
         .unwrap();
     context
         .set_function(
             "count".into(),
-            Function::new(
-                Box::new(|arguments| {
-                    match arguments {
-                        Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
-                        Value::Empty => Ok(Value::from(0)),
-                        _ => Ok(Value::from(1)),
-                    }
-                }),
-            ),
+            Function::new(Box::new(|arguments| match arguments {
+                Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
+                Value::Empty => Ok(Value::from(0)),
+                _ => Ok(Value::from(1)),
+            })),
         )
         .unwrap();
     context
         .set_value("five".to_string(), Value::Int(5))
         .unwrap();
-    context.set_function("function_four".into(), Function::new(Box::new(|_| {Ok(Value::Int(4))}))).unwrap();
+    context
+        .set_function(
+            "function_four".into(),
+            Function::new(Box::new(|_| Ok(Value::Int(4)))),
+        )
+        .unwrap();
 
     assert_eq!(eval_with_context("avg(7, 5)", &context), Ok(Value::Int(6)));
     assert_eq!(
@@ -264,13 +257,19 @@ fn test_n_ary_functions() {
         Ok(Value::Int(14))
     );
     assert_eq!(eval_with_context("count()", &context), Ok(Value::Int(0)));
-    assert_eq!(eval_with_context("count((1, 2, 3))", &context), Ok(Value::Int(3)));
+    assert_eq!(
+        eval_with_context("count((1, 2, 3))", &context),
+        Ok(Value::Int(3))
+    );
     assert_eq!(
         eval_with_context("count(3, 5.5, 2)", &context),
         Ok(Value::Int(3))
     );
     assert_eq!(eval_with_context("count 5", &context), Ok(Value::Int(1)));
-    assert_eq!(eval_with_context("function_four()", &context), Ok(Value::Int(4)));
+    assert_eq!(
+        eval_with_context("function_four()", &context),
+        Ok(Value::Int(4))
+    );
 }
 
 #[test]

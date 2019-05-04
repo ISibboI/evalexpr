@@ -410,11 +410,16 @@ impl Node {
     }
 }
 
-fn collapse_root_stack_to(root_stack: &mut Vec<Node>, mut root: Node, collapse_goal: &Node) -> EvalexprResult<Node> {
+fn collapse_root_stack_to(
+    root_stack: &mut Vec<Node>,
+    mut root: Node,
+    collapse_goal: &Node,
+) -> EvalexprResult<Node> {
     loop {
         if let Some(mut potential_higher_root) = root_stack.pop() {
             // TODO I'm not sure about this >, as I have no example for different sequence operators with the same precedence
-            if potential_higher_root.operator().precedence() > collapse_goal.operator().precedence() {
+            if potential_higher_root.operator().precedence() > collapse_goal.operator().precedence()
+            {
                 potential_higher_root.children.push(root);
                 root = potential_higher_root;
             } else {
@@ -569,7 +574,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                             root_stack.push(node);
                         }
                     }
-                    // println!("Stack after sequence operation: {:?}", root_stack);
+                // println!("Stack after sequence operation: {:?}", root_stack);
                 } else if root.operator().is_sequence() {
                     if let Some(mut last_root_child) = root.children.pop() {
                         last_root_child.insert_back_prioritized(node, true)?;

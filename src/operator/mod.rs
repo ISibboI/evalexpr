@@ -420,9 +420,7 @@ impl Operator {
                     Ok(Value::Boolean(false))
                 }
             },
-            Tuple => {
-                Ok(Value::Tuple(arguments.into()))
-            },
+            Tuple => Ok(Value::Tuple(arguments.into())),
             Assign => Err(EvalexprError::ContextNotManipulable),
             Chain => {
                 if arguments.is_empty() {
