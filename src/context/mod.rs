@@ -103,7 +103,7 @@ impl Context for HashMapContext {
 ///
 /// let ctx = evalexpr::context_map! {
 ///     "x" => 8,
-///     "f" => Function::new(None, Box::new(|_| Ok(42.into()) ))
+///     "f" => Function::new(Box::new(|_| Ok(42.into()) ))
 /// }.unwrap();
 ///
 /// assert_eq!(eval_with_context("x + f()", &ctx), Ok(50.into()));

@@ -469,12 +469,7 @@ impl Operator {
             }
             FunctionIdentifier { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
-
-                let arguments = if let Value::Tuple(arguments) = &arguments[0] {
-                    arguments
-                } else {
-                    arguments
-                };
+                let arguments = &arguments[0];
 
                 if let Some(function) = context.get_function(&identifier) {
                     function.call(arguments)

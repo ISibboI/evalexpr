@@ -10,8 +10,8 @@ use Value;
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
         "min" => Some(Function::new(
-            None,
-            Box::new(|arguments| {
+            Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
                 let mut min_int = IntType::max_value();
                 let mut min_float = 1.0f64 / 0.0f64;
                 debug_assert!(min_float.is_infinite());
@@ -34,8 +34,8 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }),
         )),
         "max" => Some(Function::new(
-            None,
-            Box::new(|arguments| {
+            Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
                 let mut max_int = IntType::min_value();
                 let mut max_float = -1.0f64 / 0.0f64;
                 debug_assert!(max_float.is_infinite());
@@ -59,9 +59,8 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         )),
 
         "len" => Some(Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                let subject = expect_string(&arguments[0])?;
+            Box::new(|argument| {
+                let subject = expect_string(argument)?;
                 Ok(Value::from(subject.len() as i64))
             }),
         )),
@@ -69,8 +68,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         // string functions
         #[cfg(feature = "regex_support")]
         "str::regex_matches" => Some(Function::new(
-            Some(2),
-            Box::new(|arguments| {
+            Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
+
                 let subject = expect_string(&arguments[0])?;
                 let re_str = expect_string(&arguments[1])?;
                 match Regex::new(re_str) {
@@ -84,8 +84,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         )),
         #[cfg(feature = "regex_support")]
         "str::regex_replace" => Some(Function::new(
-            Some(3),
-            Box::new(|arguments| {
+            Box::new(|argument| {
+                let arguments = expect_tuple(argument)?;
+
                 let subject = expect_string(&arguments[0])?;
                 let re_str = expect_string(&arguments[1])?;
                 let repl = expect_string(&arguments[2])?;
@@ -99,23 +100,20 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }),
         )),
         "str::to_lowercase" => Some(Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                let subject = expect_string(&arguments[0])?;
+            Box::new(|argument| {
+                let subject = expect_string(argument)?;
                 Ok(Value::from(subject.to_lowercase()))
             }),
         )),
         "str::to_uppercase" => Some(Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                let subject = expect_string(&arguments[0])?;
+            Box::new(|argument| {
+                let subject = expect_string(argument)?;
                 Ok(Value::from(subject.to_uppercase()))
             }),
         )),
         "str::trim" => Some(Function::new(
-            Some(1),
-            Box::new(|arguments| {
-                let subject = expect_string(&arguments[0])?;
+            Box::new(|argument| {
+                let subject = expect_string(argument)?;
                 Ok(Value::from(subject.trim()))
             }),
         )),

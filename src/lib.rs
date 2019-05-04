@@ -49,21 +49,22 @@
 //!
 //! ```rust
 //! use evalexpr::*;
-//! use evalexpr::error::expect_number;
+//! use evalexpr::error::{expect_number, expect_tuple};
 //!
 //! let mut context = HashMapContext::new();
 //! context.set_value("five".into(), 5.into()).unwrap(); // Do proper error handling here
 //! context.set_value("twelve".into(), 12.into()).unwrap(); // Do proper error handling here
-//! context.set_function("f".into(), Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
-//!     if let Value::Int(int) = arguments[0] {
+//! context.set_function("f".into(), Function::new(Box::new(|argument| {
+//!     if let Value::Int(int) = argument {
 //!         Ok(Value::Int(int / 2))
-//!     } else if let Value::Float(float) = arguments[0] {
+//!     } else if let Value::Float(float) = argument {
 //!         Ok(Value::Float(float / 2.0))
 //!     } else {
-//!         Err(EvalexprError::expected_number(arguments[0].clone()))
+//!         Err(EvalexprError::expected_number(argument.clone()))
 //!     }
 //! }))).unwrap(); // Do proper error handling here
-//! context.set_function("avg".into(), Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+//! context.set_function("avg".into(), Function::new(Box::new(|argument| {
+//!     let arguments = expect_tuple(argument)?;
 //!     expect_number(&arguments[0])?;
 //!     expect_number(&arguments[1])?;
 //!
@@ -339,7 +340,7 @@
 //!     Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from(25))),
 //!     Err(error) => {
 //!         () // Handle error
-//!     },
+//!     }
 //! }
 //! ```
 //!

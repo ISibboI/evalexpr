@@ -353,6 +353,14 @@ pub fn expect_boolean(actual: &Value) -> EvalexprResult<bool> {
     }
 }
 
+/// Returns `Ok(&[Value])` if the given value is a `Value::Tuple`, or `Err(Error::ExpectedTuple)` otherwise.
+pub fn expect_tuple(actual: &Value) -> EvalexprResult<&TupleType> {
+    match actual {
+        Value::Tuple(tuple) => Ok(tuple),
+        _ => Err(EvalexprError::expected_tuple(actual.clone())),
+    }
+}
+
 impl std::error::Error for EvalexprError {}
 
 /// Standard result type used by this crate.
