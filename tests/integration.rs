@@ -138,14 +138,13 @@ fn test_functions() {
         .set_function(
             "sub2".to_string(),
             Function::new(
-                Some(1),
-                Box::new(|arguments| {
-                    if let Value::Int(int) = arguments[0] {
+                Box::new(|argument| {
+                    if let Value::Int(int) = argument {
                         Ok(Value::Int(int - 2))
-                    } else if let Value::Float(float) = arguments[0] {
+                    } else if let Value::Float(float) = argument {
                         Ok(Value::Float(float - 2.0))
                     } else {
-                        Err(EvalexprError::expected_number(arguments[0].clone()))
+                        Err(EvalexprError::expected_number(argument.clone()))
                     }
                 }),
             ),
@@ -172,14 +171,13 @@ fn test_n_ary_functions() {
         .set_function(
             "sub2".into(),
             Function::new(
-                Some(1),
-                Box::new(|arguments| {
-                    if let Value::Int(int) = arguments[0] {
+                Box::new(|argument| {
+                    if let Value::Int(int) = argument {
                         Ok(Value::Int(int - 2))
-                    } else if let Value::Float(float) = arguments[0] {
+                    } else if let Value::Float(float) = argument {
                         Ok(Value::Float(float - 2.0))
                     } else {
-                        Err(EvalexprError::expected_number(arguments[0].clone()))
+                        Err(EvalexprError::expected_number(argument.clone()))
                     }
                 }),
             ),
@@ -189,8 +187,8 @@ fn test_n_ary_functions() {
         .set_function(
             "avg".into(),
             Function::new(
-                Some(2),
-                Box::new(|arguments| {
+                Box::new(|argument| {
+                    let arguments = expect_tuple(argument)?;
                     expect_number(&arguments[0])?;
                     expect_number(&arguments[1])?;
 
@@ -209,8 +207,8 @@ fn test_n_ary_functions() {
         .set_function(
             "muladd".into(),
             Function::new(
-                Some(3),
-                Box::new(|arguments| {
+                Box::new(|argument| {
+                    let arguments = expect_tuple(argument)?;
                     expect_number(&arguments[0])?;
                     expect_number(&arguments[1])?;
                     expect_number(&arguments[2])?;
@@ -233,16 +231,11 @@ fn test_n_ary_functions() {
         .set_function(
             "count".into(),
             Function::new(
-                None,
                 Box::new(|arguments| {
-                    if arguments.len() == 1 {
-                        if arguments[0] == Value::Empty {
-                            Ok(Value::Int(0))
-                        } else {
-                            Ok(Value::Int(1))
-                        }
-                    } else {
-                        Ok(Value::Int(arguments.len() as IntType))
+                    match arguments {
+                        Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
+                        Value::Empty => Ok(Value::from(0)),
+                        _ => Ok(Value::from(1)),
                     }
                 }),
             ),
@@ -251,6 +244,7 @@ fn test_n_ary_functions() {
     context
         .set_value("five".to_string(), Value::Int(5))
         .unwrap();
+    context.set_function("function_four".into(), Function::new(Box::new(|_| {Ok(Value::Int(4))}))).unwrap();
 
     assert_eq!(eval_with_context("avg(7, 5)", &context), Ok(Value::Int(6)));
     assert_eq!(
@@ -270,11 +264,13 @@ fn test_n_ary_functions() {
         Ok(Value::Int(14))
     );
     assert_eq!(eval_with_context("count()", &context), Ok(Value::Int(0)));
+    assert_eq!(eval_with_context("count((1, 2, 3))", &context), Ok(Value::Int(3)));
     assert_eq!(
         eval_with_context("count(3, 5.5, 2)", &context),
         Ok(Value::Int(3))
     );
     assert_eq!(eval_with_context("count 5", &context), Ok(Value::Int(1)));
+    assert_eq!(eval_with_context("function_four()", &context), Ok(Value::Int(4)));
 }
 
 #[test]
@@ -604,4 +600,52 @@ fn test_serde() {
         let serde_tree: Node = ron::de::from_str(&format!("\"{}\"", string)).unwrap();
         assert_eq!(manual_tree.eval(), serde_tree.eval());
     }
+}
+
+#[test]
+fn test_tuple_definitions() {
+    assert_eq!(eval_empty("()"), Ok(()));
+    assert_eq!(eval_int("(3)"), Ok(3));
+    assert_eq!(
+        eval_tuple("(3, 4)"),
+        Ok(vec![Value::from(3), Value::from(4)])
+    );
+    assert_eq!(
+        eval_tuple("2, (5, 6)"),
+        Ok(vec![
+            Value::from(2),
+            Value::from(vec![Value::from(5), Value::from(6)])
+        ])
+    );
+    assert_eq!(eval_tuple("1, 2"), Ok(vec![Value::from(1), Value::from(2)]));
+    assert_eq!(
+        eval_tuple("1, 2, 3, 4"),
+        Ok(vec![
+            Value::from(1),
+            Value::from(2),
+            Value::from(3),
+            Value::from(4)
+        ])
+    );
+    assert_eq!(
+        eval_tuple("(1, 2, 3), 5, 6, (true, false, 0)"),
+        Ok(vec![
+            Value::from(vec![Value::from(1), Value::from(2), Value::from(3)]),
+            Value::from(5),
+            Value::from(6),
+            Value::from(vec![Value::from(true), Value::from(false), Value::from(0)])
+        ])
+    );
+    assert_eq!(
+        eval_tuple("1, (2)"),
+        Ok(vec![Value::from(1), Value::from(2)])
+    );
+    assert_eq!(
+        eval_tuple("1, ()"),
+        Ok(vec![Value::from(1), Value::from(())])
+    );
+    assert_eq!(
+        eval_tuple("1, ((2))"),
+        Ok(vec![Value::from(1), Value::from(2)])
+    );
 }

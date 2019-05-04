@@ -4,7 +4,7 @@ use crate::{context::Context, error::*, value::Value};
 
 mod display;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Operator {
     RootNode,
 
@@ -91,23 +91,34 @@ impl Operator {
         }
     }
 
+    /// Returns true if chains of this operator should be flattened into one operator with many arguments.
+    // Make this a const fn once #57563 is resolved
+    pub(crate) fn is_sequence(&self) -> bool {
+        use crate::operator::Operator::*;
+        match self {
+            Tuple | Chain => true,
+            _ => false,
+        }
+    }
+
     /// True if this operator is a leaf, meaning it accepts no arguments.
     // Make this a const fn once #57563 is resolved
     pub(crate) fn is_leaf(&self) -> bool {
-        self.max_argument_amount() == 0
+        self.max_argument_amount() == Some(0)
     }
 
     /// Returns the maximum amount of arguments required by this operator.
     // Make this a const fn once #57563 is resolved
-    pub(crate) fn max_argument_amount(&self) -> usize {
+    pub(crate) fn max_argument_amount(&self) -> Option<usize> {
         use crate::operator::Operator::*;
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
-            | Tuple | Assign | Chain => 2,
-            Not | Neg | RootNode => 1,
-            Const { value: _ } => 0,
-            VariableIdentifier { identifier: _ } => 0,
-            FunctionIdentifier { identifier: _ } => 1,
+            | Assign => Some(2),
+            Tuple | Chain => None,
+            Not | Neg | RootNode => Some(1),
+            Const { value: _ } => Some(0),
+            VariableIdentifier { identifier: _ } => Some(0),
+            FunctionIdentifier { identifier: _ } => Some(1),
         }
     }
 
@@ -410,27 +421,7 @@ impl Operator {
                 }
             },
             Tuple => {
-                expect_operator_argument_amount(arguments.len(), 2)?;
-                if let Value::Tuple(tuple) = &arguments[0] {
-                    let mut tuple = tuple.clone();
-                    if let Value::Tuple(tuple2) = &arguments[1] {
-                        tuple.extend(tuple2.iter().cloned());
-                    } else {
-                        tuple.push(arguments[1].clone());
-                    }
-                    Ok(Value::from(tuple))
-                } else {
-                    if let Value::Tuple(tuple) = &arguments[1] {
-                        let mut tuple = tuple.clone();
-                        tuple.insert(0, arguments[0].clone());
-                        Ok(Value::from(tuple))
-                    } else {
-                        Ok(Value::from(vec![
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ]))
-                    }
-                }
+                Ok(Value::Tuple(arguments.into()))
             },
             Assign => Err(EvalexprError::ContextNotManipulable),
             Chain => {
@@ -438,7 +429,7 @@ impl Operator {
                     return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
                 }
 
-                Ok(arguments.get(1).cloned().unwrap_or(Value::Empty))
+                Ok(arguments.last().cloned().unwrap_or(Value::Empty))
             },
             Const { value } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
@@ -456,12 +447,7 @@ impl Operator {
             },
             FunctionIdentifier { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
-
-                let arguments = if let Value::Tuple(arguments) = &arguments[0] {
-                    arguments
-                } else {
-                    arguments
-                };
+                let arguments = &arguments[0];
 
                 if let Some(function) = context.get_function(&identifier) {
                     function.call(arguments)

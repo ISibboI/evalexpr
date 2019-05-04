@@ -49,21 +49,22 @@
 //!
 //! ```rust
 //! use evalexpr::*;
-//! use evalexpr::error::expect_number;
+//! use evalexpr::error::{expect_number, expect_tuple};
 //!
 //! let context = context_map! {
 //!     "five" => 5,
 //!     "twelve" => 12,
-//!     "f" => Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
-//!         if let Value::Int(int) = arguments[0] {
+//!     "f" => Function::new(Box::new(|argument| {
+//!         if let Value::Int(int) = argument {
 //!             Ok(Value::Int(int / 2))
-//!         } else if let Value::Float(float) = arguments[0] {
+//!         } else if let Value::Float(float) = argument {
 //!             Ok(Value::Float(float / 2.0))
 //!         } else {
-//!             Err(EvalexprError::expected_number(arguments[0].clone()))
+//!             Err(EvalexprError::expected_number(argument.clone()))
 //!         }
 //!     })),
-//!     "avg" => Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
+//!     "avg" => Function::new(Box::new(|argument| {
+//!         let arguments = expect_tuple(argument)?;
 //!         expect_number(&arguments[0])?;
 //!         expect_number(&arguments[1])?;
 //!
@@ -343,7 +344,7 @@
 //!     Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from(25))),
 //!     Err(error) => {
 //!         () // Handle error
-//!     },
+//!     }
 //! }
 //! # }
 //! ```
