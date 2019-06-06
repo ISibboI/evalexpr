@@ -1,6 +1,6 @@
 use std::fmt::{Display, Error, Formatter};
 
-use operator::*;
+use crate::operator::*;
 
 impl Display for Operator {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {

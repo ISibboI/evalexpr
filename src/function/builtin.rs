@@ -2,10 +2,10 @@
 use regex::Regex;
 
 use crate::error::*;
-use value::{FloatType, IntType};
-use EvalexprError;
-use Function;
-use Value;
+use crate::value::{FloatType, IntType};
+use crate::EvalexprError;
+use crate::Function;
+use crate::Value;
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {

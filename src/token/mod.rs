@@ -1,5 +1,5 @@
-use error::{EvalexprError, EvalexprResult};
-use value::{FloatType, IntType};
+use crate::error::{EvalexprError, EvalexprResult};
+use crate::value::{FloatType, IntType};
 
 mod display;
 

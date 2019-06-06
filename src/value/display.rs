@@ -1,6 +1,6 @@
 use std::fmt::{Display, Error, Formatter};
 
-use Value;
+use crate::Value;
 
 impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {

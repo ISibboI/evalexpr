@@ -1,6 +1,6 @@
 use std::fmt;
 
-use token::{PartialToken, Token};
+use crate::token::{PartialToken, Token};
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
