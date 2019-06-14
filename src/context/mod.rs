@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use function::Function;
-use value::value_type::ValueType;
-use EvalexprError;
-use EvalexprResult;
+use crate::function::Function;
+use crate::value::value_type::ValueType;
+use crate::EvalexprError;
+use crate::EvalexprResult;
 
 use crate::value::Value;
 
