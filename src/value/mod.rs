@@ -1,4 +1,4 @@
-use error::{EvalexprError, EvalexprResult};
+use crate::error::{EvalexprError, EvalexprResult};
 
 mod display;
 pub mod value_type;
@@ -216,7 +216,7 @@ impl From<()> for Value {
 
 #[cfg(test)]
 mod tests {
-    use value::{TupleType, Value};
+    use crate::value::{TupleType, Value};
 
     #[test]
     fn test_value_conversions() {

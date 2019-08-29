@@ -1,7 +1,7 @@
 use std::fmt;
 
-use error::EvalexprResult;
-use value::Value;
+use crate::error::EvalexprResult;
+use crate::value::Value;
 
 pub(crate) mod builtin;
 
@@ -20,14 +20,14 @@ pub(crate) mod builtin;
 /// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
 /// ```
 pub struct Function {
-    function: Box<Fn(&Value) -> EvalexprResult<Value>>,
+    function: Box<dyn Fn(&Value) -> EvalexprResult<Value>>,
 }
 
 impl Function {
     /// Creates a user-defined function.
     ///
     /// The `function` is a boxed function that takes a `Value` and returns a `EvalexprResult<Value, Error>`.
-    pub fn new(function: Box<Fn(&Value) -> EvalexprResult<Value>>) -> Self {
+    pub fn new(function: Box<dyn Fn(&Value) -> EvalexprResult<Value>>) -> Self {
         Self { function }
     }
 

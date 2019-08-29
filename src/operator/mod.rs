@@ -1,4 +1,4 @@
-use function::builtin::builtin_function;
+use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value};
 

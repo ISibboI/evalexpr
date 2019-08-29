@@ -1,10 +1,10 @@
 use std::fmt;
 
-use EvalexprError;
+use crate::EvalexprError;
 
 impl fmt::Display for EvalexprError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        use EvalexprError::*;
+        use crate::EvalexprError::*;
         match self {
             WrongOperatorArgumentAmount { expected, actual } => write!(
                 f,

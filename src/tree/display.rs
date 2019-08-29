@@ -1,5 +1,5 @@
 use std::fmt::{Display, Error, Formatter};
-use Node;
+use crate::Node;
 
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {

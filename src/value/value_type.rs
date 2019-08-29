@@ -1,4 +1,4 @@
-use Value;
+use crate::Value;
 
 /// The type of a `Value`.
 #[derive(Clone, Copy, Eq, PartialEq)]
