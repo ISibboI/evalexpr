@@ -2,6 +2,9 @@ extern crate evalexpr;
 
 use evalexpr::{error::*, *};
 
+#[cfg(feature = "serde")]
+mod serde;
+
 #[test]
 fn test_unary_examples() {
     assert_eq!(eval("3"), Ok(Value::Int(3)));
@@ -587,18 +590,6 @@ fn test_strings() {
     assert_eq!(eval("\"a\" + \"b\""), Ok(Value::from("ab")));
     assert_eq!(eval("\"a\" > \"b\""), Ok(Value::from(false)));
     assert_eq!(eval("\"a\" < \"b\""), Ok(Value::from(true)));
-}
-
-#[cfg(feature = "serde")]
-#[test]
-fn test_serde() {
-    let strings = ["3", "4+4", "21^(2*2)--3>5||!true"];
-
-    for string in &strings {
-        let manual_tree = build_operator_tree(string).unwrap();
-        let serde_tree: Node = ron::de::from_str(&format!("\"{}\"", string)).unwrap();
-        assert_eq!(manual_tree.eval(), serde_tree.eval());
-    }
 }
 
 #[test]
