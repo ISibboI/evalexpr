@@ -13,9 +13,10 @@ use evalexpr::build_operator_tree;
 use std::hint::black_box;
 
 const BENCHMARK_LEN: usize = 100_000;
+const EXPONENTIAL_TUPLE_ITERATIONS: usize = 12;
 
 fn generate_expression<Gen: Rng>(len: usize, gen: &mut Gen) -> String {
-    let int_distribution = Uniform::new_inclusive(-100, 100);
+    let int_distribution = Uniform::new_inclusive(1, 100);
     let whitespaces = vec![" ", "", "", "  ", " \n", "       "];
     let operators = vec!["+", "-", "*", "/", "%", "^"];
     let mut result = String::new();
@@ -51,6 +52,18 @@ fn generate_small_expressions<Gen: Rng>(len: usize, gen: &mut Gen) -> Vec<String
     result
 }
 
+fn generate_large_tuple_expression<Gen: Rng>(iterations: usize, gen: &mut Gen) -> String {
+    let mut result = String::from("a=(");
+    result.push_str(&generate_expression(0, gen));
+    result.push_str(",");
+    result.push_str(&generate_expression(0, gen));
+    result.push_str(")");
+    for _ in 0..iterations {
+        result.push_str(";a=(a,a)")
+    }
+    dbg!(result)
+}
+
 #[bench]
 fn bench_parse_long_expression_chains(bencher: &mut Bencher) {
     let mut gen = Pcg32::seed_from_u64(0);
@@ -80,5 +93,48 @@ fn bench_parse_many_small_expressions(bencher: &mut Bencher) {
         for expression in &small_expressions {
             black_box(build_operator_tree(&expression).unwrap());
         }
+    });
+}
+
+#[bench]
+fn bench_evaluate_long_expression_chains(bencher: &mut Bencher) {
+    let mut gen = Pcg32::seed_from_u64(0);
+    let long_expression_chain = build_operator_tree(&generate_expression_chain(BENCHMARK_LEN, &mut gen)).unwrap();
+
+    bencher.iter(|| {
+        long_expression_chain.eval().unwrap()
+    });
+}
+
+#[bench]
+fn bench_evaluate_deep_expression_trees(bencher: &mut Bencher) {
+    let mut gen = Pcg32::seed_from_u64(15);
+    let deep_expression_tree = build_operator_tree(&generate_expression(BENCHMARK_LEN, &mut gen)).unwrap();
+
+    bencher.iter(|| {
+        deep_expression_tree.eval().unwrap()
+    });
+}
+
+#[bench]
+fn bench_evaluate_many_small_expressions(bencher: &mut Bencher) {
+    let mut gen = Pcg32::seed_from_u64(33);
+    let small_expressions: Vec<_> = generate_small_expressions(BENCHMARK_LEN, &mut gen).iter().map(|expression| build_operator_tree(&expression).unwrap()).collect();
+
+    bencher.iter(|| {
+        for expression in &small_expressions {
+            black_box(expression.eval().unwrap());
+        }
+    });
+}
+
+#[bench]
+fn bench_evaluate_large_tuple_expression(bencher: &mut Bencher) {
+    let mut gen = Pcg32::seed_from_u64(44);
+    let large_tuple_expression = build_operator_tree(&generate_large_tuple_expression(EXPONENTIAL_TUPLE_ITERATIONS, &mut gen)).unwrap();
+    dbg!(&large_tuple_expression);
+
+    bencher.iter(|| {
+        large_tuple_expression.eval().unwrap()
     });
 }
