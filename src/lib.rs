@@ -193,6 +193,38 @@
 //! assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(5));
 //! ```
 //!
+//! ### Contexts
+//!
+//! An expression evaluator that just evaluates expressions would be useful already, but this crate can to more.
+//! It allows using [*variables*](#variables), [*assignments*](#the-assignment-operator), [*statement chaining*](#the-expression-chaining-operator) and [*user-defined functions*](#user-defined-functions) within an expression.
+//! When assigning to variables, the assignment is stored in a context.
+//! When the variable is read later on, it is read from the context.
+//! Contexts can be preserved between multiple calls to eval by creating them yourself.
+//! Here is a simple example to show the difference between preserving context between evaluations, and not preserving:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("a = 5;"), Ok(Value::from(())));
+//! assert_eq!(eval("a"), Err(EvalexprError::VariableIdentifierNotFound("a".to_string())));
+//!
+//! let mut context = HashMapContext::new();
+//! assert_eq!(eval_with_context_mut("a = 5;", &mut context), Ok(Value::from(())));
+//! assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotManipulable));
+//! assert_eq!(eval_with_context_mut("a = 5.5", &mut context), Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
+//! assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
+//!
+//! ```
+//!
+//! Note that the assignment is forgotten between the two calls to eval in the first example.
+//! In the second part, the assignment is correctly preserved.
+//! Note here, that to assign to a variable, the context needs to be passed as a mutable reference.
+//! When passed as an immutable reference, an error is returned.
+//! Also, the `HashMapContext` is type safe.
+//! This means that assigning to `a` again with a different type yields an error as well.
+//! Type unsafe contexts may be implemented if requested.
+//! For reading `a`, it is enough to pass an immutable reference.
+//!
 //! ### Builtin Functions
 //!
 //! This crate offers a set of builtin functions.
