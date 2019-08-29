@@ -135,10 +135,24 @@ impl Value {
         }
     }
 
-    /// Clones the value stored in  `self` as `TupleType`, or returns`Err` if `self` is not a `Value::Tuple`.
+    /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
     pub fn as_tuple(&self) -> EvalexprResult<TupleType> {
         match self {
             Value::Tuple(tuple) => Ok(tuple.clone()),
+            value => Err(EvalexprError::expected_tuple(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
+    pub fn as_fixed_len_tuple(&self, len: usize) -> EvalexprResult<TupleType> {
+        match self {
+            Value::Tuple(tuple) => {
+                if tuple.len() == len {
+                    Ok(tuple.clone())
+                } else {
+                    Err(EvalexprError::expected_fixed_len_tuple(len, self.clone()))
+                }
+            },
             value => Err(EvalexprError::expected_tuple(value.clone())),
         }
     }

@@ -161,8 +161,8 @@ impl Operator {
             },
             Sub => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+                arguments[0].as_number()?;
+                arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_sub(b);
@@ -182,7 +182,7 @@ impl Operator {
             },
             Neg => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
-                expect_number(&arguments[0])?;
+                arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
                     let result = a.checked_neg();
@@ -197,8 +197,8 @@ impl Operator {
             },
             Mul => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+                arguments[0].as_number()?;
+                arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_mul(b);
@@ -218,8 +218,8 @@ impl Operator {
             },
             Div => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+                arguments[0].as_number()?;
+                arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_div(b);
@@ -239,8 +239,8 @@ impl Operator {
             },
             Mod => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+                arguments[0].as_number()?;
+                arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_rem(b);
@@ -260,8 +260,8 @@ impl Operator {
             },
             Exp => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                expect_number(&arguments[0])?;
-                expect_number(&arguments[1])?;
+                arguments[0].as_number()?;
+                arguments[1].as_number()?;
 
                 Ok(Value::Float(
                     arguments[0]
@@ -390,8 +390,8 @@ impl Operator {
             },
             And => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                let a = expect_boolean(&arguments[0])?;
-                let b = expect_boolean(&arguments[1])?;
+                let a = arguments[0].as_boolean()?;
+                let b = arguments[1].as_boolean()?;
 
                 if a && b {
                     Ok(Value::Boolean(true))
@@ -401,8 +401,8 @@ impl Operator {
             },
             Or => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                let a = expect_boolean(&arguments[0])?;
-                let b = expect_boolean(&arguments[1])?;
+                let a = arguments[0].as_boolean()?;
+                let b = arguments[1].as_boolean()?;
 
                 if a || b {
                     Ok(Value::Boolean(true))
@@ -412,7 +412,7 @@ impl Operator {
             },
             Not => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
-                let a = expect_boolean(&arguments[0])?;
+                let a = arguments[0].as_boolean()?;
 
                 if !a {
                     Ok(Value::Boolean(true))
@@ -470,7 +470,7 @@ impl Operator {
         match self {
             Assign => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                let target = expect_string(&arguments[0])?;
+                let target = arguments[0].as_string()?;
                 context.set_value(target.into(), arguments[1].clone())?;
 
                 Ok(Value::Empty)

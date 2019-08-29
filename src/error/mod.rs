@@ -75,6 +75,14 @@ pub enum EvalexprError {
         actual: Value,
     },
 
+    /// A tuple value of a certain length was expected.
+    ExpectedFixedLenTuple {
+        /// The expected len
+        expected_len: usize,
+        /// The actual value.
+        actual: Value,
+    },
+
     /// An empty value was expected.
     ExpectedEmpty {
         /// The actual value.
@@ -234,6 +242,11 @@ impl EvalexprError {
         EvalexprError::ExpectedTuple { actual }
     }
 
+    /// Constructs `Error::ExpectedFixedLenTuple{expected_len, actual}`.
+    pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
+        EvalexprError::ExpectedFixedLenTuple { expected_len, actual }
+    }
+
     /// Constructs `Error::ExpectedEmpty{actual}`.
     pub fn expected_empty(actual: Value) -> Self {
         EvalexprError::ExpectedEmpty { actual }
@@ -319,45 +332,11 @@ pub fn expect_function_argument_amount(actual: usize, expected: usize) -> Evalex
     }
 }
 
-/// Returns `Ok(&str)` if the given value is a `Value::String`, or `Err(Error::ExpectedString)` otherwise.
-pub fn expect_string(actual: &Value) -> EvalexprResult<&str> {
-    match actual {
-        Value::String(string) => Ok(string),
-        _ => Err(EvalexprError::expected_string(actual.clone())),
-    }
-}
-
-/// Returns `Ok(())` if the given value is numeric.
-/// Numeric types are `Value::Int` and `Value::Float`.
-/// Otherwise, `Err(Error::ExpectedNumber)` is returned.
-pub fn expect_number(actual: &Value) -> EvalexprResult<()> {
-    match actual {
-        Value::Float(_) | Value::Int(_) => Ok(()),
-        _ => Err(EvalexprError::expected_number(actual.clone())),
-    }
-}
-
 /// Returns `Ok(())` if the given value is a string or a numeric
 pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
     match actual {
         Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(EvalexprError::expected_number_or_string(actual.clone())),
-    }
-}
-
-/// Returns `Ok(bool)` if the given value is a `Value::Boolean`, or `Err(Error::ExpectedBoolean)` otherwise.
-pub fn expect_boolean(actual: &Value) -> EvalexprResult<bool> {
-    match actual {
-        Value::Boolean(boolean) => Ok(*boolean),
-        _ => Err(EvalexprError::expected_boolean(actual.clone())),
-    }
-}
-
-/// Returns `Ok(&[Value])` if the given value is a `Value::Tuple`, or `Err(Error::ExpectedTuple)` otherwise.
-pub fn expect_tuple(actual: &Value) -> EvalexprResult<&TupleType> {
-    match actual {
-        Value::Tuple(tuple) => Ok(tuple),
-        _ => Err(EvalexprError::expected_tuple(actual.clone())),
     }
 }
 

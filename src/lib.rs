@@ -49,24 +49,21 @@
 //!
 //! ```rust
 //! use evalexpr::*;
-//! use evalexpr::error::{expect_number, expect_tuple};
 //!
 //! let context = context_map! {
 //!     "five" => 5,
 //!     "twelve" => 12,
 //!     "f" => Function::new(Box::new(|argument| {
-//!         if let Value::Int(int) = argument {
+//!         if let Ok(int) = argument.as_int() {
 //!             Ok(Value::Int(int / 2))
-//!         } else if let Value::Float(float) = argument {
+//!         } else if let Ok(float) = argument.as_float() {
 //!             Ok(Value::Float(float / 2.0))
 //!         } else {
 //!             Err(EvalexprError::expected_number(argument.clone()))
 //!         }
 //!     })),
 //!     "avg" => Function::new(Box::new(|argument| {
-//!         let arguments = expect_tuple(argument)?;
-//!         expect_number(&arguments[0])?;
-//!         expect_number(&arguments[1])?;
+//!         let arguments = argument.as_tuple()?;
 //!
 //!         if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
 //!             Ok(Value::Int((a + b) / 2))
