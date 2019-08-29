@@ -28,9 +28,19 @@ impl fmt::Display for Token {
             LBrace => write!(f, "("),
             RBrace => write!(f, ")"),
 
+            // Assignment
+            Assign => write!(f, "="),
+            PlusAssign => write!(f, "+="),
+            MinusAssign => write!(f, "-="),
+            StarAssign => write!(f, "*="),
+            SlashAssign => write!(f, "/="),
+            PercentAssign => write!(f, "%="),
+            HatAssign => write!(f, "^="),
+            AndAssign => write!(f, "&&="),
+            OrAssign => write!(f, "||="),
+
             // Special
             Comma => write!(f, ","),
-            Assign => write!(f, "="),
             Semicolon => write!(f, ";"),
 
             // Values => write!(f, ""), Variables and Functions
@@ -50,6 +60,12 @@ impl fmt::Display for PartialToken {
             Token(token) => token.fmt(f),
             Literal(literal) => literal.fmt(f),
             Whitespace => write!(f, " "),
+            Plus => write!(f, "+"),
+            Minus => write!(f, "-"),
+            Star => write!(f, "*"),
+            Slash => write!(f, "/"),
+            Percent => write!(f, "%"),
+            Hat => write!(f, "^"),
             Eq => write!(f, "="),
             ExclamationMark => write!(f, "!"),
             Gt => write!(f, ">"),

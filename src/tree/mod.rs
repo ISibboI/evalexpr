@@ -529,14 +529,23 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                 }
             },
 
-            Token::Comma => Some(Node::new(Operator::Tuple)),
             Token::Assign => Some(Node::new(Operator::Assign)),
+            Token::PlusAssign => Some(Node::new(Operator::AddAssign)),
+            Token::MinusAssign => Some(Node::new(Operator::SubAssign)),
+            Token::StarAssign => Some(Node::new(Operator::MulAssign)),
+            Token::SlashAssign => Some(Node::new(Operator::DivAssign)),
+            Token::PercentAssign => Some(Node::new(Operator::ModAssign)),
+            Token::HatAssign => Some(Node::new(Operator::ExpAssign)),
+            Token::AndAssign => Some(Node::new(Operator::AndAssign)),
+            Token::OrAssign => Some(Node::new(Operator::OrAssign)),
+
+            Token::Comma => Some(Node::new(Operator::Tuple)),
             Token::Semicolon => Some(Node::new(Operator::Chain)),
 
             Token::Identifier(identifier) => {
                 let mut result = Some(Node::new(Operator::variable_identifier(identifier.clone())));
                 if let Some(next) = next {
-                    if next == &Token::Assign {
+                    if next.is_assignment() {
                         result = Some(Node::new(Operator::value(identifier.clone().into())));
                     } else if next.is_leftsided_value() {
                         result = Some(Node::new(Operator::function_identifier(identifier)));

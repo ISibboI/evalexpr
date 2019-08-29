@@ -636,3 +636,62 @@ fn test_implicit_context() {
         Ok("xyzabc".to_string())
     );
 }
+
+#[test]
+fn test_operator_assignments() {
+    let mut context = HashMapContext::new();
+    assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("a += 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("a -= 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("a *= 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("b = 5.0", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("b /= 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("b %= 5", &mut context), Ok(()));
+    assert_eq!(eval_empty_with_context_mut("b ^= 5", &mut context), Ok(()));
+    assert_eq!(
+        eval_empty_with_context_mut("c = true", &mut context),
+        Ok(())
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("c &&= false", &mut context),
+        Ok(())
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("c ||= true", &mut context),
+        Ok(())
+    );
+
+    let mut context = HashMapContext::new();
+    assert_eq!(eval_int_with_context_mut("a = 5; a", &mut context), Ok(5));
+    assert_eq!(eval_int_with_context_mut("a += 3; a", &mut context), Ok(8));
+    assert_eq!(eval_int_with_context_mut("a -= 5; a", &mut context), Ok(3));
+    assert_eq!(eval_int_with_context_mut("a *= 5; a", &mut context), Ok(15));
+    assert_eq!(
+        eval_float_with_context_mut("b = 5.0; b", &mut context),
+        Ok(5.0)
+    );
+    assert_eq!(
+        eval_float_with_context_mut("b /= 2; b", &mut context),
+        Ok(2.5)
+    );
+    assert_eq!(
+        eval_float_with_context_mut("b %= 2; b", &mut context),
+        Ok(0.5)
+    );
+    assert_eq!(
+        eval_float_with_context_mut("b ^= 2; b", &mut context),
+        Ok(0.25)
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("c = true; c", &mut context),
+        Ok(true)
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("c &&= false; c", &mut context),
+        Ok(false)
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("c ||= true; c", &mut context),
+        Ok(true)
+    );
+}

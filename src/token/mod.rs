@@ -30,9 +30,19 @@ pub enum Token {
     LBrace,
     RBrace,
 
+    // Assignment
+    Assign,
+    PlusAssign,
+    MinusAssign,
+    StarAssign,
+    SlashAssign,
+    PercentAssign,
+    HatAssign,
+    AndAssign,
+    OrAssign,
+
     // Special
     Comma,
-    Assign,
     Semicolon,
 
     // Values, Variables and Functions
@@ -47,6 +57,12 @@ pub enum Token {
 pub enum PartialToken {
     Token(Token),
     Literal(String),
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    Hat,
     Whitespace,
     Eq,
     ExclamationMark,
@@ -59,12 +75,12 @@ pub enum PartialToken {
 // Make this a const fn as soon as match gets stable (issue #57563)
 fn char_to_partial_token(c: char) -> PartialToken {
     match c {
-        '+' => PartialToken::Token(Token::Plus),
-        '-' => PartialToken::Token(Token::Minus),
-        '*' => PartialToken::Token(Token::Star),
-        '/' => PartialToken::Token(Token::Slash),
-        '%' => PartialToken::Token(Token::Percent),
-        '^' => PartialToken::Token(Token::Hat),
+        '+' => PartialToken::Plus,
+        '-' => PartialToken::Minus,
+        '*' => PartialToken::Star,
+        '/' => PartialToken::Slash,
+        '%' => PartialToken::Percent,
+        '^' => PartialToken::Hat,
 
         '(' => PartialToken::Token(Token::LBrace),
         ')' => PartialToken::Token(Token::RBrace),
@@ -114,8 +130,17 @@ impl Token {
             Token::RBrace => false,
 
             Token::Comma => false,
-            Token::Assign => false,
             Token::Semicolon => false,
+
+            Token::Assign => false,
+            Token::PlusAssign => false,
+            Token::MinusAssign => false,
+            Token::StarAssign => false,
+            Token::SlashAssign => false,
+            Token::PercentAssign => false,
+            Token::HatAssign => false,
+            Token::AndAssign => false,
+            Token::OrAssign => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,
@@ -149,14 +174,32 @@ impl Token {
             Token::RBrace => true,
 
             Token::Comma => false,
-            Token::Assign => false,
             Token::Semicolon => false,
+
+            Token::Assign => false,
+            Token::PlusAssign => false,
+            Token::MinusAssign => false,
+            Token::StarAssign => false,
+            Token::SlashAssign => false,
+            Token::PercentAssign => false,
+            Token::HatAssign => false,
+            Token::AndAssign => false,
+            Token::OrAssign => false,
 
             Token::Identifier(_) => true,
             Token::Float(_) => true,
             Token::Int(_) => true,
             Token::Boolean(_) => true,
             Token::String(_) => true,
+        }
+    }
+
+    pub(crate) fn is_assignment(&self) -> bool {
+        use Token::*;
+        match self {
+            Assign | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign
+            | HatAssign | AndAssign | OrAssign => true,
+            _ => false,
         }
     }
 }
@@ -228,6 +271,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
     while tokens.len() > 0 {
         let first = tokens[0].clone();
         let second = tokens.get(1).cloned();
+        let third = tokens.get(2).cloned();
         let mut cutoff = 2;
 
         result.extend(
@@ -235,6 +279,48 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                 PartialToken::Token(token) => {
                     cutoff = 1;
                     Some(token)
+                },
+                PartialToken::Plus => match second {
+                    Some(PartialToken::Eq) => Some(Token::PlusAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Plus)
+                    },
+                },
+                PartialToken::Minus => match second {
+                    Some(PartialToken::Eq) => Some(Token::MinusAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Minus)
+                    },
+                },
+                PartialToken::Star => match second {
+                    Some(PartialToken::Eq) => Some(Token::StarAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Star)
+                    },
+                },
+                PartialToken::Slash => match second {
+                    Some(PartialToken::Eq) => Some(Token::SlashAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Slash)
+                    },
+                },
+                PartialToken::Percent => match second {
+                    Some(PartialToken::Eq) => Some(Token::PercentAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Percent)
+                    },
+                },
+                PartialToken::Hat => match second {
+                    Some(PartialToken::Eq) => Some(Token::HatAssign),
+                    _ => {
+                        cutoff = 1;
+                        Some(Token::Hat)
+                    },
                 },
                 PartialToken::Literal(literal) => {
                     cutoff = 1;
@@ -281,11 +367,23 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     },
                 },
                 PartialToken::Ampersand => match second {
-                    Some(PartialToken::Ampersand) => Some(Token::And),
+                    Some(PartialToken::Ampersand) => match third {
+                        Some(PartialToken::Eq) => {
+                            cutoff = 3;
+                            Some(Token::AndAssign)
+                        },
+                        _ => Some(Token::And),
+                    },
                     _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
                 PartialToken::VerticalBar => match second {
-                    Some(PartialToken::VerticalBar) => Some(Token::Or),
+                    Some(PartialToken::VerticalBar) => match third {
+                        Some(PartialToken::Eq) => {
+                            cutoff = 3;
+                            Some(Token::OrAssign)
+                        },
+                        _ => Some(Token::Or),
+                    },
                     _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
             }

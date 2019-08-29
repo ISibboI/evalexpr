@@ -25,9 +25,17 @@ impl Display for Operator {
             Or => write!(f, "||"),
             Not => write!(f, "!"),
 
-            Tuple => write!(f, ", "),
             Assign => write!(f, " = "),
+            AddAssign => write!(f, " += "),
+            SubAssign => write!(f, " -= "),
+            MulAssign => write!(f, " *= "),
+            DivAssign => write!(f, " /= "),
+            ModAssign => write!(f, " %= "),
+            ExpAssign => write!(f, " ^= "),
+            AndAssign => write!(f, " &&= "),
+            OrAssign => write!(f, " ||= "),
 
+            Tuple => write!(f, ", "),
             Chain => write!(f, "; "),
 
             Const { value } => write!(f, "{}", value),

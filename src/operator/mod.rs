@@ -26,9 +26,17 @@ pub enum Operator {
     Or,
     Not,
 
-    Tuple,
     Assign,
+    AddAssign,
+    SubAssign,
+    MulAssign,
+    DivAssign,
+    ModAssign,
+    ExpAssign,
+    AndAssign,
+    OrAssign,
 
+    Tuple,
     Chain,
 
     Const { value: Value },
@@ -67,9 +75,10 @@ impl Operator {
             Or => 70,
             Not => 110,
 
-            Tuple => 40,
-            Assign => 50,
+            Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
+            | AndAssign | OrAssign => 50,
 
+            Tuple => 40,
             Chain => 0,
 
             Const { value: _ } => 200,
@@ -113,7 +122,8 @@ impl Operator {
         use crate::operator::Operator::*;
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
-            | Assign => Some(2),
+            | Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
+            | AndAssign | OrAssign => Some(2),
             Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
             Const { value: _ } => Some(0),
@@ -420,8 +430,9 @@ impl Operator {
                     Ok(Value::Boolean(false))
                 }
             },
+            Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
+            | AndAssign | OrAssign => Err(EvalexprError::ContextNotManipulable),
             Tuple => Ok(Value::Tuple(arguments.into())),
-            Assign => Err(EvalexprError::ContextNotManipulable),
             Chain => {
                 if arguments.is_empty() {
                     return Err(EvalexprError::wrong_operator_argument_amount(0, 1));
@@ -435,6 +446,8 @@ impl Operator {
                 Ok(value.clone())
             },
             VariableIdentifier { identifier } => {
+                expect_operator_argument_amount(arguments.len(), 0)?;
+
                 if let Some(value) = context.get_value(&identifier).cloned() {
                     Ok(value)
                 } else {
@@ -472,6 +485,35 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let target = arguments[0].as_string()?;
                 context.set_value(target.into(), arguments[1].clone())?;
+
+                Ok(Value::Empty)
+            },
+            AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign | AndAssign
+            | OrAssign => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+
+                let target = arguments[0].as_string()?;
+                let left_value = Operator::VariableIdentifier {
+                    identifier: target.clone(),
+                }
+                .eval(&Vec::new(), context)?;
+                let arguments = vec![left_value, arguments[1].clone()];
+
+                let result = match self {
+                    AddAssign => Operator::Add.eval(&arguments, context),
+                    SubAssign => Operator::Sub.eval(&arguments, context),
+                    MulAssign => Operator::Mul.eval(&arguments, context),
+                    DivAssign => Operator::Div.eval(&arguments, context),
+                    ModAssign => Operator::Mod.eval(&arguments, context),
+                    ExpAssign => Operator::Exp.eval(&arguments, context),
+                    AndAssign => Operator::And.eval(&arguments, context),
+                    OrAssign => Operator::Or.eval(&arguments, context),
+                    _ => unreachable!(
+                        "Forgot to add a match arm for an assign operation: {}",
+                        self
+                    ),
+                }?;
+                context.set_value(target.into(), result)?;
 
                 Ok(Value::Empty)
             },
