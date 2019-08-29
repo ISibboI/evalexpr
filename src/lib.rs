@@ -464,6 +464,7 @@ pub use crate::{
     error::{EvalexprError, EvalexprResult},
     function::Function,
     interface::*,
+    operator::Operator,
     tree::Node,
     value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE},
 };

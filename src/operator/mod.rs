@@ -4,44 +4,86 @@ use crate::{context::Context, error::*, value::Value};
 
 mod display;
 
+/// An enum that represents operators in the operator tree.
 #[derive(Debug, PartialEq)]
 pub enum Operator {
+    /// A root node in the operator tree.
+    /// The whole expression is stored under a root node, as well as each subexpression surrounded by parentheses.
     RootNode,
 
+    /// A binary addition operator.
     Add,
+    /// A binary subtraction operator.
     Sub,
+    /// A unary negation operator.
     Neg,
+    /// A binary multiplication operator.
     Mul,
+    /// A binary division operator.
     Div,
+    /// A binary modulo operator.
     Mod,
+    /// A binary exponentiation operator.
     Exp,
 
+    /// A binary equality comparator.
     Eq,
+    /// A binary inequality comparator.
     Neq,
+    /// A binary greater-than comparator.
     Gt,
+    /// A binary lower-than comparator.
     Lt,
+    /// A binary greater-than-or-equal comparator.
     Geq,
+    /// A binary lower-than-or-equal comparator.
     Leq,
+    /// A binary logical and operator.
     And,
+    /// A binary logical or operator.
     Or,
+    /// A binary logical not operator.
     Not,
 
+    /// A binary assignment operator.
     Assign,
+    /// A binary add-assign operator.
     AddAssign,
+    /// A binary subtract-assign operator.
     SubAssign,
+    /// A binary multiply-assign operator.
     MulAssign,
+    /// A binary divide-assign operator.
     DivAssign,
+    /// A binary modulo-assign operator.
     ModAssign,
+    /// A binary exponentiate-assign operator.
     ExpAssign,
+    /// A binary and-assign operator.
     AndAssign,
+    /// A binary or-assign operator.
     OrAssign,
 
+    /// An n-ary tuple constructor.
     Tuple,
+    /// An n-ary subexpression chain.
     Chain,
 
-    Const { value: Value },
-    VariableIdentifier { identifier: String },
-    FunctionIdentifier { identifier: String },
+    /// A constant value.
+    Const {
+        /** The value of the constant. */
+        value: Value,
+    },
+    /// A variable identifier.
+    VariableIdentifier {
+        /// The identifier of the variable.
+        identifier: String,
+    },
+    /// A function identifier.
+    FunctionIdentifier {
+        /// The identifier of the function.
+        identifier: String,
+    },
 }
 
 impl Operator {
