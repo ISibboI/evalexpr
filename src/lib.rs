@@ -229,6 +229,38 @@
 //! Type unsafe contexts may be implemented if requested.
 //! For reading `a`, it is enough to pass an immutable reference.
 //!
+//! Contexts can also be manipulated in code.
+//! Take a look at the following example:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! let mut context = HashMapContext::new();
+//! // We can set variables in code like this...
+//! context.set_value("a".into(), 5.into());
+//! // ...and read from them in expressions
+//! assert_eq!(eval_int_with_context("a", &context), Ok(5));
+//! // We can write or overwrite variables in expressions...
+//! assert_eq!(eval_with_context_mut("a = 10; b = 1.0;", &mut context), Ok(().into()));
+//! // ...and read the value in code like this
+//! assert_eq!(context.get_value("a"), Some(&Value::from(10)));
+//! assert_eq!(context.get_value("b"), Some(&Value::from(1.0)));
+//! ```
+//!
+//! Contexts are also required for user-defined functions.
+//! Those can be passed one by one with the `set_function` method, but it might be more convenient to use the `context_map!` macro instead:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! let context = context_map!{
+//!     "f" => Function::new(Box::new(|args| Ok(Value::from(args.as_int()? + 5)))),
+//! };
+//! assert_eq!(eval_int_with_context("f 5", &context), Ok(10));
+//! ```
+//!
+//! For more information about user-defined functions, refer to the respective [section](#user-defined-functions).
+//!
 //! ### Builtin Functions
 //!
 //! This crate offers a set of builtin functions.
