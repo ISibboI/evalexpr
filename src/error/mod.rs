@@ -5,10 +5,7 @@
 //! The module also contains some helper functions starting with `expect_` that check for a condition and return `Err(_)` if the condition is not fulfilled.
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
-use crate::{
-    token::PartialToken,
-    value::{value_type::ValueType, TupleType},
-};
+use crate::{token::PartialToken, value::value_type::ValueType};
 
 use crate::value::Value;
 
@@ -110,7 +107,7 @@ pub enum EvalexprError {
     /// Only use this if there is no other error that describes the expected and provided types in more detail.
     TypeError {
         /// The expected types.
-        expected: TupleType,
+        expected: Vec<ValueType>,
         /// The actual value.
         actual: Value,
     },
@@ -205,7 +202,7 @@ impl EvalexprError {
     }
 
     /// Constructs `Error::TypeError{actual, expected}`.
-    pub fn type_error(actual: Value, expected: TupleType) -> Self {
+    pub fn type_error(actual: Value, expected: Vec<ValueType>) -> Self {
         EvalexprError::TypeError { actual, expected }
     }
 

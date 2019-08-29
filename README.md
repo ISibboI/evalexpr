@@ -282,7 +282,7 @@ This crate offers a set of builtin functions.
 |------------|-----------------|----------------|-------------|
 | `min` | >= 1 | Numeric | Returns the minimum of the arguments |
 | `max` | >= 1 | Numeric | Returns the maximum of the arguments |
-| `len` | 1 | String | Returns the character length of a string |
+| `len` | 1 | String/Tuple | Returns the character length of a string, or the amount of elements in a tuple (not recursively) |
 | `str::regex_matches` | 2 | String, String | Returns true if the first argument matches the regex in the second argument |
 | `str::regex_replace` | 3 | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument |
 | `str::to_lowercase` | 1 | String | Returns the lower-case version of the string |

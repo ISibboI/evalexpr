@@ -1,7 +1,7 @@
 use crate::Value;
 
 /// The type of a `Value`.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ValueType {
     /// The `Value::String` type.
     String,

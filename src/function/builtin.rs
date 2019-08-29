@@ -3,7 +3,7 @@ use regex::Regex;
 
 use crate::{
     value::{FloatType, IntType},
-    EvalexprError, Function, Value,
+    EvalexprError, Function, Value, ValueType,
 };
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
@@ -54,8 +54,16 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         }))),
 
         "len" => Some(Function::new(Box::new(|argument| {
-            let subject = argument.as_string()?;
-            Ok(Value::from(subject.len() as i64))
+            if let Ok(subject) = argument.as_string() {
+                Ok(Value::from(subject.len() as i64))
+            } else if let Ok(subject) = argument.as_tuple() {
+                Ok(Value::from(subject.len() as i64))
+            } else {
+                Err(EvalexprError::type_error(
+                    argument.clone(),
+                    vec![ValueType::String, ValueType::Tuple],
+                ))
+            }
         }))),
 
         // string functions

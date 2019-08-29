@@ -277,6 +277,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("min(4.0, 3)"), Ok(Value::Int(3)));
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
     assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
+    assert_eq!(eval("len(\"a\", \"b\")"), Ok(Value::Int(2)));
     assert_eq!(
         eval("str::to_lowercase(\"FOOBAR\")"),
         Ok(Value::from("foobar"))
