@@ -16,6 +16,7 @@
  * Allow using context operations in `eval` calls without context
  * Operator assignment operators for each binary operation (`+=`, `-=`, ...)
  * The `Operator` enum is now public for better error types
+ * Benchmarks for observing performance of future releases
 
 ### Removed
 
