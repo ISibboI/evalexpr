@@ -357,7 +357,7 @@
 //! See [LICENSE](LICENSE) for details.
 //!
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 #[cfg(feature = "regex_support")]
 extern crate regex;
