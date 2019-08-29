@@ -1,8 +1,7 @@
-use crate::token;
+use crate::{token, HashMapContext};
 use crate::tree;
 use crate::value::TupleType;
 use crate::Context;
-use crate::EmptyContext;
 use crate::EmptyType;
 use crate::EvalexprError;
 use crate::EvalexprResult;
@@ -24,7 +23,7 @@ use crate::EMPTY_VALUE;
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval(string: &str) -> EvalexprResult<Value> {
-    eval_with_context(string, &EmptyContext)
+    eval_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string with the given context.
@@ -97,21 +96,21 @@ pub fn build_operator_tree(string: &str) -> EvalexprResult<Node> {
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_string(string: &str) -> EvalexprResult<String> {
-    eval_string_with_context(string, &EmptyContext)
+    eval_string_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_int(string: &str) -> EvalexprResult<IntType> {
-    eval_int_with_context(string, &EmptyContext)
+    eval_int_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_float(string: &str) -> EvalexprResult<FloatType> {
-    eval_float_with_context(string, &EmptyContext)
+    eval_float_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a float.
@@ -119,28 +118,28 @@ pub fn eval_float(string: &str) -> EvalexprResult<FloatType> {
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_number(string: &str) -> EvalexprResult<FloatType> {
-    eval_number_with_context(string, &EmptyContext)
+    eval_number_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a boolean.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_boolean(string: &str) -> EvalexprResult<bool> {
-    eval_boolean_with_context(string, &EmptyContext)
+    eval_boolean_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a tuple.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_tuple(string: &str) -> EvalexprResult<TupleType> {
-    eval_tuple_with_context(string, &EmptyContext)
+    eval_tuple_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into an empty value.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_empty(string: &str) -> EvalexprResult<EmptyType> {
-    eval_empty_with_context(string, &EmptyContext)
+    eval_empty_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a string with the given context.

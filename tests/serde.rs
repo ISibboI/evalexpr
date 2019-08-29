@@ -1,3 +1,5 @@
+#![cfg(feature = "serde")]
+
 use evalexpr::{build_operator_tree, Node};
 
 #[test]

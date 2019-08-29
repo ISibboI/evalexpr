@@ -2,9 +2,6 @@ extern crate evalexpr;
 
 use evalexpr::{error::*, *};
 
-#[cfg(feature = "serde")]
-mod serde;
-
 #[test]
 fn test_unary_examples() {
     assert_eq!(eval("3"), Ok(Value::Int(3)));
@@ -638,4 +635,16 @@ fn test_tuple_definitions() {
         eval_tuple("1, ((2))"),
         Ok(vec![Value::from(1), Value::from(2)])
     );
+}
+
+#[test]
+fn test_implicit_context() {
+    assert_eq!(eval("a = 2 + 4 * 2; b = -5 + 3 * 5; a == b"), Ok(Value::from(true)));
+    assert_eq!(eval_boolean("a = 2 + 4 * 2; b = -5 + 3 * 5; a == b"), Ok(true));
+    assert_eq!(eval_int("a = 2 + 4 * 2; b = -5 + 3 * 5; a - b"), Ok(0));
+    assert_eq!(eval_float("a = 2 + 4 * 2; b = -5 + 3 * 5; a - b + 0.5"), Ok(0.5));
+    assert_eq!(eval_number("a = 2 + 4 * 2; b = -5 + 3 * 5; a - b"), Ok(0.0));
+    assert_eq!(eval_empty("a = 2 + 4 * 2; b = -5 + 3 * 5;"), Ok(()));
+    assert_eq!(eval_tuple("a = 2 + 4 * 2; b = -5 + 3 * 5; a, b + 0.5"), Ok(vec![Value::from(10), Value::from(10.5)]));
+    assert_eq!(eval_string("a = \"xyz\"; b = \"abc\"; c = a + b; c"), Ok("xyzabc".to_string()));
 }
