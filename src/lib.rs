@@ -206,12 +206,16 @@
 //! use evalexpr::*;
 //!
 //! assert_eq!(eval("a = 5;"), Ok(Value::from(())));
+//! // The context is not preserved between eval calls
 //! assert_eq!(eval("a"), Err(EvalexprError::VariableIdentifierNotFound("a".to_string())));
 //!
 //! let mut context = HashMapContext::new();
 //! assert_eq!(eval_with_context_mut("a = 5;", &mut context), Ok(Value::from(())));
+//! // Assignments require mutable contexts
 //! assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotManipulable));
+//! // The HashMapContext is type safe
 //! assert_eq!(eval_with_context_mut("a = 5.5", &mut context), Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
+//! // Reading a variable does not require a mutable context
 //! assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
 //!
 //! ```
