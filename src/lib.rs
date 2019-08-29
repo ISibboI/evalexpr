@@ -255,7 +255,7 @@
 //!
 //! let context = context_map!{
 //!     "f" => Function::new(Box::new(|args| Ok(Value::from(args.as_int()? + 5)))),
-//! };
+//! }.unwrap_or_else(|error| panic!("Error creating context: {}", error));
 //! assert_eq!(eval_int_with_context("f 5", &context), Ok(10));
 //! ```
 //!
