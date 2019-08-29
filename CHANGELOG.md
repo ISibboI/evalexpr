@@ -12,12 +12,24 @@
  * Overload `<`, `<=`, `>` and `>=` for strings using lexical ordering (Note: `==` and `!=` compare strings as expected)
  * Add `len`, `str::regex_matches`, `str::regex_replace`, `str::to_lowercase`, `str::to_uppercase`, `str::trim` functions for strings
  * Add a macro for more convenient definition of contexts including the direct definition of static contexts
+ * Add API for value decomposition
 
 ### Removed
 
+ * Function arguments are not decomposed anymore.
+   The function implementation will receive exactly one argument now.
+   This allows the function to be called on a tuple properly. 
+
 ### Changed
 
+ * Operators are an enum now instead of trait objects
+ * Update to Rust 2018
+
 ### Fixed
+
+ * Allow variable assignments in eval calls without context.
+   A `HashMapContext` is created automatically now.
+ * The error string for `ExpectedNumber` was wrong
 
 ### Deprecated
 
