@@ -62,23 +62,21 @@ And you can use **variables** and **functions** in expressions like this:
 
 ```rust
 use evalexpr::*;
-use evalexpr::error::expect_number;
 
 let context = context_map! {
     "five" => 5,
     "twelve" => 12,
-    "f" => Function::new(Some(1) /* argument amount */, Box::new(|arguments| {
-        if let Value::Int(int) = arguments[0] {
+    "f" => Function::new(Box::new(|argument| {
+        if let Ok(int) = argument.as_int() {
             Ok(Value::Int(int / 2))
-        } else if let Value::Float(float) = arguments[0] {
+        } else if let Ok(float) = argument.as_float() {
             Ok(Value::Float(float / 2.0))
         } else {
-            Err(EvalexprError::expected_number(arguments[0].clone()))
+            Err(EvalexprError::expected_number(argument.clone()))
         }
     })),
-    "avg" => Function::new(Some(2) /* argument amount */, Box::new(|arguments| {
-        expect_number(&arguments[0])?;
-        expect_number(&arguments[1])?;
+    "avg" => Function::new(Box::new(|argument| {
+        let arguments = argument.as_tuple()?;
 
         if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
             Ok(Value::Int((a + b) / 2))
@@ -342,7 +340,6 @@ The implementation expects a [serde `string`](https://serde.rs/data-model.html) 
 Example parsing with [ron format](docs.rs/ron):
 
 ```rust
-# #[cfg(feature = "serde_support")] {
 extern crate ron;
 use evalexpr::*;
 
@@ -356,9 +353,8 @@ match ron::de::from_str::<Node>(serialized_free) {
     Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from(25))),
     Err(error) => {
         () // Handle error
-    },
+    }
 }
-# }
 ```
 
 With `serde`, expressions can be integrated into arbitrarily complex data.
