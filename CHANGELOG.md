@@ -32,6 +32,7 @@
  * Allow variable assignments in eval calls without context.
    A `HashMapContext` is created automatically now.
  * The error string for `ExpectedNumber` was wrong
+ * Operators panicked when adding a number to a string
 
 ### Deprecated
 

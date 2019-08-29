@@ -165,7 +165,7 @@ impl Operator {
                     }
                 } else {
                     Ok(Value::Float(
-                        arguments[0].as_number().unwrap() + arguments[1].as_number().unwrap(),
+                        arguments[0].as_number()? + arguments[1].as_number()?,
                     ))
                 }
             },
@@ -186,7 +186,7 @@ impl Operator {
                     }
                 } else {
                     Ok(Value::Float(
-                        arguments[0].as_number().unwrap() - arguments[1].as_number().unwrap(),
+                        arguments[0].as_number()? - arguments[1].as_number()?,
                     ))
                 }
             },
@@ -202,7 +202,7 @@ impl Operator {
                         Err(EvalexprError::negation_error(arguments[0].clone()))
                     }
                 } else {
-                    Ok(Value::Float(-arguments[0].as_number().unwrap()))
+                    Ok(Value::Float(-arguments[0].as_number()?))
                 }
             },
             Mul => {
@@ -222,7 +222,7 @@ impl Operator {
                     }
                 } else {
                     Ok(Value::Float(
-                        arguments[0].as_number().unwrap() * arguments[1].as_number().unwrap(),
+                        arguments[0].as_number()? * arguments[1].as_number()?,
                     ))
                 }
             },
@@ -243,7 +243,7 @@ impl Operator {
                     }
                 } else {
                     Ok(Value::Float(
-                        arguments[0].as_number().unwrap() / arguments[1].as_number().unwrap(),
+                        arguments[0].as_number()? / arguments[1].as_number()?,
                     ))
                 }
             },
@@ -264,7 +264,7 @@ impl Operator {
                     }
                 } else {
                     Ok(Value::Float(
-                        arguments[0].as_number().unwrap() % arguments[1].as_number().unwrap(),
+                        arguments[0].as_number()? % arguments[1].as_number()?,
                     ))
                 }
             },
@@ -274,10 +274,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 Ok(Value::Float(
-                    arguments[0]
-                        .as_number()
-                        .unwrap()
-                        .powf(arguments[1].as_number().unwrap()),
+                    arguments[0].as_number()?.powf(arguments[1].as_number()?),
                 ))
             },
             Eq => {
@@ -316,7 +313,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 } else {
-                    if arguments[0].as_number().unwrap() > arguments[1].as_number().unwrap() {
+                    if arguments[0].as_number()? > arguments[1].as_number()? {
                         Ok(Value::Boolean(true))
                     } else {
                         Ok(Value::Boolean(false))
@@ -341,7 +338,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 } else {
-                    if arguments[0].as_number().unwrap() < arguments[1].as_number().unwrap() {
+                    if arguments[0].as_number()? < arguments[1].as_number()? {
                         Ok(Value::Boolean(true))
                     } else {
                         Ok(Value::Boolean(false))
@@ -366,7 +363,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 } else {
-                    if arguments[0].as_number().unwrap() >= arguments[1].as_number().unwrap() {
+                    if arguments[0].as_number()? >= arguments[1].as_number()? {
                         Ok(Value::Boolean(true))
                     } else {
                         Ok(Value::Boolean(false))
@@ -391,7 +388,7 @@ impl Operator {
                         Ok(Value::Boolean(false))
                     }
                 } else {
-                    if arguments[0].as_number().unwrap() <= arguments[1].as_number().unwrap() {
+                    if arguments[0].as_number()? <= arguments[1].as_number()? {
                         Ok(Value::Boolean(true))
                     } else {
                         Ok(Value::Boolean(false))

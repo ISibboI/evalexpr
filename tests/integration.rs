@@ -695,3 +695,20 @@ fn test_operator_assignments() {
         Ok(true)
     );
 }
+
+#[test]
+fn test_type_errors_in_binary_operators() {
+    // This error is bad. In future, maybe add a special error message for this kind of call.
+    assert_eq!(
+        eval("4 + \"abc\""),
+        Err(EvalexprError::expected_number(Value::from(
+            "abc".to_string()
+        )))
+    );
+    assert_eq!(
+        eval("\"abc\" + 4"),
+        Err(EvalexprError::expected_number(Value::from(
+            "abc".to_string()
+        )))
+    );
+}
