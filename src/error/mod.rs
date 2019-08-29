@@ -7,7 +7,7 @@
 
 use crate::{token::PartialToken, value::value_type::ValueType};
 
-use crate::value::Value;
+use crate::{operator::Operator, value::Value};
 
 mod display;
 
@@ -110,6 +110,14 @@ pub enum EvalexprError {
         expected: Vec<ValueType>,
         /// The actual value.
         actual: Value,
+    },
+
+    /// An operator is used with a wrong combination of types.
+    WrongTypeCombination {
+        /// The operator that whose evaluation caused the error.
+        operator: Operator,
+        /// The types that were used in the operator causing it to fail.
+        actual: Vec<ValueType>,
     },
 
     /// An opening brace without a matching closing brace was found.

@@ -62,6 +62,11 @@ impl fmt::Display for EvalexprError {
             TypeError { expected, actual } => {
                 write!(f, "Expected one of {:?}, but got {:?}.", expected, actual)
             },
+            WrongTypeCombination { operator, actual } => write!(
+                f,
+                "The operator {:?} was called with a wrong combination of types: {:?}",
+                operator, actual
+            ),
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
             UnmatchedPartialToken { first, second } => {
