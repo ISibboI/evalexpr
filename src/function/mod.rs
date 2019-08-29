@@ -1,7 +1,6 @@
 use std::fmt;
 
-use crate::error::EvalexprResult;
-use crate::value::Value;
+use crate::{error::EvalexprResult, value::Value};
 
 pub(crate) mod builtin;
 

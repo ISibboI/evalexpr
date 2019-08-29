@@ -369,13 +369,13 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-pub use crate::context::{Context, EmptyContext, HashMapContext};
-pub use crate::error::{EvalexprError, EvalexprResult};
-pub use crate::function::Function;
-pub use crate::interface::*;
-pub use crate::tree::Node;
-pub use crate::value::{
-    value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE,
+pub use crate::{
+    context::{Context, EmptyContext, HashMapContext},
+    error::{EvalexprError, EvalexprResult},
+    function::Function,
+    interface::*,
+    tree::Node,
+    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE},
 };
 
 mod context;

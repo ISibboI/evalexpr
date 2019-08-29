@@ -1,11 +1,10 @@
 #[cfg(feature = "regex_support")]
 use regex::Regex;
 
-
-use crate::value::{FloatType, IntType};
-use crate::EvalexprError;
-use crate::Function;
-use crate::Value;
+use crate::{
+    value::{FloatType, IntType},
+    EvalexprError, Function, Value,
+};
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
@@ -82,7 +81,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             let re_str = arguments[1].as_string()?;
             let repl = arguments[2].as_string()?;
             match Regex::new(&re_str) {
-                Ok(re) => Ok(Value::String(re.replace_all(&subject, repl.as_str()).to_string())),
+                Ok(re) => Ok(Value::String(
+                    re.replace_all(&subject, repl.as_str()).to_string(),
+                )),
                 Err(err) => Err(EvalexprError::invalid_regex(
                     re_str.to_string(),
                     format!("{}", err),

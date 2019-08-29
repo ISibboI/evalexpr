@@ -1,15 +1,7 @@
-use crate::{token, HashMapContext};
-use crate::tree;
-use crate::value::TupleType;
-use crate::Context;
-use crate::EmptyType;
-use crate::EvalexprError;
-use crate::EvalexprResult;
-use crate::FloatType;
-use crate::IntType;
-use crate::Node;
-use crate::Value;
-use crate::EMPTY_VALUE;
+use crate::{
+    token, tree, value::TupleType, Context, EmptyType, EvalexprError, EvalexprResult, FloatType,
+    HashMapContext, IntType, Node, Value, EMPTY_VALUE,
+};
 
 /// Evaluate the given expression string.
 ///
@@ -224,7 +216,10 @@ pub fn eval_empty_with_context(string: &str, context: &dyn Context) -> EvalexprR
 /// Evaluate the given expression string into a string with the given mutable context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_string_with_context_mut(string: &str, context: &mut dyn Context) -> EvalexprResult<String> {
+pub fn eval_string_with_context_mut(
+    string: &str,
+    context: &mut dyn Context,
+) -> EvalexprResult<String> {
     match eval_with_context_mut(string, context) {
         Ok(Value::String(string)) => Ok(string),
         Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -235,7 +230,10 @@ pub fn eval_string_with_context_mut(string: &str, context: &mut dyn Context) -> 
 /// Evaluate the given expression string into an integer with the given mutable context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int_with_context_mut(string: &str, context: &mut dyn Context) -> EvalexprResult<IntType> {
+pub fn eval_int_with_context_mut(
+    string: &str,
+    context: &mut dyn Context,
+) -> EvalexprResult<IntType> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -276,7 +274,10 @@ pub fn eval_number_with_context_mut(
 /// Evaluate the given expression string into a boolean with the given mutable context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_boolean_with_context_mut(string: &str, context: &mut dyn Context) -> EvalexprResult<bool> {
+pub fn eval_boolean_with_context_mut(
+    string: &str,
+    context: &mut dyn Context,
+) -> EvalexprResult<bool> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Boolean(boolean)) => Ok(boolean),
         Ok(value) => Err(EvalexprError::expected_boolean(value)),

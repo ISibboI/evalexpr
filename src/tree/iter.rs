@@ -1,5 +1,5 @@
-use std::slice::Iter;
 use crate::Node;
+use std::slice::Iter;
 
 /// An iterator that traverses an operator tree in pre-order.
 pub struct NodeIter<'a> {

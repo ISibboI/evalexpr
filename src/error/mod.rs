@@ -5,8 +5,10 @@
 //! The module also contains some helper functions starting with `expect_` that check for a condition and return `Err(_)` if the condition is not fulfilled.
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
-use crate::token::PartialToken;
-use crate::value::{value_type::ValueType, TupleType};
+use crate::{
+    token::PartialToken,
+    value::{value_type::ValueType, TupleType},
+};
 
 use crate::value::Value;
 
@@ -244,7 +246,10 @@ impl EvalexprError {
 
     /// Constructs `Error::ExpectedFixedLenTuple{expected_len, actual}`.
     pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
-        EvalexprError::ExpectedFixedLenTuple { expected_len, actual }
+        EvalexprError::ExpectedFixedLenTuple {
+            expected_len,
+            actual,
+        }
     }
 
     /// Constructs `Error::ExpectedEmpty{actual}`.

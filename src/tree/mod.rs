@@ -1,9 +1,8 @@
-use crate::token::Token;
-use crate::value::{TupleType, EMPTY_VALUE};
-use crate::EmptyContext;
-use crate::EmptyType;
-use crate::FloatType;
-use crate::IntType;
+use crate::{
+    token::Token,
+    value::{TupleType, EMPTY_VALUE},
+    EmptyContext, EmptyType, FloatType, IntType,
+};
 
 use crate::{
     context::Context,
@@ -228,7 +227,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a string with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string_with_context_mut(&self, context: &mut dyn Context) -> EvalexprResult<String> {
+    pub fn eval_string_with_context_mut(
+        &self,
+        context: &mut dyn Context,
+    ) -> EvalexprResult<String> {
         match self.eval_with_context_mut(context) {
             Ok(Value::String(string)) => Ok(string),
             Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -239,7 +241,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_context_mut(&self, context: &mut dyn Context) -> EvalexprResult<FloatType> {
+    pub fn eval_float_with_context_mut(
+        &self,
+        context: &mut dyn Context,
+    ) -> EvalexprResult<FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -262,7 +267,10 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number_with_context_mut(&self, context: &mut dyn Context) -> EvalexprResult<FloatType> {
+    pub fn eval_number_with_context_mut(
+        &self,
+        context: &mut dyn Context,
+    ) -> EvalexprResult<FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
@@ -285,7 +293,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_context_mut(&self, context: &mut dyn Context) -> EvalexprResult<TupleType> {
+    pub fn eval_tuple_with_context_mut(
+        &self,
+        context: &mut dyn Context,
+    ) -> EvalexprResult<TupleType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),
@@ -296,7 +307,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an empty value with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty_with_context_mut(&self, context: &mut dyn Context) -> EvalexprResult<EmptyType> {
+    pub fn eval_empty_with_context_mut(
+        &self,
+        context: &mut dyn Context,
+    ) -> EvalexprResult<EmptyType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Empty) => Ok(EMPTY_VALUE),
             Ok(value) => Err(EvalexprError::expected_empty(value)),
