@@ -698,17 +698,20 @@ fn test_operator_assignments() {
 
 #[test]
 fn test_type_errors_in_binary_operators() {
-    // This error is bad. In future, maybe add a special error message for this kind of call.
+    // Only addition supports incompatible types, all others work only on numbers or only on booleans.
+    // So only addition requires the more fancy error message.
     assert_eq!(
         eval("4 + \"abc\""),
-        Err(EvalexprError::expected_number(Value::from(
-            "abc".to_string()
-        )))
+        Err(EvalexprError::wrong_type_combination(
+            Operator::Add,
+            vec![ValueType::Int, ValueType::String]
+        ))
     );
     assert_eq!(
         eval("\"abc\" + 4"),
-        Err(EvalexprError::expected_number(Value::from(
-            "abc".to_string()
-        )))
+        Err(EvalexprError::wrong_type_combination(
+            Operator::Add,
+            vec![ValueType::String, ValueType::Int]
+        ))
     );
 }

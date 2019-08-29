@@ -214,6 +214,11 @@ impl EvalexprError {
         EvalexprError::TypeError { actual, expected }
     }
 
+    /// Constructs `EvalexprError::WrongTypeCombination{operator, actual}`.
+    pub fn wrong_type_combination(operator: Operator, actual: Vec<ValueType>) -> Self {
+        EvalexprError::WrongTypeCombination { operator, actual }
+    }
+
     /// Constructs `EvalexprError::ExpectedString{actual}`.
     pub fn expected_string(actual: Value) -> Self {
         EvalexprError::ExpectedString { actual }

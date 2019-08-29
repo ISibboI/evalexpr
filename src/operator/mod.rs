@@ -1,11 +1,12 @@
 use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value};
+use std::borrow::Borrow;
 
 mod display;
 
 /// An enum that represents operators in the operator tree.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Operator {
     /// A root node in the operator tree.
     /// The whole expression is stored under a root node, as well as each subexpression surrounded by parentheses.
@@ -205,9 +206,13 @@ impl Operator {
                             arguments[1].clone(),
                         ))
                     }
+                } else if let (Ok(a), Ok(b)) = (arguments[0].as_number(), arguments[1].as_number())
+                {
+                    Ok(Value::Float(a + b))
                 } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? + arguments[1].as_number()?,
+                    Err(EvalexprError::wrong_type_combination(
+                        self.clone(),
+                        vec![arguments[0].borrow().into(), arguments[1].borrow().into()],
                     ))
                 }
             },
