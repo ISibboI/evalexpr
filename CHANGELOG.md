@@ -13,6 +13,7 @@
  * Add `len`, `str::regex_matches`, `str::regex_replace`, `str::to_lowercase`, `str::to_uppercase`, `str::trim` functions for strings
  * Add a macro for more convenient definition of contexts including the direct definition of static contexts
  * Add API for value decomposition
+ * Allow using context operations in `eval` calls without context
 
 ### Removed
 
