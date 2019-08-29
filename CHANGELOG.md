@@ -14,6 +14,7 @@
  * Add a macro for more convenient definition of contexts including the direct definition of static contexts
  * Add API for value decomposition
  * Allow using context operations in `eval` calls without context
+ * Operator assignment operators for each binary operation (`+=`, `-=`, ...)
 
 ### Removed
 

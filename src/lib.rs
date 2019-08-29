@@ -43,6 +43,8 @@
 //! assert_eq!(context.get_value("a"), Some(&Value::from(5)));
 //! // And use the value in another expression like this
 //! assert_eq!(eval_int_with_context_mut("a = a + 2; a", &mut context), Ok(7));
+//! // It is also possible to safe a bit of typing by using an operator-assignment operator
+//! assert_eq!(eval_int_with_context_mut("a += 2; a", &mut context), Ok(9));
 //! ```
 //!
 //! And you can use **variables** and **functions** in expressions like this:
@@ -131,6 +133,14 @@
 //! | && | 75 | Logical and |
 //! | &#124;&#124; | 70 | Logical or |
 //! | = | 50 | Assignment |
+//! | += | 50 | Sum-Assignment or String-Concatenation-Assignment |
+//! | -= | 50 | Difference-Assignment |
+//! | *= | 50 | Product-Assignment |
+//! | /= | 50 | Division-Assignment |
+//! | %= | 50 | Modulo-Assignment |
+//! | ^= | 50 | Exponentiation-Assignment |
+//! | &&= | 50 | Logical-And-Assignment |
+//! | &#124;&#124;= | 50 | Logical-Or-Assignment |
 //! | , | 40 | Aggregation |
 //! | ; | 0 | Expression Chaining |
 //!
@@ -168,6 +178,18 @@
 //! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context), Err(EvalexprError::expected_int(5.0.into())));
 //! assert_eq!(eval_int_with_context("a", &context), Ok(5));
 //! assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
+//! ```
+//!
+//! For each binary operator, there exists and equivalent operator-assignment operator.
+//! Here are some examples:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval_int("a = 2; a *= 2; a += 2; a"), Ok(6));
+//! assert_eq!(eval_float("a = 2.2; a /= 2.0 / 4 + 1; a"), Ok(2.2 / (2.0 / 4.0 + 1.0)));
+//! assert_eq!(eval_string("a = \"abc\"; a += \"def\"; a"), Ok("abcdef".to_string()));
+//! assert_eq!(eval_boolean("a = true; a &&= false; a"), Ok(false));
 //! ```
 //!
 //! #### The Expression Chaining Operator
