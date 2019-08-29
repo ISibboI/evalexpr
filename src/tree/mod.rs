@@ -1,8 +1,4 @@
-use crate::{
-    token::Token,
-    value::{TupleType, EMPTY_VALUE},
-    EmptyContext, EmptyType, FloatType, IntType,
-};
+use crate::{token::Token, value::{TupleType, EMPTY_VALUE}, EmptyType, FloatType, IntType, HashMapContext};
 
 use crate::{
     context::Context,
@@ -138,11 +134,11 @@ impl Node {
         self.operator().eval_mut(&arguments, context)
     }
 
-    /// Evaluates the operator tree rooted at this node with an empty context.
+    /// Evaluates the operator tree rooted at this node.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval(&self) -> EvalexprResult<Value> {
-        self.eval_with_context(&EmptyContext)
+        self.eval_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a string with an the given context.
@@ -318,54 +314,54 @@ impl Node {
         }
     }
 
-    /// Evaluates the operator tree rooted at this node into a string with an empty context.
+    /// Evaluates the operator tree rooted at this node into a string.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_string(&self) -> EvalexprResult<String> {
-        self.eval_string_with_context(&EmptyContext)
+        self.eval_string_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into a float with an empty context.
+    /// Evaluates the operator tree rooted at this node into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_float(&self) -> EvalexprResult<FloatType> {
-        self.eval_float_with_context(&EmptyContext)
+        self.eval_float_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into an integer with an empty context.
+    /// Evaluates the operator tree rooted at this node into an integer.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_int(&self) -> EvalexprResult<IntType> {
-        self.eval_int_with_context(&EmptyContext)
+        self.eval_int_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into a float with an empty context.
+    /// Evaluates the operator tree rooted at this node into a float.
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_number(&self) -> EvalexprResult<FloatType> {
-        self.eval_number_with_context(&EmptyContext)
+        self.eval_number_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into a boolean with an empty context.
+    /// Evaluates the operator tree rooted at this node into a boolean.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_boolean(&self) -> EvalexprResult<bool> {
-        self.eval_boolean_with_context(&EmptyContext)
+        self.eval_boolean_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into a tuple with an empty context.
+    /// Evaluates the operator tree rooted at this node into a tuple.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> EvalexprResult<TupleType> {
-        self.eval_tuple_with_context(&EmptyContext)
+        self.eval_tuple_with_context_mut(&mut HashMapContext::new())
     }
 
-    /// Evaluates the operator tree rooted at this node into an empty value with an empty context.
+    /// Evaluates the operator tree rooted at this node into an empty value.
     ///
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_empty(&self) -> EvalexprResult<EmptyType> {
-        self.eval_empty_with_context(&EmptyContext)
+        self.eval_empty_with_context_mut(&mut HashMapContext::new())
     }
 
     fn children(&self) -> &[Node] {
