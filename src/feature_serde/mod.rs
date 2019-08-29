@@ -1,7 +1,7 @@
-use interface::build_operator_tree;
+use crate::interface::build_operator_tree;
 use serde::{de, Deserialize, Deserializer};
 use std::fmt;
-use Node;
+use crate::Node;
 
 impl<'de> Deserialize<'de> for Node {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
