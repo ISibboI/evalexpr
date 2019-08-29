@@ -209,47 +209,47 @@ impl EvalexprError {
         EvalexprError::WrongFunctionArgumentAmount { actual, expected }
     }
 
-    /// Constructs `Error::TypeError{actual, expected}`.
+    /// Constructs `EvalexprError::TypeError{actual, expected}`.
     pub fn type_error(actual: Value, expected: Vec<ValueType>) -> Self {
         EvalexprError::TypeError { actual, expected }
     }
 
-    /// Constructs `Error::ExpectedString{actual}`.
+    /// Constructs `EvalexprError::ExpectedString{actual}`.
     pub fn expected_string(actual: Value) -> Self {
         EvalexprError::ExpectedString { actual }
     }
 
-    /// Constructs `Error::ExpectedInt{actual}`.
+    /// Constructs `EvalexprError::ExpectedInt{actual}`.
     pub fn expected_int(actual: Value) -> Self {
         EvalexprError::ExpectedInt { actual }
     }
 
-    /// Constructs `Error::ExpectedFloat{actual}`.
+    /// Constructs `EvalexprError::ExpectedFloat{actual}`.
     pub fn expected_float(actual: Value) -> Self {
         EvalexprError::ExpectedFloat { actual }
     }
 
-    /// Constructs `Error::ExpectedNumber{actual}`.
+    /// Constructs `EvalexprError::ExpectedNumber{actual}`.
     pub fn expected_number(actual: Value) -> Self {
         EvalexprError::ExpectedNumber { actual }
     }
 
-    /// Constructs `Error::ExpectedNumberOrString{actual}`.
+    /// Constructs `EvalexprError::ExpectedNumberOrString{actual}`.
     pub fn expected_number_or_string(actual: Value) -> Self {
         EvalexprError::ExpectedNumberOrString { actual }
     }
 
-    /// Constructs `Error::ExpectedBoolean{actual}`.
+    /// Constructs `EvalexprError::ExpectedBoolean{actual}`.
     pub fn expected_boolean(actual: Value) -> Self {
         EvalexprError::ExpectedBoolean { actual }
     }
 
-    /// Constructs `Error::ExpectedTuple{actual}`.
+    /// Constructs `EvalexprError::ExpectedTuple{actual}`.
     pub fn expected_tuple(actual: Value) -> Self {
         EvalexprError::ExpectedTuple { actual }
     }
 
-    /// Constructs `Error::ExpectedFixedLenTuple{expected_len, actual}`.
+    /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
     pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
         EvalexprError::ExpectedFixedLenTuple {
             expected_len,
@@ -257,7 +257,7 @@ impl EvalexprError {
         }
     }
 
-    /// Constructs `Error::ExpectedEmpty{actual}`.
+    /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_empty(actual: Value) -> Self {
         EvalexprError::ExpectedEmpty { actual }
     }
