@@ -1,7 +1,7 @@
 #[cfg(feature = "regex_support")]
 use regex::Regex;
 
-use crate::error::*;
+
 use crate::value::{FloatType, IntType};
 use crate::EvalexprError;
 use crate::Function;
