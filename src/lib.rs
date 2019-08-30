@@ -151,6 +151,11 @@
 //! | - | 110 | Negation |
 //! | ! | 110 | Logical not |
 //!
+//! Operators that take numbers as arguments can either take integers or floating point numbers.
+//! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
+//! Otherwise, the result is an integer.
+//! An exception to this is the exponentiation operator that always returns a floating point number.
+//!
 //! #### The Aggregation Operator
 //!
 //! The aggregation operator aggregates a set of values into a tuple.
@@ -308,8 +313,8 @@
 //! | `min` | >= 1 | Numeric | Returns the minimum of the arguments |
 //! | `max` | >= 1 | Numeric | Returns the maximum of the arguments |
 //! | `len` | 1 | String/Tuple | Returns the character length of a string, or the amount of elements in a tuple (not recursively) |
-//! | `str::regex_matches` | 2 | String, String | Returns true if the first argument matches the regex in the second argument |
-//! | `str::regex_replace` | 3 | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument |
+//! | `str::regex_matches` | 2 | String, String | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
+//! | `str::regex_replace` | 3 | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
 //! | `str::to_lowercase` | 1 | String | Returns the lower-case version of the string |
 //! | `str::to_uppercase` | 1 | String | Returns the upper-case version of the string |
 //! | `str::trim` | 1 | String | Strips whitespace from the start and the end of the string |
@@ -362,53 +367,22 @@
 //! | `Value::from(4.4).as_float()` | `Ok(4.4)` |
 //! | `Value::from(true).as_int()` | `Err(Error::ExpectedInt {actual: Value::Boolean(true)})` |
 //!
-//! Operators that take numbers as arguments can either take integers or floating point numbers.
-//! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
-//! Otherwise, the result is an integer.
-//! An exception to this is the exponentiation operator that always returns a floating point number.
-//!
 //! Values have a precedence of 200.
 //!
 //! ### Variables
 //!
 //! This crate allows to compile parameterizable formulas by using variables.
 //! A variable is a literal in the formula, that does not contain whitespace or can be parsed as value.
-//! The user needs to provide bindings to the variables for evaluation.
-//! This is done with the `Context` trait.
-//! Two structs implementing this trait are predefined.
-//! There is `EmptyContext`, that returns `None` for each request, and `HashMapContext`, that stores mappings from literals to variables in a hash map.
+//! For working with variables, a [context](#contexts) is required.
+//! It stores the mappings from variables to their values.
 //!
 //! Variables do not have fixed types in the expression itself, but are typed by the context.
-//! The `Context` trait contains a function that takes a string literal and returns a `Value` enum.
-//! The variant of this enum decides the type on evaluation.
+//! Once a variable is assigned a value of a specific type, it cannot be assigned a value of another type.
+//! This might change in the future and can be changed by using a type-unsafe context (not provided by this crate as of now).
 //!
-//! Variables have a precedence of 200.
+//! Here are some examples and counter-examples on expressions that are interpreted as variables:
 //!
-//! ### User-Defined Functions
-//!
-//! This crate also allows to define arbitrary functions to be used in parsed expressions.
-//! A function is defined as a `Function` instance.
-//! It contains two properties, the `argument_amount` and the `function`.
-//! The `function` is a boxed `Fn(&[Value]) -> EvalexprResult<Value, Error>`.
-//! The `argument_amount` determines the length of the slice that is passed to `function` if it is `Some(_)`, otherwise the function is defined to take an arbitrary amount of arguments.
-//! It is verified on execution by the crate and does not need to be verified by the `function`.
-//!
-//! Functions with no arguments are not allowed.
-//! Use variables instead.
-//!
-//! Be aware that functions need to verify the types of values that are passed to them.
-//! The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
-//! Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.
-//!
-//! Functions are identified by literals, like variables as well.
-//! A literal identifies a function, if it is followed by an opening brace `(`, another literal, or a value.
-//!
-//! Same as variables, function bindings are provided by the user via a `Context`.
-//! Functions have a precedence of 190.
-//!
-//! ### Examplary variables and functions in expressions:
-//!
-//! | Expression | Valid? | Explanation |
+//! | Expression | Variable? | Explanation |
 //! |------------|--------|-------------|
 //! | `a` | yes | |
 //! | `abc` | yes | |
@@ -417,6 +391,38 @@
 //! | `123` | no | Expression is interpreted as `Value::Int` |
 //! | `true` | no | Expression is interpreted as `Value::Bool` |
 //! | `.34` | no | Expression is interpreted as `Value::Float` |
+//!
+//! Variables have a precedence of 200.
+//!
+//! ### User-Defined Functions
+//!
+//! This crate also allows to define arbitrary functions to be used in parsed expressions.
+//! A function is defined as a `Function` instance, wrapping a boxed `Fn(&[Value]) -> EvalexprResult<Value, Error>`.
+//! The definition needs to be included in the [`Context`](#contexts) that is used for evaluation.
+//! As of now, functions cannot be defined within the expression, but that might change in the future.
+//!
+//! The function gets passed what ever value is directly behind it, be it a tuple or a single values.
+//! If there is no value behind a function, it is interpreted as a variable instead.
+//! More specifically, a function needs to be followed by either an opening brace `(`, another literal, or a value.
+//! While not including special support for multi-valued functions, they can be realized by requiring a single tuple argument.
+//!
+//! Be aware that functions need to verify the types of values that are passed to them.
+//! The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
+//! Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.
+//!
+//! Here are some examples and counter-examples on expressions that are interpreted as function calls:
+//!
+//! | Expression | Variable? | Explanation |
+//! |------------|--------|-------------|
+//! | `a v` | yes | |
+//! | `x 5.5` | yes | |
+//! | `a (3, true)` | yes | |
+//! | `a b 4` | yes | Call `a` with the result of calling `b` with `4` |
+//! | `5 b` | no | Error, value cannot be followed by a literal |
+//! | `12 3` | no | Error, value cannot be followed by a value |
+//! | `a 5 6` | no | Error, function call cannot be followed by a value |
+//!
+//! Functions have a precedence of 190.
 //!
 //! ### [Serde](https://serde.rs)
 //!
