@@ -16,6 +16,12 @@
 
 ### Contributors
 
+## [5.0.2](https://github.com/ISibboI/evalexpr/compare/5.0.1...5.0.2) - 2019-08-30
+
+### Changed
+
+ * Removed target.bench.dev-dependencies completely, as they can be just listed under the normal dev-dependencies
+
 ## [5.0.1](https://github.com/ISibboI/evalexpr/compare/5.0.0...5.0.1) - 2019-08-30
 
 ### Fixed
