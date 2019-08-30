@@ -63,6 +63,7 @@ Also, we have benchmarks now to observe performance changes in future releases.
 
  * Operators are an enum now instead of trait objects
  * Update to Rust 2018
+ * Updated dependencies
 
 ### Fixed
 
