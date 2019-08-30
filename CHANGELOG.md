@@ -24,7 +24,7 @@
 
 ### Contributors
 
- * [silentgoat](https://github.com/slientgoat)
+ * [slientgoat](https://github.com/slientgoat)
 
 ## [5.0.2](https://github.com/ISibboI/evalexpr/compare/5.0.1...5.0.2) - 2019-08-30
 
