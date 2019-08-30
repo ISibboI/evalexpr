@@ -6,6 +6,41 @@
 
 ### Added
 
+### Removed 
+
+### Changed
+
+### Fixed
+
+### Deprecated
+
+### Contributors
+
+## [5.0.0](https://github.com/ISibboI/evalexpr/compare/4.1.0...5.0.0) - *'Sanity'* - 2019-08-30
+
+### Notes
+
+Finally, 'Sanity' has been released, including a huge bunch of new features.
+Notably, and providing a reason for the name of this release, function call and tuple semantics have improved a lot.
+Functions now always take exactly one argument, but this can then be a tuple.
+It is now possible to construct tuples of tuples, such that mode complex values can be constructed.
+As of now there is no way to deconstruct them though.
+
+A lot has been done on string processing, special thanks for that goes to [bittrance](https://github.com/bittrance).
+Specifically, under the feature flag `regex_support` two regex functions for strings are hiding now.
+Also, the operators `+` and comparison operators have been fitted to support strings.
+
+Thanks to [lovasoa](https://github.com/lovasoa), we now have a nice macro for context creation.
+
+Thanks to [Atul9](https://github.com/Atul9), the crate is now Rust 2018 compliant.
+
+Thanks to [mestachs'](https://github.com/mestachs) request, we now have functions to iterate over identifiers within an expression.
+
+Internally, the structure of the operator tree changed from being `&dyn`-based to being `enum`-based.
+Also, we have benchmarks now to observe performance changes in future releases.  
+
+### Added
+
  * Iterator over all identifiers within an expression, including duplicates
  * Iterators over only variable or only function identifiers within an expression, including duplicates
  * Overload the `+` operator to concatenate strings
@@ -35,8 +70,7 @@
    A `HashMapContext` is created automatically now.
  * The error string for `ExpectedNumber` was wrong
  * Operators panicked when adding a number to a string
-
-### Deprecated
+ * Some documentation was not updated for the 4.x releases
 
 ### Contributors
 
@@ -44,6 +78,7 @@ My warmhearted thanks goes to
 
  * [bittrance](https://github.com/bittrance)
  * [lovasoa](https://github.com/lovasoa)
+ * [Atul9](https://github.com/Atul9)
  * [mestachs](https://github.com/mestachs)
 
 ## [4.1.0](https://github.com/ISibboI/evalexpr/compare/4.0.0...4.1.0) - 2019-03-31
