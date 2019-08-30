@@ -16,6 +16,12 @@
 
 ### Contributors
 
+## [5.0.1](https://github.com/ISibboI/evalexpr/compare/5.0.0...5.0.1) - 2019-08-30
+
+### Fixed
+
+ * Bench dependencies are now dev-dependencies so they are not listed on crates.io as normal dependencies anymore
+
 ## [5.0.0](https://github.com/ISibboI/evalexpr/compare/4.1.0...5.0.0) - *'Sanity'* - 2019-08-30
 
 ### Notes
