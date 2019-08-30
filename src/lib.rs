@@ -38,7 +38,8 @@
 //! // Assign 5 to a like this
 //! assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
 //! // The HashMapContext is type safe, so this will fail now
-//! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context), Err(EvalexprError::expected_int(Value::from(5.0))));
+//! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
+//!            Err(EvalexprError::expected_int(Value::from(5.0))));
 //! // We can check which value the context stores for a like this
 //! assert_eq!(context.get_value("a"), Some(&Value::from(5)));
 //! // And use the value in another expression like this
@@ -166,7 +167,8 @@
 //! ```rust
 //! use evalexpr::*;
 //!
-//! assert_eq!(eval("1, \"b\", 3"), Ok(Value::from(vec![Value::from(1), Value::from("b"), Value::from(3)])));
+//! assert_eq!(eval("1, \"b\", 3"),
+//!            Ok(Value::from(vec![Value::from(1), Value::from("b"), Value::from(3)])));
 //! ```
 //!
 //! To create nested tuples, use parentheses:
@@ -196,7 +198,8 @@
 //! let mut context = HashMapContext::new();
 //! assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
 //! assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
-//! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context), Err(EvalexprError::expected_int(5.0.into())));
+//! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
+//!            Err(EvalexprError::expected_int(5.0.into())));
 //! assert_eq!(eval_int_with_context("a", &context), Ok(5));
 //! assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
 //! ```
@@ -228,7 +231,8 @@
 //! assert_eq!(eval("1;2;3;4"), Ok(4.into()));
 //!
 //! // Initialization of variables via script.
-//! assert_eq!(eval_empty_with_context_mut("hp = 1; max_hp = 5; heal_amount = 3;", &mut context), Ok(EMPTY_VALUE));
+//! assert_eq!(eval_empty_with_context_mut("hp = 1; max_hp = 5; heal_amount = 3;", &mut context),
+//!            Ok(EMPTY_VALUE));
 //! // Precompile healing script.
 //! let healing_script = build_operator_tree("hp = min(hp + heal_amount, max_hp); hp").unwrap(); // Do proper error handling here
 //! // Execute precompiled healing script.
@@ -257,7 +261,8 @@
 //! // Assignments require mutable contexts
 //! assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotManipulable));
 //! // The HashMapContext is type safe
-//! assert_eq!(eval_with_context_mut("a = 5.5", &mut context), Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
+//! assert_eq!(eval_with_context_mut("a = 5.5", &mut context),
+//!            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
 //! // Reading a variable does not require a mutable context
 //! assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
 //!
