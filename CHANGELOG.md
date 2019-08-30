@@ -16,6 +16,16 @@
 
 ### Contributors
 
+## [5.0.3](https://github.com/ISibboI/evalexpr/compare/5.0.2...5.0.3) - 2019-08-30
+
+### Fixed
+
+ * The `!=` operator was wrongfully parsed as Token::Eq
+
+### Contributors
+
+ * [silentgoat](https://github.com/slientgoat)
+
 ## [5.0.2](https://github.com/ISibboI/evalexpr/compare/5.0.1...5.0.2) - 2019-08-30
 
 ### Changed
