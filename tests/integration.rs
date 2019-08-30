@@ -560,6 +560,10 @@ fn test_strings() {
     assert_eq!(eval("\"a\" + \"b\""), Ok(Value::from("ab")));
     assert_eq!(eval("\"a\" > \"b\""), Ok(Value::from(false)));
     assert_eq!(eval("\"a\" < \"b\""), Ok(Value::from(true)));
+    assert_eq!(eval("\"xa\" > \"xb\""), Ok(Value::from(false)));
+    assert_eq!(eval("\"xa\" < \"xb\""), Ok(Value::from(true)));
+    assert_eq!(eval("\"{}\" != \"{}\""), Ok(Value::from(false)));
+    assert_eq!(eval("\"{}\" == \"{}\""), Ok(Value::from(true)));
 }
 
 #[test]
