@@ -153,14 +153,30 @@
 //!
 //! #### The Aggregation Operator
 //!
-//! The aggregation operator aggregates two values into a tuple.
-//! If one of the values is a tuple already, the resulting tuple will be flattened.
+//! The aggregation operator aggregates a set of values into a tuple.
+//! A tuple can contain arbitrary values, it is not restricted to a single type.
+//! The operator is n-ary, so it supports creating tuples longer than length two.
 //! Example:
 //!
 //! ```rust
 //! use evalexpr::*;
 //!
-//! assert_eq!(eval("1, 2, 3"), Ok(Value::from(vec![Value::from(1), Value::from(2), Value::from(3)])));
+//! assert_eq!(eval("1, \"b\", 3"), Ok(Value::from(vec![Value::from(1), Value::from("b"), Value::from(3)])));
+//! ```
+//!
+//! To create nested tuples, use parentheses:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("1, 2, (true, \"b\")"), Ok(Value::from(vec![
+//!     Value::from(1),
+//!     Value::from(2),
+//!     Value::from(vec![
+//!         Value::from(true),
+//!         Value::from("b")
+//!     ])
+//! ])));
 //! ```
 //!
 //! #### The Assignment Operator
