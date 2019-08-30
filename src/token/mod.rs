@@ -346,7 +346,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     },
                 },
                 PartialToken::ExclamationMark => match second {
-                    Some(PartialToken::Eq) => Some(Token::Eq),
+                    Some(PartialToken::Eq) => Some(Token::Neq),
                     _ => {
                         cutoff = 1;
                         Some(Token::Not)
