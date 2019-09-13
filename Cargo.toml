@@ -12,6 +12,9 @@ readme = "README.md"
 license = "MIT"
 edition = "2018"
 
+[badges]
+maintenance = { status = "actively-maintained" }
+
 [lib]
 name = "evalexpr"
 path = "src/lib.rs"
