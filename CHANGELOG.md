@@ -22,6 +22,7 @@
 
  * is-it-maintained badges had wrong repository definitions
  * maintenance status was given wrongly
+ * move maintenance status to top
 
 ## [5.0.4](https://github.com/ISibboI/evalexpr/compare/5.0.3...5.0.4) - 2019-09-13
 

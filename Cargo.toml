@@ -13,9 +13,9 @@ license = "MIT"
 edition = "2018"
 
 [badges]
+maintenance = { status = "actively-developed" }
 is-it-maintained-issue-resolution = { repository = "ISibboI/evalexpr" }
 is-it-maintained-open-issues = { repository = "ISibboI/evalexpr" }
-maintenance = { status = "actively-developed" }
 
 [lib]
 name = "evalexpr"
