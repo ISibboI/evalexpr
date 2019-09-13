@@ -13,7 +13,7 @@ license = "MIT"
 edition = "2018"
 
 [badges]
-is-it-maintained-issue-resolution = { repository = "hISibboI/evalexpr" }
+is-it-maintained-issue-resolution = { repository = "ISibboI/evalexpr" }
 is-it-maintained-open-issues = { repository = "ISibboI/evalexpr" }
 maintenance = { status = "actively-maintained" }
 
