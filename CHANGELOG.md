@@ -16,6 +16,19 @@
 
 ### Contributors
 
+## [5.0.5](https://github.com/ISibboI/evalexpr/compare/5.0.4...5.0.5) - 2019-09-13
+
+### Fixed
+
+ * is-it-maintained badges had wrong repository definitions
+
+## [5.0.4](https://github.com/ISibboI/evalexpr/compare/5.0.3...5.0.4) - 2019-09-13
+
+### Added
+
+ * maintenance badge
+ * is-it-maintained badges
+
 ## [5.0.3](https://github.com/ISibboI/evalexpr/compare/5.0.2...5.0.3) - 2019-08-30
 
 ### Fixed
