@@ -19,22 +19,17 @@ impl<'a> Iterator for NodeIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let mut pop_stack = false;
             let mut result = None;
 
             if let Some(last) = self.stack.last_mut() {
                 if let Some(next) = last.next() {
                     result = Some(next);
                 } else {
-                    pop_stack = true;
+                    // Can not fail because we just borrowed last.
+                    self.stack.pop().unwrap();
                 }
             } else {
                 return None;
-            }
-
-            if pop_stack {
-                // Can not fail because we borrowed last before.
-                self.stack.pop().unwrap();
             }
 
             if let Some(result) = result {

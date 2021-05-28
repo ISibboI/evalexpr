@@ -389,13 +389,17 @@ impl Node {
             if self.operator().is_leaf() {
                 Err(EvalexprError::AppendedToLeafNode)
             } else if self.has_enough_children() {
-                if self.children.last().unwrap().operator().precedence()
+                // Unwrap cannot fail because of has_enough_children
+                let last_child_operator = self.children.last().unwrap().operator();
+
+                if last_child_operator.precedence()
                     < node.operator().precedence()
                     // Right-to-left chaining
-                    || (self.children.last().unwrap().operator().precedence()
-                    == node.operator().precedence() && !self.children.last().unwrap().operator().is_left_to_right() && !node.operator().is_left_to_right())
+                    || (last_child_operator.precedence()
+                    == node.operator().precedence() && !last_child_operator.is_left_to_right() && !node.operator().is_left_to_right())
                 {
                     // println!("Recursing into {:?}", self.children.last().unwrap().operator());
+                    // Unwrap cannot fail because of has_enough_children
                     self.children
                         .last_mut()
                         .unwrap()
@@ -406,6 +410,7 @@ impl Node {
                         return Err(EvalexprError::AppendedToLeafNode);
                     }
 
+                    // Unwrap cannot fail because of has_enough_children
                     let last_child = self.children.pop().unwrap();
                     self.children.push(node);
                     let node = self.children.last_mut().unwrap();
