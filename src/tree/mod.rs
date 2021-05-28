@@ -32,7 +32,7 @@ mod iter;
 /// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
 /// ```
 ///
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Node {
     operator: Operator,
     children: Vec<Node>,
