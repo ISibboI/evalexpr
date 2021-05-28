@@ -1,6 +1,6 @@
 use crate::function::builtin::builtin_function;
 
-use crate::{context::Context, error::*, value::Value};
+use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 use std::borrow::Borrow;
 
 mod display;
@@ -169,7 +169,11 @@ impl Operator {
     }
 
     /// Evaluates the operator with the given arguments and context.
-    pub(crate) fn eval(&self, arguments: &[Value], context: &dyn Context) -> EvalexprResult<Value> {
+    pub(crate) fn eval<C: Context>(
+        &self,
+        arguments: &[Value],
+        context: &C,
+    ) -> EvalexprResult<Value> {
         use crate::operator::Operator::*;
         match self {
             RootNode => {
@@ -408,7 +412,7 @@ impl Operator {
                 Ok(Value::Boolean(!a))
             },
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
-            | AndAssign | OrAssign => Err(EvalexprError::ContextNotManipulable),
+            | AndAssign | OrAssign => Err(EvalexprError::ContextNotMutable),
             Tuple => Ok(Value::Tuple(arguments.into())),
             Chain => {
                 if arguments.is_empty() {
@@ -437,24 +441,27 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let arguments = &arguments[0];
 
-                if let Some(function) = context.get_function(&identifier) {
-                    function.call(arguments)
-                } else if let Some(builtin_function) = builtin_function(&identifier) {
-                    builtin_function.call(arguments)
-                } else {
-                    Err(EvalexprError::FunctionIdentifierNotFound(
-                        identifier.clone(),
-                    ))
+                match context.call_function(&identifier, arguments) {
+                    Err(EvalexprError::FunctionIdentifierNotFound(_)) => {
+                        if let Some(builtin_function) = builtin_function(&identifier) {
+                            builtin_function.call(arguments)
+                        } else {
+                            Err(EvalexprError::FunctionIdentifierNotFound(
+                                identifier.clone(),
+                            ))
+                        }
+                    },
+                    result => result,
                 }
             },
         }
     }
 
     /// Evaluates the operator with the given arguments and mutable context.
-    pub(crate) fn eval_mut(
+    pub(crate) fn eval_mut<C: ContextWithMutableVariables>(
         &self,
         arguments: &[Value],
-        context: &mut dyn Context,
+        context: &mut C,
     ) -> EvalexprResult<Value> {
         use crate::operator::Operator::*;
         match self {

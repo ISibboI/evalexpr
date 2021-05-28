@@ -191,7 +191,7 @@ pub enum EvalexprError {
     },
 
     /// A modification was attempted on a `Context` that does not allow modifications.
-    ContextNotManipulable,
+    ContextNotMutable,
 
     /// An escape sequence within a string literal is illegal.
     IllegalEscapeSequence(String),
