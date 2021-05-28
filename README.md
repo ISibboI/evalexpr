@@ -18,13 +18,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "5"
-```
-
-Add the `extern crate` definition to your `main.rs` or `lib.rs`:
-
-```rust
-extern crate evalexpr;
+evalexpr = "6"
 ```
 
 Then you can use `evalexpr` to **evaluate expressions** like this:
@@ -69,7 +63,7 @@ use evalexpr::*;
 let context = context_map! {
     "five" => 5,
     "twelve" => 12,
-    "f" => Function::new(Box::new(|argument| {
+    "f" => Function::new(|argument| {
         if let Ok(int) = argument.as_int() {
             Ok(Value::Int(int / 2))
         } else if let Ok(float) = argument.as_float() {
@@ -77,8 +71,8 @@ let context = context_map! {
         } else {
             Err(EvalexprError::expected_number(argument.clone()))
         }
-    })),
-    "avg" => Function::new(Box::new(|argument| {
+    }),
+    "avg" => Function::new(|argument| {
         let arguments = argument.as_tuple()?;
 
         if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
@@ -86,7 +80,7 @@ let context = context_map! {
         } else {
             Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
         }
-    }))
+    })
 }.unwrap(); // Do proper error handling here
 
 assert_eq!(eval_with_context("five + 8 > f(twelve)", &context), Ok(Value::from(true)));
@@ -209,7 +203,7 @@ Note that assignments are type safe, meaning if an identifier is assigned a valu
 use evalexpr::*;
 
 let mut context = HashMapContext::new();
-assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
+assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotMutable));
 assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
 assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
            Err(EvalexprError::expected_int(5.0.into())));
@@ -256,7 +250,7 @@ assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(5));
 ### Contexts
 
 An expression evaluator that just evaluates expressions would be useful already, but this crate can to more.
-It allows using [*variables*](#variables), [*assignments*](#the-assignment-operator), [*statement chaining*](#the-expression-chaining-operator) and [*user-defined functions*](#user-defined-functions) within an expression.
+It allows using [variables](#variables), [assignments](#the-assignment-operator), [statement chaining](#the-expression-chaining-operator) and [user-defined functions](#user-defined-functions) within an expression.
 When assigning to variables, the assignment is stored in a context.
 When the variable is read later on, it is read from the context.
 Contexts can be preserved between multiple calls to eval by creating them yourself.
@@ -272,7 +266,7 @@ assert_eq!(eval("a"), Err(EvalexprError::VariableIdentifierNotFound("a".to_strin
 let mut context = HashMapContext::new();
 assert_eq!(eval_with_context_mut("a = 5;", &mut context), Ok(Value::from(())));
 // Assignments require mutable contexts
-assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotManipulable));
+assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotMutable));
 // The HashMapContext is type safe
 assert_eq!(eval_with_context_mut("a = 5.5", &mut context),
            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
@@ -315,7 +309,7 @@ Those can be passed one by one with the `set_function` method, but it might be m
 use evalexpr::*;
 
 let context = context_map!{
-    "f" => Function::new(Box::new(|args| Ok(Value::from(args.as_int()? + 5)))),
+    "f" => Function::new(|args| Ok(Value::from(args.as_int()? + 5))),
 }.unwrap_or_else(|error| panic!("Error creating context: {}", error));
 assert_eq!(eval_int_with_context("f 5", &context), Ok(10));
 ```

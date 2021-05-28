@@ -5,13 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "5"
-//! ```
-//!
-//! Add the `extern crate` definition to your `main.rs` or `lib.rs`:
-//!
-//! ```rust
-//! extern crate evalexpr;
+//! evalexpr = "6"
 //! ```
 //!
 //! Then you can use `evalexpr` to **evaluate expressions** like this:
