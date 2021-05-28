@@ -1,4 +1,8 @@
-use crate::{token::Token, value::{TupleType, EMPTY_VALUE}, EmptyType, FloatType, IntType, HashMapContext};
+use crate::{
+    token::Token,
+    value::{TupleType, EMPTY_VALUE},
+    EmptyType, FloatType, HashMapContext, IntType,
+};
 
 use crate::{
     context::Context,
@@ -28,7 +32,7 @@ mod iter;
 /// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
 /// ```
 ///
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Node {
     operator: Operator,
     children: Vec<Node>,

@@ -452,7 +452,6 @@ fn test_shortcut_functions() {
             .eval_string_with_context_mut(&mut context),
         Ok("a string".to_string())
     );
-    ;
     assert_eq!(
         build_operator_tree("3.3")
             .unwrap()
