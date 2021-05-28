@@ -1,32 +1,49 @@
+//! A context defines methods to retrieve variable values and call functions for literals in an expression tree.
+//! If mutable, it also allows to assign to variables.
+//!
+//! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
+//! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
+
 use std::collections::HashMap;
 
 use crate::{function::Function, value::value_type::ValueType, EvalexprError, EvalexprResult};
 
 use crate::value::Value;
 
-/// A mutable context for an expression tree.
-///
-/// A context defines methods to retrieve values and functions for literals in an expression tree.
-/// In addition, it also allows the manipulation of values and functions.
-/// This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
-/// The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
+/// An immutable context.
 pub trait Context {
     /// Returns the value that is linked to the given identifier.
     fn get_value(&self, identifier: &str) -> Option<&Value>;
 
-    /// Returns the function that is linked to the given identifier.
-    fn get_function(&self, identifier: &str) -> Option<&Function>;
+    /// Calls the function that is linked to the given identifier with the given argument.
+    /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
+    fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value>;
+}
 
-    /// Links the given value to the given identifier.
+/// A context that allows to assign to variables.
+pub trait ContextWithMutableVariables: Context {
+    /// Sets the variable with the given identifier to the given value.
     fn set_value(&mut self, _identifier: String, _value: Value) -> EvalexprResult<()> {
-        Err(EvalexprError::ContextNotManipulable)
-    }
-
-    /// Links the given function to the given identifier.
-    fn set_function(&mut self, _identifier: String, _function: Function) -> EvalexprResult<()> {
-        Err(EvalexprError::ContextNotManipulable)
+        Err(EvalexprError::ContextNotMutable)
     }
 }
+
+/// A context that allows to assign to function identifiers.
+pub trait ContextWithMutableFunctions: Context {
+    /// Sets the function with the given identifier to the given function.
+    fn set_function(&mut self, _identifier: String, _function: Function) -> EvalexprResult<()> {
+        Err(EvalexprError::ContextNotMutable)
+    }
+}
+
+/*/// A context that allows to retrieve functions programmatically.
+pub trait GetFunctionContext: Context {
+    /// Returns the function that is linked to the given identifier.
+    ///
+    /// This might not be possible for all functions, as some might be hard-coded.
+    /// In this case, a special error variant should be returned (Not yet implemented).
+    fn get_function(&self, identifier: &str) -> Option<&Function>;
+}*/
 
 /// A context that returns `None` for each identifier.
 pub struct EmptyContext;
@@ -36,8 +53,10 @@ impl Context for EmptyContext {
         None
     }
 
-    fn get_function(&self, _identifier: &str) -> Option<&Function> {
-        None
+    fn call_function(&self, identifier: &str, _argument: &Value) -> EvalexprResult<Value> {
+        Err(EvalexprError::FunctionIdentifierNotFound(
+            identifier.to_string(),
+        ))
     }
 }
 
@@ -66,10 +85,18 @@ impl Context for HashMapContext {
         self.variables.get(identifier)
     }
 
-    fn get_function(&self, identifier: &str) -> Option<&Function> {
-        self.functions.get(identifier)
+    fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
+        if let Some(function) = self.functions.get(identifier) {
+            function.call(argument)
+        } else {
+            Err(EvalexprError::FunctionIdentifierNotFound(
+                identifier.to_string(),
+            ))
+        }
     }
+}
 
+impl ContextWithMutableVariables for HashMapContext {
     fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
             if ValueType::from(&existing_value) == ValueType::from(&value) {
@@ -84,7 +111,9 @@ impl Context for HashMapContext {
         self.variables.insert(identifier, value);
         Ok(())
     }
+}
 
+impl ContextWithMutableFunctions for HashMapContext {
     fn set_function(&mut self, identifier: String, function: Function) -> EvalexprResult<()> {
         self.functions.insert(identifier, function);
         Ok(())

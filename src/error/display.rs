@@ -106,7 +106,7 @@ impl fmt::Display for EvalexprError {
                 "Regular expression {:?} is invalid: {:?}",
                 regex, message
             ),
-            ContextNotManipulable => write!(f, "Cannot manipulate context"),
+            ContextNotMutable => write!(f, "Cannot manipulate context"),
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }

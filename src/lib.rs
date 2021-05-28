@@ -196,7 +196,7 @@
 //! use evalexpr::*;
 //!
 //! let mut context = HashMapContext::new();
-//! assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotManipulable));
+//! assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotMutable));
 //! assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
 //! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
 //!            Err(EvalexprError::expected_int(5.0.into())));
@@ -259,7 +259,7 @@
 //! let mut context = HashMapContext::new();
 //! assert_eq!(eval_with_context_mut("a = 5;", &mut context), Ok(Value::from(())));
 //! // Assignments require mutable contexts
-//! assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotManipulable));
+//! assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotMutable));
 //! // The HashMapContext is type safe
 //! assert_eq!(eval_with_context_mut("a = 5.5", &mut context),
 //!            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
@@ -488,7 +488,10 @@ extern crate serde;
 extern crate serde_derive;
 
 pub use crate::{
-    context::{Context, EmptyContext, HashMapContext},
+    context::{
+        Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext,
+        HashMapContext,
+    },
     error::{EvalexprError, EvalexprResult},
     function::Function,
     interface::*,
