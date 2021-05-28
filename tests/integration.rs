@@ -137,7 +137,7 @@ fn test_functions() {
     context
         .set_function(
             "sub2".to_string(),
-            Function::new(Box::new(|argument| {
+            Function::new(|argument| {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int - 2))
                 } else if let Value::Float(float) = argument {
@@ -145,7 +145,7 @@ fn test_functions() {
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
-            })),
+            }),
         )
         .unwrap();
     context
@@ -168,7 +168,7 @@ fn test_n_ary_functions() {
     context
         .set_function(
             "sub2".into(),
-            Function::new(Box::new(|argument| {
+            Function::new(|argument| {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int - 2))
                 } else if let Value::Float(float) = argument {
@@ -176,13 +176,13 @@ fn test_n_ary_functions() {
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
-            })),
+            }),
         )
         .unwrap();
     context
         .set_function(
             "avg".into(),
-            Function::new(Box::new(|argument| {
+            Function::new(|argument| {
                 let arguments = argument.as_tuple()?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
@@ -194,13 +194,13 @@ fn test_n_ary_functions() {
                         (arguments[0].as_float()? + arguments[1].as_float()?) / 2.0,
                     ))
                 }
-            })),
+            }),
         )
         .unwrap();
     context
         .set_function(
             "muladd".into(),
-            Function::new(Box::new(|argument| {
+            Function::new(|argument| {
                 let arguments = argument.as_tuple()?;
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
@@ -216,27 +216,24 @@ fn test_n_ary_functions() {
                             + arguments[2].as_float()?,
                     ))
                 }
-            })),
+            }),
         )
         .unwrap();
     context
         .set_function(
             "count".into(),
-            Function::new(Box::new(|arguments| match arguments {
+            Function::new(|arguments| match arguments {
                 Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
                 Value::Empty => Ok(Value::from(0)),
                 _ => Ok(Value::from(1)),
-            })),
+            }),
         )
         .unwrap();
     context
         .set_value("five".to_string(), Value::Int(5))
         .unwrap();
     context
-        .set_function(
-            "function_four".into(),
-            Function::new(Box::new(|_| Ok(Value::Int(4)))),
-        )
+        .set_function("function_four".into(), Function::new(|_| Ok(Value::Int(4))))
         .unwrap();
 
     assert_eq!(eval_with_context("avg(7, 5)", &context), Ok(Value::Int(6)));

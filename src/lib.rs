@@ -56,7 +56,7 @@
 //! let context = context_map! {
 //!     "five" => 5,
 //!     "twelve" => 12,
-//!     "f" => Function::new(Box::new(|argument| {
+//!     "f" => Function::new(|argument| {
 //!         if let Ok(int) = argument.as_int() {
 //!             Ok(Value::Int(int / 2))
 //!         } else if let Ok(float) = argument.as_float() {
@@ -64,8 +64,8 @@
 //!         } else {
 //!             Err(EvalexprError::expected_number(argument.clone()))
 //!         }
-//!     })),
-//!     "avg" => Function::new(Box::new(|argument| {
+//!     }),
+//!     "avg" => Function::new(|argument| {
 //!         let arguments = argument.as_tuple()?;
 //!
 //!         if let (Value::Int(a), Value::Int(b)) = (&arguments[0], &arguments[1]) {
@@ -73,7 +73,7 @@
 //!         } else {
 //!             Ok(Value::Float((arguments[0].as_number()? + arguments[1].as_number()?) / 2.0))
 //!         }
-//!     }))
+//!     })
 //! }.unwrap(); // Do proper error handling here
 //!
 //! assert_eq!(eval_with_context("five + 8 > f(twelve)", &context), Ok(Value::from(true)));
@@ -302,7 +302,7 @@
 //! use evalexpr::*;
 //!
 //! let context = context_map!{
-//!     "f" => Function::new(Box::new(|args| Ok(Value::from(args.as_int()? + 5)))),
+//!     "f" => Function::new(|args| Ok(Value::from(args.as_int()? + 5))),
 //! }.unwrap_or_else(|error| panic!("Error creating context: {}", error));
 //! assert_eq!(eval_int_with_context("f 5", &context), Ok(10));
 //! ```
