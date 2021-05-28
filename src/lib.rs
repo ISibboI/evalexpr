@@ -475,6 +475,7 @@
 //!
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 
 #[cfg(feature = "regex_support")]
 extern crate regex;
