@@ -40,57 +40,36 @@ pub enum Value {
 impl Value {
     /// Returns true if `self` is a `Value::String`.
     pub fn is_string(&self) -> bool {
-        match self {
-            Value::String(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::String(_))
     }
     /// Returns true if `self` is a `Value::Int`.
     pub fn is_int(&self) -> bool {
-        match self {
-            Value::Int(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::Int(_))
     }
 
     /// Returns true if `self` is a `Value::Float`.
     pub fn is_float(&self) -> bool {
-        match self {
-            Value::Float(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::Float(_))
     }
 
     /// Returns true if `self` is a `Value::Int` or `Value::Float`.
     pub fn is_number(&self) -> bool {
-        match self {
-            Value::Int(_) | Value::Float(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::Int(_) | Value::Float(_))
     }
 
     /// Returns true if `self` is a `Value::Boolean`.
     pub fn is_boolean(&self) -> bool {
-        match self {
-            Value::Boolean(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::Boolean(_))
     }
 
     /// Returns true if `self` is a `Value::Tuple`.
     pub fn is_tuple(&self) -> bool {
-        match self {
-            Value::Tuple(_) => true,
-            _ => false,
-        }
+        matches!(self, Value::Tuple(_))
     }
 
     /// Returns true if `self` is a `Value::Empty`.
     pub fn is_empty(&self) -> bool {
-        match self {
-            Value::Empty => true,
-            _ => false,
-        }
+        matches!(self, Value::Empty)
     }
 
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.

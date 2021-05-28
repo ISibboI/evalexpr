@@ -136,21 +136,14 @@ impl Operator {
     // Make this a const fn once #57563 is resolved
     pub(crate) fn is_left_to_right(&self) -> bool {
         use crate::operator::Operator::*;
-        match self {
-            Assign => false,
-            FunctionIdentifier { identifier: _ } => false,
-            _ => true,
-        }
+        !matches!(self, Assign | FunctionIdentifier { identifier: _ })
     }
 
     /// Returns true if chains of this operator should be flattened into one operator with many arguments.
     // Make this a const fn once #57563 is resolved
     pub(crate) fn is_sequence(&self) -> bool {
         use crate::operator::Operator::*;
-        match self {
-            Tuple | Chain => true,
-            _ => false,
-        }
+        matches!(self, Tuple | Chain)
     }
 
     /// True if this operator is a leaf, meaning it accepts no arguments.
@@ -327,20 +320,12 @@ impl Operator {
             Eq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
-                if arguments[0] == arguments[1] {
-                    Ok(Value::Boolean(true))
-                } else {
-                    Ok(Value::Boolean(false))
-                }
+                Ok(Value::Boolean(arguments[0] == arguments[1]))
             },
             Neq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
-                if arguments[0] != arguments[1] {
-                    Ok(Value::Boolean(true))
-                } else {
-                    Ok(Value::Boolean(false))
-                }
+                Ok(Value::Boolean(arguments[0] != arguments[1]))
             },
             Gt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
@@ -348,23 +333,13 @@ impl Operator {
                 expect_number_or_string(&arguments[1])?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-                    if a > b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a > b))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    if a > b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a > b))
                 } else {
-                    if arguments[0].as_number()? > arguments[1].as_number()? {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(
+                        arguments[0].as_number()? > arguments[1].as_number()?,
+                    ))
                 }
             },
             Lt => {
@@ -373,23 +348,13 @@ impl Operator {
                 expect_number_or_string(&arguments[1])?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-                    if a < b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a < b))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    if a < b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a < b))
                 } else {
-                    if arguments[0].as_number()? < arguments[1].as_number()? {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(
+                        arguments[0].as_number()? < arguments[1].as_number()?,
+                    ))
                 }
             },
             Geq => {
@@ -398,23 +363,13 @@ impl Operator {
                 expect_number_or_string(&arguments[1])?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-                    if a >= b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a >= b))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    if a >= b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a >= b))
                 } else {
-                    if arguments[0].as_number()? >= arguments[1].as_number()? {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(
+                        arguments[0].as_number()? >= arguments[1].as_number()?,
+                    ))
                 }
             },
             Leq => {
@@ -423,23 +378,13 @@ impl Operator {
                 expect_number_or_string(&arguments[1])?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_string(), arguments[1].as_string()) {
-                    if a <= b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a <= b))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    if a <= b {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(a <= b))
                 } else {
-                    if arguments[0].as_number()? <= arguments[1].as_number()? {
-                        Ok(Value::Boolean(true))
-                    } else {
-                        Ok(Value::Boolean(false))
-                    }
+                    Ok(Value::Boolean(
+                        arguments[0].as_number()? <= arguments[1].as_number()?,
+                    ))
                 }
             },
             And => {
@@ -447,32 +392,20 @@ impl Operator {
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
-                if a && b {
-                    Ok(Value::Boolean(true))
-                } else {
-                    Ok(Value::Boolean(false))
-                }
+                Ok(Value::Boolean(a && b))
             },
             Or => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
-                if a || b {
-                    Ok(Value::Boolean(true))
-                } else {
-                    Ok(Value::Boolean(false))
-                }
+                Ok(Value::Boolean(a || b))
             },
             Not => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let a = arguments[0].as_boolean()?;
 
-                if !a {
-                    Ok(Value::Boolean(true))
-                } else {
-                    Ok(Value::Boolean(false))
-                }
+                Ok(Value::Boolean(!a))
             },
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => Err(EvalexprError::ContextNotManipulable),
@@ -528,7 +461,7 @@ impl Operator {
             Assign => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let target = arguments[0].as_string()?;
-                context.set_value(target.into(), arguments[1].clone())?;
+                context.set_value(target, arguments[1].clone())?;
 
                 Ok(Value::Empty)
             },
@@ -557,7 +490,7 @@ impl Operator {
                         self
                     ),
                 }?;
-                context.set_value(target.into(), result)?;
+                context.set_value(target, result)?;
 
                 Ok(Value::Empty)
             },

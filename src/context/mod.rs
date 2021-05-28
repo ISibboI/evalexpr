@@ -86,7 +86,7 @@ impl Context for HashMapContext {
     }
 
     fn set_function(&mut self, identifier: String, function: Function) -> EvalexprResult<()> {
-        self.functions.insert(identifier.into(), function);
+        self.functions.insert(identifier, function);
         Ok(())
     }
 }

@@ -196,11 +196,18 @@ impl Token {
 
     pub(crate) fn is_assignment(&self) -> bool {
         use Token::*;
-        match self {
-            Assign | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign
-            | HatAssign | AndAssign | OrAssign => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Assign
+                | PlusAssign
+                | MinusAssign
+                | StarAssign
+                | SlashAssign
+                | PercentAssign
+                | HatAssign
+                | AndAssign
+                | OrAssign
+        )
     }
 }
 
@@ -210,7 +217,7 @@ fn parse_escape_sequence<Iter: Iterator<Item = char>>(iter: &mut Iter) -> Evalex
         Some('"') => Ok('"'),
         Some('\\') => Ok('\\'),
         Some(c) => Err(EvalexprError::IllegalEscapeSequence(format!("\\{}", c))),
-        None => Err(EvalexprError::IllegalEscapeSequence(format!("\\"))),
+        None => Err(EvalexprError::IllegalEscapeSequence("\\".to_string())),
     }
 }
 
@@ -268,7 +275,7 @@ fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
 /// Resolves all partial tokens by converting them to complex tokens.
 fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
     let mut result = Vec::new();
-    while tokens.len() > 0 {
+    while !tokens.is_empty() {
         let first = tokens[0].clone();
         let second = tokens.get(1).cloned();
         let third = tokens.get(2).cloned();

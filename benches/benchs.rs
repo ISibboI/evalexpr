@@ -1,4 +1,5 @@
 #![feature(test)]
+#![feature(bench_black_box)]
 
 extern crate rand;
 extern crate rand_pcg;

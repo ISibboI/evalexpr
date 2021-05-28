@@ -20,7 +20,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 } else if let Value::Int(int) = argument {
                     min_int = min_int.min(int);
                 } else {
-                    return Err(EvalexprError::expected_number(argument.clone()));
+                    return Err(EvalexprError::expected_number(argument));
                 }
             }
 
@@ -42,7 +42,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 } else if let Value::Int(int) = argument {
                     max_int = max_int.max(int);
                 } else {
-                    return Err(EvalexprError::expected_number(argument.clone()));
+                    return Err(EvalexprError::expected_number(argument));
                 }
             }
 
