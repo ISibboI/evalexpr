@@ -54,7 +54,7 @@ checksum = "b486ce3ccf7ffd79fdeb678eac06a9e6c09fc88d33836340becb8fffe87c5e33"
 
 [[package]]
 name = "evalexpr"
-version = "5.1.0"
+version = "5.1.1-alpha.0"
 dependencies = [
  "rand",
  "rand_pcg",
