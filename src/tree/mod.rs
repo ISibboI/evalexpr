@@ -1,4 +1,8 @@
-use crate::{token::Token, value::{TupleType, EMPTY_VALUE}, EmptyType, FloatType, IntType, HashMapContext};
+use crate::{
+    token::Token,
+    value::{TupleType, EMPTY_VALUE},
+    EmptyType, FloatType, HashMapContext, IntType,
+};
 
 use crate::{
     context::Context,
