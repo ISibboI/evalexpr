@@ -13,20 +13,21 @@ pub(crate) mod builtin;
 /// use evalexpr::*;
 ///
 /// let mut context = HashMapContext::new();
-/// context.set_function("id".into(), Function::new(Box::new(|argument| {
+/// context.set_function("id".into(), Function::new(|argument| {
 ///     Ok(argument.clone())
-/// }))).unwrap(); // Do proper error handling here
+/// })).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
 /// ```
+#[derive(Clone)]
 pub struct Function {
-    function: Box<dyn Fn(&Value) -> EvalexprResult<Value>>,
+    function: fn(&Value) -> EvalexprResult<Value>,
 }
 
 impl Function {
     /// Creates a user-defined function.
     ///
     /// The `function` is a boxed function that takes a `Value` and returns a `EvalexprResult<Value, Error>`.
-    pub fn new(function: Box<dyn Fn(&Value) -> EvalexprResult<Value>>) -> Self {
+    pub fn new(function: fn(&Value) -> EvalexprResult<Value>) -> Self {
         Self { function }
     }
 

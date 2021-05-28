@@ -8,7 +8,7 @@ use crate::{
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
-        "min" => Some(Function::new(Box::new(|argument| {
+        "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut min_int = IntType::max_value();
             let mut min_float = 1.0f64 / 0.0f64;
@@ -29,8 +29,8 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             } else {
                 Ok(Value::Float(min_float))
             }
-        }))),
-        "max" => Some(Function::new(Box::new(|argument| {
+        })),
+        "max" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut max_int = IntType::min_value();
             let mut max_float = -1.0f64 / 0.0f64;
@@ -51,9 +51,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             } else {
                 Ok(Value::Float(max_float))
             }
-        }))),
+        })),
 
-        "len" => Some(Function::new(Box::new(|argument| {
+        "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as i64))
             } else if let Ok(subject) = argument.as_tuple() {
@@ -64,11 +64,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                     vec![ValueType::String, ValueType::Tuple],
                 ))
             }
-        }))),
+        })),
 
         // string functions
         #[cfg(feature = "regex_support")]
-        "str::regex_matches" => Some(Function::new(Box::new(|argument| {
+        "str::regex_matches" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
 
             let subject = arguments[0].as_string()?;
@@ -80,9 +80,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                     format!("{}", err),
                 )),
             }
-        }))),
+        })),
         #[cfg(feature = "regex_support")]
-        "str::regex_replace" => Some(Function::new(Box::new(|argument| {
+        "str::regex_replace" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
 
             let subject = arguments[0].as_string()?;
@@ -97,19 +97,19 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                     format!("{}", err),
                 )),
             }
-        }))),
-        "str::to_lowercase" => Some(Function::new(Box::new(|argument| {
+        })),
+        "str::to_lowercase" => Some(Function::new(|argument| {
             let subject = argument.as_string()?;
             Ok(Value::from(subject.to_lowercase()))
-        }))),
-        "str::to_uppercase" => Some(Function::new(Box::new(|argument| {
+        })),
+        "str::to_uppercase" => Some(Function::new(|argument| {
             let subject = argument.as_string()?;
             Ok(Value::from(subject.to_uppercase()))
-        }))),
-        "str::trim" => Some(Function::new(Box::new(|argument| {
+        })),
+        "str::trim" => Some(Function::new(|argument| {
             let subject = argument.as_string()?;
             Ok(Value::from(subject.trim()))
-        }))),
+        })),
         _ => None,
     }
 }
