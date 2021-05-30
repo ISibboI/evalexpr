@@ -272,28 +272,28 @@ fn test_n_ary_functions() {
 #[test]
 fn test_builtin_functions() {
     // Log
-    assert_eq!(eval("ln(2.718281828459045)"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("log(9, 9)"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("log2(2)"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("log10(10)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::ln(2.718281828459045)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::log(9, 9)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::log2(2)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::log10(10)"), Ok(Value::Float(1.0)));
     // Cos
-    assert_eq!(eval("cos(0)"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("acos(1)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("cosh(0)"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("acosh(1)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::cos(0)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::acos(1)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::cosh(0)"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("math::acosh(1)"), Ok(Value::Float(0.0)));
     // Sin
-    assert_eq!(eval("sin(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("asin(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("sinh(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("asinh(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::sin(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::asin(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::sinh(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::asinh(0)"), Ok(Value::Float(0.0)));
     // Tan
-    assert_eq!(eval("tan(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("atan(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("tanh(0)"), Ok(Value::Float(0.0)));
-    assert_eq!(eval("atanh(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::tan(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::atan(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::tanh(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::atanh(0)"), Ok(Value::Float(0.0)));
     // Root
-    assert_eq!(eval("sqrt(25)"), Ok(Value::Float(5.0)));
-    assert_eq!(eval("cbrt(8)"), Ok(Value::Float(2.0)));
+    assert_eq!(eval("math::sqrt(25)"), Ok(Value::Float(5.0)));
+    assert_eq!(eval("math::cbrt(8)"), Ok(Value::Float(2.0)));
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("floor(1.9)"), Ok(Value::Float(1.0)));
@@ -321,11 +321,20 @@ fn test_builtin_functions() {
         eval("str::trim(\"  foo  bar \")"),
         Ok(Value::from("foo  bar"))
     );
-    assert_eq!(eval("str::from(\"a\")"), Ok(Value::String(String::from("\"a\""))));
+    assert_eq!(
+        eval("str::from(\"a\")"),
+        Ok(Value::String(String::from("\"a\"")))
+    );
     assert_eq!(eval("str::from(1.0)"), Ok(Value::String(String::from("1"))));
     assert_eq!(eval("str::from(1)"), Ok(Value::String(String::from("1"))));
-    assert_eq!(eval("str::from(true)"), Ok(Value::String(String::from("true"))));
-    assert_eq!(eval("str::from(1, 2, 3)"), Ok(Value::String(String::from("(1, 2, 3)"))));
+    assert_eq!(
+        eval("str::from(true)"),
+        Ok(Value::String(String::from("true")))
+    );
+    assert_eq!(
+        eval("str::from(1, 2, 3)"),
+        Ok(Value::String(String::from("(1, 2, 3)")))
+    );
     assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()"))));
 }
 
