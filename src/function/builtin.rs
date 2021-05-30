@@ -18,32 +18,32 @@ macro_rules! simple_math {
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
         // Log
-        "ln" => simple_math!(ln),
-        "log" => Some(Function::new(|argument| {
+        "math::ln" => simple_math!(ln),
+        "math::log" => Some(Function::new(|argument| {
             let tuple = argument.as_fixed_len_tuple(2)?;
             let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
             Ok(Value::Float(a.log(b)))
         })),
-        "log2" => simple_math!(log2),
-        "log10" => simple_math!(log10),
+        "math::log2" => simple_math!(log2),
+        "math::log10" => simple_math!(log10),
         // Cos
-        "cos" => simple_math!(cos),
-        "acos" => simple_math!(acos),
-        "cosh" => simple_math!(cosh),
-        "acosh" => simple_math!(acosh),
+        "math::cos" => simple_math!(cos),
+        "math::acos" => simple_math!(acos),
+        "math::cosh" => simple_math!(cosh),
+        "math::acosh" => simple_math!(acosh),
         // Sin
-        "sin" => simple_math!(sin),
-        "asin" => simple_math!(asin),
-        "sinh" => simple_math!(sinh),
-        "asinh" => simple_math!(asinh),
+        "math::sin" => simple_math!(sin),
+        "math::asin" => simple_math!(asin),
+        "math::sinh" => simple_math!(sinh),
+        "math::asinh" => simple_math!(asinh),
         // Tan
-        "tan" => simple_math!(tan),
-        "atan" => simple_math!(atan),
-        "tanh" => simple_math!(tanh),
-        "atanh" => simple_math!(atanh),
+        "math::tan" => simple_math!(tan),
+        "math::atan" => simple_math!(atan),
+        "math::tanh" => simple_math!(tanh),
+        "math::atanh" => simple_math!(atanh),
         // Root
-        "sqrt" => simple_math!(sqrt),
-        "cbrt" => simple_math!(cbrt),
+        "math::sqrt" => simple_math!(sqrt),
+        "math::cbrt" => simple_math!(cbrt),
         // Rounding
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),

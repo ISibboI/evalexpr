@@ -320,16 +320,38 @@ For more information about user-defined functions, refer to the respective [sect
 
 This crate offers a set of builtin functions.
 
-| Identifier | Argument Amount | Argument Types | Description |
-|------------|-----------------|----------------|-------------|
-| `min` | >= 1 | Numeric | Returns the minimum of the arguments |
-| `max` | >= 1 | Numeric | Returns the maximum of the arguments |
-| `len` | 1 | String/Tuple | Returns the character length of a string, or the amount of elements in a tuple (not recursively) |
-| `str::regex_matches` | 2 | String, String | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
-| `str::regex_replace` | 3 | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
-| `str::to_lowercase` | 1 | String | Returns the lower-case version of the string |
-| `str::to_uppercase` | 1 | String | Returns the upper-case version of the string |
-| `str::trim` | 1 | String | Strips whitespace from the start and the end of the string |
+| Identifier           | Argument Amount | Argument Types         | Description |
+|----------------------|-----------------|------------------------|-------------|
+| `min`                | >= 1            | Numeric                | Returns the minimum of the arguments |
+| `max`                | >= 1            | Numeric                | Returns the maximum of the arguments |
+| `len`                | 1               | String/Tuple           | Returns the character length of a string, or the amount of elements in a tuple (not recursively) |
+| `floor`              | 1               | Numeric                | Returns the largest integer less than or equal to a number |
+| `round`              | 1               | Numeric                | Returns the nearest integer to a number. Round half-way cases away from 0.0 |
+| `ceil`               | 1               | Numeric                | Returns the smallest integer greater than or equal to a number |
+| `math::ln`           | 1               | Numeric                | Returns the natural logarithm of the number |
+| `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
+| `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |
+| `math::log10`        | 1               | Numeric                | Returns the base 10 logarithm of the number |
+| `math::cos`          | 1               | Numeric                | Computes the cosine of a number (in radians) |
+| `math::acos`         | 1               | Numeric                | Computes the arccosine of a number. Return value is in radians in the range [0, pi] or NaN if the number is outside the range [-1, 1] |
+| `math::cosh`         | 1               | Numeric                | Hyperbolic cosine function |
+| `math::acosh`        | 1               | Numeric                | Inverse hyperbolic cosine function |
+| `math::sin`          | 1               | Numeric                | Computes the sine of a number (in radians) |
+| `math::asin`         | 1               | Numeric                | Computes the arcsine of a number. Return value is in radians in the range [-pi/2, pi/2] or NaN if the number is outside the range [-1, 1] |
+| `math::sinh`         | 1               | Numeric                | Hyperbolic sine function |
+| `math::asinh`        | 1               | Numeric                | Inverse hyperbolic sine function |
+| `math::tan`          | 1               | Numeric                | Computes the tangent of a number (in radians) |
+| `math::atan`         | 1               | Numeric                | Computes the arctangent of a number. Return value is in radians in the range [-pi/2, pi/2] |
+| `math::tanh`         | 1               | Numeric                | Hyperbolic tangent function |
+| `math::atanh`        | 1               | Numeric                | Inverse hyperbolic tangent function. |
+| `math::sqrt`         | 1               | Numeric                | Returns the square root of a number. Returns NaN if a negative number |
+| `math::cbrt`         | 1               | Numeric                | Returns the cube root of a number |
+| `str::regex_matches` | 2               | String, String         | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
+| `str::regex_replace` | 3               | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
+| `str::to_lowercase`  | 1               | String                 | Returns the lower-case version of the string |
+| `str::to_uppercase`  | 1               | String                 | Returns the upper-case version of the string |
+| `str::trim`          | 1               | String                 | Strips whitespace from the start and the end of the string |
+| `str::from`          | >= 0            | Any                    | Returns passed value as string |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
 If the maximum or minimum is an integer, then an integer is returned.
