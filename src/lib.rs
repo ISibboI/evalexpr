@@ -1,7 +1,6 @@
 //!
 //! ## Quickstart
 //!
-//! Minimum Supported Rust Version: 1.42.0
 //! Add `evalexpr` as dependency to your `Cargo.toml`:
 //!
 //! ```toml

@@ -9,12 +9,14 @@ It has a small and easy to use interface and can be easily integrated into any a
 It is very lightweight and comes with no further dependencies.
 Evalexpr is [available on crates.io](https://crates.io/crates/evalexpr), and its [API Documentation is available on docs.rs](https://docs.rs/evalexpr).
 
+
+**Minimum Supported Rust Version:** 1.42.0
+
 <!-- cargo-sync-readme start -->
 
 
 ## Quickstart
 
-Minimum Supported Rust Version: 1.42.0
 Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
