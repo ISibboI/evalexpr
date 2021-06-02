@@ -18,12 +18,15 @@ jobs:
           - name: Test
             command: test
             args: ""
-          - name: Format
-            command: fmt
-            args: -- --check
           - name: Lint
             command: clippy
             args: ""
+        include:
+          - toolchain: nightly
+            command:
+              name: Format
+              command: fmt
+              args: -- --check
 
     steps:
       - uses: actions/checkout@v2
@@ -39,6 +42,8 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          override: true
+          default: true
 
       - name: ${{matrix.command.name}}
         uses: actions-rs/cargo@v1
