@@ -16,6 +16,37 @@
 
 ### Contributors
 
+## [6.0.0](https://github.com/ISibboI/evalexpr/compare/5.1.0...6.0.0) - 2021-05-28
+
+### Added
+
+ * `#![forbid(unsafe_code)]`
+ * Made `Function` derive `Clone`
+ * Ensure that `Function` implements `Send` and `Sync`
+
+### Removed
+
+ * `Cargo.lock`
+
+### Changed
+
+ * Decomposed `Context` into `Context`, `ContextWithMutableVariables` and `ContextWithMutableFunctions`
+ * Replaced the `get_function` method of `Context` with a `call_function` method
+
+### Contributors
+
+ * [dvtomas](https://github.com/dvtomas)
+
+## [5.1.0](https://github.com/ISibboI/evalexpr/compare/5.0.5...5.1.0) - 2021-05-28
+
+### Added
+
+ * Make `Node` cloneable
+
+### Contributors
+
+ * [dvtomas](https://github.com/dvtomas)
+
 ## [5.0.5](https://github.com/ISibboI/evalexpr/compare/5.0.4...5.0.5) - 2019-09-13
 
 ### Fixed
