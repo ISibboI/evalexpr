@@ -92,7 +92,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
-          args: --manifest-path implementation/Cargo.toml --all --all-features --out Lcov -- --test-threads 1
+          args: --all --all-features --out Lcov -- --test-threads 1
 
       - name: Upload Coverage
         uses: coverallsapp/github-action@master
