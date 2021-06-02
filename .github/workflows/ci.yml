@@ -15,18 +15,24 @@ jobs:
           - name: Check
             command: check
             args: ""
+            components: ""
           - name: Test
             command: test
             args: ""
-          - name: Lint
-            command: clippy
-            args: ""
+            components: ""
         include:
           - toolchain: nightly
             command:
               name: Format
               command: fmt
               args: -- --check
+              components: rustfmt
+          - toolchain: stable
+              command:
+                name: Lint
+                command: clippy
+                args: ""
+                components: clippy
 
     steps:
       - uses: actions/checkout@v2
@@ -44,7 +50,7 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
           default: true
-          components: rustfmt, clippy
+          components: ${{matrix.command.components}}
 
       - name: ${{matrix.command.name}}
         uses: actions-rs/cargo@v1
