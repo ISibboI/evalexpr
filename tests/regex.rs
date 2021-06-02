@@ -1,6 +1,7 @@
 #![cfg(feature = "regex_support")]
 
 use evalexpr::*;
+use std::panic::panic_any;
 
 #[test]
 fn test_regex_functions() {
@@ -17,7 +18,7 @@ fn test_regex_functions() {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
         },
-        v => panic!(v),
+        v => panic_any!(v),
     };
     assert_eq!(
         eval("str::regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
