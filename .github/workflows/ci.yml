@@ -14,24 +14,24 @@ jobs:
         command:
           - name: Check
             command: check
-            args: ""
+            args: --all-features
             components: ""
           - name: Test
             command: test
-            args: ""
+            args: --all-features
             components: ""
         include:
           - toolchain: nightly
             command:
               name: Format
               command: fmt
-              args: -- --check
+              args: --all-features -- --check
               components: rustfmt
           - toolchain: stable
             command:
               name: Lint
               command: clippy
-              args: ""
+              args: --all-features
               components: clippy
 
     steps:
