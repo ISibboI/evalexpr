@@ -523,7 +523,6 @@ mod feature_serde;
 mod function;
 mod interface;
 mod operator;
-mod predefined;
 mod token;
 mod tree;
 mod value;

@@ -6,9 +6,13 @@
 
 use std::collections::HashMap;
 
-use crate::{function::Function, value::value_type::ValueType, EvalexprError, EvalexprResult};
+use crate::{
+    function::Function,
+    value::{value_type::ValueType, Value},
+    EvalexprError, EvalexprResult,
+};
 
-use crate::value::Value;
+mod predefined;
 
 /// An immutable context.
 pub trait Context {

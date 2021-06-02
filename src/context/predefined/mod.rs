@@ -1,4 +1,4 @@
-/// Context with all f64::consts available by default.
+/// Context with all Rust's constants in `f64::consts` available by default.
 /// Alternatively, specifiy constants with `math_consts_context!(E, PI, TAU, ...)`
 /// Available constants can be found in the [`core::f64::consts module`](https://doc.rust-lang.org/nightly/core/f64/consts/index.html).
 #[macro_export]
