@@ -17,7 +17,7 @@ fn test_regex_functions() {
             assert_eq!(regex, "[");
             assert!(message.contains("unclosed character class"));
         },
-        v => panic!("{}", v),
+        v => panic!("{:?}", v),
     };
     assert_eq!(
         eval("str::regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
