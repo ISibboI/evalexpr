@@ -28,11 +28,11 @@ jobs:
               args: -- --check
               components: rustfmt
           - toolchain: stable
-              command:
-                name: Lint
-                command: clippy
-                args: ""
-                components: clippy
+            command:
+              name: Lint
+              command: clippy
+              args: ""
+              components: clippy
 
     steps:
       - uses: actions/checkout@v2
