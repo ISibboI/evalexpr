@@ -4,13 +4,26 @@ on: [push, pull_request]
 
 jobs:
   build_and_test:
-    name: Build, Test, Format & Lint
+    name: ${{matrix.command.name}} ${{matrix.toolchain}}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        rust: [stable, beta, nightly, 1.24.0]
+        toolchain: [stable, beta, nightly, 1.24.0]
+        command:
+          - name: Check
+            command: check
+            args: ""
+          - name: Test
+            command: test
+            args: ""
+          - name: Format
+            command: fmt
+            args: -- --check
+          - name: Lint
+            command: clippy
+            args: ""
 
     steps:
       - uses: actions/checkout@v2
@@ -25,25 +38,10 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: ${{ matrix.toolchain }}
 
-      - name: 🔨 Build
+      - name: ${{matrix.command.name}}
         uses: actions-rs/cargo@v1
         with:
-          command: build
-
-      - name: 🔎 Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-
-      - name: Format
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --check
-
-      - name: Lint
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
+          command: ${{matrix.command.command}}
+          args: ${{matrix.command.args}}
