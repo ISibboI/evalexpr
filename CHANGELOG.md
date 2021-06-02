@@ -16,6 +16,20 @@
 
 ### Contributors
 
+## [6.1.0](https://github.com/ISibboI/evalexpr/compare/6.0.0...6.1.0) - 2021-06-02
+
+### Added
+
+ * Macro `math_consts_context` adding all of Rust's `f64` constants
+ * All common math functions implemented by Rust's `f64` are now builtin
+ * Continuous integration and test coverage report
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Edwin](https://github.com/olback)
+
 ## [6.0.0](https://github.com/ISibboI/evalexpr/compare/5.1.0...6.0.0) - 2021-05-28
 
 ### Added
@@ -35,6 +49,8 @@
 
 ### Contributors
 
+My warmhearted thanks goes to
+
  * [dvtomas](https://github.com/dvtomas)
 
 ## [5.1.0](https://github.com/ISibboI/evalexpr/compare/5.0.5...5.1.0) - 2021-05-28
@@ -44,6 +60,8 @@
  * Make `Node` cloneable
 
 ### Contributors
+
+My warmhearted thanks goes to
 
  * [dvtomas](https://github.com/dvtomas)
 
