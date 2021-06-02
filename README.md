@@ -1,6 +1,7 @@
 # evalexpr
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Coverage Status](https://coveralls.io/repos/github/ISibboI/evalexpr/badge.svg?branch=master)](https://coveralls.io/github/ISibboI/evalexpr?branch=master)
 [![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
 [![](https://docs.rs/evalexpr/badge.svg)](https://docs.rs/evalexpr)
 
