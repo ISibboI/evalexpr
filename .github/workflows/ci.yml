@@ -25,7 +25,7 @@ jobs:
             command:
               name: Format
               command: fmt
-              args: --all-features -- --check
+              args: --all -- --check
               components: rustfmt
           - toolchain: stable
             command:
