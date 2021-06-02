@@ -14,6 +14,7 @@ Evalexpr is [available on crates.io](https://crates.io/crates/evalexpr), and its
 
 ## Quickstart
 
+Minimum Supported Rust Version: 1.42.0
 Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
