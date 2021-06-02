@@ -6,8 +6,49 @@ use crate::{
     EvalexprError, Function, Value, ValueType,
 };
 
+macro_rules! simple_math {
+    ($func:ident) => {
+        Some(Function::new(|argument| {
+            let num = argument.as_number()?;
+            Ok(Value::Float(num.$func()))
+        }))
+    };
+}
+
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
+        // Log
+        "math::ln" => simple_math!(ln),
+        "math::log" => Some(Function::new(|argument| {
+            let tuple = argument.as_fixed_len_tuple(2)?;
+            let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
+            Ok(Value::Float(a.log(b)))
+        })),
+        "math::log2" => simple_math!(log2),
+        "math::log10" => simple_math!(log10),
+        // Cos
+        "math::cos" => simple_math!(cos),
+        "math::acos" => simple_math!(acos),
+        "math::cosh" => simple_math!(cosh),
+        "math::acosh" => simple_math!(acosh),
+        // Sin
+        "math::sin" => simple_math!(sin),
+        "math::asin" => simple_math!(asin),
+        "math::sinh" => simple_math!(sinh),
+        "math::asinh" => simple_math!(asinh),
+        // Tan
+        "math::tan" => simple_math!(tan),
+        "math::atan" => simple_math!(atan),
+        "math::tanh" => simple_math!(tanh),
+        "math::atanh" => simple_math!(atanh),
+        // Root
+        "math::sqrt" => simple_math!(sqrt),
+        "math::cbrt" => simple_math!(cbrt),
+        // Rounding
+        "floor" => simple_math!(floor),
+        "round" => simple_math!(round),
+        "ceil" => simple_math!(ceil),
+        // Other
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut min_int = IntType::max_value();
@@ -52,7 +93,6 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Ok(Value::Float(max_float))
             }
         })),
-
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as i64))
@@ -65,8 +105,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 ))
             }
         })),
-
-        // string functions
+        // String functions
         #[cfg(feature = "regex_support")]
         "str::regex_matches" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
@@ -109,6 +148,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "str::trim" => Some(Function::new(|argument| {
             let subject = argument.as_string()?;
             Ok(Value::from(subject.trim()))
+        })),
+        "str::from" => Some(Function::new(|argument| {
+            Ok(Value::String(argument.to_string()))
         })),
         _ => None,
     }
