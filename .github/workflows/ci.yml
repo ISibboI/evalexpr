@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build_and_test:
-    name: ${{matrix.command.name}} ${{matrix.toolchain}}
+    name: ${{matrix.command.name}} (${{matrix.toolchain}})
     runs-on: ubuntu-latest
 
     strategy:
