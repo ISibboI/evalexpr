@@ -44,6 +44,7 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
           default: true
+          components: rustfmt, clippy
 
       - name: ${{matrix.command.name}}
         uses: actions-rs/cargo@v1
