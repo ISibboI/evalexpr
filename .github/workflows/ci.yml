@@ -1,0 +1,49 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+jobs:
+  build_and_test:
+    name: Build, Test, Format & Lint
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [stable, beta, nightly, 1.24.0]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: ⚡ Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: 🔨 Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+      - name: 🔎 Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+
+      - name: Format
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
+
+      - name: Lint
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
