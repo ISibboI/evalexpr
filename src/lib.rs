@@ -38,7 +38,7 @@
 //! assert_eq!(context.get_value("a"), Some(&Value::from(5)));
 //! // And use the value in another expression like this
 //! assert_eq!(eval_int_with_context_mut("a = a + 2; a", &mut context), Ok(7));
-//! // It is also possible to safe a bit of typing by using an operator-assignment operator
+//! // It is also possible to save a bit of typing by using an operator-assignment operator
 //! assert_eq!(eval_int_with_context_mut("a += 2; a", &mut context), Ok(9));
 //! ```
 //!
@@ -105,9 +105,9 @@
 //! ### Operators
 //!
 //! This crate offers a set of binary and unary operators for building expressions.
-//! Operators have a precedence to determine their order of evaluation.
+//! Operators have a precedence to determine their order of evaluation, where operators of higher precedence are evaluated first.
 //! The precedence should resemble that of most common programming languages, especially Rust.
-//! The precedence of variables and values is 200, and the precedence of function literals is 190.
+//! Variables and values have a precedence of 200, and function literals have 190.
 //!
 //! Supported binary operators:
 //!
@@ -184,7 +184,9 @@
 //!
 //! This crate features the assignment operator, that allows expressions to store their result in a variable in the expression context.
 //! If an expression uses the assignment operator, it must be evaluated with a mutable context.
-//! Note that assignments are type safe, meaning if an identifier is assigned a value of a type once, it cannot be assigned a value of another type.
+//!
+//! Note that assignments are type safe when using the `HashMapContext`.
+//! That means that if an identifier is assigned a value of a type once, it cannot be assigned a value of another type.
 //!
 //! ```rust
 //! use evalexpr::*;
@@ -198,7 +200,7 @@
 //! assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
 //! ```
 //!
-//! For each binary operator, there exists and equivalent operator-assignment operator.
+//! For each binary operator, there exists an equivalent operator-assignment operator.
 //! Here are some examples:
 //!
 //! ```rust
@@ -224,24 +226,24 @@
 //! assert_eq!(eval("1;2;3;4;"), Ok(Value::Empty));
 //! assert_eq!(eval("1;2;3;4"), Ok(4.into()));
 //!
-//! // Initialization of variables via script.
+//! // Initialization of variables via script
 //! assert_eq!(eval_empty_with_context_mut("hp = 1; max_hp = 5; heal_amount = 3;", &mut context),
 //!            Ok(EMPTY_VALUE));
-//! // Precompile healing script.
+//! // Precompile healing script
 //! let healing_script = build_operator_tree("hp = min(hp + heal_amount, max_hp); hp").unwrap(); // Do proper error handling here
-//! // Execute precompiled healing script.
+//! // Execute precompiled healing script
 //! assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(4));
 //! assert_eq!(healing_script.eval_int_with_context_mut(&mut context), Ok(5));
 //! ```
 //!
 //! ### Contexts
 //!
-//! An expression evaluator that just evaluates expressions would be useful already, but this crate can to more.
+//! An expression evaluator that just evaluates expressions would be useful already, but this crate can do more.
 //! It allows using [*variables*](#variables), [*assignments*](#the-assignment-operator), [*statement chaining*](#the-expression-chaining-operator) and [*user-defined functions*](#user-defined-functions) within an expression.
 //! When assigning to variables, the assignment is stored in a context.
 //! When the variable is read later on, it is read from the context.
 //! Contexts can be preserved between multiple calls to eval by creating them yourself.
-//! Here is a simple example to show the difference between preserving context between evaluations, and not preserving:
+//! Here is a simple example to show the difference between preserving and not preserving context between evaluations:
 //!
 //! ```rust
 //! use evalexpr::*;
@@ -264,10 +266,11 @@
 //!
 //! Note that the assignment is forgotten between the two calls to eval in the first example.
 //! In the second part, the assignment is correctly preserved.
-//! Note here, that to assign to a variable, the context needs to be passed as a mutable reference.
+//! Note as well that to assign to a variable, the context needs to be passed as a mutable reference.
 //! When passed as an immutable reference, an error is returned.
+//!
 //! Also, the `HashMapContext` is type safe.
-//! This means that assigning to `a` again with a different type yields an error as well.
+//! This means that assigning to `a` again with a different type yields an error.
 //! Type unsafe contexts may be implemented if requested.
 //! For reading `a`, it is enough to pass an immutable reference.
 //!
@@ -313,25 +316,25 @@
 //! | `max`                | >= 1            | Numeric                | Returns the maximum of the arguments |
 //! | `len`                | 1               | String/Tuple           | Returns the character length of a string, or the amount of elements in a tuple (not recursively) |
 //! | `floor`              | 1               | Numeric                | Returns the largest integer less than or equal to a number |
-//! | `round`              | 1               | Numeric                | Returns the nearest integer to a number. Round half-way cases away from 0.0 |
+//! | `round`              | 1               | Numeric                | Returns the nearest integer to a number. Rounds half-way cases away from 0.0 |
 //! | `ceil`               | 1               | Numeric                | Returns the smallest integer greater than or equal to a number |
 //! | `math::ln`           | 1               | Numeric                | Returns the natural logarithm of the number |
 //! | `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
 //! | `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |
 //! | `math::log10`        | 1               | Numeric                | Returns the base 10 logarithm of the number |
 //! | `math::cos`          | 1               | Numeric                | Computes the cosine of a number (in radians) |
-//! | `math::acos`         | 1               | Numeric                | Computes the arccosine of a number. Return value is in radians in the range [0, pi] or NaN if the number is outside the range [-1, 1] |
+//! | `math::acos`         | 1               | Numeric                | Computes the arccosine of a number. The return value is in radians in the range [0, pi] or NaN if the number is outside the range [-1, 1] |
 //! | `math::cosh`         | 1               | Numeric                | Hyperbolic cosine function |
 //! | `math::acosh`        | 1               | Numeric                | Inverse hyperbolic cosine function |
 //! | `math::sin`          | 1               | Numeric                | Computes the sine of a number (in radians) |
-//! | `math::asin`         | 1               | Numeric                | Computes the arcsine of a number. Return value is in radians in the range [-pi/2, pi/2] or NaN if the number is outside the range [-1, 1] |
+//! | `math::asin`         | 1               | Numeric                | Computes the arcsine of a number. The return value is in radians in the range [-pi/2, pi/2] or NaN if the number is outside the range [-1, 1] |
 //! | `math::sinh`         | 1               | Numeric                | Hyperbolic sine function |
 //! | `math::asinh`        | 1               | Numeric                | Inverse hyperbolic sine function |
 //! | `math::tan`          | 1               | Numeric                | Computes the tangent of a number (in radians) |
-//! | `math::atan`         | 1               | Numeric                | Computes the arctangent of a number. Return value is in radians in the range [-pi/2, pi/2] |
+//! | `math::atan`         | 1               | Numeric                | Computes the arctangent of a number. The return value is in radians in the range [-pi/2, pi/2] |
 //! | `math::tanh`         | 1               | Numeric                | Hyperbolic tangent function |
 //! | `math::atanh`        | 1               | Numeric                | Inverse hyperbolic tangent function. |
-//! | `math::sqrt`         | 1               | Numeric                | Returns the square root of a number. Returns NaN if a negative number |
+//! | `math::sqrt`         | 1               | Numeric                | Returns the square root of a number. Returns NaN for a negative number |
 //! | `math::cbrt`         | 1               | Numeric                | Returns the cube root of a number |
 //! | `str::regex_matches` | 2               | String, String         | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
 //! | `str::regex_replace` | 3               | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
@@ -349,7 +352,7 @@
 //! ### Values
 //!
 //! Operators take values as arguments and produce values as results.
-//! Values can be boolean, integer or floating point numbers, strings, tuples or the empty type.
+//! Values can be booleans, integer or floating point numbers, strings, tuples or the empty type.
 //! Values are denoted as displayed in the following table.
 //!
 //! | Value type | Example |
@@ -362,13 +365,13 @@
 //! | `Value::Empty` | `()` |
 //!
 //! Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
-//! Tuples are represented as `Vec<Value>` and empty values are not stored, but represented by rust's unit type `()` where necessary.
+//! Tuples are represented as `Vec<Value>` and empty values are not stored, but represented by Rust's unit type `()` where necessary.
 //!
 //! There exist type aliases for some of the types.
 //! They include `IntType`, `FloatType`, `TupleType` and `EmptyType`.
 //!
 //! Values can be constructed either directly or using the `From` trait.
-//! Values can be decomposed using the `Value::as_[type]` methods.
+//! They can be decomposed using the `Value::as_[type]` methods.
 //! The type of a value can be checked using the `Value::is_[type]` methods.
 //!
 //! **Examples for constructing a value:**
@@ -417,8 +420,8 @@
 //!
 //! ### User-Defined Functions
 //!
-//! This crate also allows to define arbitrary functions to be used in parsed expressions.
-//! A function is defined as a `Function` instance, wrapping a boxed `Fn(&[Value]) -> EvalexprResult<Value, Error>`.
+//! This crate allows to define arbitrary functions to be used in parsed expressions.
+//! A function is defined as a `Function` instance, wrapping an `fn(&Value) -> EvalexprResult<Value>`.
 //! The definition needs to be included in the [`Context`](#contexts) that is used for evaluation.
 //! As of now, functions cannot be defined within the expression, but that might change in the future.
 //!
@@ -429,11 +432,11 @@
 //!
 //! Be aware that functions need to verify the types of values that are passed to them.
 //! The `error` module contains some shortcuts for verification, and error types for passing a wrong value type.
-//! Also, most numeric functions need to differentiate between being called with integers or floating point numbers, and act accordingly.
+//! Also, most numeric functions need to distinguish between being called with integers or floating point numbers, and act accordingly.
 //!
 //! Here are some examples and counter-examples on expressions that are interpreted as function calls:
 //!
-//! | Expression | Variable? | Explanation |
+//! | Expression | Function? | Explanation |
 //! |------------|--------|-------------|
 //! | `a v` | yes | |
 //! | `x 5.5` | yes | |
@@ -452,7 +455,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = {version = "5", features = ["serde_support"]}
+//! evalexpr = {version = "6", features = ["serde_support"]}
 //! ```
 //!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
@@ -481,8 +484,8 @@
 //!
 //! With `serde`, expressions can be integrated into arbitrarily complex data.
 //!
-//! The crate also implements `Serialize` and `Deserialize` for the `HashMapContext`.
-//! But note that only the variables get serialized, not the functions.
+//! The crate also implements `Serialize` and `Deserialize` for the `HashMapContext`,
+//! but note that only the variables get (de)serialized, not the functions.
 //!
 //! ## License
 //!
