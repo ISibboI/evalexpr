@@ -517,6 +517,7 @@ pub use crate::{
     operator::Operator,
     tree::Node,
     value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE},
+    token::PartialToken,
 };
 
 mod context;

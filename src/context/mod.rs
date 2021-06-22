@@ -50,6 +50,7 @@ pub trait GetFunctionContext: Context {
 }*/
 
 /// A context that returns `None` for each identifier.
+#[derive(Debug, Default)]
 pub struct EmptyContext;
 
 impl Context for EmptyContext {
@@ -150,20 +151,19 @@ macro_rules! context_map {
 
     // The user has to specify a literal 'Function::new' in order to create a function
     ( ($ctx:expr) $k:expr => Function::new($($v:tt)*) , $($tt:tt)*) => {{
-        $ctx.set_function($k.into(), $crate::Function::new($($v)*))
+        $crate::ContextWithMutableFunctions::set_function($ctx, $k.into(), $crate::Function::new($($v)*))
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
     // add a value, and chain the eventual error with the ones in the next values
     ( ($ctx:expr) $k:expr => $v:expr , $($tt:tt)*) => {{
-        $ctx.set_value($k.into(), $v.into())
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), $v.into())
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
 
     // Create a context, then recurse to add the values in it
     ( $($tt:tt)* ) => {{
-        use $crate::Context;
         let mut context = $crate::HashMapContext::new();
-        $crate::context_map!((context) $($tt)*)
+        $crate::context_map!((&mut context) $($tt)*)
             .map(|_| context)
     }};
 }

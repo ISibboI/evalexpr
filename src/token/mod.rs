@@ -53,22 +53,38 @@ pub enum Token {
     String(String),
 }
 
+/// A partial token is an input character whose meaning depends on the characters around it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PartialToken {
+    /// A partial token that unambiguously maps to a single token.
     Token(Token),
+    /// A partial token that is a literal.
     Literal(String),
+    /// A plus character '+'.
     Plus,
+    /// A minus character '-'.
     Minus,
+    /// A star character '*'.
     Star,
+    /// A slash character '/'.
     Slash,
+    /// A percent character '%'.
     Percent,
+    /// A hat character '^'.
     Hat,
+    /// A whitespace character, e.g. ' '.
     Whitespace,
+    /// An equal-to character '='.
     Eq,
+    /// An exclamation mark character '!'.
     ExclamationMark,
+    /// A greater-than character '>'.
     Gt,
+    /// A lower-than character '<'.
     Lt,
+    /// An ampersand character '&'.
     Ampersand,
+    /// A vertical bar character '|'.
     VerticalBar,
 }
 

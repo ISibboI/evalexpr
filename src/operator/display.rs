@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 use std::fmt::{Display, Error, Formatter};
 
 use crate::operator::*;

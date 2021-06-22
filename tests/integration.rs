@@ -1,5 +1,3 @@
-extern crate evalexpr;
-
 use evalexpr::{error::*, *};
 
 #[test]
@@ -763,4 +761,46 @@ fn test_type_errors_in_binary_operators() {
             vec![ValueType::String, ValueType::Int]
         ))
     );
+}
+
+#[test]
+fn test_empty_context() {
+    let context = EmptyContext;
+    assert_eq!(context.get_value("abc"), None);
+    assert_eq!(context.call_function("abc", &Value::Empty), Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned())));
+}
+
+#[test]
+fn test_hashmap_context_type_safety() {
+    let mut context = context_map! {"a" => 5, "b" => 5.0}.unwrap();
+    assert_eq!(eval_with_context_mut("a = 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("a = 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(4.0)}));
+    assert_eq!(eval_with_context_mut("a += 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(8.0)}));
+    assert_eq!(eval_with_context_mut("a -= 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(0.0)}));
+    assert_eq!(eval_with_context_mut("a *= 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(16.0)}));
+    assert_eq!(eval_with_context_mut("a /= 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(1.0)}));
+    assert_eq!(eval_with_context_mut("a %= 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(0.0)}));
+    assert_eq!(eval_with_context_mut("a ^= 4.0", &mut context), Err(EvalexprError::ExpectedInt {actual: Value::Float(256.0)}));
+
+    assert_eq!(eval_with_context_mut("b = 4.0", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b = 4", &mut context), Err(EvalexprError::ExpectedFloat {actual: Value::Int(4)}));
+    assert_eq!(eval_with_context_mut("b += 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b -= 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b *= 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b /= 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b %= 4", &mut context), Ok(Value::Empty));
+    assert_eq!(eval_with_context_mut("b ^= 4", &mut context), Ok(Value::Empty));
+}
+
+#[test]
+fn test_error_constructors() {
+    assert_eq!(eval("a = true + \"4\""), Err(EvalexprError::ExpectedNumberOrString { actual: Value::Boolean(true) }));
+    assert_eq!(eval("a = true && \"4\""), Err(EvalexprError::ExpectedBoolean { actual: Value::from("4") }));
+    assert_eq!(eval_tuple("4"), Err(EvalexprError::ExpectedTuple { actual: Value::Int(4) }));
+    assert_eq!(Value::Tuple(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3), Err(EvalexprError::ExpectedFixedLenTuple { expected_len: 3, actual: Value::Tuple(vec![Value::Int(4), Value::Int(5)]) }));
+    assert_eq!(eval_empty("4"), Err(EvalexprError::ExpectedEmpty {actual: Value::Int(4)}));
+    assert_eq!(eval("&"), Err(EvalexprError::UnmatchedPartialToken { first: PartialToken::Ampersand, second: None }));
+
+    assert_eq!(expect_function_argument_amount(2, 2), Ok(()));
+    assert_eq!(expect_function_argument_amount(2, 3), Err(EvalexprError::WrongFunctionArgumentAmount { expected: 3, actual: 2 }));
 }
