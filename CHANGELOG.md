@@ -6,7 +6,7 @@
 
 ### Added
 
-### Removed 
+### Removed
 
 ### Changed
 
@@ -15,6 +15,12 @@
 ### Deprecated
 
 ### Contributors
+
+## [6.1.1](https://github.com/ISibboI/evalexpr/compare/6.1.0...6.1.1) - 2021-06-22
+
+### Fixed
+
+ * Improved syntax of documentation.
 
 ## [6.1.0](https://github.com/ISibboI/evalexpr/compare/6.0.0...6.1.0) - 2021-06-02
 
