@@ -27,11 +27,11 @@ jobs:
               command: fmt
               args: --all -- --check
               components: rustfmt
-          - toolchain: stable
+          - toolchain: nightly
             command:
               name: Lint
               command: clippy
-              args: --all-features
+              args: --all-features --tests --benches
               components: clippy
 
     steps:

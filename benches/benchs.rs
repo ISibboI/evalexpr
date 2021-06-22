@@ -54,9 +54,9 @@ fn generate_small_expressions<Gen: Rng>(len: usize, gen: &mut Gen) -> Vec<String
 fn generate_large_tuple_expression<Gen: Rng>(iterations: usize, gen: &mut Gen) -> String {
     let mut result = String::from("a=(");
     result.push_str(&generate_expression(0, gen));
-    result.push_str(",");
+    result.push(',');
     result.push_str(&generate_expression(0, gen));
-    result.push_str(")");
+    result.push(')');
     for _ in 0..iterations {
         result.push_str(";a=(a,a)")
     }
@@ -86,7 +86,7 @@ fn bench_parse_many_small_expressions(bencher: &mut Bencher) {
 
     bencher.iter(|| {
         for expression in &small_expressions {
-            black_box(build_operator_tree(&expression).unwrap());
+            black_box(build_operator_tree(expression).unwrap());
         }
     });
 }
@@ -114,7 +114,7 @@ fn bench_evaluate_many_small_expressions(bencher: &mut Bencher) {
     let mut gen = Pcg32::seed_from_u64(33);
     let small_expressions: Vec<_> = generate_small_expressions(BENCHMARK_LEN, &mut gen)
         .iter()
-        .map(|expression| build_operator_tree(&expression).unwrap())
+        .map(|expression| build_operator_tree(expression).unwrap())
         .collect();
 
     bencher.iter(|| {

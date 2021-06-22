@@ -429,7 +429,7 @@ impl Operator {
             VariableIdentifier { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
-                if let Some(value) = context.get_value(&identifier).cloned() {
+                if let Some(value) = context.get_value(identifier).cloned() {
                     Ok(value)
                 } else {
                     Err(EvalexprError::VariableIdentifierNotFound(
@@ -441,9 +441,9 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let arguments = &arguments[0];
 
-                match context.call_function(&identifier, arguments) {
+                match context.call_function(identifier, arguments) {
                     Err(EvalexprError::FunctionIdentifierNotFound(_)) => {
-                        if let Some(builtin_function) = builtin_function(&identifier) {
+                        if let Some(builtin_function) = builtin_function(identifier) {
                             builtin_function.call(arguments)
                         } else {
                             Err(EvalexprError::FunctionIdentifierNotFound(
