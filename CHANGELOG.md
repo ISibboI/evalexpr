@@ -16,11 +16,27 @@
 
 ### Contributors
 
+## [6.2.0](https://github.com/ISibboI/evalexpr/compare/6.1.1...6.2.0) - 2021-06-24
+
+### Notes
+
+ * Increased test coverage
+
+### Added
+
+ * Implemented `Clone` for `HashMapContext`
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Magnus Ulimoen](https://github.com/mulimoen)
+
 ## [6.1.1](https://github.com/ISibboI/evalexpr/compare/6.1.0...6.1.1) - 2021-06-22
 
 ### Fixed
 
- * Improved syntax of documentation.
+ * Improved syntax of documentation
 
 ## [6.1.0](https://github.com/ISibboI/evalexpr/compare/6.0.0...6.1.0) - 2021-06-02
 
