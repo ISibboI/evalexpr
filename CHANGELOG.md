@@ -16,6 +16,18 @@
 
 ### Contributors
 
+## [6.3.0](https://github.com/ISibboI/evalexpr/compare/6.2.1...6.3.0) - 2021-07-06
+
+### Added
+
+ * Implement more builtin math methods
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Magnus Ulimoen](https://github.com/mulimoen)
+
 ## [6.2.0](https://github.com/ISibboI/evalexpr/compare/6.1.1...6.2.0) - 2021-06-24
 
 ### Notes
