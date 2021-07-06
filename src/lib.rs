@@ -335,7 +335,7 @@
 //! | `math::asinh`        | 1               | Numeric                | Inverse hyperbolic sine function |
 //! | `math::tan`          | 1               | Numeric                | Computes the tangent of a number (in radians) |
 //! | `math::atan`         | 1               | Numeric                | Computes the arctangent of a number. The return value is in radians in the range [-pi/2, pi/2] |
-//! | `math::atan2`        | 2               | Numeric                | Computes the four quadrant arctangent in radians |
+//! | `math::atan2`        | 2               | Numeric, Numeric       | Computes the four quadrant arctangent in radians |
 //! | `math::tanh`         | 1               | Numeric                | Hyperbolic tangent function |
 //! | `math::atanh`        | 1               | Numeric                | Inverse hyperbolic tangent function. |
 //! | `math::sqrt`         | 1               | Numeric                | Returns the square root of a number. Returns NaN for a negative number |
