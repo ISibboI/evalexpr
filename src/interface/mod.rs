@@ -2,6 +2,7 @@ use crate::{
     token, tree, value::TupleType, Context, ContextWithMutableVariables, EmptyType, EvalexprError,
     EvalexprResult, FloatType, HashMapContext, IntType, Node, Value, EMPTY_VALUE,
 };
+use std::convert::TryFrom;
 
 /// Evaluate the given expression string.
 ///
@@ -180,7 +181,10 @@ pub fn eval_number_with_context<C: Context>(
 ) -> EvalexprResult<FloatType> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(Value::Int(int)) => Ok(int as FloatType),
+        Ok(Value::Int(int)) => match i32::try_from(int).map(f64::try_from) {
+            Ok(Ok(float)) => Ok(float),
+            _ => Err(EvalexprError::expected_float(Value::Int(int))),
+        },
         Ok(value) => Err(EvalexprError::expected_float(value)),
         Err(error) => Err(error),
     }
@@ -271,7 +275,10 @@ pub fn eval_number_with_context_mut<C: ContextWithMutableVariables>(
 ) -> EvalexprResult<FloatType> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(Value::Int(int)) => Ok(int as FloatType),
+        Ok(Value::Int(int)) => match i32::try_from(int).map(f64::try_from) {
+            Ok(Ok(float)) => Ok(float),
+            _ => Err(EvalexprError::expected_float(Value::Int(int))),
+        },
         Ok(value) => Err(EvalexprError::expected_float(value)),
         Err(error) => Err(error),
     }

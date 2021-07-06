@@ -131,7 +131,7 @@ impl Value {
                 } else {
                     Err(EvalexprError::expected_fixed_len_tuple(len, self.clone()))
                 }
-            },
+            }
             value => Err(EvalexprError::expected_tuple(value.clone())),
         }
     }
