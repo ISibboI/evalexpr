@@ -13,19 +13,27 @@ macro_rules! simple_math {
             Ok(Value::Float(num.$func()))
         }))
     };
+    ($func:ident, 2) => {
+        Some(Function::new(|argument| {
+            let tuple = argument.as_fixed_len_tuple(2)?;
+            let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
+            Ok(Value::Float(a.$func(b)))
+        }))
+    };
 }
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
     match identifier {
         // Log
         "math::ln" => simple_math!(ln),
-        "math::log" => Some(Function::new(|argument| {
-            let tuple = argument.as_fixed_len_tuple(2)?;
-            let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
-            Ok(Value::Float(a.log(b)))
-        })),
+        "math::log" => simple_math!(log, 2),
         "math::log2" => simple_math!(log2),
         "math::log10" => simple_math!(log10),
+        // Exp
+        "math::exp" => simple_math!(exp),
+        "math::exp2" => simple_math!(exp2),
+        // Pow
+        "math::pow" => simple_math!(powf, 2),
         // Cos
         "math::cos" => simple_math!(cos),
         "math::acos" => simple_math!(acos),
@@ -41,9 +49,12 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::atan" => simple_math!(atan),
         "math::tanh" => simple_math!(tanh),
         "math::atanh" => simple_math!(atanh),
+        "math::atan2" => simple_math!(atan2, 2),
         // Root
         "math::sqrt" => simple_math!(sqrt),
         "math::cbrt" => simple_math!(cbrt),
+        // Hypotenuse
+        "math::hypot" => simple_math!(hypot, 2),
         // Rounding
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),

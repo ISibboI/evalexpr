@@ -322,6 +322,9 @@
 //! | `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
 //! | `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |
 //! | `math::log10`        | 1               | Numeric                | Returns the base 10 logarithm of the number |
+//! | `math::exp`          | 1               | Numeric                | Returns `e^(number)`, (the exponential function) |
+//! | `math::exp2`         | 1               | Numeric                | Returns `2^(number)` |
+//! | `math::pow`          | 2               | Numeric, Numeric       | Raises a number to the power of the other number |
 //! | `math::cos`          | 1               | Numeric                | Computes the cosine of a number (in radians) |
 //! | `math::acos`         | 1               | Numeric                | Computes the arccosine of a number. The return value is in radians in the range [0, pi] or NaN if the number is outside the range [-1, 1] |
 //! | `math::cosh`         | 1               | Numeric                | Hyperbolic cosine function |
@@ -332,10 +335,12 @@
 //! | `math::asinh`        | 1               | Numeric                | Inverse hyperbolic sine function |
 //! | `math::tan`          | 1               | Numeric                | Computes the tangent of a number (in radians) |
 //! | `math::atan`         | 1               | Numeric                | Computes the arctangent of a number. The return value is in radians in the range [-pi/2, pi/2] |
+//! | `math::atan2`        | 2               | Numeric                | Computes the four quadrant arctangent in radians |
 //! | `math::tanh`         | 1               | Numeric                | Hyperbolic tangent function |
 //! | `math::atanh`        | 1               | Numeric                | Inverse hyperbolic tangent function. |
 //! | `math::sqrt`         | 1               | Numeric                | Returns the square root of a number. Returns NaN for a negative number |
 //! | `math::cbrt`         | 1               | Numeric                | Returns the cube root of a number |
+//! | `math::hypot`        | 2               | Numeric                | Calculates the length of the hypotenuse of a right-angle triangle given legs of length given by the two arguments |
 //! | `str::regex_matches` | 2               | String, String         | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
 //! | `str::regex_replace` | 3               | String, String, String | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
 //! | `str::to_lowercase`  | 1               | String                 | Returns the lower-case version of the string |
