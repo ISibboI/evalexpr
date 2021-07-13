@@ -4,7 +4,7 @@
 
 ### Notes
 
- * Minimum supported Rust version (MSRV) increased to `1.46`
+ * Minimum supported Rust version (MSRV) increased to `1.46.0`
  * Increased test coverage by adding more test and ignoring untestable files
 
 ### Added
