@@ -5,7 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "6"
+//! evalexpr = "7"
 //! ```
 //!
 //! Then you can use `evalexpr` to **evaluate expressions** like this:
@@ -460,7 +460,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = {version = "6", features = ["serde_support"]}
+//! evalexpr = {version = "7", features = ["serde_support"]}
 //! ```
 //!
 //! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.

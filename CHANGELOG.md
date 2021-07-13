@@ -4,13 +4,20 @@
 
 ### Notes
 
+ * Minimum supported Rust version (MSRV) increased to `1.46`
+ * Increased test coverage by adding more test and ignoring untestable files
+
 ### Added
 
 ### Removed
 
 ### Changed
+ 
+ * Made some functions `const`. This increased the MSRV
 
 ### Fixed
+
+ * `eval_number` methods returned `EvalexprError::ExpectedFloat` before, now they correctly return `EvalexprError::ExpectedNumber`
 
 ### Deprecated
 

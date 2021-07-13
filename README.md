@@ -22,7 +22,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "6"
+evalexpr = "7"
 ```
 
 Then you can use `evalexpr` to **evaluate expressions** like this:
@@ -477,7 +477,7 @@ This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "6", features = ["serde_support"]}
+evalexpr = {version = "7", features = ["serde_support"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
