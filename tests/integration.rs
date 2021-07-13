@@ -412,28 +412,280 @@ fn test_shortcut_functions() {
         .set_value("string".into(), Value::from("a string"))
         .unwrap();
 
-    // assert_eq!(eval_string("???"));
+    assert_eq!(eval_string("\"3.3\""), Ok("3.3".to_owned()));
+    assert_eq!(
+        eval_string("3.3"),
+        Err(EvalexprError::ExpectedString {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_string("3..3"),
+        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+    );
     assert_eq!(
         eval_string_with_context("string", &context),
+        Ok("a string".to_owned())
+    );
+    assert_eq!(
+        eval_string_with_context("3.3", &context),
+        Err(EvalexprError::ExpectedString {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_string_with_context("3..3", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+    );
+    assert_eq!(
+        eval_string_with_context_mut("string", &mut context),
         Ok("a string".to_string())
     );
+    assert_eq!(
+        eval_string_with_context_mut("3.3", &mut context),
+        Err(EvalexprError::ExpectedString {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_string_with_context_mut("3..3", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+    );
+
     assert_eq!(eval_float("3.3"), Ok(3.3));
+    assert_eq!(
+        eval_float("33"),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_float("asd()"),
+        Err(EvalexprError::FunctionIdentifierNotFound("asd".to_owned()))
+    );
     assert_eq!(eval_float_with_context("3.3", &context), Ok(3.3));
+    assert_eq!(
+        eval_float_with_context("33", &context),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_float_with_context("asd)", &context),
+        Err(EvalexprError::UnmatchedRBrace)
+    );
+    assert_eq!(eval_float_with_context_mut("3.3", &mut context), Ok(3.3));
+    assert_eq!(
+        eval_float_with_context_mut("33", &mut context),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_float_with_context_mut("asd(", &mut context),
+        Err(EvalexprError::UnmatchedLBrace)
+    );
+
     assert_eq!(eval_int("3"), Ok(3));
+    assert_eq!(
+        eval_int("3.3"),
+        Err(EvalexprError::ExpectedInt {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_int("(,);."),
+        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+    );
     assert_eq!(eval_int_with_context("3", &context), Ok(3));
+    assert_eq!(
+        eval_int_with_context("3.3", &context),
+        Err(EvalexprError::ExpectedInt {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_int_with_context("(,);.", &context),
+        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+    );
+    assert_eq!(eval_int_with_context_mut("3", &mut context), Ok(3));
+    assert_eq!(
+        eval_int_with_context_mut("3.3", &mut context),
+        Err(EvalexprError::ExpectedInt {
+            actual: Value::Float(3.3)
+        })
+    );
+    assert_eq!(
+        eval_int_with_context_mut("(,);.", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+    );
+
     assert_eq!(eval_number("3"), Ok(3.0));
+    assert_eq!(
+        eval_number("true"),
+        Err(EvalexprError::ExpectedNumber {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        eval_number("abc"),
+        Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
+    );
     assert_eq!(eval_number_with_context("3", &context), Ok(3.0));
+    assert_eq!(
+        eval_number_with_context("true", &context),
+        Err(EvalexprError::ExpectedNumber {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        eval_number_with_context("abc", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
+    );
+    assert_eq!(eval_number_with_context_mut("3", &mut context), Ok(3.0));
+    assert_eq!(
+        eval_number_with_context_mut("true", &mut context),
+        Err(EvalexprError::ExpectedNumber {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        eval_number_with_context_mut("abc", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
+    );
+
     assert_eq!(eval_boolean("true"), Ok(true));
+    assert_eq!(
+        eval_boolean("4"),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: Value::Int(4)
+        })
+    );
+    assert_eq!(
+        eval_boolean("trueee"),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "trueee".to_owned()
+        ))
+    );
     assert_eq!(eval_boolean_with_context("true", &context), Ok(true));
+    assert_eq!(
+        eval_boolean_with_context("4", &context),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: Value::Int(4)
+        })
+    );
+    assert_eq!(
+        eval_boolean_with_context("trueee", &context),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "trueee".to_owned()
+        ))
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("true", &mut context),
+        Ok(true)
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("4", &mut context),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: Value::Int(4)
+        })
+    );
+    assert_eq!(
+        eval_boolean_with_context_mut("trueee", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "trueee".to_owned()
+        ))
+    );
+
     assert_eq!(eval_tuple("3,3"), Ok(vec![Value::Int(3), Value::Int(3)]));
+    assert_eq!(
+        eval_tuple("33"),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_tuple("3a3"),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
     assert_eq!(
         eval_tuple_with_context("3,3", &context),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
-    assert_eq!(eval_empty(""), Ok(EMPTY_VALUE));
-    assert_eq!(eval_empty_with_context("", &context), Ok(EMPTY_VALUE));
+    assert_eq!(
+        eval_tuple_with_context("33", &context),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_tuple_with_context("3a3", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+    assert_eq!(
+        eval_tuple_with_context_mut("3,3", &mut context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        eval_tuple_with_context_mut("33", &mut context),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_tuple_with_context_mut("3a3", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
 
-    // assert_eq!(build_operator_tree("???").unwrap().eval_string());
+    assert_eq!(eval_empty(""), Ok(EMPTY_VALUE));
+    assert_eq!(eval_empty("()"), Ok(EMPTY_VALUE));
+    assert_eq!(
+        eval_empty("(,)"),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+        })
+    );
+    assert_eq!(
+        eval_empty("xaq"),
+        Err(EvalexprError::VariableIdentifierNotFound("xaq".to_owned()))
+    );
+    assert_eq!(eval_empty_with_context("", &context), Ok(EMPTY_VALUE));
+    assert_eq!(eval_empty_with_context("()", &context), Ok(EMPTY_VALUE));
+    assert_eq!(
+        eval_empty_with_context("(,)", &context),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+        })
+    );
+    assert_eq!(
+        eval_empty_with_context("xaq", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("xaq".to_owned()))
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("()", &mut context),
+        Ok(EMPTY_VALUE)
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("(,)", &mut context),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Tuple(vec![Value::Empty, Value::Empty])
+        })
+    );
+    assert_eq!(
+        eval_empty_with_context_mut("xaq", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("xaq".to_owned()))
+    );
+
+    // With detour via build_operator_tree
+
+    assert_eq!(
+        build_operator_tree("\"???\"").unwrap().eval_string(),
+        Ok("???".to_owned())
+    );
     assert_eq!(
         build_operator_tree("string")
             .unwrap()
@@ -485,26 +737,6 @@ fn test_shortcut_functions() {
         build_operator_tree("")
             .unwrap()
             .eval_empty_with_context(&context),
-        Ok(EMPTY_VALUE)
-    );
-
-    assert_eq!(
-        eval_string_with_context_mut("string", &mut context),
-        Ok("a string".to_string())
-    );
-    assert_eq!(eval_float_with_context_mut("3.3", &mut context), Ok(3.3));
-    assert_eq!(eval_int_with_context_mut("3", &mut context), Ok(3));
-    assert_eq!(eval_number_with_context_mut("3", &mut context), Ok(3.0));
-    assert_eq!(
-        eval_boolean_with_context_mut("true", &mut context),
-        Ok(true)
-    );
-    assert_eq!(
-        eval_tuple_with_context_mut("3,3", &mut context),
-        Ok(vec![Value::Int(3), Value::Int(3)])
-    );
-    assert_eq!(
-        eval_empty_with_context_mut("", &mut context),
         Ok(EMPTY_VALUE)
     );
 
@@ -625,6 +857,14 @@ fn test_strings() {
     assert_eq!(eval("\"xa\" < \"xb\""), Ok(Value::from(true)));
     assert_eq!(eval("\"{}\" != \"{}\""), Ok(Value::from(false)));
     assert_eq!(eval("\"{}\" == \"{}\""), Ok(Value::from(true)));
+}
+
+#[test]
+fn test_string_escaping() {
+    assert_eq!(
+        eval("\"\\\"str\\\\ing\\\"\""),
+        Ok(Value::from("\"str\\ing\""))
+    );
 }
 
 #[test]
@@ -926,4 +1166,21 @@ fn test_error_constructors() {
             actual: 2
         })
     );
+}
+
+#[test]
+fn test_iterators() {
+    let tree = build_operator_tree("5 + 3 + fun(4) + var").unwrap();
+    let mut iter = tree.iter_identifiers();
+    assert_eq!(iter.next(), Some("fun"));
+    assert_eq!(iter.next(), Some("var"));
+    assert_eq!(iter.next(), None);
+
+    let mut iter = tree.iter_variable_identifiers();
+    assert_eq!(iter.next(), Some("var"));
+    assert_eq!(iter.next(), None);
+
+    let mut iter = tree.iter_function_identifiers();
+    assert_eq!(iter.next(), Some("fun"));
+    assert_eq!(iter.next(), None);
 }

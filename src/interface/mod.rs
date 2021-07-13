@@ -181,7 +181,7 @@ pub fn eval_number_with_context<C: Context>(
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(Value::Int(int)) => Ok(int as FloatType),
-        Ok(value) => Err(EvalexprError::expected_float(value)),
+        Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),
     }
 }
@@ -272,7 +272,7 @@ pub fn eval_number_with_context_mut<C: ContextWithMutableVariables>(
     match eval_with_context_mut(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(Value::Int(int)) => Ok(int as FloatType),
-        Ok(value) => Err(EvalexprError::expected_float(value)),
+        Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),
     }
 }

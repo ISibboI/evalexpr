@@ -122,6 +122,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
 }
 
 impl Token {
+    #[cfg(not(tarpaulin_include))]
     pub(crate) const fn is_leftsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
@@ -165,6 +166,7 @@ impl Token {
         }
     }
 
+    #[cfg(not(tarpaulin_include))]
     pub(crate) const fn is_rightsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
@@ -208,6 +210,7 @@ impl Token {
         }
     }
 
+    #[cfg(not(tarpaulin_include))]
     pub(crate) fn is_assignment(&self) -> bool {
         use Token::*;
         matches!(
