@@ -421,3 +421,32 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
 pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
     partial_tokens_to_tokens(&str_to_partial_tokens(string)?)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::token::{char_to_partial_token, tokenize};
+
+    #[test]
+    fn test_partial_token_display() {
+        let chars = vec![
+            '+', '-', '*', '/', '%', '^', '(', ')', ',', ';', '=', '!', '>', '<', '&', '|', ' ',
+        ];
+
+        for char in chars {
+            assert_eq!(format!("{}", char), format!("{}", char_to_partial_token(char)));
+        }
+    }
+    
+    #[test]
+    fn test_token_display() {
+        let token_string = "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
+        let tokens = tokenize(token_string).unwrap();
+        let mut result_string = String::new();
+
+        for token in tokens {
+            result_string += &format!("{} ", token);
+        }
+
+        assert_eq!(token_string, result_string);
+    }
+}

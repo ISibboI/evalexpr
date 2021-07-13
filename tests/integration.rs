@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 use evalexpr::{error::*, *};
 
 #[test]
@@ -274,6 +276,10 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::log(9, 9)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("math::log2(2)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("math::log10(10)"), Ok(Value::Float(1.0)));
+    // Powers
+    assert_eq!(eval("math::exp(2)"), Ok(Value::Float(2.0_f64.exp())));
+    assert_eq!(eval("math::exp2(2)"), Ok(Value::Float(2.0_f64.exp2())));
+    assert_eq!(eval("math::pow(1.5, 1.3)"), Ok(Value::Float(1.5_f64.powf(1.3))));
     // Cos
     assert_eq!(eval("math::cos(0)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("math::acos(1)"), Ok(Value::Float(0.0)));
@@ -289,9 +295,12 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::atan(0)"), Ok(Value::Float(0.0)));
     assert_eq!(eval("math::tanh(0)"), Ok(Value::Float(0.0)));
     assert_eq!(eval("math::atanh(0)"), Ok(Value::Float(0.0)));
+    assert_eq!(eval("math::atan2(1.2, -5.5)"), Ok(Value::Float(1.2_f64.atan2(-5.5))));
     // Root
     assert_eq!(eval("math::sqrt(25)"), Ok(Value::Float(5.0)));
     assert_eq!(eval("math::cbrt(8)"), Ok(Value::Float(2.0)));
+    // Hypotenuse
+    assert_eq!(eval("math::hypot(8.2, 1.1)"), Ok(Value::Float(8.2_f64.hypot(1.1))));
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("floor(1.9)"), Ok(Value::Float(1.0)));

@@ -9,6 +9,8 @@ use crate::{token::PartialToken, value::value_type::ValueType};
 
 use crate::{operator::Operator, value::Value};
 
+// Exclude error display code from test coverage, as the code does not make sense to test.
+#[cfg(not(tarpaulin_include))]
 mod display;
 
 /// Errors used in this crate.
