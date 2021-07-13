@@ -190,7 +190,7 @@ impl Node {
         match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
-            Ok(value) => Err(EvalexprError::expected_int(value)),
+            Ok(value) => Err(EvalexprError::expected_number(value)),
             Err(error) => Err(error),
         }
     }
@@ -281,7 +281,7 @@ impl Node {
         match self.eval_with_context_mut(context) {
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
-            Ok(value) => Err(EvalexprError::expected_int(value)),
+            Ok(value) => Err(EvalexprError::expected_number(value)),
             Err(error) => Err(error),
         }
     }
