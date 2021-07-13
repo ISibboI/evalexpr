@@ -433,13 +433,17 @@ mod tests {
         ];
 
         for char in chars {
-            assert_eq!(format!("{}", char), format!("{}", char_to_partial_token(char)));
+            assert_eq!(
+                format!("{}", char),
+                format!("{}", char_to_partial_token(char))
+            );
         }
     }
-    
+
     #[test]
     fn test_token_display() {
-        let token_string = "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
+        let token_string =
+            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
         let tokens = tokenize(token_string).unwrap();
         let mut result_string = String::new();
 
