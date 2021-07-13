@@ -1,3 +1,4 @@
+#![cfg(not(tarpaulin_include))]
 #![cfg(feature = "regex_support")]
 
 use evalexpr::*;

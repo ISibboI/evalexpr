@@ -1,3 +1,4 @@
+#![cfg(not(tarpaulin_include))]
 #![cfg(feature = "serde")]
 
 use evalexpr::{build_operator_tree, Node};
