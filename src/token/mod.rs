@@ -88,7 +88,7 @@ pub enum PartialToken {
     VerticalBar,
 }
 
-// Make this a const fn as soon as match gets stable (issue #57563)
+// Make this a const fn as soon as is_whitespace and to_string get stable (issue #57563)
 fn char_to_partial_token(c: char) -> PartialToken {
     match c {
         '+' => PartialToken::Plus,
@@ -122,8 +122,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
 }
 
 impl Token {
-    // Make this a const fn as soon as match gets stable (issue #57563)
-    pub(crate) fn is_leftsided_value(&self) -> bool {
+    pub(crate) const fn is_leftsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
             Token::Minus => false,
@@ -166,8 +165,7 @@ impl Token {
         }
     }
 
-    // Make this a const fn as soon as match gets stable (issue #57563)
-    pub(crate) fn is_rightsided_value(&self) -> bool {
+    pub(crate) const fn is_rightsided_value(&self) -> bool {
         match self {
             Token::Plus => false,
             Token::Minus => false,
