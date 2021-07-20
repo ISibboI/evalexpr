@@ -355,7 +355,25 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     } else if let Ok(boolean) = literal.parse::<bool>() {
                         Some(Token::Boolean(boolean))
                     } else {
-                        Some(Token::Identifier(literal.to_string()))
+                        // If there are two tokens following this one, check if the next one is
+                        // a plus or a minus. If so, then attempt to parse all three tokens as a
+                        // scientific notation number of the form `<coefficient>e{+,-}<exponent>`,
+                        // for example [Literal("10e"), Minus, Literal("3")] => "1e-3".parse().
+                        match (second, third) {
+                            (Some(s), Some(t))
+                                if s == PartialToken::Minus || s == PartialToken::Plus =>
+                            {
+                                if let Ok(number) =
+                                    format!("{}{}{}", literal, s, t).parse::<FloatType>()
+                                {
+                                    cutoff = 3;
+                                    Some(Token::Float(number))
+                                } else {
+                                    Some(Token::Identifier(literal.to_string()))
+                                }
+                            }
+                            _ => Some(Token::Identifier(literal.to_string())),
+                        }
                     }
                 },
                 PartialToken::Whitespace => {
