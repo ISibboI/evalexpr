@@ -9,6 +9,8 @@
 
 ### Added
 
+ * Allow scientific notation in float literals
+
 ### Removed
 
 ### Changed
@@ -22,6 +24,10 @@
 ### Deprecated
 
 ### Contributors
+
+My warmhearted thanks goes to
+
+ * [Dennis Marttinen](https://github.com/twelho)
 
 ## [6.3.0](https://github.com/ISibboI/evalexpr/compare/6.2.1...6.3.0) - 2021-07-06
 
