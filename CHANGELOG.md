@@ -4,14 +4,28 @@
 
 ### Notes
 
+### Added
+
+### Removed
+
+### Changed
+
+### Fixed
+
+### Deprecated
+
+### Contributors
+
+## [6.4.0](https://github.com/ISibboI/evalexpr/compare/6.3.0...6.4.0) - 2021-07-21
+
+### Notes
+
  * Minimum supported Rust version (MSRV) increased to `1.46.0`
  * Increased test coverage by adding more test and ignoring untestable files
 
 ### Added
 
  * Allow scientific notation in float literals
-
-### Removed
 
 ### Changed
  
@@ -20,8 +34,6 @@
 ### Fixed
 
  * `eval_number` methods returned `EvalexprError::ExpectedFloat` before, now they correctly return `EvalexprError::ExpectedNumber`
-
-### Deprecated
 
 ### Contributors
 
