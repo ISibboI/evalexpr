@@ -17,6 +17,11 @@ fn test_unary_examples() {
     assert_eq!(eval("-3"), Ok(Value::Int(-3)));
     assert_eq!(eval("-3.6"), Ok(Value::Float(-3.6)));
     assert_eq!(eval("----3"), Ok(Value::Int(3)));
+    assert_eq!(eval("1e0"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("1e-0"), Ok(Value::Float(1.0)));
+    assert_eq!(eval("10e3"), Ok(Value::Float(10000.0)));
+    assert_eq!(eval("10e+3"), Ok(Value::Float(10000.0)));
+    assert_eq!(eval("10e-3"), Ok(Value::Float(0.01)));
 }
 
 #[test]
@@ -41,6 +46,8 @@ fn test_binary_examples() {
     assert_eq!(eval("3+-1"), Ok(Value::Int(2)));
     assert_eq!(eval("-3-5"), Ok(Value::Int(-8)));
     assert_eq!(eval("-5--3"), Ok(Value::Int(-2)));
+    assert_eq!(eval("5e2--3"), Ok(Value::Float(503.0)));
+    assert_eq!(eval("-5e-2--3"), Ok(Value::Float(2.95)));
 }
 
 #[test]
