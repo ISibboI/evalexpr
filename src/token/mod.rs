@@ -360,11 +360,12 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                         // scientific notation number of the form `<coefficient>e{+,-}<exponent>`,
                         // for example [Literal("10e"), Minus, Literal("3")] => "1e-3".parse().
                         match (second, third) {
-                            (Some(s), Some(t))
-                                if s == PartialToken::Minus || s == PartialToken::Plus =>
+                            (Some(second), Some(third))
+                                if second == PartialToken::Minus
+                                    || second == PartialToken::Plus =>
                             {
                                 if let Ok(number) =
-                                    format!("{}{}{}", literal, s, t).parse::<FloatType>()
+                                    format!("{}{}{}", literal, second, third).parse::<FloatType>()
                                 {
                                     cutoff = 3;
                                     Some(Token::Float(number))
