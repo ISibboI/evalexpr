@@ -6,6 +6,8 @@
 
 ### Added
 
+ * Bitwise operators as builtin functions `bitand`, `bitor`, `bitxor`, `bitnot` (#88)
+
 ### Removed
 
 ### Changed
