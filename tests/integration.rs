@@ -1492,3 +1492,44 @@ fn test_iterators() {
     assert_eq!(iter.next(), Some("fun"));
     assert_eq!(iter.next(), None);
 }
+
+#[test]
+fn test_same_operator_chains() {
+    #![allow(clippy::eq_op)]
+    assert_eq!(
+        eval("3.0 / 3.0 / 3.0 / 3.0"),
+        Ok(Value::from(3.0 / 3.0 / 3.0 / 3.0))
+    );
+    assert_eq!(
+        eval("3.0 - 3.0 - 3.0 - 3.0"),
+        Ok(Value::from(3.0 - 3.0 - 3.0 - 3.0))
+    );
+}
+
+#[test]
+fn test_long_expression_i89() {
+    let tree = build_operator_tree(
+        "x*0.2*5/4+x*2*4*1*1*1*1*1*1*1+7*math::sin(y)-z/math::sin(3.0/2.0/(1-x*4*1*1*1*1))",
+    )
+    .unwrap();
+    let x = 0.0;
+    let y: f64 = 3.0;
+    let z = 4.0;
+    let context = context_map! {
+        "x" => 0.0,
+        "y" => 3.0,
+        "z" => 4.0
+    }
+    .unwrap();
+    let expected = x * 0.2 * 5.0 / 4.0
+        + x * 2.0 * 4.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0
+        + 7.0 * y.sin()
+        - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin();
+    let actual = tree.eval_float_with_context(&context).unwrap();
+    assert!(
+        (expected - actual).abs() < expected.abs().min(actual.abs()) * 1e-12,
+        "expected: {}, actual: {}",
+        expected,
+        actual
+    );
+}
