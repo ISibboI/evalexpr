@@ -115,8 +115,8 @@
 //! |----------|------------|-------------|
 //! | ^ | 120 | Exponentiation |
 //! | * | 100 | Product |
-//! | / | 100 | Division |
-//! | % | 100 | Modulo |
+//! | / | 100 | Division (integer if both arguments are integers, otherwise float) |
+//! | % | 100 | Modulo (integer if both arguments are integers, otherwise float) |
 //! | + | 95 | Sum or String Concatenation |
 //! | - | 95 | Difference |
 //! | < | 80 | Lower than |
@@ -150,6 +150,15 @@
 //! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
 //! Otherwise, the result is an integer.
 //! An exception to this is the exponentiation operator that always returns a floating point number.
+//! Example:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("1 / 2"), Ok(Value::from(0)));
+//! assert_eq!(eval("1.0 / 2"), Ok(Value::from(0.5)));
+//! assert_eq!(eval("2^2"), Ok(Value::from(4.0)));
+//! ```
 //!
 //! #### The Aggregation Operator
 //!
