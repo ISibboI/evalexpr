@@ -277,6 +277,36 @@ fn test_n_ary_functions() {
 }
 
 #[test]
+fn test_capturing_functions() {
+    let mut context = HashMapContext::new();
+    // this variable is captured by the function
+    let three = 3;
+    context
+        .set_function(
+            "mult_3".into(),
+            Function::new(move |argument| {
+                if let Value::Int(int) = argument {
+                    Ok(Value::Int(int * three))
+                } else if let Value::Float(float) = argument {
+                    Ok(Value::Float(float * three as f64))
+                } else {
+                    Err(EvalexprError::expected_number(argument.clone()))
+                }
+            }),
+        )
+        .unwrap();
+
+    let four = 4;
+    context
+        .set_function("function_four".into(), Function::new(move |_| Ok(Value::Int(four))))
+        .unwrap();
+
+    assert_eq!(eval_with_context("mult_3 2", &context), Ok(Value::Int(6)));
+    assert_eq!(eval_with_context("mult_3(3)", &context), Ok(Value::Int(9)));
+    assert_eq!(eval_with_context("mult_3(function_four())", &context), Ok(Value::Int(12)));
+}
+
+#[test]
 fn test_builtin_functions() {
     // Log
     assert_eq!(eval("math::ln(2.718281828459045)"), Ok(Value::Float(1.0)));
