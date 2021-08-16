@@ -1462,6 +1462,56 @@ fn test_hashmap_context_type_safety() {
 }
 
 #[test]
+fn test_hashmap_context_clone_debug() {
+    let mut context = HashMapContext::new();
+    // this variable is captured by the function
+    let three = 3;
+    context
+        .set_function(
+            "mult_3".into(),
+            Function::new(move |argument| {
+                if let Value::Int(int) = argument {
+                    Ok(Value::Int(int * three))
+                } else if let Value::Float(float) = argument {
+                    Ok(Value::Float(float * three as f64))
+                } else {
+                    Err(EvalexprError::expected_number(argument.clone()))
+                }
+            }),
+        )
+        .unwrap();
+
+    let four = 4;
+    context
+        .set_function(
+            "function_four".into(),
+            Function::new(move |_| Ok(Value::Int(four))),
+        )
+        .unwrap();
+    context.set_value("variable_five".into(), 5.into()).unwrap();
+    let context = context;
+    let cloned_context = context.clone();
+
+    assert_eq!(format!("{:?}", &context), format!("{:?}", &cloned_context));
+    assert_eq!(
+        cloned_context.get_value("variable_five"),
+        Some(&Value::from(5))
+    );
+    assert_eq!(
+        eval_with_context("mult_3 2", &cloned_context),
+        Ok(Value::Int(6))
+    );
+    assert_eq!(
+        eval_with_context("mult_3(3)", &cloned_context),
+        Ok(Value::Int(9))
+    );
+    assert_eq!(
+        eval_with_context("mult_3(function_four())", &cloned_context),
+        Ok(Value::Int(12))
+    );
+}
+
+#[test]
 fn test_error_constructors() {
     assert_eq!(
         eval("a = true + \"4\""),
@@ -1567,5 +1617,184 @@ fn test_long_expression_i89() {
         "expected: {}, actual: {}",
         expected,
         actual
+    );
+}
+
+#[test]
+fn test_value_type() {
+    assert_eq!(
+        ValueType::from(&Value::String(String::new())),
+        ValueType::String
+    );
+    assert_eq!(ValueType::from(&Value::Float(0.0)), ValueType::Float);
+    assert_eq!(ValueType::from(&Value::Int(0)), ValueType::Int);
+    assert_eq!(ValueType::from(&Value::Boolean(true)), ValueType::Boolean);
+    assert_eq!(ValueType::from(&Value::Tuple(Vec::new())), ValueType::Tuple);
+    assert_eq!(ValueType::from(&Value::Empty), ValueType::Empty);
+
+    assert_eq!(
+        ValueType::from(&mut Value::String(String::new())),
+        ValueType::String
+    );
+    assert_eq!(ValueType::from(&mut Value::Float(0.0)), ValueType::Float);
+    assert_eq!(ValueType::from(&mut Value::Int(0)), ValueType::Int);
+    assert_eq!(
+        ValueType::from(&mut Value::Boolean(true)),
+        ValueType::Boolean
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::Tuple(Vec::new())),
+        ValueType::Tuple
+    );
+    assert_eq!(ValueType::from(&mut Value::Empty), ValueType::Empty);
+
+    assert!(!Value::String(String::new()).is_number());
+    assert!(Value::Float(0.0).is_number());
+    assert!(Value::Int(0).is_number());
+    assert!(!Value::Boolean(true).is_number());
+    assert!(!Value::Tuple(Vec::new()).is_number());
+    assert!(!Value::Empty.is_number());
+
+    assert!(!Value::String(String::new()).is_empty());
+    assert!(!Value::Float(0.0).is_empty());
+    assert!(!Value::Int(0).is_empty());
+    assert!(!Value::Boolean(true).is_empty());
+    assert!(!Value::Tuple(Vec::new()).is_empty());
+    assert!(Value::Empty.is_empty());
+
+    assert_eq!(
+        Value::String(String::new()).as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::String(String::new())
+        })
+    );
+    assert_eq!(Value::Float(0.0).as_float(), Ok(0.0));
+    assert_eq!(
+        Value::Int(0).as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Int(0)
+        })
+    );
+    assert_eq!(
+        Value::Boolean(true).as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        Value::Tuple(Vec::new()).as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Tuple(Vec::new())
+        })
+    );
+    assert_eq!(
+        Value::Empty.as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Empty
+        })
+    );
+
+    assert_eq!(
+        Value::String(String::new()).as_tuple(),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::String(String::new())
+        })
+    );
+    assert_eq!(
+        Value::Float(0.0).as_tuple(),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Float(0.0)
+        })
+    );
+    assert_eq!(
+        Value::Int(0).as_tuple(),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(0)
+        })
+    );
+    assert_eq!(
+        Value::Boolean(true).as_tuple(),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(Value::Tuple(Vec::new()).as_tuple(), Ok(Vec::new()));
+    assert_eq!(
+        Value::Empty.as_tuple(),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Empty
+        })
+    );
+
+    assert_eq!(
+        Value::String(String::new()).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::String(String::new())
+        })
+    );
+    assert_eq!(
+        Value::Float(0.0).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Float(0.0)
+        })
+    );
+    assert_eq!(
+        Value::Int(0).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(0)
+        })
+    );
+    assert_eq!(
+        Value::Boolean(true).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        Value::Tuple(Vec::new()).as_fixed_len_tuple(0),
+        Ok(Vec::new())
+    );
+    assert_eq!(
+        Value::Empty.as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Empty
+        })
+    );
+
+    assert_eq!(
+        Value::String(String::new()).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::String(String::new())
+        })
+    );
+    assert_eq!(
+        Value::Float(0.0).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Float(0.0)
+        })
+    );
+    assert_eq!(
+        Value::Int(0).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Int(0)
+        })
+    );
+    assert_eq!(
+        Value::Boolean(true).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        Value::Tuple(Vec::new()).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Tuple(Vec::new())
+        })
+    );
+    assert_eq!(Value::Empty.as_empty(), Ok(()));
+
+    assert_eq!(
+        Result::from(Value::String(String::new())),
+        Ok(Value::String(String::new()))
     );
 }

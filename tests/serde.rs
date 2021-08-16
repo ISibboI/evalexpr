@@ -30,4 +30,11 @@ fn test_serde_errors() {
                 .to_owned()
         ))
     );
+    // Ensure that this does not panic.
+    assert_ne!(
+        ron::de::from_str::<Node>("[\"5==5\"]")
+            .unwrap_err()
+            .to_string(),
+        ""
+    );
 }
