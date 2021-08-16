@@ -16,6 +16,19 @@
 
 ### Contributors
 
+## [6.5.0](https://github.com/ISibboI/evalexpr/compare/6.4.0...6.5.0) - 2021-08-16
+
+### Added
+
+ * Make `Function::new` able to accept closures (thanks to Jakub Dąbek)
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Jakub Dąbek](https://github.com/jakubdabek)
+ * [LonnonjamesD](https://github.com/LonnonjamesD)
+
 ## [6.4.0](https://github.com/ISibboI/evalexpr/compare/6.3.0...6.4.0) - 2021-07-21
 
 ### Notes
