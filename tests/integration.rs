@@ -298,12 +298,18 @@ fn test_capturing_functions() {
 
     let four = 4;
     context
-        .set_function("function_four".into(), Function::new(move |_| Ok(Value::Int(four))))
+        .set_function(
+            "function_four".into(),
+            Function::new(move |_| Ok(Value::Int(four))),
+        )
         .unwrap();
 
     assert_eq!(eval_with_context("mult_3 2", &context), Ok(Value::Int(6)));
     assert_eq!(eval_with_context("mult_3(3)", &context), Ok(Value::Int(9)));
-    assert_eq!(eval_with_context("mult_3(function_four())", &context), Ok(Value::Int(12)));
+    assert_eq!(
+        eval_with_context("mult_3(function_four())", &context),
+        Ok(Value::Int(12))
+    );
 }
 
 #[test]
