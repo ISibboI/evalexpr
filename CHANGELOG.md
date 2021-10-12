@@ -6,6 +6,7 @@
 
 ### Added
 
+ * Bitwise operators as builtin functions `bitand`, `bitor`, `bitxor`, `bitnot` (#88)
  * Public immutable and mutable accessor functions to the operator and children of a Node.
 
 ### Removed

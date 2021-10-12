@@ -5,6 +5,7 @@ use crate::{
     value::{FloatType, IntType},
     EvalexprError, Function, Value, ValueType,
 };
+use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 macro_rules! simple_math {
     ($func:ident) => {
@@ -18,6 +19,22 @@ macro_rules! simple_math {
             let tuple = argument.as_fixed_len_tuple(2)?;
             let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
             Ok(Value::Float(a.$func(b)))
+        }))
+    };
+}
+
+macro_rules! int_function {
+    ($func:ident) => {
+        Some(Function::new(|argument| {
+            let int = argument.as_int()?;
+            Ok(Value::Int(int.$func()))
+        }))
+    };
+    ($func:ident, 2) => {
+        Some(Function::new(|argument| {
+            let tuple = argument.as_fixed_len_tuple(2)?;
+            let (a, b) = (tuple[0].as_int()?, tuple[1].as_int()?);
+            Ok(Value::Int(a.$func(b)))
         }))
     };
 }
@@ -163,6 +180,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "str::from" => Some(Function::new(|argument| {
             Ok(Value::String(argument.to_string()))
         })),
+        // Bitwise operators
+        "bitand" => int_function!(bitand, 2),
+        "bitor" => int_function!(bitor, 2),
+        "bitxor" => int_function!(bitxor, 2),
+        "bitnot" => int_function!(not),
         _ => None,
     }
 }

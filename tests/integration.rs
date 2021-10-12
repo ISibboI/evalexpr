@@ -395,6 +395,14 @@ fn test_builtin_functions() {
         Ok(Value::String(String::from("(1, 2, 3)")))
     );
     assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()"))));
+    assert_eq!(eval("bitand(5, -1)"), Ok(Value::Int(5)));
+    assert_eq!(eval("bitand(6, 5)"), Ok(Value::Int(4)));
+    assert_eq!(eval("bitor(5, -1)"), Ok(Value::Int(-1)));
+    assert_eq!(eval("bitor(6, 5)"), Ok(Value::Int(7)));
+    assert_eq!(eval("bitxor(5, -1)"), Ok(Value::Int(-6)));
+    assert_eq!(eval("bitxor(6, 5)"), Ok(Value::Int(3)));
+    assert_eq!(eval("bitnot(5)"), Ok(Value::Int(-6)));
+    assert_eq!(eval("bitnot(-1)"), Ok(Value::Int(0)));
 }
 
 #[test]

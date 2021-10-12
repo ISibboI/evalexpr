@@ -373,6 +373,10 @@ This crate offers a set of builtin functions.
 | `str::to_uppercase`  | 1               | String                 | Returns the upper-case version of the string |
 | `str::trim`          | 1               | String                 | Strips whitespace from the start and the end of the string |
 | `str::from`          | >= 0            | Any                    | Returns passed value as string |
+| `bitand`             | 2               | Int                    | Computes the bitwise and of the given integers |
+| `bitor`              | 2               | Int                    | Computes the bitwise or of the given integers |
+| `bitxor`             | 2               | Int                    | Computes the bitwise xor of the given integers |
+| `bitnot`             | 1               | Int                    | Computes the bitwise not of the given integer |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
 If the maximum or minimum is an integer, then an integer is returned.
