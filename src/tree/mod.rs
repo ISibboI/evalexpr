@@ -378,12 +378,28 @@ impl Node {
         self.eval_empty_with_context_mut(&mut HashMapContext::new())
     }
 
-    fn children(&self) -> &[Node] {
+    /// Returns the children of this node as a slice.
+    pub fn children(&self) -> &[Node] {
         &self.children
     }
 
-    fn operator(&self) -> &Operator {
+    /// Returns the operator associated with this node.
+    pub fn operator(&self) -> &Operator {
         &self.operator
+    }
+
+    /// Returns a mutable reference to the vector containing the children of this node.
+    ///
+    /// WARNING: Writing to this might have unexpected results, as some operators require certain amounts and types of arguments.
+    pub fn children_mut(&mut self) -> &mut Vec<Node> {
+        &mut self.children
+    }
+
+    /// Returns a mutable reference to the operator associated with this node.
+    ///
+    /// WARNING: Writing to this might have unexpected results, as some operators require different amounts and types of arguments.
+    pub fn operator_mut(&mut self) -> &mut Operator {
+        &mut self.operator
     }
 
     fn has_enough_children(&self) -> bool {

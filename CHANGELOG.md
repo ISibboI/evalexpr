@@ -6,6 +6,8 @@
 
 ### Added
 
+ * Public immutable and mutable accessor functions to the operator and children of a Node.
+
 ### Removed
 
 ### Changed
