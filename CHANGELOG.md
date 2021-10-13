@@ -6,9 +6,6 @@
 
 ### Added
 
- * Bitwise operators as builtin functions `bitand`, `bitor`, `bitxor`, `bitnot` (#88)
- * Public immutable and mutable accessor functions to the operator and children of a Node.
-
 ### Removed
 
 ### Changed
@@ -18,6 +15,20 @@
 ### Deprecated
 
 ### Contributors
+
+## [6.6.0](https://github.com/ISibboI/evalexpr/compare/6.5.0...6.6.0) - 2021-10-13
+
+### Added
+
+ * Bitwise operators as builtin functions `bitand`, `bitor`, `bitxor`, `bitnot` (#88)
+ * Public immutable and mutable accessor functions to the operator and children of a Node.
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Michał Hanusek](https://github.com/hanusek)
+ * [Kai Giebeler](https://github.com/kawogi)
 
 ## [6.5.0](https://github.com/ISibboI/evalexpr/compare/6.4.0...6.5.0) - 2021-08-16
 

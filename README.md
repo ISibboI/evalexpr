@@ -22,7 +22,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "7"
+evalexpr = "6"
 ```
 
 Then you can use `evalexpr` to **evaluate expressions** like this:
