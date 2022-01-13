@@ -366,3 +366,36 @@ impl std::error::Error for EvalexprError {}
 
 /// Standard result type used by this crate.
 pub type EvalexprResult<T> = Result<T, EvalexprError>;
+
+#[cfg(test)]
+mod tests {
+    use crate::{EvalexprError, Value, ValueType};
+
+    /// Tests whose only use is to bring test coverage of trivial lines up, like trivial constructors.
+    #[test]
+    fn trivial_coverage_tests() {
+        assert_eq!(
+            EvalexprError::type_error(Value::Int(3), vec![ValueType::String]),
+            EvalexprError::TypeError {
+                actual: Value::Int(3),
+                expected: vec![ValueType::String]
+            }
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::String("abc".to_string()), Value::Empty),
+            EvalexprError::expected_string(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Boolean(false), Value::Empty),
+            EvalexprError::expected_boolean(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Tuple(vec![]), Value::Empty),
+            EvalexprError::expected_tuple(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),
+            EvalexprError::expected_empty(Value::String("abc".to_string()))
+        );
+    }
+}

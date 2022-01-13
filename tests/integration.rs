@@ -582,6 +582,7 @@ fn test_shortcut_functions() {
         eval_number("abc"),
         Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
     );
+    assert_eq!(eval_number_with_context("3.5", &context), Ok(3.5));
     assert_eq!(eval_number_with_context("3", &context), Ok(3.0));
     assert_eq!(
         eval_number_with_context("true", &context),
@@ -593,6 +594,7 @@ fn test_shortcut_functions() {
         eval_number_with_context("abc", &context),
         Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
     );
+    assert_eq!(eval_number_with_context_mut("3.5", &mut context), Ok(3.5));
     assert_eq!(eval_number_with_context_mut("3", &mut context), Ok(3.0));
     assert_eq!(
         eval_number_with_context_mut("true", &mut context),
