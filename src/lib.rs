@@ -5,7 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "6"
+//! evalexpr = "7"
 //! ```
 //!
 //! Then you can use `evalexpr` to **evaluate expressions** like this:
