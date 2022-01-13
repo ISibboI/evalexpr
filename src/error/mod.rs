@@ -15,6 +15,7 @@ mod display;
 
 /// Errors used in this crate.
 #[derive(Debug, PartialEq)]
+#[non_exhaustive]
 pub enum EvalexprError {
     /// An operator was called with a wrong amount of arguments.
     WrongOperatorArgumentAmount {
@@ -127,6 +128,10 @@ pub enum EvalexprError {
 
     /// A closing brace without a matching opening brace was found.
     UnmatchedRBrace,
+
+    /// Left of an opening brace or right of a closing brace is a token that does not expect the brace next to it.
+    /// For example, writing `4(5)` would yield this error, as the `4` does not have any operands.
+    MissingOperatorOutsideOfBrace,
 
     /// A `PartialToken` is unmatched, such that it cannot be combined into a full `Token`.
     /// This happens if for example a single `=` is found, surrounded by whitespace.
@@ -361,3 +366,36 @@ impl std::error::Error for EvalexprError {}
 
 /// Standard result type used by this crate.
 pub type EvalexprResult<T> = Result<T, EvalexprError>;
+
+#[cfg(test)]
+mod tests {
+    use crate::{EvalexprError, Value, ValueType};
+
+    /// Tests whose only use is to bring test coverage of trivial lines up, like trivial constructors.
+    #[test]
+    fn trivial_coverage_tests() {
+        assert_eq!(
+            EvalexprError::type_error(Value::Int(3), vec![ValueType::String]),
+            EvalexprError::TypeError {
+                actual: Value::Int(3),
+                expected: vec![ValueType::String]
+            }
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::String("abc".to_string()), Value::Empty),
+            EvalexprError::expected_string(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Boolean(false), Value::Empty),
+            EvalexprError::expected_boolean(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Tuple(vec![]), Value::Empty),
+            EvalexprError::expected_tuple(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),
+            EvalexprError::expected_empty(Value::String("abc".to_string()))
+        );
+    }
+}

@@ -582,6 +582,7 @@ fn test_shortcut_functions() {
         eval_number("abc"),
         Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
     );
+    assert_eq!(eval_number_with_context("3.5", &context), Ok(3.5));
     assert_eq!(eval_number_with_context("3", &context), Ok(3.0));
     assert_eq!(
         eval_number_with_context("true", &context),
@@ -593,6 +594,7 @@ fn test_shortcut_functions() {
         eval_number_with_context("abc", &context),
         Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
     );
+    assert_eq!(eval_number_with_context_mut("3.5", &mut context), Ok(3.5));
     assert_eq!(eval_number_with_context_mut("3", &mut context), Ok(3.0));
     assert_eq!(
         eval_number_with_context_mut("true", &mut context),
@@ -1805,4 +1807,31 @@ fn test_value_type() {
         Result::from(Value::String(String::new())),
         Ok(Value::String(String::new()))
     );
+}
+
+#[test]
+fn test_parenthese_combinations() {
+    // These are from issue #94
+    assert_eq!(
+        eval("123(1*2)"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()()()()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()()()(9)()()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval_with_context("a+100(a*2)", &context_map! {"a" => 4}.unwrap()),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(eval_int("(((1+2)*(3+4)+(5-(6)))/((7-8)))"), Ok(-20));
+    assert_eq!(eval_int("(((((5)))))"), Ok(5));
 }

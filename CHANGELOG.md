@@ -16,6 +16,22 @@
 
 ### Contributors
 
+## [7.0.0](https://github.com/ISibboI/evalexpr/compare/6.6.0...7.0.0) - 2022-01-13
+
+### Changed
+
+ * Made the `EvalexprError` enum non_exhaustive.
+
+### Fixed
+
+ * Expressions that have dangling parenthese expressions such as `4(5)` now produce an error.
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [dbr/Ben](https://github.com/dbr)
+
 ## [6.6.0](https://github.com/ISibboI/evalexpr/compare/6.5.0...6.6.0) - 2021-10-13
 
 ### Added

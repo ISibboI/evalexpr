@@ -69,6 +69,12 @@ impl fmt::Display for EvalexprError {
             ),
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
+            MissingOperatorOutsideOfBrace { .. } => write!(
+                f,
+                "Found an opening parenthesis that is preceded by something that does not take \
+                 any arguments on the right, or found a closing parenthesis that is succeeded by \
+                 something that does not take any arguments on the left."
+            ),
             UnmatchedPartialToken { first, second } => {
                 if let Some(second) = second {
                     write!(
