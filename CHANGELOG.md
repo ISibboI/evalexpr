@@ -10,7 +10,11 @@
 
 ### Changed
 
+ * Made the `EvalexprError` enum non_exhaustive.
+
 ### Fixed
+
+ * Expressions that have dangling parenthese expressions such as `4(5)` now produce an error.
 
 ### Deprecated
 

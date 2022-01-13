@@ -406,6 +406,14 @@ impl Node {
         Some(self.children().len()) == self.operator().max_argument_amount()
     }
 
+    fn has_too_many_children(&self) -> bool {
+        if let Some(max_argument_amount) = self.operator().max_argument_amount() {
+            self.children().len() > max_argument_amount
+        } else {
+            false
+        }
+    }
+
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
         // println!("Inserting {:?} into {:?}", node.operator, self.operator());
         if self.operator().precedence() < node.operator().precedence() || is_root_node
@@ -415,7 +423,7 @@ impl Node {
             if self.operator().is_leaf() {
                 Err(EvalexprError::AppendedToLeafNode)
             } else if self.has_enough_children() {
-                // Unwrap cannot fail because of has_enough_children
+                // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                 let last_child_operator = self.children.last().unwrap().operator();
 
                 if last_child_operator.precedence()
@@ -425,7 +433,7 @@ impl Node {
                     == node.operator().precedence() && !last_child_operator.is_left_to_right() && !node.operator().is_left_to_right())
                 {
                     // println!("Recursing into {:?}", self.children.last().unwrap().operator());
-                    // Unwrap cannot fail because of has_enough_children
+                    // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                     self.children
                         .last_mut()
                         .unwrap()
@@ -436,11 +444,35 @@ impl Node {
                         return Err(EvalexprError::AppendedToLeafNode);
                     }
 
-                    // Unwrap cannot fail because of has_enough_children
+                    // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                     let last_child = self.children.pop().unwrap();
+                    // Root nodes have at most one child
+                    // TODO I am not sure if this is the correct error
+                    if self.operator() == &Operator::RootNode && !self.children().is_empty() {
+                        return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+                    }
+                    // Do not insert root nodes into root nodes.
+                    // TODO I am not sure if this is the correct error
+                    if self.operator() == &Operator::RootNode
+                        && node.operator() == &Operator::RootNode
+                    {
+                        return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+                    }
                     self.children.push(node);
                     let node = self.children.last_mut().unwrap();
 
+                    // Root nodes have at most one child
+                    // TODO I am not sure if this is the correct error
+                    if node.operator() == &Operator::RootNode && !node.children().is_empty() {
+                        return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+                    }
+                    // Do not insert root nodes into root nodes.
+                    // TODO I am not sure if this is the correct error
+                    if node.operator() == &Operator::RootNode
+                        && last_child.operator() == &Operator::RootNode
+                    {
+                        return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+                    }
                     node.children.push(last_child);
                     Ok(())
                 }
@@ -492,6 +524,11 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
     loop {
         // println!("Root is: {:?}", root);
         if root.operator() == &Operator::RootNode {
+            // This should fire if parsing something like `4(5)`
+            if root.has_too_many_children() {
+                return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+            }
+
             root_stack.push(root);
             break;
         }
@@ -501,6 +538,11 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
                 potential_higher_root.children.push(root);
                 root = potential_higher_root;
             } else {
+                // This should fire if parsing something like `4(5)`
+                if root.has_too_many_children() {
+                    return Err(EvalexprError::MissingOperatorOutsideOfBrace);
+                }
+
                 root_stack.push(potential_higher_root);
                 root_stack.push(root);
                 break;

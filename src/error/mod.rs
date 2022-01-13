@@ -15,6 +15,7 @@ mod display;
 
 /// Errors used in this crate.
 #[derive(Debug, PartialEq)]
+#[non_exhaustive]
 pub enum EvalexprError {
     /// An operator was called with a wrong amount of arguments.
     WrongOperatorArgumentAmount {
@@ -127,6 +128,10 @@ pub enum EvalexprError {
 
     /// A closing brace without a matching opening brace was found.
     UnmatchedRBrace,
+
+    /// Left of an opening brace or right of a closing brace is a token that does not expect the brace next to it.
+    /// For example, writing `4(5)` would yield this error, as the `4` does not have any operands.
+    MissingOperatorOutsideOfBrace,
 
     /// A `PartialToken` is unmatched, such that it cannot be combined into a full `Token`.
     /// This happens if for example a single `=` is found, surrounded by whitespace.

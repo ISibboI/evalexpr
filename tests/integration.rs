@@ -1810,10 +1810,26 @@ fn test_value_type() {
 #[test]
 fn test_parenthese_combinations() {
     // These are from issue #94
-    dbg!(build_operator_tree("123(1*2)").unwrap());
-    assert!(dbg!(eval("123(1*2)")).is_err());
-    assert!(dbg!(eval("1()")).is_err());
-    assert!(dbg!(eval("1()()()()")).is_err());
-    assert!(dbg!(eval("1()()()(9)()()")).is_err());
-    assert!(dbg!(eval_with_context("a+100+(a*2)", &context_map! {"a" => 4}.unwrap())).is_err());
+    assert_eq!(
+        eval("123(1*2)"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()()()()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval("1()()()(9)()()"),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(
+        eval_with_context("a+100(a*2)", &context_map! {"a" => 4}.unwrap()),
+        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+    );
+    assert_eq!(eval_int("(((1+2)*(3+4)+(5-(6)))/((7-8)))"), Ok(-20));
+    assert_eq!(eval_int("(((((5)))))"), Ok(5));
 }

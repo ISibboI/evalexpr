@@ -372,7 +372,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                                 } else {
                                     Some(Token::Identifier(literal.to_string()))
                                 }
-                            }
+                            },
                             _ => Some(Token::Identifier(literal.to_string())),
                         }
                     }
