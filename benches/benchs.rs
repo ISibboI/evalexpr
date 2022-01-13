@@ -1,5 +1,6 @@
 #![feature(test)]
 #![feature(bench_black_box)]
+#![cfg(not(tarpaulin_include))]
 
 extern crate rand;
 extern crate rand_pcg;
