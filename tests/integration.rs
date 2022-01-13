@@ -1806,3 +1806,14 @@ fn test_value_type() {
         Ok(Value::String(String::new()))
     );
 }
+
+#[test]
+fn test_parenthese_combinations() {
+    // These are from issue #94
+    dbg!(build_operator_tree("123(1*2)").unwrap());
+    assert!(dbg!(eval("123(1*2)")).is_err());
+    assert!(dbg!(eval("1()")).is_err());
+    assert!(dbg!(eval("1()()()()")).is_err());
+    assert!(dbg!(eval("1()()()(9)()()")).is_err());
+    assert!(dbg!(eval_with_context("a+100+(a*2)", &context_map! {"a" => 4}.unwrap())).is_err());
+}
