@@ -539,6 +539,14 @@ Please report a panic in this crate immediately as issue on [github](https://git
 Even if the crate itself is panic free, it allows the user to define custom functions that are executed by the crate.
 The user needs to ensure that the functions they provide to the crate never panic.
 
+## Untrusted input
+
+This crate was not built with untrusted input in mind, but due to its simplicity and freedom of panics it is likely secure, keeping the following in mind:
+ * Limit the length of the untrusted input.
+ * If a mutable context is maintained between evaluations of untrusted input, the untrusted input might fill it gradually until the application runs out of memory.
+ * If no context is provided, a temporary mutable context is implicitly provided. This is freed after evaluation of every single string, so gradual filling cannot happen.
+ * If no context or a mutable context is provided, and the `regex_support` feature is activated, the `regex_replace` builtin function can be used to build an exponentially sized string.
+
 ## Contribution
 
 If you have any ideas for features or see any problems in the code, architecture, interface, algorithmics or documentation, please open an issue on [github](https://github.com/ISibboI/evalexpr/issues).
