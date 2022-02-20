@@ -18,17 +18,20 @@ fn test_serde() {
 fn test_serde_errors() {
     assert_eq!(
         ron::de::from_str::<Node>("[\"5==5\"]"),
-        Err(ron::de::Error::Parser(
-            ron::de::ParseError::ExpectedString,
-            ron::de::Position { col: 1, line: 1 }
-        ))
+        Err(ron::Error {
+            code: ron::de::ErrorCode::ExpectedString,
+            position: ron::de::Position { col: 1, line: 1 }
+        })
     );
     assert_eq!(
         ron::de::from_str::<Node>("\"&\""),
-        Err(ron::de::Error::Message(
-            "Found a partial token '&' that should be followed by another partial token."
-                .to_owned()
-        ))
+        Err(ron::Error {
+            code: ron::de::ErrorCode::Message(
+                "Found a partial token '&' that should be followed by another partial token."
+                    .to_owned()
+            ),
+            position: ron::de::Position { line: 0, col: 0 }
+        })
     );
     // Ensure that this does not panic.
     assert_ne!(
