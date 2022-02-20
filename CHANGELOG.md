@@ -16,11 +16,19 @@
 
 ### Contributors
 
+## [7.0.1](https://github.com/ISibboI/evalexpr/compare/7.0.0...7.0.1) - 2022-02-20
+
+### Changed
+
+ * Updated the optional dependencies, and fixed them to a minimum tested version.
+   For simplicity, I fixed them to the newest version, but since I export none of them, this is luckily not breaking.
+ * Updated the dev-dependencies.
+
 ## [7.0.0](https://github.com/ISibboI/evalexpr/compare/6.6.0...7.0.0) - 2022-01-13
 
 ### Changed
 
- * Made the `EvalexprError` enum non_exhaustive.
+ * Made the `EvalexprError` enum `non_exhaustive`.
 
 ### Fixed
 
