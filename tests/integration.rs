@@ -403,6 +403,10 @@ fn test_builtin_functions() {
     assert_eq!(eval("bitxor(6, 5)"), Ok(Value::Int(3)));
     assert_eq!(eval("bitnot(5)"), Ok(Value::Int(-6)));
     assert_eq!(eval("bitnot(-1)"), Ok(Value::Int(0)));
+    assert_eq!(eval("shl(5, 1)"), Ok(Value::Int(10)));
+    assert_eq!(eval("shl(-6, 5)"), Ok(Value::Int(-192)));
+    assert_eq!(eval("shr(5, 1)"), Ok(Value::Int(2)));
+    assert_eq!(eval("shr(-6, 5)"), Ok(Value::Int(-1)));
 }
 
 #[test]

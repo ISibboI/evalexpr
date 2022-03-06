@@ -5,7 +5,7 @@ use crate::{
     value::{FloatType, IntType},
     EvalexprError, Function, Value, ValueType,
 };
-use std::ops::{BitAnd, BitOr, BitXor, Not};
+use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 
 macro_rules! simple_math {
     ($func:ident) => {
@@ -185,6 +185,8 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "bitor" => int_function!(bitor, 2),
         "bitxor" => int_function!(bitxor, 2),
         "bitnot" => int_function!(not),
+        "shl" => int_function!(shl, 2),
+        "shr" => int_function!(shr, 2),
         _ => None,
     }
 }

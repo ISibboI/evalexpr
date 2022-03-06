@@ -360,6 +360,8 @@
 //! | `bitor`              | 2               | Int                    | Computes the bitwise or of the given integers |
 //! | `bitxor`             | 2               | Int                    | Computes the bitwise xor of the given integers |
 //! | `bitnot`             | 1               | Int                    | Computes the bitwise not of the given integer |
+//! | `shl`                | 2               | Int                    | Computes the given integer bitwise shifted left by the other given integer |
+//! | `shr`                | 2               | Int                    | Computes the given integer bitwise shifted right by the other given integer |
 //!
 //! The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
 //! If the maximum or minimum is an integer, then an integer is returned.
