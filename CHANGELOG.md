@@ -16,6 +16,18 @@
 
 ### Contributors
 
+## [7.1.0](https://github.com/ISibboI/evalexpr/compare/7.0.1...7.1.0) - 2022-03-13
+
+### Added
+
+ * Bit shift functions `shl` and `shr`, same as Rust's shift functions on `i64`.
+
+### Contributors
+
+My warmhearted thanks goes to
+
+ * [Diane Sparks](https://github.com/FractalDiane)
+
 ## [7.0.1](https://github.com/ISibboI/evalexpr/compare/7.0.0...7.0.1) - 2022-02-20
 
 ### Changed
