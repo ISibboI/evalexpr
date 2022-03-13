@@ -5,7 +5,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! evalexpr = "7"
+//! evalexpr = "<desired version>"
 //! ```
 //!
 //! Then you can use `evalexpr` to **evaluate expressions** like this:
@@ -113,6 +113,7 @@
 //!
 //! | Operator | Precedence | Description |
 //! |----------|------------|-------------|
+//! | . | 140 | Tuple access |
 //! | ^ | 120 | Exponentiation |
 //! | * | 100 | Product |
 //! | / | 100 | Division (integer if both arguments are integers, otherwise float) |
@@ -143,8 +144,8 @@
 //!
 //! | Operator | Precedence | Description |
 //! |----------|------------|-------------|
-//! | - | 110 | Negation |
-//! | ! | 110 | Logical not |
+//! | - | 150 | Negation |
+//! | ! | 150 | Logical not |
 //!
 //! Operators that take numbers as arguments can either take integers or floating point numbers.
 //! If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
@@ -187,6 +188,18 @@
 //!         Value::from("b")
 //!     ])
 //! ])));
+//! ```
+//!
+//! #### The Tuple Access Operator
+//!
+//! To access a value at a certain position inside a tuple, the tuple access operator can be used.
+//! Tuples are indexed starting from zero.
+//! Example:
+//!
+//! ```rust
+//! use evalexpr::*;
+//!
+//! assert_eq!(eval("a = (3, 5, 8); a.1"), Ok(Value::from(5)));
 //! ```
 //!
 //! #### The Assignment Operator

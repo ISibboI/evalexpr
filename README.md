@@ -22,7 +22,7 @@ Add `evalexpr` as dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = "7"
+evalexpr = "<desired version>"
 ```
 
 Then you can use `evalexpr` to **evaluate expressions** like this:
@@ -130,6 +130,7 @@ Supported binary operators:
 
 | Operator | Precedence | Description |
 |----------|------------|-------------|
+| . | 140 | Tuple access |
 | ^ | 120 | Exponentiation |
 | * | 100 | Product |
 | / | 100 | Division (integer if both arguments are integers, otherwise float) |
@@ -160,8 +161,8 @@ Supported unary operators:
 
 | Operator | Precedence | Description |
 |----------|------------|-------------|
-| - | 110 | Negation |
-| ! | 110 | Logical not |
+| - | 150 | Negation |
+| ! | 150 | Logical not |
 
 Operators that take numbers as arguments can either take integers or floating point numbers.
 If one of the arguments is a floating point number, all others are converted to floating point numbers as well, and the resulting value is a floating point number as well.
@@ -204,6 +205,18 @@ assert_eq!(eval("1, 2, (true, \"b\")"), Ok(Value::from(vec![
         Value::from("b")
     ])
 ])));
+```
+
+#### The Tuple Access Operator
+
+To access a value at a certain position inside a tuple, the tuple access operator can be used.
+Tuples are indexed starting from zero.
+Example:
+
+```rust
+use evalexpr::*;
+
+assert_eq!(eval("a = (3, 5, 8); a.1"), Ok(Value::from(5)));
 ```
 
 #### The Assignment Operator
@@ -523,7 +536,7 @@ but note that only the variables get (de)serialized, not the functions.
 ## License
 
 This crate is primarily distributed under the terms of the MIT license.
-See [LICENSE](LICENSE) for details.
+See [LICENSE](../LICENSE) for details.
 
 
 <!-- cargo-sync-readme end -->
