@@ -118,7 +118,7 @@ impl Operator {
             Eq | Neq | Gt | Lt | Geq | Leq => 80,
             And => 75,
             Or => 70,
-            Not => 110,
+            Not => 150,
 
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => 50,
