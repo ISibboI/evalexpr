@@ -1939,6 +1939,10 @@ fn test_tuple_access() {
     assert_eq!(eval("a = (1, 2, 3); a.0"), Ok(Value::Int(1)));
     assert_eq!(eval("a = (1, 2, 3); a.1"), Ok(Value::Int(2)));
     assert_eq!(eval("a = (1, 2, 3); a.2"), Ok(Value::Int(3)));
+    // TODO these should produce errors.
+    assert_eq!(eval("a = (1, 2, 3); b = 0; a.b"), Ok(Value::Int(1)));
+    assert_eq!(eval("a = (1, 2, 3); b = 1; a.b"), Ok(Value::Int(2)));
+    assert_eq!(eval("a = (1, 2, 3); b = 2; a.b"), Ok(Value::Int(3)));
 
     assert_eq!(
         eval("(1, 2, 3).-1"),
