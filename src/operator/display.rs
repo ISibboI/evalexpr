@@ -37,6 +37,7 @@ impl Display for Operator {
             AndAssign => write!(f, " &&= "),
             OrAssign => write!(f, " ||= "),
 
+            Application => write!(f, "."),
             Tuple => write!(f, ", "),
             Chain => write!(f, "; "),
 

@@ -1,7 +1,7 @@
 use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
-use std::borrow::Borrow;
+use std::{borrow::Borrow, convert::TryInto};
 
 mod display;
 
@@ -65,6 +65,9 @@ pub enum Operator {
     /// A binary or-assign operator.
     OrAssign,
 
+    /// The standard application operator from object-oriented languages.
+    /// As of version 8, it only supports selecting tuple values.
+    Application,
     /// An n-ary tuple constructor.
     Tuple,
     /// An n-ary subexpression chain.
@@ -120,6 +123,7 @@ impl Operator {
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => 50,
 
+            Application => 150,
             Tuple => 40,
             Chain => 0,
 
@@ -155,7 +159,7 @@ impl Operator {
         match self {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
             | Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
-            | AndAssign | OrAssign => Some(2),
+            | AndAssign | OrAssign | Application => Some(2),
             Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
             Const { value: _ } => Some(0),
@@ -409,6 +413,23 @@ impl Operator {
             },
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => Err(EvalexprError::ContextNotMutable),
+            Application => {
+                expect_operator_argument_amount(arguments.len(), 2)?;
+                let tuple = arguments[0].as_tuple()?;
+                let index = arguments[1].as_int()?;
+                let length = tuple.len();
+
+                if index < 0 {
+                    return Err(EvalexprError::NegativeTupleIndex { index });
+                }
+                let index_usize: usize = index
+                    .try_into()
+                    .map_err(|_| EvalexprError::TupleIndexOutOfUSizeRange { index })?;
+                if index_usize >= length {
+                    return Err(EvalexprError::TupleIndexOutOfRange { index, length });
+                }
+                Ok(tuple[index_usize].clone())
+            },
             Tuple => Ok(Value::Tuple(arguments.into())),
             Chain => {
                 if arguments.is_empty() {

@@ -612,6 +612,7 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::AndAssign => Some(Node::new(Operator::AndAssign)),
             Token::OrAssign => Some(Node::new(Operator::OrAssign)),
 
+            Token::Dot => Some(Node::new(Operator::Application)),
             Token::Comma => Some(Node::new(Operator::Tuple)),
             Token::Semicolon => Some(Node::new(Operator::Chain)),
 

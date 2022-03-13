@@ -5,7 +5,7 @@
 //! The module also contains some helper functions starting with `expect_` that check for a condition and return `Err(_)` if the condition is not fulfilled.
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
-use crate::{token::PartialToken, value::value_type::ValueType};
+use crate::{token::PartialToken, value::value_type::ValueType, IntType};
 
 use crate::{operator::Operator, value::Value};
 
@@ -195,6 +195,26 @@ pub enum EvalexprError {
         regex: String,
         /// Failure message from the regex engine
         message: String,
+    },
+
+    /// A tuple was attempted to index with a negative value.
+    NegativeTupleIndex {
+        /// The negative index.
+        index: IntType,
+    },
+
+    /// A tuple was attempted to index with a value past the length of the tuple.
+    TupleIndexOutOfRange {
+        /// The index that is out of range.
+        index: IntType,
+        /// The length of the tuple.
+        length: usize,
+    },
+
+    /// A tuple was attempted to index with a value larger than the maximum value of [usize](std::usize).
+    TupleIndexOutOfUSizeRange {
+        /// The index that is out of range for [usize](std::usize).
+        index: IntType,
     },
 
     /// A modification was attempted on a `Context` that does not allow modifications.

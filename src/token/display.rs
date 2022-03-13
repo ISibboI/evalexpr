@@ -40,6 +40,7 @@ impl fmt::Display for Token {
             OrAssign => write!(f, "||="),
 
             // Special
+            Dot => write!(f, "."),
             Comma => write!(f, ","),
             Semicolon => write!(f, ";"),
 

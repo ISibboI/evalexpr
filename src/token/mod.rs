@@ -42,6 +42,7 @@ pub enum Token {
     OrAssign,
 
     // Special
+    Dot,
     Comma,
     Semicolon,
 
@@ -101,6 +102,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
         '(' => PartialToken::Token(Token::LBrace),
         ')' => PartialToken::Token(Token::RBrace),
 
+        '.' => PartialToken::Token(Token::Dot),
         ',' => PartialToken::Token(Token::Comma),
         ';' => PartialToken::Token(Token::Semicolon),
 
@@ -145,6 +147,7 @@ impl Token {
             Token::LBrace => true,
             Token::RBrace => false,
 
+            Token::Dot => false,
             Token::Comma => false,
             Token::Semicolon => false,
 
@@ -189,6 +192,7 @@ impl Token {
             Token::LBrace => false,
             Token::RBrace => true,
 
+            Token::Dot => false,
             Token::Comma => false,
             Token::Semicolon => false,
 
@@ -263,6 +267,7 @@ fn parse_string_literal<Iter: Iterator<Item = char>>(
 /// Converts a string to a vector of partial tokens.
 fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
     let mut result = Vec::new();
+    let mut last_literal_is_numeric = false;
     let mut iter = string.chars().peekable();
 
     while let Some(c) = iter.next() {
@@ -271,18 +276,38 @@ fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
         } else {
             let partial_token = char_to_partial_token(c);
 
-            let if_let_successful =
-                if let (Some(PartialToken::Literal(last)), PartialToken::Literal(literal)) =
-                    (result.last_mut(), &partial_token)
+            let transformed_token = if let Some(PartialToken::Literal(last)) = result.last_mut() {
+                match &partial_token {
+                    PartialToken::Literal(literal) => {
+                        last_literal_is_numeric =
+                            last_literal_is_numeric && literal.chars().next().unwrap().is_digit(10);
+                        last.push_str(literal);
+                        None
+                    },
+                    PartialToken::Token(Token::Dot) => {
+                        // If the last literal is numeric, then a dot is a decimal point rather than the application operator.
+                        if last_literal_is_numeric {
+                            last.push('.');
+                            None
+                        } else {
+                            Some(partial_token)
+                        }
+                    },
+                    _ => Some(partial_token),
+                }
+            } else {
+                Some(partial_token)
+            };
+
+            if let Some(transformed_token) = transformed_token {
+                last_literal_is_numeric = if let PartialToken::Literal(literal) = &transformed_token
                 {
-                    last.push_str(literal);
-                    true
+                    literal.chars().next().unwrap().is_digit(10)
                 } else {
                     false
                 };
 
-            if !if_let_successful {
-                result.push(partial_token);
+                result.push(transformed_token);
             }
         }
     }
@@ -358,7 +383,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                         // If there are two tokens following this one, check if the next one is
                         // a plus or a minus. If so, then attempt to parse all three tokens as a
                         // scientific notation number of the form `<coefficient>e{+,-}<exponent>`,
-                        // for example [Literal("10e"), Minus, Literal("3")] => "1e-3".parse().
+                        // for example [Literal('10e"), Minus, Literal("3")] => "1e-3".parse().
                         match (second, third) {
                             (Some(second), Some(third))
                                 if second == PartialToken::Minus
@@ -449,7 +474,8 @@ mod tests {
     #[test]
     fn test_partial_token_display() {
         let chars = vec![
-            '+', '-', '*', '/', '%', '^', '(', ')', ',', ';', '=', '!', '>', '<', '&', '|', ' ',
+            '+', '-', '*', '/', '%', '^', '(', ')', '.', ',', ';', '=', '!', '>', '<', '&', '|',
+            ' ',
         ];
 
         for char in chars {
@@ -463,7 +489,7 @@ mod tests {
     #[test]
     fn test_token_display() {
         let token_string =
-            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
+            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= . , ; ";
         let tokens = tokenize(token_string).unwrap();
         let mut result_string = String::new();
 

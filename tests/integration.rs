@@ -546,7 +546,10 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int("(,);."),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
     assert_eq!(eval_int_with_context("3", &context), Ok(3));
     assert_eq!(
@@ -557,7 +560,10 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int_with_context("(,);.", &context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
     assert_eq!(eval_int_with_context_mut("3", &mut context), Ok(3));
     assert_eq!(
@@ -568,7 +574,10 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int_with_context_mut("(,);.", &mut context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
 
     assert_eq!(eval_number("3"), Ok(3.0));
@@ -851,7 +860,10 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         build_operator_tree("(,);.").unwrap().eval_int(),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
     assert_eq!(
         build_operator_tree("3")
@@ -871,7 +883,10 @@ fn test_shortcut_functions() {
         build_operator_tree("(,);.")
             .unwrap()
             .eval_int_with_context(&context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
     assert_eq!(
         build_operator_tree("3")
@@ -891,7 +906,10 @@ fn test_shortcut_functions() {
         build_operator_tree("(,);.")
             .unwrap()
             .eval_int_with_context_mut(&mut context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 0
+        })
     );
 
     assert_eq!(build_operator_tree("3").unwrap().eval_number(), Ok(3.0));
@@ -1834,4 +1852,81 @@ fn test_parenthese_combinations() {
     );
     assert_eq!(eval_int("(((1+2)*(3+4)+(5-(6)))/((7-8)))"), Ok(-20));
     assert_eq!(eval_int("(((((5)))))"), Ok(5));
+}
+
+#[test]
+fn test_floating_point_notations() {
+    assert_eq!(eval("1e34"), Ok(Value::Float(1e34)));
+    assert_eq!(eval("1.65e34"), Ok(Value::Float(1.65e34)));
+    assert_eq!(eval("1.65"), Ok(Value::Float(1.65)));
+    assert_eq!(eval("1."), Ok(Value::Float(1.)));
+
+    assert_eq!(eval("-1e34"), Ok(Value::Float(-1e34)));
+    assert_eq!(eval("-1.65e34"), Ok(Value::Float(-1.65e34)));
+    assert_eq!(eval("-1.65"), Ok(Value::Float(-1.65)));
+    assert_eq!(eval("-1."), Ok(Value::Float(-1.)));
+
+    assert_eq!(eval("- 1e34"), Ok(Value::Float(-1e34)));
+    assert_eq!(eval("- 1.65e34"), Ok(Value::Float(-1.65e34)));
+    assert_eq!(eval("- 1.65"), Ok(Value::Float(-1.65)));
+    assert_eq!(eval("- 1."), Ok(Value::Float(-1.)));
+
+    assert_eq!(
+        eval(".65"),
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 1
+        })
+    );
+    assert_eq!(
+        eval("-.65"),
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 1
+        })
+    );
+    assert_eq!(
+        eval("- .65"),
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 1
+        })
+    );
+    assert_eq!(
+        eval("1..65e34"),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "1..65e34".to_string()
+        ))
+    );
+    assert_eq!(
+        eval("-1..65e34"),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "1..65e34".to_string()
+        ))
+    );
+    assert_eq!(
+        eval("1.3.65e34"),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "1.3.65e34".to_string()
+        ))
+    );
+    assert_eq!(
+        eval("1.3.6"),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "1.3.6".to_string()
+        ))
+    );
+    assert_eq!(eval("1. 3"), Err(EvalexprError::AppendedToLeafNode));
+    assert_eq!(
+        eval("1 .3"),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(1)
+        })
+    );
+    assert_eq!(
+        eval("1 . 3"),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(1)
+        })
+    );
 }

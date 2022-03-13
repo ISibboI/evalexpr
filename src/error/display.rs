@@ -112,6 +112,19 @@ impl fmt::Display for EvalexprError {
                 "Regular expression {:?} is invalid: {:?}",
                 regex, message
             ),
+            NegativeTupleIndex { index } => write!(f, "Negative tuple index {}", index),
+            TupleIndexOutOfRange { index, length } => write!(
+                f,
+                "Tuple index {} out of range for tuple of length {}",
+                index, length
+            ),
+            TupleIndexOutOfUSizeRange { index } => write!(
+                f,
+                "Tuple index {} cannot be converted to usize, since it is larger than the maximum \
+                 value of usize ({})",
+                index,
+                usize::MAX
+            ),
             ContextNotMutable => write!(f, "Cannot manipulate context"),
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),
