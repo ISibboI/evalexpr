@@ -1930,3 +1930,44 @@ fn test_floating_point_notations() {
         })
     );
 }
+
+#[test]
+fn test_tuple_access() {
+    assert_eq!(eval("(1, 2, 3).0"), Ok(Value::Int(1)));
+    assert_eq!(eval("(1, 2, 3).1"), Ok(Value::Int(2)));
+    assert_eq!(eval("(1, 2, 3).2"), Ok(Value::Int(3)));
+    assert_eq!(eval("a = (1, 2, 3); a.0"), Ok(Value::Int(1)));
+    assert_eq!(eval("a = (1, 2, 3); a.1"), Ok(Value::Int(2)));
+    assert_eq!(eval("a = (1, 2, 3); a.2"), Ok(Value::Int(3)));
+
+    assert_eq!(
+        eval("(1, 2, 3).-1"),
+        Err(EvalexprError::NegativeTupleIndex { index: -1 })
+    );
+    assert_eq!(
+        eval("(1, 2, 3).(-1)"),
+        Err(EvalexprError::NegativeTupleIndex { index: -1 })
+    );
+    assert_eq!(
+        eval("(1, 2, 3).3"),
+        Err(EvalexprError::TupleIndexOutOfRange {
+            index: 3,
+            length: 3
+        })
+    );
+    assert_eq!(
+        eval("a = (1, 2, 3); a.-1"),
+        Err(EvalexprError::NegativeTupleIndex { index: -1 })
+    );
+    assert_eq!(
+        eval("a = (1, 2, 3); a.(-1)"),
+        Err(EvalexprError::NegativeTupleIndex { index: -1 })
+    );
+    assert_eq!(
+        eval("a = (1, 2, 3); a.3"),
+        Err(EvalexprError::TupleIndexOutOfRange {
+            index: 3,
+            length: 3
+        })
+    );
+}
