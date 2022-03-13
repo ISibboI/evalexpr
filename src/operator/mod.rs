@@ -111,7 +111,7 @@ impl Operator {
             RootNode => 200,
 
             Add | Sub => 95,
-            Neg => 110,
+            Neg => 150,
             Mul | Div | Mod => 100,
             Exp => 120,
 
@@ -123,7 +123,7 @@ impl Operator {
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => 50,
 
-            Application => 150,
+            Application => 140,
             Tuple => 40,
             Chain => 0,
 

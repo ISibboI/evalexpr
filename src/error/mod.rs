@@ -204,6 +204,7 @@ pub enum EvalexprError {
     },
 
     /// A tuple was attempted to index with a value past the length of the tuple.
+    /// Tuples are indexed starting from zero, so any index greater or equal to the length is out of range.
     TupleIndexOutOfRange {
         /// The index that is out of range.
         index: IntType,

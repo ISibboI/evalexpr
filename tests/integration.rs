@@ -1875,21 +1875,21 @@ fn test_floating_point_notations() {
         eval(".65"),
         Err(EvalexprError::WrongOperatorArgumentAmount {
             expected: 2,
-            actual: 1
+            actual: 1,
         })
     );
     assert_eq!(
         eval("-.65"),
         Err(EvalexprError::WrongOperatorArgumentAmount {
-            expected: 2,
-            actual: 1
+            expected: 1,
+            actual: 0,
         })
     );
     assert_eq!(
         eval("- .65"),
         Err(EvalexprError::WrongOperatorArgumentAmount {
-            expected: 2,
-            actual: 1
+            expected: 1,
+            actual: 0,
         })
     );
     assert_eq!(
@@ -1920,13 +1920,13 @@ fn test_floating_point_notations() {
     assert_eq!(
         eval("1 .3"),
         Err(EvalexprError::ExpectedTuple {
-            actual: Value::Int(1)
+            actual: Value::Int(1),
         })
     );
     assert_eq!(
         eval("1 . 3"),
         Err(EvalexprError::ExpectedTuple {
-            actual: Value::Int(1)
+            actual: Value::Int(1),
         })
     );
 }
