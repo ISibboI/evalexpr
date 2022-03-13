@@ -508,7 +508,7 @@
 //! ## License
 //!
 //! This crate is primarily distributed under the terms of the MIT license.
-//! See [LICENSE](LICENSE) for details.
+//! See [LICENSE](../LICENSE) for details.
 //!
 
 #![deny(missing_docs)]
