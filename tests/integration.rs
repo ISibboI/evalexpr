@@ -410,7 +410,10 @@ fn test_builtin_functions() {
     assert_eq!(eval("shr(-6, 5)"), Ok(Value::Int(-1)));
     assert_eq!(eval("if(true, -6, 5)"), Ok(Value::Int(-6)));
     assert_eq!(eval("if(false, -6, 5)"), Ok(Value::Int(5)));
-    assert_eq!(eval("if(2-1==1, \"good\", 0)"), Ok(Value::String(String::from("good"))));
+    assert_eq!(
+        eval("if(2-1==1, \"good\", 0)"),
+        Ok(Value::String(String::from("good")))
+    );
 }
 
 #[test]

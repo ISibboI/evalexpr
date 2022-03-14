@@ -123,7 +123,12 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         })),
         "if" => Some(Function::new(|argument| {
             if let [condition, if_true, if_false] = &argument.as_fixed_len_tuple(3)?[..] {
-                return Ok(if condition.as_boolean()? { if_true } else { if_false }.clone())
+                return Ok(if condition.as_boolean()? {
+                    if_true
+                } else {
+                    if_false
+                }
+                .clone());
             }
             Err(EvalexprError::type_error(
                 argument.clone(),
