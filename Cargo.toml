@@ -23,7 +23,7 @@ name = "evalexpr"
 path = "src/lib.rs"
 
 [dependencies]
-regex = { version = "1.5.4", optional = true}
+regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
 serde_derive = { version = "1.0.133", optional = true}
 
