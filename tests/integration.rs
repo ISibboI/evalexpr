@@ -465,6 +465,12 @@ fn test_no_panic() {
         IntType::max_value()
     ))
     .is_ok());
+    assert!(eval("if").is_err());
+    assert!(eval("if()").is_err());
+    assert!(eval("if(true, 1)").is_err());
+    assert!(eval("if(false, 2)").is_err());
+    assert!(eval("if(1,1,1)").is_err());
+    assert!(eval("if(true,1,1,1)").is_err());
 }
 
 #[test]
