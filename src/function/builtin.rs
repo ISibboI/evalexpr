@@ -122,11 +122,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }
         })),
         "if" => Some(Function::new(|argument| {
-            let arguments = &argument.as_fixed_len_tuple(3)?;
+            let mut arguments = argument.as_fixed_len_tuple(3)?;
             Ok(if arguments[0].as_boolean()? {
-                arguments[1].clone()
+                arguments.swap_remove(1)
             } else {
-                arguments[2].clone()
+                arguments.swap_remove(2)
             })
         })),
         "len" => Some(Function::new(|argument| {
