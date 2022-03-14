@@ -327,6 +327,7 @@
 //! | `floor`              | 1               | Numeric                | Returns the largest integer less than or equal to a number |
 //! | `round`              | 1               | Numeric                | Returns the nearest integer to a number. Rounds half-way cases away from 0.0 |
 //! | `ceil`               | 1               | Numeric                | Returns the smallest integer greater than or equal to a number |
+//! | `if`                 | 3               | Boolean, Any, Any      | If the first argument is true, returns the second argument, otherwise, return the third  |
 //! | `math::ln`           | 1               | Numeric                | Returns the natural logarithm of the number |
 //! | `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
 //! | `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |

@@ -121,6 +121,15 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Ok(Value::Float(max_float))
             }
         })),
+        "if" => Some(Function::new(|argument| {
+            if let [condition, if_true, if_false] = &argument.as_fixed_len_tuple(3)?[..] {
+                return Ok(if condition.as_boolean()? { if_true } else { if_false }.clone())
+            }
+            Err(EvalexprError::type_error(
+                argument.clone(),
+                vec![ValueType::Boolean, ValueType::Empty, ValueType::Empty],
+            ))
+        })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as i64))
