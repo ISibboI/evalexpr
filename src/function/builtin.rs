@@ -122,18 +122,12 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             }
         })),
         "if" => Some(Function::new(|argument| {
-            if let [condition, if_true, if_false] = &argument.as_fixed_len_tuple(3)?[..] {
-                return Ok(if condition.as_boolean()? {
-                    if_true
-                } else {
-                    if_false
-                }
-                .clone());
-            }
-            Err(EvalexprError::type_error(
-                argument.clone(),
-                vec![ValueType::Boolean, ValueType::Empty, ValueType::Empty],
-            ))
+            let arguments = &argument.as_fixed_len_tuple(3)?;
+            Ok(if arguments[0].as_boolean()? {
+                arguments[1].clone()
+            } else {
+                arguments[2].clone()
+            })
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
