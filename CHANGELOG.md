@@ -16,6 +16,14 @@
 
 ### Contributors
 
+## [7.1.1](https://github.com/ISibboI/evalexpr/compare/7.1.1...7.1.1) - 2022-03-14
+
+### Fixed
+
+ * Set regex minimum version to `1.5.5`, as the previous versions contains a security vulnerability.
+   See https://groups.google.com/g/rustlang-security-announcements/c/NcNNL1Jq7Yw?pli=1.
+   This vulnerability does not affect this crate as of now, but if we ever allow passing parameters to the regex engine, it might.
+
 ## [7.1.0](https://github.com/ISibboI/evalexpr/compare/7.0.1...7.1.0) - 2022-03-13
 
 ### Added
