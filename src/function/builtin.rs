@@ -121,6 +121,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Ok(Value::Float(max_float))
             }
         })),
+        "if" => Some(Function::new(|argument| {
+            let mut arguments = argument.as_fixed_len_tuple(3)?;
+            let result_index = if arguments[0].as_boolean()? { 1 } else { 2 };
+            Ok(arguments.swap_remove(result_index))
+        })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as i64))
