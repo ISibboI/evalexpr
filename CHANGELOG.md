@@ -16,7 +16,19 @@
 
 ### Contributors
 
-## [7.1.1](https://github.com/ISibboI/evalexpr/compare/7.1.1...7.1.1) - 2022-03-14
+## [7.2.0](https://github.com/ISibboI/evalexpr/compare/7.1.1...7.2.0) - 2022-03-16
+
+### Added
+
+ * The builtin function `if`, which mimics the if-else construct existing in many programming languages.
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Ophir LOJKINE](https://github.com/lovasoa)
+
+## [7.1.1](https://github.com/ISibboI/evalexpr/compare/7.1.0...7.1.1) - 2022-03-14
 
 ### Fixed
 
