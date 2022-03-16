@@ -38,7 +38,6 @@ jobs:
               name: Sync readme
               command: sync-readme
               args: --check
-              components: cargo-sync-readme
 
     steps:
       - uses: actions/checkout@v2
@@ -58,6 +57,12 @@ jobs:
           override: true
           default: true
           components: ${{matrix.command.components}}
+
+      - name: Install cargo-sync-readme
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-sync-readme
 
       - name: ${{matrix.command.name}}
         uses: actions-rs/cargo@v1
