@@ -372,7 +372,6 @@ fn test_builtin_functions() {
     assert_eq!(eval("is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
     assert_eq!(eval("is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
     assert_eq!(eval("is_normal(0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_subnormal(0)"), Ok(Value::Boolean(false)));
     // Other
     assert_eq!(eval("min(4.0, 3)"), Ok(Value::Int(3)));
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
