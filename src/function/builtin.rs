@@ -90,7 +90,6 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "is_finite" => float_is(f64::is_finite),
         "is_infinite" => float_is(f64::is_infinite),
         "is_normal" => float_is(f64::is_normal),
-        "is_subnormal" => float_is(f64::is_subnormal),
         // Other
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;

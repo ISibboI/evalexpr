@@ -331,8 +331,7 @@
 //! | `is_nan`             | 1               | Numeric                | Returns true if the argument is the floating-point value NaN, false otherwise  |
 //! | `is_finite`          | 1               | Numeric                | Returns true if the argument is a finite floating-point number, false otherwise  |
 //! | `is_infinite`        | 1               | Numeric                | Returns true if the argument is an infinite floating-point number, false otherwise  |
-//! | `is_normal`          | 1               | Numeric                | Returns true if the argument is a floating-point number that is neither zero, infinite, subnormal, or NaN, false otherwise  |
-//! | `is_subnormal`       | 1               | Numeric                | Returns true if the argument is a [subnormal](https://en.wikipedia.org/wiki/Subnormal_number) number, false otherwise  |
+//! | `is_normal`          | 1               | Numeric                | Returns true if the argument is a floating-point number that is neither zero, infinite, [subnormal](https://en.wikipedia.org/wiki/Subnormal_number), or NaN, false otherwise  |
 //! | `math::ln`           | 1               | Numeric                | Returns the natural logarithm of the number |
 //! | `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
 //! | `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |
