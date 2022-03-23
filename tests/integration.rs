@@ -362,6 +362,18 @@ fn test_builtin_functions() {
     assert_eq!(eval("round(1.9)"), Ok(Value::Float(2.0)));
     assert_eq!(eval("ceil(1.1)"), Ok(Value::Float(2.0)));
     assert_eq!(eval("ceil(1.9)"), Ok(Value::Float(2.0)));
+    assert_eq!(eval("is_nan(\"xxx\")"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_nan(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_nan(0.0/0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("is_finite(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_finite(0.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_finite(0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("is_infinite(0.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_normal(0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_subnormal(0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("is_subnormal(1.0e-308)"), Ok(Value::Boolean(true)));
     // Other
     assert_eq!(eval("min(4.0, 3)"), Ok(Value::Int(3)));
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));

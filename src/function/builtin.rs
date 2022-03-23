@@ -23,6 +23,16 @@ macro_rules! simple_math {
     };
 }
 
+fn float_is(func: fn(f64) -> bool) -> Option<Function> {
+    Some(Function::new(move |argument| {
+        if let Ok(num) = argument.as_float() {
+            Ok(func(num).into())
+        } else {
+            Ok(false.into())
+        }
+    }))
+}
+
 macro_rules! int_function {
     ($func:ident) => {
         Some(Function::new(|argument| {
@@ -76,6 +86,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
+        "is_nan" => float_is(f64::is_nan),
+        "is_finite" => float_is(f64::is_finite),
+        "is_infinite" => float_is(f64::is_infinite),
+        "is_normal" => float_is(f64::is_normal),
+        "is_subnormal" => float_is(f64::is_subnormal),
         // Other
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
