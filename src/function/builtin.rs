@@ -24,9 +24,9 @@ macro_rules! simple_math {
 }
 
 fn float_is(func: fn(f64) -> bool) -> Option<Function> {
-    Some(Function::new(move |argument|
+    Some(Function::new(move |argument| {
         Ok(func(argument.as_number()?).into())
-    ))
+    }))
 }
 
 macro_rules! int_function {
@@ -87,7 +87,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::is_infinite" => float_is(f64::is_infinite),
         "math::is_normal" => float_is(f64::is_normal),
         // Other
-        "typeof" => Some(Function::new(move |argument|
+        "typeof" => Some(Function::new(move |argument| {
             Ok(match argument {
                 Value::String(_) => "string",
                 Value::Float(_) => "float",
@@ -95,8 +95,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Value::Boolean(_) => "boolean",
                 Value::Tuple(_) => "tuple",
                 Value::Empty => "empty",
-            }.into())
-        )),
+            }
+            .into())
+        })),
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut min_int = IntType::max_value();

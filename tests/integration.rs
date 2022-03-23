@@ -367,7 +367,10 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::is_finite(1.0/0.0)"), Ok(Value::Boolean(false)));
     assert_eq!(eval("math::is_finite(0.0/0.0)"), Ok(Value::Boolean(false)));
     assert_eq!(eval("math::is_finite(0.0)"), Ok(Value::Boolean(true)));
-    assert_eq!(eval("math::is_infinite(0.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(
+        eval("math::is_infinite(0.0/0.0)"),
+        Ok(Value::Boolean(false))
+    );
     assert_eq!(eval("math::is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
     assert_eq!(eval("math::is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
     assert_eq!(eval("math::is_normal(0)"), Ok(Value::Boolean(false)));
@@ -449,9 +452,12 @@ fn test_errors() {
         })
     );
     assert_eq!(eval("!(()true)"), Err(EvalexprError::AppendedToLeafNode));
-    assert_eq!(eval("math::is_nan(\"xxx\")"), Err(EvalexprError::ExpectedNumber {
-        actual: Value::String("xxx".to_string())
-    }));
+    assert_eq!(
+        eval("math::is_nan(\"xxx\")"),
+        Err(EvalexprError::ExpectedNumber {
+            actual: Value::String("xxx".to_string())
+        })
+    );
 }
 
 #[test]
