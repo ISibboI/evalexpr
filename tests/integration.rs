@@ -362,17 +362,22 @@ fn test_builtin_functions() {
     assert_eq!(eval("round(1.9)"), Ok(Value::Float(2.0)));
     assert_eq!(eval("ceil(1.1)"), Ok(Value::Float(2.0)));
     assert_eq!(eval("ceil(1.9)"), Ok(Value::Float(2.0)));
-    assert_eq!(eval("is_nan(\"xxx\")"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_nan(1.0/0.0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_nan(0.0/0.0)"), Ok(Value::Boolean(true)));
-    assert_eq!(eval("is_finite(1.0/0.0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_finite(0.0/0.0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_finite(0.0)"), Ok(Value::Boolean(true)));
-    assert_eq!(eval("is_infinite(0.0/0.0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
-    assert_eq!(eval("is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
-    assert_eq!(eval("is_normal(0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_nan(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_nan(0.0/0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("math::is_finite(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_finite(0.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_finite(0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("math::is_infinite(0.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
+    assert_eq!(eval("math::is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
+    assert_eq!(eval("math::is_normal(0)"), Ok(Value::Boolean(false)));
     // Other
+    assert_eq!(eval("typeof(4.0, 3)"), Ok(Value::String("tuple".into())));
+    assert_eq!(eval("typeof(4.0)"), Ok(Value::String("float".into())));
+    assert_eq!(eval("typeof(4)"), Ok(Value::String("int".into())));
+    assert_eq!(eval("typeof(\"\")"), Ok(Value::String("string".into())));
+    assert_eq!(eval("typeof(true)"), Ok(Value::String("boolean".into())));
+    assert_eq!(eval("typeof()"), Ok(Value::String("empty".into())));
     assert_eq!(eval("min(4.0, 3)"), Ok(Value::Int(3)));
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
     assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
@@ -440,10 +445,13 @@ fn test_errors() {
         eval("true-"),
         Err(EvalexprError::WrongOperatorArgumentAmount {
             actual: 1,
-            expected: 2
+            expected: 2,
         })
     );
     assert_eq!(eval("!(()true)"), Err(EvalexprError::AppendedToLeafNode));
+    assert_eq!(eval("math::is_nan(\"xxx\")"), Err(EvalexprError::ExpectedNumber {
+        actual: Value::String("xxx".to_string())
+    }));
 }
 
 #[test]
