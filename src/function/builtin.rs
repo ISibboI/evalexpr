@@ -82,6 +82,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
+        // Float special values
         "math::is_nan" => float_is(f64::is_nan),
         "math::is_finite" => float_is(f64::is_finite),
         "math::is_infinite" => float_is(f64::is_infinite),
