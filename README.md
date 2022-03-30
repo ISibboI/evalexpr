@@ -380,6 +380,7 @@ This crate offers a set of builtin functions.
 | `bitnot`             | 1               | Int                    | Computes the bitwise not of the given integer |
 | `shl`                | 2               | Int                    | Computes the given integer bitwise shifted left by the other given integer |
 | `shr`                | 2               | Int                    | Computes the given integer bitwise shifted right by the other given integer |
+| `random`             | 0               | Empty                  | Return a random float between 0 and 1. Requires the `rand` feature flag. |
 
 The `min` and `max` functions can deal with a mixture of integer and floating point arguments.
 If the maximum or minimum is an integer, then an integer is returned.

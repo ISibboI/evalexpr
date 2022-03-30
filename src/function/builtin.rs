@@ -185,6 +185,11 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "str::from" => Some(Function::new(|argument| {
             Ok(Value::String(argument.to_string()))
         })),
+        #[cfg(feature = "rand")]
+        "random" => Some(Function::new(|argument| {
+            argument.as_empty()?;
+            Ok(Value::Float(rand::random()))
+        })),
         // Bitwise operators
         "bitand" => int_function!(bitand, 2),
         "bitor" => int_function!(bitor, 2),
