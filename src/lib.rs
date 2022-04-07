@@ -35,7 +35,7 @@
 //! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
 //!            Err(EvalexprError::expected_int(Value::from(5.0))));
 //! // We can check which value the context stores for a like this
-//! assert_eq!(context.get_value("a"), Some(&Value::from(5)));
+//! assert_eq!(context.get_value("a"), Some(Value::from(5)));
 //! // And use the value in another expression like this
 //! assert_eq!(eval_int_with_context_mut("a = a + 2; a", &mut context), Ok(7));
 //! // It is also possible to save a bit of typing by using an operator-assignment operator
@@ -206,7 +206,7 @@
 //! assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
 //!            Err(EvalexprError::expected_int(5.0.into())));
 //! assert_eq!(eval_int_with_context("a", &context), Ok(5));
-//! assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
+//! assert_eq!(context.get_value("a"), Some(5.into()));
 //! ```
 //!
 //! For each binary operator, there exists an equivalent operator-assignment operator.
@@ -297,8 +297,8 @@
 //! // We can write or overwrite variables in expressions...
 //! assert_eq!(eval_with_context_mut("a = 10; b = 1.0;", &mut context), Ok(().into()));
 //! // ...and read the value in code like this
-//! assert_eq!(context.get_value("a"), Some(&Value::from(10)));
-//! assert_eq!(context.get_value("b"), Some(&Value::from(1.0)));
+//! assert_eq!(context.get_value("a"), Some(Value::from(10)));
+//! assert_eq!(context.get_value("b"), Some(Value::from(1.0)));
 //! ```
 //!
 //! Contexts are also required for user-defined functions.

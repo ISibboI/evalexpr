@@ -1546,7 +1546,7 @@ fn test_hashmap_context_clone_debug() {
     assert_eq!(format!("{:?}", &context), format!("{:?}", &cloned_context));
     assert_eq!(
         cloned_context.get_value("variable_five"),
-        Some(&Value::from(5))
+        Some(Value::from(5))
     );
     assert_eq!(
         eval_with_context("mult_3 2", &cloned_context),
