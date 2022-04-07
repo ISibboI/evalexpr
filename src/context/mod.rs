@@ -86,8 +86,8 @@ impl HashMapContext {
 }
 
 impl Context for HashMapContext {
-        self.variables.get(identifier)
     fn get_value(&self, identifier: &str) -> Option<Value> {
+        self.variables.get(identifier).cloned()
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
