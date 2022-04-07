@@ -328,6 +328,11 @@
 //! | `round`              | 1               | Numeric                | Returns the nearest integer to a number. Rounds half-way cases away from 0.0 |
 //! | `ceil`               | 1               | Numeric                | Returns the smallest integer greater than or equal to a number |
 //! | `if`                 | 3               | Boolean, Any, Any      | If the first argument is true, returns the second argument, otherwise, returns the third  |
+//! | `typeof`             | 1               | Any                    | returns "string", "float", "int", "boolean", "tuple", or "empty" depending on the type of the argument  |
+//! | `math::is_nan`       | 1               | Numeric                | Returns true if the argument is the floating-point value NaN, false if it is another floating-point value, and throws an error if it is not a number  |
+//! | `math::is_finite`    | 1               | Numeric                | Returns true if the argument is a finite floating-point number, false otherwise  |
+//! | `math::is_infinite`  | 1               | Numeric                | Returns true if the argument is an infinite floating-point number, false otherwise  |
+//! | `math::is_normal`    | 1               | Numeric                | Returns true if the argument is a floating-point number that is neither zero, infinite, [subnormal](https://en.wikipedia.org/wiki/Subnormal_number), or NaN, false otherwise  |
 //! | `math::ln`           | 1               | Numeric                | Returns the natural logarithm of the number |
 //! | `math::log`          | 2               | Numeric, Numeric       | Returns the logarithm of the number with respect to an arbitrary base |
 //! | `math::log2`         | 1               | Numeric                | Returns the base 2 logarithm of the number |

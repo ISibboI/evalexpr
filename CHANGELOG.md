@@ -6,6 +6,8 @@
 
 ### Added
 
+ * Builtin functions to check for nan, infinity and subnormality in floats (#101)
+
 ### Removed
 
 ### Changed
@@ -15,6 +17,10 @@
 ### Deprecated
 
 ### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Ophir LOJKINE](https://github.com/lovasoa)
 
 ## [7.2.0](https://github.com/ISibboI/evalexpr/compare/7.1.1...7.2.0) - 2022-03-16
 
