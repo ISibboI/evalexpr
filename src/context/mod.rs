@@ -17,6 +17,24 @@ mod predefined;
 /// An immutable context.
 pub trait Context {
     /// Returns the value that is linked to the given identifier.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    /// use std::collections::HashMap;
+    ///
+    /// struct HashMapContext {
+    ///     variables: HashMap<String, Value>
+    /// }
+    ///
+    /// impl Context for HashMapContext {
+    ///     fn get_value(&self, identifier: &str) -> Option<Value> {
+    ///         self.variables.get(identifier).cloned()
+    ///     }
+    ///     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> { todo!() }
+    /// }
+    /// ```
     fn get_value(&self, identifier: &str) -> Option<Value>;
 
     /// Calls the function that is linked to the given identifier with the given argument.
