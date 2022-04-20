@@ -9,6 +9,7 @@ fn assert_expr(expr: &str) {
 #[test]
 fn test_random() {
     for _ in 0..100 {
+        // This has a probability of 1e-20 of failing
         assert_expr("random() != random()");
         assert_expr("0 <= random()");
         assert_expr("random() <= 1");
