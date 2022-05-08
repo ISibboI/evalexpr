@@ -4,7 +4,7 @@
 //! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use crate::{
     function::Function,
@@ -22,6 +22,7 @@ pub trait Context {
     ///
     /// ```rust
     /// use evalexpr::*;
+    /// use std::borrow::Cow;
     /// use std::collections::HashMap;
     ///
     /// struct HashMapContext {
@@ -29,13 +30,13 @@ pub trait Context {
     /// }
     ///
     /// impl Context for HashMapContext {
-    ///     fn get_value(&self, identifier: &str) -> Option<Value> {
-    ///         self.variables.get(identifier).cloned()
+    ///     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+    ///         self.variables.get(identifier).map(Cow::Borrowed)
     ///     }
     ///     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> { todo!() }
     /// }
     /// ```
-    fn get_value(&self, identifier: &str) -> Option<Value>;
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>>;
 
     /// Calls the function that is linked to the given identifier with the given argument.
     /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
@@ -104,8 +105,8 @@ impl HashMapContext {
 }
 
 impl Context for HashMapContext {
-    fn get_value(&self, identifier: &str) -> Option<Value> {
-        self.variables.get(identifier).cloned()
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+        self.variables.get(identifier).map(Cow::Borrowed)
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
