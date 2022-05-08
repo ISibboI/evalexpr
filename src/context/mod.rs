@@ -72,7 +72,7 @@ pub trait GetFunctionContext: Context {
 pub struct EmptyContext;
 
 impl Context for EmptyContext {
-    fn get_value(&self, _identifier: &str) -> Option<Value> {
+    fn get_value(&self, _identifier: &str) -> Option<Cow<'_, Value>> {
         None
     }
 
