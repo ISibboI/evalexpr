@@ -11,6 +11,7 @@ use rand::{distributions::Uniform, seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::hint::black_box;
 use test::Bencher;
+use std::fmt::Write;
 
 const BENCHMARK_LEN: usize = 100_000;
 const EXPONENTIAL_TUPLE_ITERATIONS: usize = 12;
@@ -20,13 +21,13 @@ fn generate_expression<Gen: Rng>(len: usize, gen: &mut Gen) -> String {
     let whitespaces = vec![" ", "", "", "  ", " \n", "       "];
     let operators = vec!["+", "-", "*", "/", "%", "^"];
     let mut result = String::new();
-    result.push_str(&format!("{}", gen.sample(int_distribution)));
+    write!(result, "{}", gen.sample(int_distribution)).unwrap();
 
     while result.len() < len {
         result.push_str(whitespaces.choose(gen).unwrap());
         result.push_str(operators.choose(gen).unwrap());
         result.push_str(whitespaces.choose(gen).unwrap());
-        result.push_str(&format!("{}", gen.sample(int_distribution)));
+        write!(result, "{}", gen.sample(int_distribution)).unwrap();
     }
 
     result
