@@ -123,9 +123,9 @@ impl Operator {
             Tuple => 40,
             Chain => 0,
 
-            Const { value: _ } => 200,
-            VariableIdentifier { identifier: _ } => 200,
-            FunctionIdentifier { identifier: _ } => 190,
+            Const { .. } => 200,
+            VariableIdentifier { .. } => 200,
+            FunctionIdentifier { .. } => 190,
         }
     }
 
@@ -134,7 +134,7 @@ impl Operator {
     /// Left-to-right chaining has priority if operators with different order but same precedence are chained.
     pub(crate) const fn is_left_to_right(&self) -> bool {
         use crate::operator::Operator::*;
-        !matches!(self, Assign | FunctionIdentifier { identifier: _ })
+        !matches!(self, Assign | FunctionIdentifier { .. })
     }
 
     /// Returns true if chains of this operator should be flattened into one operator with many arguments.
@@ -158,9 +158,9 @@ impl Operator {
             | AndAssign | OrAssign => Some(2),
             Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
-            Const { value: _ } => Some(0),
-            VariableIdentifier { identifier: _ } => Some(0),
-            FunctionIdentifier { identifier: _ } => Some(1),
+            Const { .. } => Some(0),
+            VariableIdentifier { .. } => Some(0),
+            FunctionIdentifier { .. } => Some(1),
         }
     }
 
