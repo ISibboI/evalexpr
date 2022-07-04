@@ -1,4 +1,5 @@
 use crate::error::{EvalexprError, EvalexprResult};
+use std::convert::TryFrom;
 
 mod display;
 pub mod value_type;
@@ -190,6 +191,78 @@ impl From<Value> for EvalexprResult<Value> {
 impl From<()> for Value {
     fn from(_: ()) -> Self {
         Value::Empty
+    }
+}
+
+impl TryFrom<Value> for String {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::String(value) = value {
+            Ok(value)
+        } else {
+            Err(EvalexprError::ExpectedString { actual: value })
+        }
+    }
+}
+
+impl TryFrom<Value> for FloatType {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::Float(value) = value {
+            Ok(value)
+        } else {
+            Err(EvalexprError::ExpectedFloat { actual: value })
+        }
+    }
+}
+
+impl TryFrom<Value> for IntType {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::Int(value) = value {
+            Ok(value)
+        } else {
+            Err(EvalexprError::ExpectedInt { actual: value })
+        }
+    }
+}
+
+impl TryFrom<Value> for bool {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::Boolean(value) = value {
+            Ok(value)
+        } else {
+            Err(EvalexprError::ExpectedBoolean { actual: value })
+        }
+    }
+}
+
+impl TryFrom<Value> for TupleType {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::Tuple(value) = value {
+            Ok(value)
+        } else {
+            Err(EvalexprError::ExpectedTuple { actual: value })
+        }
+    }
+}
+
+impl TryFrom<Value> for () {
+    type Error = EvalexprError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Value::Empty = value {
+            Ok(())
+        } else {
+            Err(EvalexprError::ExpectedEmpty { actual: value })
+        }
     }
 }
 
