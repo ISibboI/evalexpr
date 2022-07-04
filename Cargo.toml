@@ -26,6 +26,7 @@ path = "src/lib.rs"
 regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
 serde_derive = { version = "1.0.133", optional = true}
+rand = { version = "0.8.5", optional = true}
 
 [features]
 serde_support = ["serde", "serde_derive"]
@@ -33,5 +34,5 @@ regex_support = ["regex"]
 
 [dev-dependencies]
 ron = "0.7.0"
-rand = "0.8.4"
+rand = "0.8.5"
 rand_pcg = "0.3.1"
