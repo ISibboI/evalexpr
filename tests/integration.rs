@@ -2083,3 +2083,28 @@ fn test_try_from() {
     );
     assert_eq!(EmptyType::try_from(value.clone()), Ok(()));
 }
+
+#[test]
+fn assignment_lhs_is_identifier() {
+    let tree = build_operator_tree("a = 1").unwrap();
+    let operators: Vec<_> = tree.iter().map(|node| node.operator().clone()).collect();
+
+    let mut context = HashMapContext::new();
+    tree.eval_empty_with_context_mut(&mut context).unwrap();
+    assert_eq!(context.get_value("a"), Some(&Value::Int(1)));
+
+    assert!(
+        matches!(
+            operators.as_slice(),
+            [
+                Operator::Assign,
+                Operator::VariableIdentifier { identifier: value },
+                Operator::Const {
+                    value: Value::Int(1)
+                }
+            ] if value == "a"
+        ),
+        "actual: {:#?}",
+        operators
+    );
+}
