@@ -9,9 +9,8 @@ extern crate test;
 use evalexpr::build_operator_tree;
 use rand::{distributions::Uniform, seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::hint::black_box;
+use std::{fmt::Write, hint::black_box};
 use test::Bencher;
-use std::fmt::Write;
 
 const BENCHMARK_LEN: usize = 100_000;
 const EXPONENTIAL_TUPLE_ITERATIONS: usize = 12;

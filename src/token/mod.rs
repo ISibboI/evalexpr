@@ -445,6 +445,7 @@ pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
 #[cfg(test)]
 mod tests {
     use crate::token::{char_to_partial_token, tokenize};
+    use std::fmt::Write;
 
     #[test]
     fn test_partial_token_display() {
@@ -468,7 +469,7 @@ mod tests {
         let mut result_string = String::new();
 
         for token in tokens {
-            result_string += &format!("{} ", token);
+            write!(result_string, "{} ", token).unwrap();
         }
 
         assert_eq!(token_string, result_string);
