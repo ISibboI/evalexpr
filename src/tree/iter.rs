@@ -26,7 +26,8 @@ impl<'a> Iterator for NodeIter<'a> {
                     result = Some(next);
                 } else {
                     // Can not fail because we just borrowed last.
-                    self.stack.pop().unwrap();
+                    // We just checked that the iterator is empty, so we can safely discard it.
+                    let _ = self.stack.pop().unwrap();
                 }
             } else {
                 return None;
