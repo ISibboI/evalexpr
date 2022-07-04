@@ -1,6 +1,7 @@
 #![cfg(not(tarpaulin_include))]
 
 use evalexpr::{error::*, *};
+use std::convert::TryFrom;
 
 #[test]
 fn test_unary_examples() {
@@ -1875,4 +1876,210 @@ fn test_parenthese_combinations() {
     );
     assert_eq!(eval_int("(((1+2)*(3+4)+(5-(6)))/((7-8)))"), Ok(-20));
     assert_eq!(eval_int("(((((5)))))"), Ok(5));
+}
+
+#[test]
+fn test_try_from() {
+    #![allow(clippy::redundant_clone)]
+
+    let value = Value::String("abc".to_string());
+    assert_eq!(String::try_from(value.clone()), Ok("abc".to_string()));
+    assert_eq!(
+        FloatType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedFloat {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        IntType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedInt {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::Float(1.3);
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(FloatType::try_from(value.clone()), Ok(1.3));
+    assert_eq!(
+        IntType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedInt {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::Int(13);
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        FloatType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedFloat {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(IntType::try_from(value.clone()), Ok(13));
+    assert_eq!(
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::Boolean(true);
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        FloatType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedFloat {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        IntType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedInt {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(bool::try_from(value.clone()), Ok(true));
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::Tuple(vec![Value::Int(1), Value::String("abc".to_string())]);
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        FloatType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedFloat {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        IntType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedInt {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Ok(vec![Value::Int(1), Value::String("abc".to_string())])
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::Empty;
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        FloatType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedFloat {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        IntType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedInt {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(EmptyType::try_from(value.clone()), Ok(()));
 }
