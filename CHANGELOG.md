@@ -7,6 +7,7 @@
 ### Added
 
  * Builtin functions to check for nan, infinity and subnormality in floats (#101)
+ * Builtin random function (#102)
 
 ### Removed
 
