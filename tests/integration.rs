@@ -2090,7 +2090,7 @@ fn assignment_lhs_is_identifier() {
     let operators: Vec<_> = tree.iter().map(|node| node.operator().clone()).collect();
 
     let mut context = HashMapContext::new();
-    tree.eval_empty_with_context_mut(&mut context).unwrap();
+    tree.eval_with_context_mut(&mut context).unwrap();
     assert_eq!(context.get_value("a"), Some(&Value::Int(1)));
 
     assert!(
@@ -2098,7 +2098,7 @@ fn assignment_lhs_is_identifier() {
             operators.as_slice(),
             [
                 Operator::Assign,
-                Operator::VariableIdentifier { identifier: value },
+                Operator::VariableIdentifierWrite { identifier: value },
                 Operator::Const {
                     value: Value::Int(1)
                 }

@@ -75,8 +75,13 @@ pub enum Operator {
         /** The value of the constant. */
         value: Value,
     },
-    /// A variable identifier.
-    VariableIdentifier {
+    /// A write to a variable identifier.
+    VariableIdentifierWrite {
+        /// The identifier of the variable.
+        identifier: String,
+    },
+    /// A read from a variable identifier.
+    VariableIdentifierRead {
         /// The identifier of the variable.
         identifier: String,
     },
@@ -92,8 +97,12 @@ impl Operator {
         Operator::Const { value }
     }
 
-    pub(crate) fn variable_identifier(identifier: String) -> Self {
-        Operator::VariableIdentifier { identifier }
+    pub(crate) fn variable_identifier_write(identifier: String) -> Self {
+        Operator::VariableIdentifierWrite { identifier }
+    }
+
+    pub(crate) fn variable_identifier_read(identifier: String) -> Self {
+        Operator::VariableIdentifierRead { identifier }
     }
 
     pub(crate) fn function_identifier(identifier: String) -> Self {
@@ -124,7 +133,7 @@ impl Operator {
             Chain => 0,
 
             Const { .. } => 200,
-            VariableIdentifier { .. } => 200,
+            VariableIdentifierWrite { .. } | VariableIdentifierRead { .. } => 200,
             FunctionIdentifier { .. } => 190,
         }
     }
@@ -159,7 +168,7 @@ impl Operator {
             Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
             Const { .. } => Some(0),
-            VariableIdentifier { .. } => Some(0),
+            VariableIdentifierWrite { .. } | VariableIdentifierRead { .. } => Some(0),
             FunctionIdentifier { .. } => Some(1),
         }
     }
@@ -422,7 +431,12 @@ impl Operator {
 
                 Ok(value.clone())
             },
-            VariableIdentifier { identifier } => {
+            VariableIdentifierWrite { identifier } => {
+                expect_operator_argument_amount(arguments.len(), 0)?;
+
+                Ok(identifier.clone().into())
+            },
+            VariableIdentifierRead { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
                 if let Some(value) = context.get_value(identifier).cloned() {
@@ -473,7 +487,7 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
                 let target = arguments[0].as_string()?;
-                let left_value = Operator::VariableIdentifier {
+                let left_value = Operator::VariableIdentifierRead {
                     identifier: target.clone(),
                 }
                 .eval(&Vec::new(), context)?;

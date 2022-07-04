@@ -69,7 +69,8 @@ impl Node {
     /// ```
     pub fn iter_identifiers(&self) -> impl Iterator<Item = &str> {
         self.iter().filter_map(|node| match node.operator() {
-            Operator::VariableIdentifier { identifier }
+            Operator::VariableIdentifierWrite { identifier }
+            | Operator::VariableIdentifierRead { identifier }
             | Operator::FunctionIdentifier { identifier } => Some(identifier.as_str()),
             _ => None,
         })
@@ -92,7 +93,8 @@ impl Node {
     /// ```
     pub fn iter_variable_identifiers(&self) -> impl Iterator<Item = &str> {
         self.iter().filter_map(|node| match node.operator() {
-            Operator::VariableIdentifier { identifier } => Some(identifier.as_str()),
+            Operator::VariableIdentifierWrite { identifier }
+            | Operator::VariableIdentifierRead { identifier } => Some(identifier.as_str()),
             _ => None,
         })
     }
@@ -616,10 +618,14 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::Semicolon => Some(Node::new(Operator::Chain)),
 
             Token::Identifier(identifier) => {
-                let mut result = Some(Node::new(Operator::variable_identifier(identifier.clone())));
+                let mut result = Some(Node::new(Operator::variable_identifier_read(
+                    identifier.clone(),
+                )));
                 if let Some(next) = next {
                     if next.is_assignment() {
-                        result = Some(Node::new(Operator::value(identifier.clone().into())));
+                        result = Some(Node::new(Operator::variable_identifier_write(
+                            identifier.clone(),
+                        )));
                     } else if next.is_leftsided_value() {
                         result = Some(Node::new(Operator::function_identifier(identifier)));
                     }
