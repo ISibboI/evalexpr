@@ -4,7 +4,7 @@
 //! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use crate::{
     function::Function,
@@ -17,7 +17,26 @@ mod predefined;
 /// An immutable context.
 pub trait Context {
     /// Returns the value that is linked to the given identifier.
-    fn get_value(&self, identifier: &str) -> Option<&Value>;
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    /// use std::borrow::Cow;
+    /// use std::collections::HashMap;
+    ///
+    /// struct HashMapContext {
+    ///     variables: HashMap<String, Value>
+    /// }
+    ///
+    /// impl Context for HashMapContext {
+    ///     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+    ///         self.variables.get(identifier).map(Cow::Borrowed)
+    ///     }
+    ///     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> { todo!() }
+    /// }
+    /// ```
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>>;
 
     /// Calls the function that is linked to the given identifier with the given argument.
     /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
@@ -54,7 +73,7 @@ pub trait GetFunctionContext: Context {
 pub struct EmptyContext;
 
 impl Context for EmptyContext {
-    fn get_value(&self, _identifier: &str) -> Option<&Value> {
+    fn get_value(&self, _identifier: &str) -> Option<Cow<'_, Value>> {
         None
     }
 
@@ -86,8 +105,8 @@ impl HashMapContext {
 }
 
 impl Context for HashMapContext {
-    fn get_value(&self, identifier: &str) -> Option<&Value> {
-        self.variables.get(identifier)
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+        self.variables.get(identifier).map(Cow::Borrowed)
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
