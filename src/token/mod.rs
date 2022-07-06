@@ -444,7 +444,7 @@ pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::token::{char_to_partial_token, tokenize};
+    use crate::token::{char_to_partial_token, tokenize, Token};
     use std::fmt::Write;
 
     #[test]
@@ -473,5 +473,18 @@ mod tests {
         }
 
         assert_eq!(token_string, result_string);
+    }
+
+    #[test]
+    fn assignment_lhs_is_identifier() {
+        let tokens = tokenize("a = 1").unwrap();
+        assert_eq!(
+            tokens.as_slice(),
+            [
+                Token::Identifier("a".to_string()),
+                Token::Assign,
+                Token::Int(1)
+            ]
+        );
     }
 }

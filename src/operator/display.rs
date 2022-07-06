@@ -41,7 +41,9 @@ impl Display for Operator {
             Chain => write!(f, "; "),
 
             Const { value } => write!(f, "{}", value),
-            VariableIdentifier { identifier } => write!(f, "{}", identifier),
+            VariableIdentifierWrite { identifier } | VariableIdentifierRead { identifier } => {
+                write!(f, "{}", identifier)
+            },
             FunctionIdentifier { identifier } => write!(f, "{}", identifier),
         }
     }

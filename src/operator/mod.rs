@@ -75,8 +75,13 @@ pub enum Operator {
         /** The value of the constant. */
         value: Value,
     },
-    /// A variable identifier.
-    VariableIdentifier {
+    /// A write to a variable identifier.
+    VariableIdentifierWrite {
+        /// The identifier of the variable.
+        identifier: String,
+    },
+    /// A read from a variable identifier.
+    VariableIdentifierRead {
         /// The identifier of the variable.
         identifier: String,
     },
@@ -92,8 +97,12 @@ impl Operator {
         Operator::Const { value }
     }
 
-    pub(crate) fn variable_identifier(identifier: String) -> Self {
-        Operator::VariableIdentifier { identifier }
+    pub(crate) fn variable_identifier_write(identifier: String) -> Self {
+        Operator::VariableIdentifierWrite { identifier }
+    }
+
+    pub(crate) fn variable_identifier_read(identifier: String) -> Self {
+        Operator::VariableIdentifierRead { identifier }
     }
 
     pub(crate) fn function_identifier(identifier: String) -> Self {
@@ -123,9 +132,9 @@ impl Operator {
             Tuple => 40,
             Chain => 0,
 
-            Const { value: _ } => 200,
-            VariableIdentifier { identifier: _ } => 200,
-            FunctionIdentifier { identifier: _ } => 190,
+            Const { .. } => 200,
+            VariableIdentifierWrite { .. } | VariableIdentifierRead { .. } => 200,
+            FunctionIdentifier { .. } => 190,
         }
     }
 
@@ -134,7 +143,7 @@ impl Operator {
     /// Left-to-right chaining has priority if operators with different order but same precedence are chained.
     pub(crate) const fn is_left_to_right(&self) -> bool {
         use crate::operator::Operator::*;
-        !matches!(self, Assign | FunctionIdentifier { identifier: _ })
+        !matches!(self, Assign | FunctionIdentifier { .. })
     }
 
     /// Returns true if chains of this operator should be flattened into one operator with many arguments.
@@ -158,9 +167,9 @@ impl Operator {
             | AndAssign | OrAssign => Some(2),
             Tuple | Chain => None,
             Not | Neg | RootNode => Some(1),
-            Const { value: _ } => Some(0),
-            VariableIdentifier { identifier: _ } => Some(0),
-            FunctionIdentifier { identifier: _ } => Some(1),
+            Const { .. } => Some(0),
+            VariableIdentifierWrite { .. } | VariableIdentifierRead { .. } => Some(0),
+            FunctionIdentifier { .. } => Some(1),
         }
     }
 
@@ -422,7 +431,12 @@ impl Operator {
 
                 Ok(value.clone())
             },
-            VariableIdentifier { identifier } => {
+            VariableIdentifierWrite { identifier } => {
+                expect_operator_argument_amount(arguments.len(), 0)?;
+
+                Ok(identifier.clone().into())
+            },
+            VariableIdentifierRead { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
                 if let Some(value) = context.get_value(identifier).cloned() {
@@ -473,7 +487,7 @@ impl Operator {
                 expect_operator_argument_amount(arguments.len(), 2)?;
 
                 let target = arguments[0].as_string()?;
-                let left_value = Operator::VariableIdentifier {
+                let left_value = Operator::VariableIdentifierRead {
                     identifier: target.clone(),
                 }
                 .eval(&Vec::new(), context)?;
