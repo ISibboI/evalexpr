@@ -6,11 +6,6 @@
 
 ### Added
 
- * Builtin functions to check for nan, infinity and subnormality in floats (#101)
- * Builtin random function (#102)
- * Implement `TryFrom<Value>` for all types a value can hold (#105)
- * Split VariableIdentifier node into read and write variants (#106)
-
 ### Removed
 
 ### Changed
@@ -18,6 +13,17 @@
 ### Fixed
 
 ### Deprecated
+
+### Contributors
+
+## [8.0.0](https://github.com/ISibboI/evalexpr/compare/7.2.0...8.0.0) - 2022-07-06
+
+### Added
+
+ * Builtin functions to check for nan, infinity and subnormality in floats (#101)
+ * Builtin random function (#102)
+ * Implement `TryFrom<Value>` for all types a value can hold (#105)
+ * Split VariableIdentifier node into read and write variants (#106)
 
 ### Contributors
 
