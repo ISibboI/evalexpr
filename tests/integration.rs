@@ -2108,3 +2108,16 @@ fn assignment_lhs_is_identifier() {
         operators
     );
 }
+
+#[test]
+fn test_variable_assignment_and_iteration() {
+    let mut context = HashMapContext::new();
+    eval_with_context_mut("a = 5; b = 5.0", &mut context).unwrap();
+
+    let mut variables: Vec<_> = context.iter_variables().collect();
+    variables.sort_unstable_by(|(name_a, _), (name_b, _)| name_a.cmp(name_b));
+    assert_eq!(
+        variables,
+        vec![("a".to_string(), 5.into()), ("b".to_string(), 5.0.into())]
+    );
+}
