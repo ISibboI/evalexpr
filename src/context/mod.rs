@@ -4,7 +4,7 @@
 //! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, iter};
 
 use crate::{
     function::Function,
@@ -40,6 +40,22 @@ pub trait ContextWithMutableFunctions: Context {
     }
 }
 
+/// A context that allows to iterate over its variable names with their values.
+///
+/// **Note:** this trait will change after GATs are stabilised, because then we can get rid of the lifetime in the trait definition.
+pub trait IterateVariablesContext<'a> {
+    /// The iterator type for iterating over variable name-value pairs.
+    type VariableIterator: 'a + Iterator<Item = (String, Value)>;
+    /// The iterator type for iterating over variable names.
+    type VariableNameIterator: 'a + Iterator<Item = String>;
+
+    /// Returns an iterator over pairs of variable names and values.
+    fn iter_variables(&'a self) -> Self::VariableIterator;
+
+    /// Returns an iterator over variable names.
+    fn iter_variable_names(&'a self) -> Self::VariableNameIterator;
+}
+
 /*/// A context that allows to retrieve functions programmatically.
 pub trait GetFunctionContext: Context {
     /// Returns the function that is linked to the given identifier.
@@ -62,6 +78,19 @@ impl Context for EmptyContext {
         Err(EvalexprError::FunctionIdentifierNotFound(
             identifier.to_string(),
         ))
+    }
+}
+
+impl<'a> IterateVariablesContext<'a> for EmptyContext {
+    type VariableIterator = iter::Empty<(String, Value)>;
+    type VariableNameIterator = iter::Empty<String>;
+
+    fn iter_variables(&self) -> Self::VariableIterator {
+        iter::empty()
+    }
+
+    fn iter_variable_names(&self) -> Self::VariableNameIterator {
+        iter::empty()
     }
 }
 
@@ -122,6 +151,25 @@ impl ContextWithMutableFunctions for HashMapContext {
     fn set_function(&mut self, identifier: String, function: Function) -> EvalexprResult<()> {
         self.functions.insert(identifier, function);
         Ok(())
+    }
+}
+
+impl<'a> IterateVariablesContext<'a> for HashMapContext {
+    type VariableIterator = std::iter::Map<
+        std::collections::hash_map::Iter<'a, String, Value>,
+        fn((&String, &Value)) -> (String, Value),
+    >;
+    type VariableNameIterator =
+        std::iter::Cloned<std::collections::hash_map::Keys<'a, String, Value>>;
+
+    fn iter_variables(&'a self) -> Self::VariableIterator {
+        self.variables
+            .iter()
+            .map(|(string, value)| (string.clone(), value.clone()))
+    }
+
+    fn iter_variable_names(&'a self) -> Self::VariableNameIterator {
+        self.variables.keys().cloned()
     }
 }
 
