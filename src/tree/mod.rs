@@ -107,7 +107,7 @@ impl Node {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("d=a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_read_variable_identifiers();
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.next(), Some("b"));
