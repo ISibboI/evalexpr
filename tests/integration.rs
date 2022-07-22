@@ -1616,14 +1616,24 @@ fn test_error_constructors() {
 
 #[test]
 fn test_iterators() {
-    let tree = build_operator_tree("5 + 3 + fun(4) + var").unwrap();
+    let tree = build_operator_tree("writevar = 5 + 3 + fun(4) + var").unwrap();
     let mut iter = tree.iter_identifiers();
+    assert_eq!(iter.next(), Some("writevar"));
     assert_eq!(iter.next(), Some("fun"));
     assert_eq!(iter.next(), Some("var"));
     assert_eq!(iter.next(), None);
 
     let mut iter = tree.iter_variable_identifiers();
+    assert_eq!(iter.next(), Some("writevar"));
     assert_eq!(iter.next(), Some("var"));
+    assert_eq!(iter.next(), None);
+
+    let mut iter = tree.iter_read_variable_identifiers();
+    assert_eq!(iter.next(), Some("var"));
+    assert_eq!(iter.next(), None);
+
+    let mut iter = tree.iter_write_variable_identifiers();
+    assert_eq!(iter.next(), Some("writevar"));
     assert_eq!(iter.next(), None);
 
     let mut iter = tree.iter_function_identifiers();
