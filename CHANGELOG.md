@@ -16,6 +16,18 @@
 
 ### Contributors
 
+## [8.1.0](https://github.com/ISibboI/evalexpr/compare/8.0.0...8.1.0) - 2022-07-22
+
+### Added
+
+ * Functions `iter_(read/write)_variable_identifiers`, which iterate over all `ReadVariableIdentifier`s or all `WriteVariableIdentifier`s in an operator tree (#110)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Tobias Schmitt](https://github.com/tsmt09)
+
 ## [8.0.0](https://github.com/ISibboI/evalexpr/compare/7.2.0...8.0.0) - 2022-07-06
 
 ### Added
