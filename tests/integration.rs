@@ -2128,6 +2128,10 @@ fn test_variable_assignment_and_iteration() {
     variables.sort_unstable_by(|(name_a, _), (name_b, _)| name_a.cmp(name_b));
     assert_eq!(
         variables,
-        vec![("a".to_string(), 5.into()), ("b".to_string(), 5.0.into())]
+        vec![("a".to_string(), 5.into()), ("b".to_string(), 5.0.into())],
     );
+
+    let mut variables: Vec<_> = context.iter_variable_names().collect();
+    variables.sort_unstable();
+    assert_eq!(variables, vec!["a".to_string(), "b".to_string()],);
 }
