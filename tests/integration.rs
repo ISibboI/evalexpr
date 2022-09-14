@@ -89,7 +89,10 @@ fn test_mod_examples() {
 #[test]
 fn test_pow_examples() {
     assert_eq!(eval("1 ^ 4"), Ok(Value::Float(1.0)));
-    assert_eq!(eval("6 ^ 4"), Ok(Value::Float(6.0f64.powf(4.0))));
+    assert_eq!(
+        eval("6 ^ 4"),
+        Ok(Value::Float((6.0 as FloatType).powf(4.0)))
+    );
     assert_eq!(eval("1 ^ 4 + 2"), Ok(Value::Float(3.0)));
     assert_eq!(eval("2 ^ (4 + 2)"), Ok(Value::Float(64.0)));
 }
@@ -289,7 +292,7 @@ fn test_capturing_functions() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as f64))
+                    Ok(Value::Float(float * three as FloatType))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
@@ -321,11 +324,17 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::log2(2)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("math::log10(10)"), Ok(Value::Float(1.0)));
     // Powers
-    assert_eq!(eval("math::exp(2)"), Ok(Value::Float(2.0_f64.exp())));
-    assert_eq!(eval("math::exp2(2)"), Ok(Value::Float(2.0_f64.exp2())));
+    assert_eq!(
+        eval("math::exp(2)"),
+        Ok(Value::Float((2.0 as FloatType).exp()))
+    );
+    assert_eq!(
+        eval("math::exp2(2)"),
+        Ok(Value::Float((2.0 as FloatType).exp2()))
+    );
     assert_eq!(
         eval("math::pow(1.5, 1.3)"),
-        Ok(Value::Float(1.5_f64.powf(1.3)))
+        Ok(Value::Float((1.5 as FloatType).powf(1.3)))
     );
     // Cos
     assert_eq!(eval("math::cos(0)"), Ok(Value::Float(1.0)));
@@ -344,7 +353,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::atanh(0)"), Ok(Value::Float(0.0)));
     assert_eq!(
         eval("math::atan2(1.2, -5.5)"),
-        Ok(Value::Float(1.2_f64.atan2(-5.5)))
+        Ok(Value::Float((1.2 as FloatType).atan2(-5.5)))
     );
     // Root
     assert_eq!(eval("math::sqrt(25)"), Ok(Value::Float(5.0)));
@@ -352,7 +361,7 @@ fn test_builtin_functions() {
     // Hypotenuse
     assert_eq!(
         eval("math::hypot(8.2, 1.1)"),
-        Ok(Value::Float(8.2_f64.hypot(1.1)))
+        Ok(Value::Float((8.2 as FloatType).hypot(1.1)))
     );
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
@@ -1525,7 +1534,7 @@ fn test_hashmap_context_clone_debug() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as f64))
+                    Ok(Value::Float(float * three as FloatType))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
@@ -1661,7 +1670,7 @@ fn test_long_expression_i89() {
     )
     .unwrap();
     let x = 0.0;
-    let y: f64 = 3.0;
+    let y: FloatType = 3.0;
     let z = 4.0;
     let context = context_map! {
         "x" => 0.0,
@@ -1672,8 +1681,8 @@ fn test_long_expression_i89() {
     let expected = x * 0.2 * 5.0 / 4.0
         + x * 2.0 * 4.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0
         + 7.0 * y.sin()
-        - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin();
-    let actual = tree.eval_float_with_context(&context).unwrap();
+        - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin() ;
+    let actual: FloatType = tree.eval_float_with_context(&context).unwrap();
     assert!(
         (expected - actual).abs() < expected.abs().min(actual.abs()) * 1e-12,
         "expected: {}, actual: {}",
