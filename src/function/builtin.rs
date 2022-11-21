@@ -23,7 +23,7 @@ macro_rules! simple_math {
     };
 }
 
-fn float_is(func: fn(f64) -> bool) -> Option<Function> {
+fn float_is(func: fn(FloatType) -> bool) -> Option<Function> {
     Some(Function::new(move |argument| {
         Ok(func(argument.as_number()?).into())
     }))
@@ -83,10 +83,10 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
         // Float special values
-        "math::is_nan" => float_is(f64::is_nan),
-        "math::is_finite" => float_is(f64::is_finite),
-        "math::is_infinite" => float_is(f64::is_infinite),
-        "math::is_normal" => float_is(f64::is_normal),
+        "math::is_nan" => float_is(FloatType::is_nan),
+        "math::is_finite" => float_is(FloatType::is_finite),
+        "math::is_infinite" => float_is(FloatType::is_infinite),
+        "math::is_normal" => float_is(FloatType::is_normal),
         // Other
         "typeof" => Some(Function::new(move |argument| {
             Ok(match argument {
@@ -102,7 +102,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut min_int = IntType::max_value();
-            let mut min_float = 1.0f64 / 0.0f64;
+            let mut min_float: FloatType = 1.0 / 0.0;
             debug_assert!(min_float.is_infinite());
 
             for argument in arguments {
@@ -124,7 +124,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "max" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut max_int = IntType::min_value();
-            let mut max_float = -1.0f64 / 0.0f64;
+            let mut max_float: FloatType = -1.0 / 0.0;
             debug_assert!(max_float.is_infinite());
 
             for argument in arguments {
@@ -150,9 +150,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
-                Ok(Value::from(subject.len() as i64))
+                Ok(Value::from(subject.len() as IntType))
             } else if let Ok(subject) = argument.as_tuple() {
-                Ok(Value::from(subject.len() as i64))
+                Ok(Value::from(subject.len() as IntType))
             } else {
                 Err(EvalexprError::type_error(
                     argument.clone(),
