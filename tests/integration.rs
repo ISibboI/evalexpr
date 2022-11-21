@@ -1681,7 +1681,7 @@ fn test_long_expression_i89() {
     let expected = x * 0.2 * 5.0 / 4.0
         + x * 2.0 * 4.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0
         + 7.0 * y.sin()
-        - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin() ;
+        - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin();
     let actual: FloatType = tree.eval_float_with_context(&context).unwrap();
     assert!(
         (expected - actual).abs() < expected.abs().min(actual.abs()) * 1e-12,
