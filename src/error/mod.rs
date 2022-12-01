@@ -14,7 +14,7 @@ use crate::{operator::Operator, value::Value};
 mod display;
 
 /// Errors used in this crate.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
 pub enum EvalexprError {
     /// An operator was called with a wrong amount of arguments.
