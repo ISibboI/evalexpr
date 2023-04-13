@@ -16,6 +16,23 @@
 
 ### Contributors
 
+## [8.2.0](https://github.com/ISibboI/evalexpr/compare/8.1.0...8.2.0) - 2023-04-13
+
+### Added
+
+ * `EvalExprError` now derives `Clone` (#116)
+
+### Changed
+
+ * Occurrences of `f64` and `i64` have been replaced with the type aliases `FloatType` and `IntType` where applicable (#113)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+* [Natan Freeman](https://github.com/NatanFreeman)
+* [Claus Matzinger](https://github.com/celaus)
+
 ## [8.1.0](https://github.com/ISibboI/evalexpr/compare/8.0.0...8.1.0) - 2022-07-22
 
 ### Added
