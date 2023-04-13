@@ -23,7 +23,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
           override: true
 
       - name: Rust cache
@@ -52,7 +51,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
           override: true
 
       - name: Rust cache
@@ -82,7 +80,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
           override: true
 
       - name: Rust cache
@@ -112,7 +109,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
           override: true
 
       - name: Rust cache
@@ -125,6 +121,41 @@ jobs:
         with:
           command: check
           args: --all-features --all --bins --benches --examples --tests --lib
+
+  check_sync_readme:
+    needs: [precheck_default, precheck_all_features]
+    name: Check sync readme
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        rust: [ stable ]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Install cargo-sync-readme
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-sync-readme
+
+      - name: Sync readme check
+        uses: actions-rs/cargo@v1
+        with:
+          command: sync-readme
+          args: --check
 
   check_platform_compatibility:
     needs: [precheck_default, precheck_all_features]
@@ -143,7 +174,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
           override: true
 
       - name: Rust cache
