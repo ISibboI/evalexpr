@@ -16,17 +16,18 @@
 
 ### Contributors
 
-## [8.2.1](https://github.com/ISibboI/evalexpr/compare/8.2.0...8.2.1) - 2023-04-13
+## [9.0.0](https://github.com/ISibboI/evalexpr/compare/8.2.0...9.0.0) - 2023-04-13
 
 ### Fixed
 
-* Taking numbers to negative powers gave unexpected results (#120)
+ * Taking numbers to negative powers gave unexpected results (#120)
+ * **Update MSRV to 1.56.1 (2021 edition release)** to allow builds with the latest versions of all dependencies.
 
 ### Contributors
 
 My warmhearted thanks goes to:
 
-* [Pham Nhat Huy](https://github.com/012e)
+ * [Pham Nhat Huy](https://github.com/012e)
 
 ## [8.2.0](https://github.com/ISibboI/evalexpr/compare/8.1.0...8.2.0) - 2023-04-13
 
@@ -42,8 +43,8 @@ My warmhearted thanks goes to:
 
 My warmhearted thanks goes to:
 
-* [Natan Freeman](https://github.com/NatanFreeman)
-* [Claus Matzinger](https://github.com/celaus)
+ * [Natan Freeman](https://github.com/NatanFreeman)
+ * [Claus Matzinger](https://github.com/celaus)
 
 ## [8.1.0](https://github.com/ISibboI/evalexpr/compare/8.0.0...8.1.0) - 2022-07-22
 
