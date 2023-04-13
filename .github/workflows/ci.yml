@@ -64,7 +64,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --benches --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests --lib
 
   check_msrv:
     needs: [precheck_default, precheck_all_features]
@@ -94,7 +94,37 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all-features --all --benches --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests --lib
+
+  check_benches:
+    needs: [precheck_default, precheck_all_features]
+    name: Check benches with all features
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        rust: [ nightly ]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all-features --all --bins --benches --examples --tests --lib
 
   check_platform_compatibility:
     needs: [precheck_default, precheck_all_features]
@@ -125,7 +155,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --benches --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests --lib
 
   detailed_tests:
     needs: [precheck_default, precheck_all_features]
@@ -156,7 +186,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --benches --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests --lib
 
       - name: Test
         uses: actions-rs/cargo@v1
