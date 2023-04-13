@@ -67,25 +67,19 @@ jobs:
   check_msrv:
     needs: [precheck_default, precheck_all_features]
     name: Check MSRV with all features
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        rust: [ 1.56.1 ]
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@master
 
-      - name: Install ${{ matrix.rust }}
+      - name: Install MSRV toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: 1.56.1
           override: true
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.os }}
 
       - name: Check
         uses: actions-rs/cargo@v1
