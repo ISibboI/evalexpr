@@ -2145,3 +2145,13 @@ fn test_variable_assignment_and_iteration() {
     variables.sort_unstable();
     assert_eq!(variables, vec!["a".to_string(), "b".to_string()],);
 }
+
+#[test]
+fn test_negative_power() {
+    assert_eq!(eval("3^-2"), Ok(Value::Float(1.0/9.0)));
+    assert_eq!(eval("3^(-2)"), Ok(Value::Float(1.0/9.0)));
+    assert_eq!(eval("-3^2"), Ok(Value::Float(-9.0)));
+    assert_eq!(eval("-(3)^2"), Ok(Value::Float(-9.0)));
+    assert_eq!(eval("(-3)^-2"), Ok(Value::Float(1.0/9.0)));
+    assert_eq!(eval("-(3^-2)"), Ok(Value::Float(-1.0/9.0)));
+}
