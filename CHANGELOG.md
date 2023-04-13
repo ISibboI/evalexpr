@@ -16,6 +16,18 @@
 
 ### Contributors
 
+## [8.2.1](https://github.com/ISibboI/evalexpr/compare/8.2.0...8.2.1) - 2023-04-13
+
+### Fixed
+
+* Taking numbers to negative powers gave unexpected results (#120)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+* [Pham Nhat Huy](https://github.com/012e)
+
 ## [8.2.0](https://github.com/ISibboI/evalexpr/compare/8.1.0...8.2.0) - 2023-04-13
 
 ### Added
