@@ -459,8 +459,13 @@ impl Node {
     }
 
     fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
-        // println!("Inserting {:?} into {:?}", node.operator, self.operator());
-        if self.operator().precedence() < node.operator().precedence() || is_root_node
+        // println!(
+        //     "Inserting {:?} into {:?}, is_root_node = {is_root_node}",
+        //     node.operator(),
+        //     self.operator()
+        // );
+        // println!("Self is {:?}", self);
+        if self.operator().precedence() < node.operator().precedence() || node.operator().is_unary() || is_root_node
             // Right-to-left chaining
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
         {
@@ -471,12 +476,15 @@ impl Node {
                 let last_child_operator = self.children.last().unwrap().operator();
 
                 if last_child_operator.precedence()
-                    < node.operator().precedence()
+                    < node.operator().precedence() || node.operator().is_unary()
                     // Right-to-left chaining
                     || (last_child_operator.precedence()
                     == node.operator().precedence() && !last_child_operator.is_left_to_right() && !node.operator().is_left_to_right())
                 {
-                    // println!("Recursing into {:?}", self.children.last().unwrap().operator());
+                    // println!(
+                    //     "Recursing into {:?}",
+                    //     self.children.last().unwrap().operator()
+                    // );
                     // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                     self.children
                         .last_mut()

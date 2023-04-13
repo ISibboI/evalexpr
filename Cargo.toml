@@ -11,7 +11,7 @@ documentation = "https://docs.rs/evalexpr"
 readme = "README.md"
 license = "MIT"
 edition = "2018"
-rust-version = "1.46.0"
+rust-version = "1.56.1"
 
 [badges]
 maintenance = { status = "actively-developed" }
