@@ -1551,6 +1551,7 @@ fn test_hashmap_context_clone_debug() {
         .unwrap();
     context.set_value("variable_five".into(), 5.into()).unwrap();
     let context = context;
+    #[allow(clippy::redundant_clone)]
     let cloned_context = context.clone();
 
     assert_eq!(format!("{:?}", &context), format!("{:?}", &cloned_context));
