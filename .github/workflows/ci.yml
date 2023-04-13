@@ -1,112 +1,183 @@
-name: Continuous Integration
+name: CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+
+env:
+  RUSTFLAGS: -Dwarnings
 
 jobs:
-  build_test_format_lint:
-    name: ${{matrix.command.name}} (${{matrix.toolchain}})
-    runs-on: ubuntu-latest
+  precheck_default:
+    name: Check default
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
 
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command:  check
+          args: --all --bins --examples --lib
+
+  precheck_all_features:
+    name: Check all features
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command:  check
+          args: --all-features --all --benches --bins --examples --tests --lib
+
+  check_msrv:
+    needs: [precheck_default, precheck_all_features]
+    name: Check MSRV with all features
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        rust: [ 1.46.0 ]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all-features --all --benches --bins --examples --tests --lib
+
+  check_platform_compatibility:
+    needs: [precheck_default, precheck_all_features]
+    name: Check platform compatibility
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, beta, nightly, 1.46.0]
-        command:
-          - name: Check
-            command: check
-            args: --all-features
-            components: ""
-          - name: Test
-            command: test
-            args: --all-features
-            components: ""
-        include:
-          - toolchain: nightly
-            command:
-              name: Format
-              command: fmt
-              args: --all -- --check
-              components: rustfmt
-          - toolchain: nightly
-            command:
-              name: Lint
-              command: clippy
-              args: --all-features --tests --benches
-              components: clippy
-          - toolchain: stable
-            command:
-              name: Sync readme
-              command: sync-readme
-              args: --check
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        rust: [stable]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: ⚡ Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/checkout@master
 
-      - name: Install toolchain
+      - name: Install ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
           override: true
-          default: true
-          components: ${{matrix.command.components}}
 
-      - name: Install cargo-sync-readme
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: Check
         uses: actions-rs/cargo@v1
         with:
-          command: install
-          args: cargo-sync-readme
+          command:  check
+          args: --all-features --all --benches --bins --examples --tests --lib
 
-      - name: ${{matrix.command.name}}
-        uses: actions-rs/cargo@v1
-        with:
-          command: ${{matrix.command.command}}
-          args: ${{matrix.command.args}}
-
-  coveralls_io:
-    name: Coverage
-    runs-on: ubuntu-latest
+  detailed_tests:
+    needs: [precheck_default, precheck_all_features]
+    name: Check, test, doc, format and lint with all features
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable, beta, nightly]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: ⚡ Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/checkout@master
 
-      - name: Install toolchain
+      - name: Install ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
           override: true
-          default: true
 
-      - name: Install cargo-tarpaulin
-        uses: actions-rs/install@v0.1
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
         with:
-          crate: cargo-tarpaulin
-          version: latest
-          use-tool-cache: true
+          key: ${{ matrix.os }}
 
-      - name: Coverage Report with tarpaulin
+      - name: Check
         uses: actions-rs/cargo@v1
         with:
-          command: tarpaulin
-          args: --all --all-features --out Lcov -- --test-threads 1
+          command:  check
+          args: --all-features --all --benches --bins --examples --tests --lib
 
-      - name: Upload Coverage
-        uses: coverallsapp/github-action@master
+      - name: Test
+        uses: actions-rs/cargo@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
+          command: test
+          args: --all-features --all
+
+      - name: Docs
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all-features
+
+      - name: Format
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+
+      - name: Lint
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-features --all-targets
