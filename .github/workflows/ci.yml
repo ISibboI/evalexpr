@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        rust: [ 1.46.0 ]
+        rust: [ 1.56.1 ]
 
     steps:
       - uses: actions/checkout@master
