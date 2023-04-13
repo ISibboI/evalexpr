@@ -2148,10 +2148,11 @@ fn test_variable_assignment_and_iteration() {
 
 #[test]
 fn test_negative_power() {
-    assert_eq!(eval("3^-2"), Ok(Value::Float(1.0/9.0)));
-    assert_eq!(eval("3^(-2)"), Ok(Value::Float(1.0/9.0)));
+    println!("{:?}", build_operator_tree("3^-2").unwrap());
+    assert_eq!(eval("3^-2"), Ok(Value::Float(1.0 / 9.0)));
+    assert_eq!(eval("3^(-2)"), Ok(Value::Float(1.0 / 9.0)));
     assert_eq!(eval("-3^2"), Ok(Value::Float(-9.0)));
     assert_eq!(eval("-(3)^2"), Ok(Value::Float(-9.0)));
-    assert_eq!(eval("(-3)^-2"), Ok(Value::Float(1.0/9.0)));
-    assert_eq!(eval("-(3^-2)"), Ok(Value::Float(-1.0/9.0)));
+    assert_eq!(eval("(-3)^-2"), Ok(Value::Float(1.0 / 9.0)));
+    assert_eq!(eval("-(3^-2)"), Ok(Value::Float(-1.0 / 9.0)));
 }

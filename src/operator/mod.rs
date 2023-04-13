@@ -173,6 +173,11 @@ impl Operator {
         }
     }
 
+    /// Returns true if this operator is unary, i.e. it requires exactly one argument.
+    pub(crate) fn is_unary(&self) -> bool {
+        self.max_argument_amount() == Some(1) && *self != Operator::RootNode
+    }
+
     /// Evaluates the operator with the given arguments and context.
     pub(crate) fn eval<C: Context>(
         &self,
