@@ -148,6 +148,25 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             let result_index = if arguments[0].as_boolean()? { 1 } else { 2 };
             Ok(arguments.swap_remove(result_index))
         })),
+        "some" => Some(Function::new(move |argument| {
+            let arguments = argument.as_tuple()?;
+            if let (Value::Tuple(a), b) = (&arguments[0].clone(), &arguments[1].clone()) {
+                if let Value::Tuple(b) = b {
+                    for item in b {
+                        if a.contains(item) {
+                            return Ok(Value::Boolean(true));
+                        }
+                    }
+                } else {
+                    if a.contains(&b) {
+                        return Ok(Value::Boolean(true));
+                    }
+                }
+                Ok(Value::Boolean(false))
+            } else {
+                Ok(Value::Boolean(false))
+            }
+        })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as IntType))
