@@ -328,7 +328,8 @@
 //! | `round`              | 1               | Numeric                | Returns the nearest integer to a number. Rounds half-way cases away from 0.0 |
 //! | `ceil`               | 1               | Numeric                | Returns the smallest integer greater than or equal to a number |
 //! | `if`                 | 3               | Boolean, Any, Any      | If the first argument is true, returns the second argument, otherwise, returns the third  |
-//! | `some`               | 2               | Tuple, Any             | Returns true if second argument exists in first argument(tuple). If second argument is tuple, checks if any exist in first argument. |
+//! | `contains`           | 2               | Tuple, Any non Tuple   | Returns true if second argument exists in first argument. |
+//! | `contains_any`       | 2               | Tuple, Tuple of Any Non Tuple | Returns true if one of the values in the tuple of second argument exists in first argument(tuple). |
 //! | `typeof`             | 1               | Any                    | returns "string", "float", "int", "boolean", "tuple", or "empty" depending on the type of the argument  |
 //! | `math::is_nan`       | 1               | Numeric                | Returns true if the argument is the floating-point value NaN, false if it is another floating-point value, and throws an error if it is not a number  |
 //! | `math::is_finite`    | 1               | Numeric                | Returns true if the argument is a finite floating-point number, false otherwise  |

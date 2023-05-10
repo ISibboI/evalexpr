@@ -148,23 +148,59 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             let result_index = if arguments[0].as_boolean()? { 1 } else { 2 };
             Ok(arguments.swap_remove(result_index))
         })),
-        "some" => Some(Function::new(move |argument| {
-            let arguments = argument.as_tuple()?;
+        "contains" => Some(Function::new(move |argument| {
+            let arguments = argument.as_fixed_len_tuple(2)?;
+            if let (Value::Tuple(a), b) = (&arguments[0].clone(), &arguments[1].clone()) {
+                if let Value::String(_) | Value::Int(_) | Value::Float(_) | Value::Boolean(_) = b {
+                    Ok(a.contains(b).into())
+                } else {
+                    Err(EvalexprError::type_error(
+                        b.clone(),
+                        vec![
+                            ValueType::String,
+                            ValueType::Int,
+                            ValueType::Float,
+                            ValueType::Boolean,
+                        ],
+                    ))
+                }
+            } else {
+                Err(EvalexprError::expected_tuple(arguments[0].clone()))
+            }
+        })),
+        "contains_any" => Some(Function::new(move |argument| {
+            let arguments = argument.as_fixed_len_tuple(2)?;
             if let (Value::Tuple(a), b) = (&arguments[0].clone(), &arguments[1].clone()) {
                 if let Value::Tuple(b) = b {
-                    for item in b {
-                        if a.contains(item) {
-                            return Ok(Value::Boolean(true));
+                    let mut contains = false;
+                    for value in b {
+                        //if value is not String, Int, Bool, Float error it out
+                        if let Value::String(_)
+                        | Value::Int(_)
+                        | Value::Float(_)
+                        | Value::Boolean(_) = value
+                        {
+                            if a.contains(value) {
+                                contains = true;
+                            }
+                        } else {
+                            return Err(EvalexprError::type_error(
+                                value.clone(),
+                                vec![
+                                    ValueType::String,
+                                    ValueType::Int,
+                                    ValueType::Float,
+                                    ValueType::Boolean,
+                                ],
+                            ));
                         }
                     }
+                    Ok(contains.into())
                 } else {
-                    if a.contains(&b) {
-                        return Ok(Value::Boolean(true));
-                    }
+                    Err(EvalexprError::expected_tuple(b.clone()))
                 }
-                Ok(Value::Boolean(false))
             } else {
-                Ok(Value::Boolean(false))
+                Err(EvalexprError::expected_tuple(arguments[0].clone()))
             }
         })),
         "len" => Some(Function::new(|argument| {

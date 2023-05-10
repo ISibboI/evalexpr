@@ -395,6 +395,93 @@ fn test_builtin_functions() {
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
     assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
     assert_eq!(eval("len(\"a\", \"b\")"), Ok(Value::Int(2)));
+    //Contians
+    assert_eq!(
+        eval("contains(1, 2, 3)"),
+        Err(EvalexprError::expected_fixed_len_tuple(
+            2,
+            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
+        ))
+    );
+    assert_eq!(
+        eval("contains((\"foo\", \"bar\"), \"bar\")"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("contains((\"foo\", \"bar\"), \"buzz\")"),
+        Ok(Value::Boolean(false)),
+    );
+    assert_eq!(
+        eval("contains(\"foo\", \"bar\")"),
+        Err(EvalexprError::expected_tuple(Value::String("foo".into())))
+    );
+    assert_eq!(
+        eval("contains((\"foo\", \"bar\", 123), 123)"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("contains((\"foo\", \"bar\"), (\"buzz\", \"bazz\"))"),
+        Err(EvalexprError::type_error(
+            Value::Tuple(vec![
+                Value::String("buzz".into()),
+                Value::String("bazz".into())
+            ]),
+            vec![
+                ValueType::String,
+                ValueType::Int,
+                ValueType::Float,
+                ValueType::Boolean
+            ]
+        ))
+    );
+    //Contains Any
+    assert_eq!(
+        eval("contains_any(1, 2, 3)"),
+        Err(EvalexprError::expected_fixed_len_tuple(
+            2,
+            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)])
+        ))
+    );
+    assert_eq!(
+        eval("contains_any((\"foo\", \"bar\"), (\"bar\", \"buzz\"))"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("contains_any((\"foo\", \"bar\"), (\"buzz\", \"bazz\"))"),
+        Ok(Value::Boolean(false)),
+    );
+    assert_eq!(
+        eval("contains_any((1,2,3), (3,4,5))"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("contains_any((1,2,3), (4,5,6))"),
+        Ok(Value::Boolean(false))
+    );
+    assert_eq!(
+        eval("contains_any((true, false, true, true), (false, false, false))"),
+        Ok(Value::Boolean(true))
+    );
+    assert_eq!(
+        eval("contains_any(\"foo\", \"bar\")"),
+        Err(EvalexprError::expected_tuple(Value::String("foo".into())))
+    );
+    assert_eq!(
+        eval("contains_any((\"foo\", \"bar\"), \"buzz\")"),
+        Err(EvalexprError::expected_tuple(Value::String("buzz".into())))
+    );
+    assert_eq!(
+        eval("contains_any((\"foo\", \"bar\"), (\"buzz\", (1, 2, 3)))"),
+        Err(EvalexprError::type_error(
+            Value::Tuple(vec![Value::Int(1), Value::Int(2), Value::Int(3)]),
+            vec![
+                ValueType::String,
+                ValueType::Int,
+                ValueType::Float,
+                ValueType::Boolean
+            ]
+        ))
+    );
     // String
     assert_eq!(
         eval("str::to_lowercase(\"FOOBAR\")"),
