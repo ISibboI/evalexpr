@@ -174,7 +174,6 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 if let Value::Tuple(b) = b {
                     let mut contains = false;
                     for value in b {
-                        //if value is not String, Int, Bool, Float error it out
                         if let Value::String(_)
                         | Value::Int(_)
                         | Value::Float(_)
