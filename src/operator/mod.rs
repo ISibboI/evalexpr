@@ -1,7 +1,6 @@
 use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
-use std::borrow::Borrow;
 
 mod display;
 
@@ -219,7 +218,10 @@ impl Operator {
                 } else {
                     Err(EvalexprError::wrong_type_combination(
                         self.clone(),
-                        vec![arguments[0].borrow().into(), arguments[1].borrow().into()],
+                        vec![
+                            arguments.get(0).unwrap().into(),
+                            arguments.get(1).unwrap().into(),
+                        ],
                     ))
                 }
             },
