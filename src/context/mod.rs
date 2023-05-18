@@ -22,6 +22,12 @@ pub trait Context {
     /// Calls the function that is linked to the given identifier with the given argument.
     /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value>;
+
+    /// Checks if builtin function has been disabled.
+    fn is_builtin_fn_disabled(&self) -> bool;
+
+    /// Disables Builtin function.
+    fn disable_builtin_fn(&mut self);
 }
 
 /// A context that allows to assign to variables.
@@ -79,6 +85,12 @@ impl Context for EmptyContext {
             identifier.to_string(),
         ))
     }
+    /// Builtin functions can't be disbaled for Empty Context.
+    fn disable_builtin_fn(&mut self) {}
+    /// Builtin functions are always disabled for Empty Context.
+    fn is_builtin_fn_disabled(&self) -> bool {
+        true
+    }
 }
 
 impl<'a> IterateVariablesContext<'a> for EmptyContext {
@@ -105,6 +117,7 @@ pub struct HashMapContext {
     variables: HashMap<String, Value>,
     #[cfg_attr(feature = "serde_support", serde(skip))]
     functions: HashMap<String, Function>,
+    without_builtin_fn: bool,
 }
 
 impl HashMapContext {
@@ -127,6 +140,14 @@ impl Context for HashMapContext {
                 identifier.to_string(),
             ))
         }
+    }
+
+    fn disable_builtin_fn(&mut self) {
+        self.without_builtin_fn = true;
+    }
+
+    fn is_builtin_fn_disabled(&self) -> bool {
+        self.without_builtin_fn
     }
 }
 
