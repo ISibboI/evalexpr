@@ -269,6 +269,8 @@ It allows using [variables](#variables), [assignments](#the-assignment-operator)
 When assigning to variables, the assignment is stored in a context.
 When the variable is read later on, it is read from the context.
 Contexts can be preserved between multiple calls to eval by creating them yourself.
+By default, Contexts have builtin functions diabled. 
+It can be disabled by calling Context::disable_builtin_fn().
 Here is a simple example to show the difference between preserving and not preserving context between evaluations:
 
 ```rust
@@ -287,6 +289,13 @@ assert_eq!(eval_with_context_mut("a = 5.5", &mut context),
            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
 // Reading a variable does not require a mutable context
 assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
+
+// Built in functions are enabled by default.
+assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+// Disabling builtin function in Context.
+context.disable_builtin_fn();
+// Builting functions are disabled and using them returns Error.
+assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
 
 ```
 
@@ -394,6 +403,8 @@ If the maximum or minimum is an integer, then an integer is returned.
 Otherwise, a float is returned.
 
 The regex functions require the feature flag `regex_support`.
+
+The builtin functions can be disabled by calling Context::disable_builtin_fn().
 
 ### Values
 
