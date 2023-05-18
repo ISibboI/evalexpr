@@ -2243,3 +2243,14 @@ fn test_negative_power() {
     assert_eq!(eval("(-3)^-2"), Ok(Value::Float(1.0 / 9.0)));
     assert_eq!(eval("-(3^-2)"), Ok(Value::Float(-1.0 / 9.0)));
 }
+
+#[test]
+fn test_disabling_builtin_fn() {
+    let mut context = HashMapContext::new();
+    // Built in functions are enabled by default.
+    assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+    // Disabling builtin function in Context.
+    context.disable_builtin_fn();
+    // Builting functions are disabled and using them returns Error.
+    assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
+}
