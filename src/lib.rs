@@ -252,6 +252,8 @@
 //! When assigning to variables, the assignment is stored in a context.
 //! When the variable is read later on, it is read from the context.
 //! Contexts can be preserved between multiple calls to eval by creating them yourself.
+//! By default, Builtin functions are diabled.
+//! Builtin functions can be disabled by calling Context::disable_builtin_fn().
 //! Here is a simple example to show the difference between preserving and not preserving context between evaluations:
 //!
 //! ```rust
@@ -270,6 +272,12 @@
 //!            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
 //! // Reading a variable does not require a mutable context
 //! assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
+//! // Builtin functions are enabled by default.
+//! assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+//! //Disabling builtin function in Context.
+//! context.disable_builtin_fn();
+//! // Builtin functions are disabled and using them returns Error.
+//! assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
 //!
 //! ```
 //!
@@ -377,6 +385,9 @@
 //! Otherwise, a float is returned.
 //!
 //! The regex functions require the feature flag `regex_support`.
+//! 
+//! Builtin functions are enabled by Default.
+//! It can be disabled by calling Context::disable_builtin_fn().
 //!
 //! ### Values
 //!
