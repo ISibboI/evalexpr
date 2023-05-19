@@ -1515,11 +1515,31 @@ fn test_type_errors_in_binary_operators() {
 
 #[test]
 fn test_empty_context() {
-    let context = EmptyContext;
+    let mut context = EmptyContext;
     assert_eq!(context.get_value("abc"), None);
     assert_eq!(
         context.call_function("abc", &Value::Empty),
         Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned()))
+    );
+    assert_eq!(
+        eval_with_context("max(1,3)", &context),
+        Err(EvalexprError::FunctionIdentifierNotFound(String::from(
+            "max"
+        )))
+    );
+    assert_eq!(
+        context.set_builtin_functions_disabled(false),
+        Err(EvalexprError::InvalidBuiltinFunctionsContext)
+    )
+}
+
+#[test]
+fn test_empty_context_with_builtin_functions() {
+    let mut context = EmptyContextWithBuiltinFunctions;
+    assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::Int(3)));
+    assert_eq!(
+        context.set_builtin_functions_disabled(true),
+        Err(EvalexprError::InvalidBuiltinFunctionsContext)
     );
 }
 
@@ -2245,12 +2265,17 @@ fn test_negative_power() {
 }
 
 #[test]
-fn test_disabling_builtin_fn() {
+fn test_builtin_functions_context() {
     let mut context = HashMapContext::new();
-    // Built in functions are enabled by default.
-    assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+    // Builtin functions are enabled by default for HashMapContext.
+    assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::from(3)));
     // Disabling builtin function in Context.
-    context.disable_builtin_fn();
+    context.set_builtin_functions_disabled(true);
     // Builting functions are disabled and using them returns Error.
-    assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
+    assert_eq!(
+        eval_with_context("max(1,3)", &context),
+        Err(EvalexprError::FunctionIdentifierNotFound(String::from(
+            "max"
+        )))
+    );
 }

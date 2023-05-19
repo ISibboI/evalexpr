@@ -24,10 +24,10 @@ pub trait Context {
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value>;
 
     /// Checks if builtin function has been disabled.
-    fn is_builtin_fn_disabled(&self) -> bool;
+    fn are_builtin_functions_disabled(&self) -> bool;
 
     /// Disables Builtin function.
-    fn disable_builtin_fn(&mut self);
+    fn set_builtin_functions_disabled(&mut self, disabled: bool) -> EvalexprResult<()>;
 }
 
 /// A context that allows to assign to variables.
@@ -72,6 +72,7 @@ pub trait GetFunctionContext: Context {
 }*/
 
 /// A context that returns `None` for each identifier.
+/// Builtin functiions are disabled.
 #[derive(Debug, Default)]
 pub struct EmptyContext;
 
@@ -85,10 +86,12 @@ impl Context for EmptyContext {
             identifier.to_string(),
         ))
     }
-    /// Builtin functions can't be disbaled for Empty Context.
-    fn disable_builtin_fn(&mut self) {}
+    /// Builtin functions can't be enabled for Empty Context.
+    fn set_builtin_functions_disabled(&mut self, _disabled: bool) -> EvalexprResult<()> {
+        Err(EvalexprError::InvalidBuiltinFunctionsContext)
+    }
     /// Builtin functions are always disabled for Empty Context.
-    fn is_builtin_fn_disabled(&self) -> bool {
+    fn are_builtin_functions_disabled(&self) -> bool {
         true
     }
 }
@@ -106,6 +109,42 @@ impl<'a> IterateVariablesContext<'a> for EmptyContext {
     }
 }
 
+/// Same as Empty Context except Builtin functions are enabled.
+#[derive(Debug, Default)]
+pub struct EmptyContextWithBuiltinFunctions;
+
+impl Context for EmptyContextWithBuiltinFunctions {
+    fn get_value(&self, _identifier: &str) -> Option<&Value> {
+        None
+    }
+
+    fn call_function(&self, identifier: &str, _argument: &Value) -> EvalexprResult<Value> {
+        Err(EvalexprError::FunctionIdentifierNotFound(
+            identifier.to_string(),
+        ))
+    }
+    /// Builtin functions can't be disbaled for EmptyContextWithBuiltinFunctions.
+    fn set_builtin_functions_disabled(&mut self, _disabled: bool) -> EvalexprResult<()> {
+        Err(EvalexprError::InvalidBuiltinFunctionsContext)
+    }
+    /// Builtin functions are always enabled for EmptyContextWithBuiltinFunctions.
+    fn are_builtin_functions_disabled(&self) -> bool {
+        false
+    }
+}
+
+impl<'a> IterateVariablesContext<'a> for EmptyContextWithBuiltinFunctions {
+    type VariableIterator = iter::Empty<(String, Value)>;
+    type VariableNameIterator = iter::Empty<String>;
+
+    fn iter_variables(&self) -> Self::VariableIterator {
+        iter::empty()
+    }
+
+    fn iter_variable_names(&self) -> Self::VariableNameIterator {
+        iter::empty()
+    }
+}
 /// A context that stores its mappings in hash maps.
 ///
 /// *Value and function mappings are stored independently, meaning that there can be a function and a value with the same identifier.*
@@ -117,7 +156,7 @@ pub struct HashMapContext {
     variables: HashMap<String, Value>,
     #[cfg_attr(feature = "serde_support", serde(skip))]
     functions: HashMap<String, Function>,
-    without_builtin_fn: bool,
+    without_builtin_functions: bool,
 }
 
 impl HashMapContext {
@@ -142,12 +181,13 @@ impl Context for HashMapContext {
         }
     }
 
-    fn disable_builtin_fn(&mut self) {
-        self.without_builtin_fn = true;
+    fn set_builtin_functions_disabled(&mut self, disabled: bool) -> EvalexprResult<()> {
+        self.without_builtin_functions = disabled;
+        Ok(())
     }
 
-    fn is_builtin_fn_disabled(&self) -> bool {
-        self.without_builtin_fn
+    fn are_builtin_functions_disabled(&self) -> bool {
+        self.without_builtin_functions
     }
 }
 

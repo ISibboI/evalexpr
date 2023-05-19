@@ -203,6 +203,9 @@ pub enum EvalexprError {
     /// An escape sequence within a string literal is illegal.
     IllegalEscapeSequence(String),
 
+    /// Empty Context can't have builtin functions enabled
+    InvalidBuiltinFunctionsContext,
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }
