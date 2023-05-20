@@ -78,6 +78,8 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::cbrt" => simple_math!(cbrt),
         // Hypotenuse
         "math::hypot" => simple_math!(hypot, 2),
+        // Absolute
+        "math::abs" => simple_math!(abs),
         // Rounding
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),
