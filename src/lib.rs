@@ -358,6 +358,7 @@
 //! | `math::sqrt`         | 1               | Numeric                       | Returns the square root of a number. Returns NaN for a negative number |
 //! | `math::cbrt`         | 1               | Numeric                       | Returns the cube root of a number |
 //! | `math::hypot`        | 2               | Numeric                       | Calculates the length of the hypotenuse of a right-angle triangle given legs of length given by the two arguments |
+//! | `math::abs`          | 1               | Numeric                       | Returns the absolute value of a number |
 //! | `str::regex_matches` | 2               | String, String                | Returns true if the first argument matches the regex in the second argument (Requires `regex_support` feature flag) |
 //! | `str::regex_replace` | 3               | String, String, String        | Returns the first argument with all matches of the regex in the second argument replaced by the third argument (Requires `regex_support` feature flag) |
 //! | `str::to_lowercase`  | 1               | String                        | Returns the lower-case version of the string |
