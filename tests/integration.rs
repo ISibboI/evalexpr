@@ -363,6 +363,9 @@ fn test_builtin_functions() {
         eval("math::hypot(8.2, 1.1)"),
         Ok(Value::Float((8.2 as FloatType).hypot(1.1)))
     );
+    // Absolute
+    assert_eq!(eval("math::abs(15)"), Ok(Value::Float(15.0)));
+    assert_eq!(eval("math::abs(-15)"), Ok(Value::Float(15.0)));
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
     assert_eq!(eval("floor(1.9)"), Ok(Value::Float(1.0)));
