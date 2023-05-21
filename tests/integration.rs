@@ -1529,17 +1529,22 @@ fn test_empty_context() {
     );
     assert_eq!(
         context.set_builtin_functions_disabled(false),
-        Err(EvalexprError::InvalidBuiltinFunctionsContext)
+        Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
     )
 }
 
 #[test]
 fn test_empty_context_with_builtin_functions() {
     let mut context = EmptyContextWithBuiltinFunctions;
+    assert_eq!(context.get_value("abc"), None);
+    assert_eq!(
+        context.call_function("abc", &Value::Empty),
+        Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned()))
+    );
     assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::Int(3)));
     assert_eq!(
         context.set_builtin_functions_disabled(true),
-        Err(EvalexprError::InvalidBuiltinFunctionsContext)
+        Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
     );
 }
 
@@ -2270,8 +2275,8 @@ fn test_builtin_functions_context() {
     // Builtin functions are enabled by default for HashMapContext.
     assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::from(3)));
     // Disabling builtin function in Context.
-    context.set_builtin_functions_disabled(true);
-    // Builting functions are disabled and using them returns Error.
+    context.set_builtin_functions_disabled(true).unwrap();
+    // Builtin functions are disabled and using them returns an error.
     assert_eq!(
         eval_with_context("max(1,3)", &context),
         Err(EvalexprError::FunctionIdentifierNotFound(String::from(

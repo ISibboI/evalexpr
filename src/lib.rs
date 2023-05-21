@@ -270,10 +270,6 @@
 //!            Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
 //! // Reading a variable does not require a mutable context
 //! assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
-//! // Builtin functions are enabled by default.
-//! assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
-//! context.set_builtin_functions_disabled(true);
-//! assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
 //!
 //! ```
 //!
@@ -287,8 +283,6 @@
 //! Type unsafe contexts may be implemented if requested.
 //! For reading `a`, it is enough to pass an immutable reference.
 //!
-//! EmptyContext have builtin functions disabled and can't be enabled.
-//! EmptyContextWithBuiltinFunctions have builtin functions enabled and can't be disabled.
 //! Contexts can also be manipulated in code.
 //! Take a look at the following example:
 //!
@@ -322,14 +316,21 @@
 //! For more information about user-defined functions, refer to the respective [section](#user-defined-functions).
 //!
 //! ### Builtin Functions
-//! Builtin functions are enabled by default for HashMap Context. It can be disabled by calling Context::
-//! set_builtin_functions_disabled
 //!
-//! It's disabled for EmptyContext. It can't be enabled for EmptyContext
+//! This crate offers a set of builtin functions (see below for a full list).
+//! They can be disabled if needed as follows:
 //!
-//! It's enabled for EmptyContextWithBuiltinfunctions. It can't be disabled.
+//! ```rust
+//! use evalexpr::*;
+//! let mut context = HashMapContext::new();
+//! assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+//! context.set_builtin_functions_disabled(true).unwrap(); // Do proper error handling here
+//! assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
+//! ```
 //!
-//! This crate offers a set of builtin functions.
+//! Not all contexts support enabling or disabling builtin functions.
+//! Specifically the `EmptyContext` has builtin functions disabled by default, and they cannot be enabled.
+//! Symmetrically, the `EmptyContextWithBuiltinFunctions` has builtin functions enabled by default, and they cannot be disabled.
 //!
 //! | Identifier           | Argument Amount | Argument Types                | Description |
 //! |----------------------|-----------------|-------------------------------|-------------|
@@ -389,9 +390,6 @@
 //! Otherwise, a float is returned.
 //!
 //! The regex functions require the feature flag `regex_support`.
-//!
-//! Builtin functions are enabled by Default.
-//! It can be disabled by calling Context::disable_builtin_fn().
 //!
 //! ### Values
 //!
