@@ -16,17 +16,29 @@
 
 ### Contributors
 
-## [9.1.0](https://github.com/ISibboI/evalexpr/compare/9.0.0...9.1.0) - 2023-05-16
+## [10.0.0](https://github.com/ISibboI/evalexpr/compare/9.1.0...10.0.0) - 2023-05-21
 
 ### Added
 
-* Builtin functions `contains` and `contains_any` (#127)
+ * Builtin functions can now be disabled (#129)
 
 ### Contributors
 
 My warmhearted thanks goes to:
 
-* [nickisyourfan](https://github.com/nickisyourfan)
+ * [hexofyore](https://github.com/hexofyore)
+
+## [9.1.0](https://github.com/ISibboI/evalexpr/compare/9.0.0...9.1.0) - 2023-05-16
+
+### Added
+
+ * Builtin functions `contains` and `contains_any` (#127)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [nickisyourfan](https://github.com/nickisyourfan)
 
 ## [9.0.0](https://github.com/ISibboI/evalexpr/compare/8.2.0...9.0.0) - 2023-04-13
 
