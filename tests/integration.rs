@@ -1527,6 +1527,7 @@ fn test_empty_context() {
             "max"
         )))
     );
+    assert_eq!(context.set_builtin_functions_disabled(true), Ok(()));
     assert_eq!(
         context.set_builtin_functions_disabled(false),
         Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
@@ -1542,9 +1543,10 @@ fn test_empty_context_with_builtin_functions() {
         Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned()))
     );
     assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::Int(3)));
+    assert_eq!(context.set_builtin_functions_disabled(false), Ok(()));
     assert_eq!(
         context.set_builtin_functions_disabled(true),
-        Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
+        Err(EvalexprError::BuiltinFunctionsCannotBeDisabled)
     );
 }
 

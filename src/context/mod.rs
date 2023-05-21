@@ -94,8 +94,12 @@ impl Context for EmptyContext {
     }
 
     /// Builtin functions can't be enabled for `EmptyContext`.
-    fn set_builtin_functions_disabled(&mut self, _disabled: bool) -> EvalexprResult<()> {
-        Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
+    fn set_builtin_functions_disabled(&mut self, disabled: bool) -> EvalexprResult<()> {
+        if disabled {
+            Ok(())
+        } else {
+            Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
+        }
     }
 }
 
@@ -134,8 +138,12 @@ impl Context for EmptyContextWithBuiltinFunctions {
     }
 
     /// Builtin functions can't be disabled for EmptyContextWithBuiltinFunctions.
-    fn set_builtin_functions_disabled(&mut self, _disabled: bool) -> EvalexprResult<()> {
-        Err(EvalexprError::BuiltinFunctionsCannotBeDisabled)
+    fn set_builtin_functions_disabled(&mut self, disabled: bool) -> EvalexprResult<()> {
+        if disabled {
+            Err(EvalexprError::BuiltinFunctionsCannotBeDisabled)
+        } else {
+            Ok(())
+        }
     }
 }
 
