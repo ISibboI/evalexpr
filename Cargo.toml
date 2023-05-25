@@ -27,6 +27,7 @@ regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
 serde_derive = { version = "1.0.133", optional = true}
 rand = { version = "0.8.5", optional = true}
+num-traits = "0.2.15"
 
 [features]
 serde_support = ["serde", "serde_derive"]
