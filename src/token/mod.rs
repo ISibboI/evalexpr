@@ -348,7 +348,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                 },
                 PartialToken::Literal(literal) => {
                     cutoff = 1;
-                    if let Ok(number) = literal.parse::<IntType>() {
+                    if let Ok(number) = literal.parse_dec_or_hex::<IntType>() {
                         Some(Token::Int(number))
                     } else if let Ok(number) = literal.parse::<FloatType>() {
                         Some(Token::Float(number))
@@ -440,6 +440,21 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
 
 pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
     partial_tokens_to_tokens(&str_to_partial_tokens(string)?)
+}
+
+/// Helper trait to parse strings to integer from both decimal or hex
+trait ParseDecOrHex {
+    fn parse_dec_or_hex<T: num_traits::Num>(&self) -> Result<T, T::FromStrRadixErr>;
+}
+
+impl ParseDecOrHex for str {
+    fn parse_dec_or_hex<T: num_traits::Num>(&self) -> Result<T, T::FromStrRadixErr> {
+        if self.starts_with("0x") {
+            T::from_str_radix(&self[2..], 16)
+        } else {
+            T::from_str_radix(&self, 10)
+        }
+    }
 }
 
 #[cfg(test)]

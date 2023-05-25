@@ -2291,3 +2291,9 @@ fn test_builtin_functions_context() {
         )))
     );
 }
+
+#[test]
+fn test_hex() {
+    assert_eq!(eval("0x3"), Ok(Value::Int(3)));
+    assert_eq!(eval("0xFF"), Ok(Value::Int(255)));
+}
