@@ -459,7 +459,9 @@ impl Operator {
                 let arguments = &arguments[0];
 
                 match context.call_function(identifier, arguments) {
-                    Err(EvalexprError::FunctionIdentifierNotFound(_)) => {
+                    Err(EvalexprError::FunctionIdentifierNotFound(_))
+                        if !context.are_builtin_functions_disabled() =>
+                    {
                         if let Some(builtin_function) = builtin_function(identifier) {
                             builtin_function.call(arguments)
                         } else {

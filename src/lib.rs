@@ -317,7 +317,20 @@
 //!
 //! ### Builtin Functions
 //!
-//! This crate offers a set of builtin functions.
+//! This crate offers a set of builtin functions (see below for a full list).
+//! They can be disabled if needed as follows:
+//!
+//! ```rust
+//! use evalexpr::*;
+//! let mut context = HashMapContext::new();
+//! assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+//! context.set_builtin_functions_disabled(true).unwrap(); // Do proper error handling here
+//! assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
+//! ```
+//!
+//! Not all contexts support enabling or disabling builtin functions.
+//! Specifically the `EmptyContext` has builtin functions disabled by default, and they cannot be enabled.
+//! Symmetrically, the `EmptyContextWithBuiltinFunctions` has builtin functions enabled by default, and they cannot be disabled.
 //!
 //! | Identifier           | Argument Amount | Argument Types                | Description |
 //! |----------------------|-----------------|-------------------------------|-------------|
@@ -539,7 +552,7 @@ extern crate serde_derive;
 pub use crate::{
     context::{
         Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext,
-        HashMapContext, IterateVariablesContext,
+        EmptyContextWithBuiltinFunctions, HashMapContext, IterateVariablesContext,
     },
     error::{EvalexprError, EvalexprResult},
     function::Function,

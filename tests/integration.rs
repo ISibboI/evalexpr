@@ -1520,11 +1520,38 @@ fn test_type_errors_in_binary_operators() {
 
 #[test]
 fn test_empty_context() {
-    let context = EmptyContext;
+    let mut context = EmptyContext;
     assert_eq!(context.get_value("abc"), None);
     assert_eq!(
         context.call_function("abc", &Value::Empty),
         Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned()))
+    );
+    assert_eq!(
+        eval_with_context("max(1,3)", &context),
+        Err(EvalexprError::FunctionIdentifierNotFound(String::from(
+            "max"
+        )))
+    );
+    assert_eq!(context.set_builtin_functions_disabled(true), Ok(()));
+    assert_eq!(
+        context.set_builtin_functions_disabled(false),
+        Err(EvalexprError::BuiltinFunctionsCannotBeEnabled)
+    )
+}
+
+#[test]
+fn test_empty_context_with_builtin_functions() {
+    let mut context = EmptyContextWithBuiltinFunctions;
+    assert_eq!(context.get_value("abc"), None);
+    assert_eq!(
+        context.call_function("abc", &Value::Empty),
+        Err(EvalexprError::FunctionIdentifierNotFound("abc".to_owned()))
+    );
+    assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::Int(3)));
+    assert_eq!(context.set_builtin_functions_disabled(false), Ok(()));
+    assert_eq!(
+        context.set_builtin_functions_disabled(true),
+        Err(EvalexprError::BuiltinFunctionsCannotBeDisabled)
     );
 }
 
@@ -2247,4 +2274,20 @@ fn test_negative_power() {
     assert_eq!(eval("-(3)^2"), Ok(Value::Float(-9.0)));
     assert_eq!(eval("(-3)^-2"), Ok(Value::Float(1.0 / 9.0)));
     assert_eq!(eval("-(3^-2)"), Ok(Value::Float(-1.0 / 9.0)));
+}
+
+#[test]
+fn test_builtin_functions_context() {
+    let mut context = HashMapContext::new();
+    // Builtin functions are enabled by default for HashMapContext.
+    assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::from(3)));
+    // Disabling builtin function in Context.
+    context.set_builtin_functions_disabled(true).unwrap();
+    // Builtin functions are disabled and using them returns an error.
+    assert_eq!(
+        eval_with_context("max(1,3)", &context),
+        Err(EvalexprError::FunctionIdentifierNotFound(String::from(
+            "max"
+        )))
+    );
 }

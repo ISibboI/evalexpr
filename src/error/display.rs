@@ -113,6 +113,12 @@ impl fmt::Display for EvalexprError {
                 regex, message
             ),
             ContextNotMutable => write!(f, "Cannot manipulate context"),
+            BuiltinFunctionsCannotBeEnabled => {
+                write!(f, "This context does not allow enabling builtin functions")
+            },
+            BuiltinFunctionsCannotBeDisabled => {
+                write!(f, "This context does not allow disabling builtin functions")
+            },
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
