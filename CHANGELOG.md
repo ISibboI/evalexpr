@@ -6,6 +6,8 @@
 
 ### Added
 
+ * Builtin function `math::abs` (#130)
+
 ### Removed
 
 ### Changed
@@ -15,6 +17,10 @@
 ### Deprecated
 
 ### Contributors
+
+My warmhearted thanks goes to:
+
+* [Heki](https://github.com/LinuxHeki)
 
 ## [10.0.0](https://github.com/ISibboI/evalexpr/compare/9.1.0...10.0.0) - 2023-05-21
 
