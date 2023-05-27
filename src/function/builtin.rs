@@ -78,6 +78,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::cbrt" => simple_math!(cbrt),
         // Hypotenuse
         "math::hypot" => simple_math!(hypot, 2),
+        // Rounding
         "floor" => simple_math!(floor),
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
@@ -87,12 +88,10 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::is_infinite" => float_is(FloatType::is_infinite),
         "math::is_normal" => float_is(FloatType::is_normal),
         // Absolute
-        "math::abs" => Some(Function::new(|argument| {
-            match argument {
-                Value::Float(num) => Ok(Value::Float(num.abs())),
-                Value::Int(num) => Ok(Value::Int(num.abs())),
-                _ => Err(EvalexprError::ExpectedNumber { actual: argument.clone() }),
-            }
+        "math::abs" => Some(Function::new(|argument| match argument {
+            Value::Float(num) => Ok(Value::Float(num.abs())),
+            Value::Int(num) => Ok(Value::Int(num.abs())),
+            _ => Err(EvalexprError::expected_number(argument.clone())),
         })),
         // Other
         "typeof" => Some(Function::new(move |argument| {
