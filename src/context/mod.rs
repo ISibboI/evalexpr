@@ -198,13 +198,13 @@ impl Context for HashMapContext {
         }
     }
 
+    fn are_builtin_functions_disabled(&self) -> bool {
+        self.without_builtin_functions
+    }
+
     fn set_builtin_functions_disabled(&mut self, disabled: bool) -> EvalexprResult<()> {
         self.without_builtin_functions = disabled;
         Ok(())
-    }
-
-    fn are_builtin_functions_disabled(&self) -> bool {
-        self.without_builtin_functions
     }
 }
 
