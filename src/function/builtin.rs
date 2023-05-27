@@ -87,6 +87,12 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "math::is_finite" => float_is(FloatType::is_finite),
         "math::is_infinite" => float_is(FloatType::is_infinite),
         "math::is_normal" => float_is(FloatType::is_normal),
+        // Absolute
+        "math::abs" => Some(Function::new(|argument| match argument {
+            Value::Float(num) => Ok(Value::Float(num.abs())),
+            Value::Int(num) => Ok(Value::Int(num.abs())),
+            _ => Err(EvalexprError::expected_number(argument.clone())),
+        })),
         // Other
         "typeof" => Some(Function::new(move |argument| {
             Ok(match argument {

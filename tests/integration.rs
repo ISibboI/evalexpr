@@ -384,6 +384,11 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::is_infinite(1.0/0.0)"), Ok(Value::Boolean(true)));
     assert_eq!(eval("math::is_normal(1.0/0.0)"), Ok(Value::Boolean(false)));
     assert_eq!(eval("math::is_normal(0)"), Ok(Value::Boolean(false)));
+    // Absolute
+    assert_eq!(eval("math::abs(15.4)"), Ok(Value::Float(15.4)));
+    assert_eq!(eval("math::abs(-15.4)"), Ok(Value::Float(15.4)));
+    assert_eq!(eval("math::abs(15)"), Ok(Value::Int(15)));
+    assert_eq!(eval("math::abs(-15)"), Ok(Value::Int(15)));
     // Other
     assert_eq!(eval("typeof(4.0, 3)"), Ok(Value::String("tuple".into())));
     assert_eq!(eval("typeof(4.0)"), Ok(Value::String("float".into())));
