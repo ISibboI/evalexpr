@@ -443,10 +443,10 @@ pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
 }
 
 fn parse_dec_or_hex(literal: &str) -> Result<IntType, std::num::ParseIntError> {
-    if literal.starts_with("0x") {
-        IntType::from_str_radix(&literal[2..], 16)
+    if let Some(literal) = literal.strip_prefix("0x") {
+        IntType::from_str_radix(literal, 16)
     } else {
-        IntType::from_str_radix(&literal, 10)
+        IntType::from_str_radix(literal, 10)
     }
 }
 
