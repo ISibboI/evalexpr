@@ -181,6 +181,36 @@ jobs:
           command:  check
           args: --all-features --all --bins --examples --tests --lib
 
+  check_cli:
+    needs: [ precheck_default, precheck_all_features ]
+    name: Check CLI
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        rust: [ stable ]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}
+
+      - name: CLI
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: cargo run -- p = 2; p + 3
+          contains: 5
+          expected_result: PASSED
+
   detailed_tests:
     needs: [precheck_default, precheck_all_features]
     name: Check, test, doc, format and lint with all features
