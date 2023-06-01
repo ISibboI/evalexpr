@@ -1,5 +1,7 @@
 # evalexpr
 
+[![Version](https://img.shields.io/crates/v/evalexpr.svg)](https://crates.io/crates/evalexpr)
+[![Downloads](https://img.shields.io/crates/d/evalexpr.svg)](https://crates.io/crates/evalexpr)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Coverage Status](https://coveralls.io/repos/github/ISibboI/evalexpr/badge.svg?branch=main)](https://coveralls.io/github/ISibboI/evalexpr?branch=main)
 [![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
