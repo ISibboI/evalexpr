@@ -1,4 +1,14 @@
 //!
+//! ## CLI
+//!
+//! While primarily meant to be used as a library, `evalexpr` is also available as a command line tool.
+//! It can be installed and used as follows:
+//!
+//! ```bash
+//! cargo install evalexpr
+//! evalexpr 2 + 3 # outputs `5` to stdout.
+//! ```
+//!
 //! ## Quickstart
 //!
 //! Add `evalexpr` as dependency to your `Cargo.toml`:
