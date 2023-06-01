@@ -207,7 +207,7 @@ jobs:
       - name: CLI
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
-          command_line: cargo run -- p = 2; p + 3
+          command_line: cargo run -- p = 2\; p + 3
           contains: 5
           expected_result: PASSED
 
