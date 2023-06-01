@@ -75,7 +75,7 @@ jobs:
       - name: Install MSRV toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.56.1
+          toolchain: 1.65.0
           override: true
 
       - name: Rust cache
