@@ -6,9 +6,6 @@
 
 ### Added
 
- * Builtin function `math::abs` (#130)
- * A CLI for evaluating expressions. Install via `cargo install evalexpr`. (#133)
-
 ### Removed
 
 ### Changed
@@ -16,6 +13,16 @@
 ### Fixed
 
 ### Deprecated
+
+### Contributors
+
+## [11.0.0](https://github.com/ISibboI/evalexpr/compare/10.0.0...11.0.0) - 2023-06-01
+
+### Added
+
+ * Builtin function `math::abs` (#130)
+ * A CLI for evaluating expressions. Install via `cargo install evalexpr`. (#133)
+ * The ability to parse integers from hex literals (#131)
 
 ### Contributors
 
