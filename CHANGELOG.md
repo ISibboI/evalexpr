@@ -18,11 +18,19 @@
 
 ## [11.0.0](https://github.com/ISibboI/evalexpr/compare/10.0.0...11.0.0) - 2023-06-01
 
+### Notes
+
+ * Due to the introduction of [GATs](https://blog.rust-lang.org/2022/10/28/gats-stabilization.html), the MSRV changes to `1.65.0` in this update.
+
 ### Added
 
  * Builtin function `math::abs` (#130)
  * A CLI for evaluating expressions. Install via `cargo install evalexpr`. (#133)
  * The ability to parse integers from hex literals (#131)
+
+### Changed
+
+ * The `IterVariablesContext` from using a lifetime parameter to GATs (#135)
 
 ### Contributors
 
