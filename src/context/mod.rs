@@ -50,17 +50,21 @@ pub trait ContextWithMutableFunctions: Context {
 /// A context that allows to iterate over its variable names with their values.
 ///
 /// **Note:** this trait will change after GATs are stabilised, because then we can get rid of the lifetime in the trait definition.
-pub trait IterateVariablesContext<'a> {
+pub trait IterateVariablesContext {
     /// The iterator type for iterating over variable name-value pairs.
-    type VariableIterator: 'a + Iterator<Item = (String, Value)>;
+    type VariableIterator<'a>: Iterator<Item = (String, Value)>
+    where
+        Self: 'a;
     /// The iterator type for iterating over variable names.
-    type VariableNameIterator: 'a + Iterator<Item = String>;
+    type VariableNameIterator<'a>: Iterator<Item = String>
+    where
+        Self: 'a;
 
     /// Returns an iterator over pairs of variable names and values.
-    fn iter_variables(&'a self) -> Self::VariableIterator;
+    fn iter_variables(&self) -> Self::VariableIterator<'_>;
 
     /// Returns an iterator over variable names.
-    fn iter_variable_names(&'a self) -> Self::VariableNameIterator;
+    fn iter_variable_names(&self) -> Self::VariableNameIterator<'_>;
 }
 
 /*/// A context that allows to retrieve functions programmatically.
@@ -103,15 +107,15 @@ impl Context for EmptyContext {
     }
 }
 
-impl<'a> IterateVariablesContext<'a> for EmptyContext {
-    type VariableIterator = iter::Empty<(String, Value)>;
-    type VariableNameIterator = iter::Empty<String>;
+impl IterateVariablesContext for EmptyContext {
+    type VariableIterator<'a> = iter::Empty<(String, Value)>;
+    type VariableNameIterator<'a> = iter::Empty<String>;
 
-    fn iter_variables(&self) -> Self::VariableIterator {
+    fn iter_variables(&self) -> Self::VariableIterator<'_> {
         iter::empty()
     }
 
-    fn iter_variable_names(&self) -> Self::VariableNameIterator {
+    fn iter_variable_names(&self) -> Self::VariableNameIterator<'_> {
         iter::empty()
     }
 }
@@ -147,15 +151,15 @@ impl Context for EmptyContextWithBuiltinFunctions {
     }
 }
 
-impl<'a> IterateVariablesContext<'a> for EmptyContextWithBuiltinFunctions {
-    type VariableIterator = iter::Empty<(String, Value)>;
-    type VariableNameIterator = iter::Empty<String>;
+impl IterateVariablesContext for EmptyContextWithBuiltinFunctions {
+    type VariableIterator<'a> = iter::Empty<(String, Value)>;
+    type VariableNameIterator<'a> = iter::Empty<String>;
 
-    fn iter_variables(&self) -> Self::VariableIterator {
+    fn iter_variables(&self) -> Self::VariableIterator<'_> {
         iter::empty()
     }
 
-    fn iter_variable_names(&self) -> Self::VariableNameIterator {
+    fn iter_variable_names(&self) -> Self::VariableNameIterator<'_> {
         iter::empty()
     }
 }
@@ -232,21 +236,21 @@ impl ContextWithMutableFunctions for HashMapContext {
     }
 }
 
-impl<'a> IterateVariablesContext<'a> for HashMapContext {
-    type VariableIterator = std::iter::Map<
+impl IterateVariablesContext for HashMapContext {
+    type VariableIterator<'a> = std::iter::Map<
         std::collections::hash_map::Iter<'a, String, Value>,
         fn((&String, &Value)) -> (String, Value),
     >;
-    type VariableNameIterator =
+    type VariableNameIterator<'a> =
         std::iter::Cloned<std::collections::hash_map::Keys<'a, String, Value>>;
 
-    fn iter_variables(&'a self) -> Self::VariableIterator {
+    fn iter_variables(&self) -> Self::VariableIterator<'_> {
         self.variables
             .iter()
             .map(|(string, value)| (string.clone(), value.clone()))
     }
 
-    fn iter_variable_names(&'a self) -> Self::VariableNameIterator {
+    fn iter_variable_names(&self) -> Self::VariableNameIterator<'_> {
         self.variables.keys().cloned()
     }
 }
