@@ -7,6 +7,7 @@
 ### Added
 
  * Builtin function `math::abs` (#130)
+ * A CLI for evaluating expressions. Install via `cargo install evalexpr`. (#133)
 
 ### Removed
 
@@ -20,7 +21,8 @@
 
 My warmhearted thanks goes to:
 
-* [Heki](https://github.com/LinuxHeki)
+ * [Heki](https://github.com/LinuxHeki)
+ * [Kaspar Schleiser](https://github.com/kaspar030)
 
 ## [10.0.0](https://github.com/ISibboI/evalexpr/compare/9.1.0...10.0.0) - 2023-05-21
 
