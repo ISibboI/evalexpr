@@ -12,7 +12,19 @@ fn write_binary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
 }
 
 fn write_unary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
-    write!(f, "{}{}", op, node.children.get(0).ok_or(Error)?,)
+    write!(
+        f,
+        "{}{}",
+        op,
+        node.children.get(0).ok_or(Error)?,
+    )
+}
+
+fn write_root(f: &mut Formatter, node: &Node) -> Result<(), Error> {
+    for c in node.children.iter() {
+        write!(f, "{}", c)?
+    }
+    Ok(())
 }
 
 fn write_sequence(f: &mut Formatter, node: &Node, sep: &str) -> Result<(), Error> {
@@ -29,7 +41,7 @@ fn write_sequence(f: &mut Formatter, node: &Node, sep: &str) -> Result<(), Error
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match &self.operator {
-            Operator::RootNode => write_sequence(f, self, ""),
+            Operator::RootNode => write_root(f, self),
             Operator::Add => write_binary(f, self, "+"),
             Operator::Sub => write_binary(f, self, "-"),
             Operator::Neg => write_unary(f, self, "-"),
