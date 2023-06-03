@@ -12,12 +12,7 @@ fn write_binary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
 }
 
 fn write_unary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
-    write!(
-        f,
-        "{}{}",
-        op,
-        node.children.get(0).ok_or(Error)?,
-    )
+    write!(f, "{}{}", op, node.children.get(0).ok_or(Error)?,)
 }
 
 fn write_root(f: &mut Formatter, node: &Node) -> Result<(), Error> {
