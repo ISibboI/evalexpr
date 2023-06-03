@@ -1,4 +1,4 @@
-use crate::{Node, operator::Operator};
+use crate::{operator::Operator, Node};
 use std::slice::{Iter, IterMut};
 
 /// An iterator that traverses an operator tree in pre-order.
@@ -49,7 +49,7 @@ pub struct OperatorIterMut<'a> {
 impl<'a> OperatorIterMut<'a> {
     fn new(node: &'a mut Node) -> Self {
         OperatorIterMut {
-            stack: vec![node.children.iter_mut()]
+            stack: vec![node.children.iter_mut()],
         }
     }
 }
@@ -92,4 +92,3 @@ impl Node {
         OperatorIterMut::new(self)
     }
 }
-

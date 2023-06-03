@@ -98,12 +98,13 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut().filter_map(|operator| match operator {
-            Operator::VariableIdentifierWrite { identifier }
-            | Operator::VariableIdentifierRead { identifier }
-            | Operator::FunctionIdentifier { identifier } => Some(identifier),
-            _ => None
-        })
+        self.iter_operator_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier }
+                | Operator::VariableIdentifierRead { identifier }
+                | Operator::FunctionIdentifier { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Returns an iterator over all variable identifiers in this expression.
@@ -152,11 +153,12 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut().filter_map(|operator| match operator {
-            Operator::VariableIdentifierWrite { identifier }
-            | Operator::VariableIdentifierRead { identifier } => Some(identifier),
-            _ => None,
-        })
+        self.iter_operator_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier }
+                | Operator::VariableIdentifierRead { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Returns an iterator over all read variable identifiers in this expression.
@@ -205,10 +207,11 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_read_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut().filter_map(|operator| match operator {
-            Operator::VariableIdentifierRead { identifier } => Some(identifier),
-            _ => None,
-        })
+        self.iter_operator_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierRead { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Returns an iterator over all write variable identifiers in this expression.
@@ -255,10 +258,11 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_write_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut().filter_map(|operator| match operator {
-            Operator::VariableIdentifierWrite { identifier } => Some(identifier),
-            _ => None,
-        })
+        self.iter_operator_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Returns an iterator over all function identifiers in this expression.
@@ -305,10 +309,11 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_function_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut().filter_map(|operator| match operator {
-            Operator::FunctionIdentifier { identifier } => Some(identifier),
-            _ => None,
-        })
+        self.iter_operator_mut()
+            .filter_map(|operator| match operator {
+                Operator::FunctionIdentifier { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Evaluates the operator tree rooted at this node with the given context.
