@@ -41,19 +41,20 @@ impl<'a> Iterator for NodeIter<'a> {
     }
 }
 
-pub struct NodeIterMut<'a> {
+/// An iterator that mutably traverses an operator tree in pre-order.
+pub struct OperatorIterMut<'a> {
     stack: Vec<IterMut<'a, Node>>,
 }
 
-impl<'a> NodeIterMut<'a> {
+impl<'a> OperatorIterMut<'a> {
     fn new(node: &'a mut Node) -> Self {
-        NodeIterMut {
+        OperatorIterMut {
             stack: vec![node.children.iter_mut()]
         }
     }
 }
 
-impl<'a> Iterator for NodeIterMut<'a> {
+impl<'a> Iterator for OperatorIterMut<'a> {
     type Item = &'a mut Operator;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -88,7 +89,7 @@ impl Node {
 
     /// Returns a mutable iterator over all operators in this tree.
     pub fn iter_operator_mut(&mut self) -> impl Iterator<Item = &mut Operator> {
-        NodeIterMut::new(self)
+        OperatorIterMut::new(self)
     }
 }
 
