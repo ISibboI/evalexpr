@@ -88,7 +88,7 @@ impl Node {
     }
 
     /// Returns a mutable iterator over all operators in this tree.
-    pub fn iter_operator_mut(&mut self) -> impl Iterator<Item = &mut Operator> {
+    pub fn iter_operators_mut(&mut self) -> impl Iterator<Item = &mut Operator> {
         OperatorIterMut::new(self)
     }
 }

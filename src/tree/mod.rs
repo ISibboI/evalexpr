@@ -98,7 +98,7 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut()
+        self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::VariableIdentifierWrite { identifier }
                 | Operator::VariableIdentifierRead { identifier }
@@ -153,7 +153,7 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut()
+        self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::VariableIdentifierWrite { identifier }
                 | Operator::VariableIdentifierRead { identifier } => Some(identifier),
@@ -207,7 +207,7 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_read_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut()
+        self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::VariableIdentifierRead { identifier } => Some(identifier),
                 _ => None,
@@ -258,7 +258,7 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_write_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut()
+        self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::VariableIdentifierWrite { identifier } => Some(identifier),
                 _ => None,
@@ -309,7 +309,7 @@ impl Node {
     /// assert_eq!(iter.next(), None);
     /// ```
     pub fn iter_function_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
-        self.iter_operator_mut()
+        self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::FunctionIdentifier { identifier } => Some(identifier),
                 _ => None,
