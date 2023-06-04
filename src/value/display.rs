@@ -6,7 +6,13 @@ impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
             Value::String(string) => write!(f, "\"{}\"", string),
-            Value::Float(float) => write!(f, "{}", float),
+            Value::Float(float) => {
+                if let Some(precision) = f.precision() {
+                    write!(f, "{1:.*}", precision, float)
+                } else {
+                    write!(f, "{}", float)
+                }
+            },
             Value::Int(int) => write!(f, "{}", int),
             Value::Boolean(boolean) => write!(f, "{}", boolean),
             Value::Tuple(tuple) => {
