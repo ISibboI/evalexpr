@@ -15,28 +15,21 @@ fn write_unary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
     write!(f, "{}{}", op, node.children.get(0).ok_or(Error)?,)
 }
 
-fn write_root(f: &mut Formatter, node: &Node) -> Result<(), Error> {
-    for c in node.children.iter() {
-        write!(f, "{}", c)?
-    }
-    Ok(())
-}
 
 fn write_sequence(f: &mut Formatter, node: &Node, sep: &str) -> Result<(), Error> {
-    write!(f, "(")?;
     for (i, c) in node.children.iter().enumerate() {
         write!(f, "{}", c)?;
         if i + 1 < node.children.len() {
             write!(f, "{} ", sep)?;
         }
     }
-    write!(f, ")")
+    Ok(())
 }
 
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match &self.operator {
-            Operator::RootNode => write_root(f, self),
+            Operator::RootNode => write_sequence(f, self, ""),
             Operator::Add => write_binary(f, self, "+"),
             Operator::Sub => write_binary(f, self, "-"),
             Operator::Neg => write_unary(f, self, "-"),
@@ -62,7 +55,11 @@ impl Display for Node {
             Operator::ExpAssign => write_binary(f, self, "^="),
             Operator::AndAssign => write_binary(f, self, "&&="),
             Operator::OrAssign => write_binary(f, self, "||="),
-            Operator::Tuple => write_sequence(f, self, ","),
+            Operator::Tuple => {
+                write!(f, "(")?;
+                write_sequence(f, self, ",")?;
+                write!(f, ")")
+            },
             Operator::Chain => write_sequence(f, self, ";"),
             Operator::Const { value } => write!(f, "{}", value),
             Operator::VariableIdentifierWrite { identifier } => {
