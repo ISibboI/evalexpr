@@ -15,21 +15,29 @@ fn write_unary(f: &mut Formatter, node: &Node, op: &str) -> Result<(), Error> {
     write!(f, "{}{}", op, node.children.get(0).ok_or(Error)?,)
 }
 
-
 fn write_sequence(f: &mut Formatter, node: &Node, sep: &str) -> Result<(), Error> {
+    write!(f, "(")?;
     for (i, c) in node.children.iter().enumerate() {
         write!(f, "{}", c)?;
         if i + 1 < node.children.len() {
             write!(f, "{} ", sep)?;
         }
     }
-    Ok(())
+    write!(f, ")")
 }
 
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match &self.operator {
-            Operator::RootNode => write_sequence(f, self, ""),
+            Operator::RootNode => {
+                for (i, c) in self.children.iter().enumerate() {
+                    write!(f, "{}", c)?;
+                    if i + 1 < self.children.len() {
+                        write!(f, " ")?;
+                    }
+                }
+                Ok(())
+            },
             Operator::Add => write_binary(f, self, "+"),
             Operator::Sub => write_binary(f, self, "-"),
             Operator::Neg => write_unary(f, self, "-"),
@@ -55,11 +63,7 @@ impl Display for Node {
             Operator::ExpAssign => write_binary(f, self, "^="),
             Operator::AndAssign => write_binary(f, self, "&&="),
             Operator::OrAssign => write_binary(f, self, "||="),
-            Operator::Tuple => {
-                write!(f, "(")?;
-                write_sequence(f, self, ",")?;
-                write!(f, ")")
-            },
+            Operator::Tuple => write_sequence(f, self, ","),
             Operator::Chain => write_sequence(f, self, ";"),
             Operator::Const { value } => write!(f, "{}", value),
             Operator::VariableIdentifierWrite { identifier } => {
@@ -78,6 +82,36 @@ impl Display for Node {
                 }
                 Ok(())
             },
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::build_operator_tree;
+    #[test]
+    fn test_display() {
+        let pairs = [
+            ("", ""),
+            ("0", "0"),
+            ("0.1", "0.1"),
+            ("f (1, 2)", "f (1, 2)"),
+            ("()", ""),
+            ("a; b", "(a; b)"),
+            ("a = b", "(a = b)"),
+            ("5 + 3", "(5 + 3)"),
+            ("5 + 3 * 2", "(5 + (3 * 2))"),
+            ("f (g 4)", "f g 4"),
+            ("f (g 4; 5)", "f (g 4; 5)"),
+        ];
+        for (i, o) in pairs.iter() {
+            assert_eq!(
+                &&format!(
+                    "{}",
+                    build_operator_tree(i).expect("Could not build operator tree")
+                ),
+                o
+            );
         }
     }
 }
