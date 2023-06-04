@@ -300,7 +300,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
-          args: --all --all-features --out Lcov -- --test-threads 1
+          args: --all-features --all-targets --out Lcov -- --test-threads 1
 
       - name: Upload Coverage
         uses: coverallsapp/github-action@master
