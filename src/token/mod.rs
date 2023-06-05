@@ -350,12 +350,16 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     cutoff = 1;
                     let starts_with_alphabet_or_underscore =
                         literal.starts_with(|x: char| x.is_alphabetic() || x == '_');
-                    let contains_alphanumeric_only =
-                        literal.chars().all(|x| x.is_alphanumeric() || x == '_');
+                    // Alphanumeric || Underscore || Colon
+                    let contains_only_valid_chars = literal
+                        .chars()
+                        .all(|x| x.is_alphanumeric() || x == '_' || x == ':');
                     let is_not_underscore = literal != "_";
                     let contains_alphabet = literal.contains(|x: char| x.is_alphabetic());
-                    if starts_with_alphabet_or_underscore
-                        && contains_alphanumeric_only
+                    if let Ok(boolean) = literal.parse::<bool>() {
+                        Some(Token::Boolean(boolean))
+                    } else if starts_with_alphabet_or_underscore
+                        && contains_only_valid_chars
                         && is_not_underscore
                         && contains_alphabet
                     {
@@ -364,8 +368,6 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                         Some(Token::Int(number))
                     } else if let Ok(number) = literal.parse::<FloatType>() {
                         Some(Token::Float(number))
-                    } else if let Ok(boolean) = literal.parse::<bool>() {
-                        Some(Token::Boolean(boolean))
                     } else {
                         // If there are two tokens following this one, check if the next one is
                         // a plus or a minus. If so, then attempt to parse all three tokens as a
@@ -382,10 +384,16 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                                     cutoff = 3;
                                     Some(Token::Float(number))
                                 } else {
-                                    return Err(EvalexprError::IllegalIdentifierSequence);
+                                    return Err(EvalexprError::IllegalIdentifierSequence(
+                                        literal.to_string(),
+                                    ));
                                 }
                             },
-                            _ => return Err(EvalexprError::IllegalIdentifierSequence),
+                            _ => {
+                                return Err(EvalexprError::IllegalIdentifierSequence(
+                                    literal.to_string(),
+                                ))
+                            },
                         }
                     }
                 },
@@ -512,7 +520,9 @@ mod tests {
     fn wrong_identifier_sequence() {
         assert_eq!(
             tokenize("1b + 1"),
-            Err(crate::EvalexprError::IllegalIdentifierSequence)
+            Err(crate::EvalexprError::IllegalIdentifierSequence(
+                String::from("1b")
+            ))
         );
         assert_eq!(
             tokenize("_b + 1"),

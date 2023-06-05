@@ -615,7 +615,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_string("3..3"),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3..3".to_owned()))
     );
     assert_eq!(
         eval_string_with_context("string", &context),
@@ -629,7 +629,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_string_with_context("3..3", &context),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3..3".to_owned()))
     );
     assert_eq!(
         eval_string_with_context_mut("string", &mut context),
@@ -643,7 +643,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_string_with_context_mut("3..3", &mut context),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3..3".to_owned()))
     );
 
     assert_eq!(eval_float("3.3"), Ok(3.3));
@@ -689,7 +689,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int("(,);."),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence(".".to_owned()))
     );
     assert_eq!(eval_int_with_context("3", &context), Ok(3));
     assert_eq!(
@@ -700,7 +700,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int_with_context("(,);.", &context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence(".".to_owned()))
     );
     assert_eq!(eval_int_with_context_mut("3", &mut context), Ok(3));
     assert_eq!(
@@ -711,7 +711,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_int_with_context_mut("(,);.", &mut context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence(".".to_owned()))
     );
 
     assert_eq!(eval_number("3"), Ok(3.0));
@@ -802,7 +802,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_tuple("3a3"),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3a3".to_owned()))
     );
     assert_eq!(
         eval_tuple_with_context("3,3", &context),
@@ -816,7 +816,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_tuple_with_context("3a3", &context),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3a3".to_owned()))
     );
     assert_eq!(
         eval_tuple_with_context_mut("3,3", &mut context),
@@ -830,7 +830,7 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_tuple_with_context_mut("3a3", &mut context),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+        Err(EvalexprError::IllegalIdentifierSequence("3a3".to_owned()))
     );
 
     assert_eq!(eval_empty(""), Ok(EMPTY_VALUE));
@@ -889,8 +889,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("3..3").unwrap().eval_string(),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+        build_operator_tree("3..3"),
+        Err(EvalexprError::IllegalIdentifierSequence("3..3".to_owned()))
     );
     assert_eq!(
         build_operator_tree("string")
@@ -907,10 +907,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("3..3")
-            .unwrap()
-            .eval_string_with_context(&context),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
+        build_operator_tree("3..3"),
+        Err(EvalexprError::IllegalIdentifierSequence("3..3".to_owned()))
     );
     assert_eq!(
         build_operator_tree("string")
@@ -925,12 +923,6 @@ fn test_shortcut_functions() {
         Err(EvalexprError::ExpectedString {
             actual: Value::Float(3.3)
         })
-    );
-    assert_eq!(
-        build_operator_tree("3..3")
-            .unwrap()
-            .eval_string_with_context_mut(&mut context),
-        Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
     );
 
     assert_eq!(build_operator_tree("3.3").unwrap().eval_float(), Ok(3.3));
@@ -993,8 +985,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("(,);.").unwrap().eval_int(),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        build_operator_tree("(,);."),
+        Err(EvalexprError::IllegalIdentifierSequence(".".to_owned()))
     );
     assert_eq!(
         build_operator_tree("3")
@@ -1011,10 +1003,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("(,);.")
-            .unwrap()
-            .eval_int_with_context(&context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
+        build_operator_tree("(,);."),
+        Err(EvalexprError::IllegalIdentifierSequence(".".to_owned()))
     );
     assert_eq!(
         build_operator_tree("3")
@@ -1029,12 +1019,6 @@ fn test_shortcut_functions() {
         Err(EvalexprError::ExpectedInt {
             actual: Value::Float(3.3)
         })
-    );
-    assert_eq!(
-        build_operator_tree("(,);.")
-            .unwrap()
-            .eval_int_with_context_mut(&mut context),
-        Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
     );
 
     assert_eq!(build_operator_tree("3").unwrap().eval_number(), Ok(3.0));
@@ -1161,8 +1145,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("3a3").unwrap().eval_tuple(),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+        build_operator_tree("3a3"),
+        Err(EvalexprError::IllegalIdentifierSequence("3a3".to_owned()))
     );
     assert_eq!(
         build_operator_tree("3,3")
@@ -1178,12 +1162,7 @@ fn test_shortcut_functions() {
             actual: Value::Int(33)
         })
     );
-    assert_eq!(
-        build_operator_tree("3a3")
-            .unwrap()
-            .eval_tuple_with_context(&context),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
-    );
+
     assert_eq!(
         build_operator_tree("3,3")
             .unwrap()
@@ -1199,10 +1178,8 @@ fn test_shortcut_functions() {
         })
     );
     assert_eq!(
-        build_operator_tree("3a3")
-            .unwrap()
-            .eval_tuple_with_context_mut(&mut context),
-        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+        build_operator_tree("3a3"),
+        Err(EvalexprError::IllegalIdentifierSequence("3a3".to_owned()))
     );
 
     assert_eq!(
@@ -2301,6 +2278,6 @@ fn test_hex() {
         eval("0x"),
         // The "VariableIdentifierNotFound" error is what evalexpr currently returns,
         // but ideally it would return more specific errors for "illegal" literals.
-        Err(EvalexprError::VariableIdentifierNotFound("0x".into()))
+        Err(EvalexprError::IllegalIdentifierSequence("0x".into()))
     );
 }

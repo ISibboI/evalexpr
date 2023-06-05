@@ -210,7 +210,7 @@ pub enum EvalexprError {
     BuiltinFunctionsCannotBeDisabled,
 
     /// Error parsing identifier
-    IllegalIdentifierSequence,
+    IllegalIdentifierSequence(String),
 
     /// A custom error explained by its message.
     CustomMessage(String),
