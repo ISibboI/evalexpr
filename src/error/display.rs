@@ -120,6 +120,7 @@ impl fmt::Display for EvalexprError {
                 write!(f, "This context does not allow disabling builtin functions")
             },
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
+            IllegalIdentifierSequence => write!(f, "Illegal Identifier Sequence"),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

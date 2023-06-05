@@ -209,6 +209,9 @@ pub enum EvalexprError {
     /// This context does not allow disabling builtin functions.
     BuiltinFunctionsCannotBeDisabled,
 
+    /// Error parsing identifier
+    IllegalIdentifierSequence,
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }
