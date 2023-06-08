@@ -78,6 +78,7 @@ impl Node {
 
     /// Returns an iterator over all identifiers in this expression, allowing mutation.
     /// Each occurrence of an identifier is returned separately.
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -295,7 +296,7 @@ impl Node {
     ///
     /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
     ///
-    /// for identifier in tree.iter_function_variable_identifiers_mut() {
+    /// for identifier in tree.iter_function_identifiers_mut() {
     ///     *identifier = String::from("x");
     /// }
     ///
@@ -308,7 +309,7 @@ impl Node {
     /// assert_eq!(iter.next(), Some("c"));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter_function_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+    pub fn iter_function_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
         self.iter_operators_mut()
             .filter_map(|operator| match operator {
                 Operator::FunctionIdentifier { identifier } => Some(identifier),
