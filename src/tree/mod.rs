@@ -76,6 +76,38 @@ impl Node {
         })
     }
 
+    /// Returns an iterator over all identifiers in this expression, allowing mutation.
+    /// Each occurrence of an identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let mut tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    ///
+    /// for identifier in tree.iter_identifiers_mut() {
+    ///     *identifier = String::from("x");
+    /// }
+    ///
+    /// let mut iter = tree.iter_identifiers();
+    ///
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+        self.iter_operators_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier }
+                | Operator::VariableIdentifierRead { identifier }
+                | Operator::FunctionIdentifier { identifier } => Some(identifier),
+                _ => None,
+            })
+    }
+
     /// Returns an iterator over all variable identifiers in this expression.
     /// Each occurrence of a variable identifier is returned separately.
     ///
@@ -97,6 +129,37 @@ impl Node {
             | Operator::VariableIdentifierRead { identifier } => Some(identifier.as_str()),
             _ => None,
         })
+    }
+
+    /// Returns an iterator over all variable identifiers in this expression, allowing mutation.
+    /// Each occurrence of a variable identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let mut tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    ///
+    /// for identifier in tree.iter_variable_identifiers_mut() {
+    ///     *identifier = String::from("x");
+    /// }
+    ///
+    /// let mut iter = tree.iter_identifiers();
+    ///
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("f"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+        self.iter_operators_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier }
+                | Operator::VariableIdentifierRead { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Returns an iterator over all read variable identifiers in this expression.
@@ -121,6 +184,37 @@ impl Node {
         })
     }
 
+    /// Returns an iterator over all read variable identifiers in this expression, allowing mutation.
+    /// Each occurrence of a variable identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    ///
+    /// for identifier in tree.iter_read_variable_identifiers_mut() {
+    ///     *identifier = String::from("x");
+    /// }
+    ///
+    /// let mut iter = tree.iter_identifiers();
+    ///
+    /// assert_eq!(iter.next(), Some("d"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("f"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_read_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+        self.iter_operators_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierRead { identifier } => Some(identifier),
+                _ => None,
+            })
+    }
+
     /// Returns an iterator over all write variable identifiers in this expression.
     /// Each occurrence of a variable identifier is returned separately.
     ///
@@ -141,6 +235,37 @@ impl Node {
         })
     }
 
+    /// Returns an iterator over all write variable identifiers in this expression, allowing mutation.
+    /// Each occurrence of a variable identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    ///
+    /// for identifier in tree.iter_write_variable_identifiers_mut() {
+    ///     *identifier = String::from("x");
+    /// }
+    ///
+    /// let mut iter = tree.iter_identifiers();
+    ///
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.next(), Some("f"));
+    /// assert_eq!(iter.next(), Some("b"));
+    /// assert_eq!(iter.next(), Some("c"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_write_variable_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+        self.iter_operators_mut()
+            .filter_map(|operator| match operator {
+                Operator::VariableIdentifierWrite { identifier } => Some(identifier),
+                _ => None,
+            })
+    }
+
     /// Returns an iterator over all function identifiers in this expression.
     /// Each occurrence of a function identifier is returned separately.
     ///
@@ -159,6 +284,37 @@ impl Node {
             Operator::FunctionIdentifier { identifier } => Some(identifier.as_str()),
             _ => None,
         })
+    }
+
+    /// Returns an iterator over all function identifiers in this expression, allowing mutation.
+    /// Each occurrence of a variable identifier is returned separately.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use evalexpr::*;
+    ///
+    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    ///
+    /// for identifier in tree.iter_function_identifiers_mut() {
+    ///     *identifier = String::from("x");
+    /// }
+    ///
+    /// let mut iter = tree.iter_identifiers();
+    ///
+    /// assert_eq!(iter.next(), Some("d"));
+    /// assert_eq!(iter.next(), Some("a"));
+    /// assert_eq!(iter.next(), Some("x"));
+    /// assert_eq!(iter.next(), Some("b"));
+    /// assert_eq!(iter.next(), Some("c"));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    pub fn iter_function_identifiers_mut(&mut self) -> impl Iterator<Item = &mut String> {
+        self.iter_operators_mut()
+            .filter_map(|operator| match operator {
+                Operator::FunctionIdentifier { identifier } => Some(identifier),
+                _ => None,
+            })
     }
 
     /// Evaluates the operator tree rooted at this node with the given context.
