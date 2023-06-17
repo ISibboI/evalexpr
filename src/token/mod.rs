@@ -348,12 +348,26 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                 },
                 PartialToken::Literal(literal) => {
                     cutoff = 1;
-                    if let Ok(number) = parse_dec_or_hex(&literal) {
+                    let starts_with_alphabet_or_underscore =
+                        literal.starts_with(|x: char| x.is_alphabetic() || x == '_');
+                    // Alphanumeric || Underscore || Colon
+                    let contains_only_valid_chars = literal
+                        .chars()
+                        .all(|x| x.is_alphanumeric() || x == '_' || x == ':');
+                    let is_not_underscore = literal != "_";
+                    let contains_alphabet = literal.contains(|x: char| x.is_alphabetic());
+                    if let Ok(boolean) = literal.parse::<bool>() {
+                        Some(Token::Boolean(boolean))
+                    } else if starts_with_alphabet_or_underscore
+                        && contains_only_valid_chars
+                        && is_not_underscore
+                        && contains_alphabet
+                    {
+                        Some(Token::Identifier(literal))
+                    } else if let Ok(number) = parse_dec_or_hex(&literal) {
                         Some(Token::Int(number))
                     } else if let Ok(number) = literal.parse::<FloatType>() {
                         Some(Token::Float(number))
-                    } else if let Ok(boolean) = literal.parse::<bool>() {
-                        Some(Token::Boolean(boolean))
                     } else {
                         // If there are two tokens following this one, check if the next one is
                         // a plus or a minus. If so, then attempt to parse all three tokens as a
@@ -370,10 +384,16 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                                     cutoff = 3;
                                     Some(Token::Float(number))
                                 } else {
-                                    Some(Token::Identifier(literal.to_string()))
+                                    return Err(EvalexprError::IllegalIdentifierSequence(
+                                        literal.to_string(),
+                                    ));
                                 }
                             },
-                            _ => Some(Token::Identifier(literal.to_string())),
+                            _ => {
+                                return Err(EvalexprError::IllegalIdentifierSequence(
+                                    literal.to_string(),
+                                ))
+                            },
                         }
                     }
                 },
@@ -494,5 +514,33 @@ mod tests {
                 Token::Int(1)
             ]
         );
+    }
+
+    #[test]
+    fn wrong_identifier_sequence() {
+        assert_eq!(
+            tokenize("1b + 1"),
+            Err(crate::EvalexprError::IllegalIdentifierSequence(
+                String::from("1b")
+            ))
+        );
+        assert_eq!(
+            tokenize("_b + 1"),
+            Ok(vec![
+                Token::Identifier(String::from("_b")),
+                Token::Plus,
+                Token::Int(1)
+            ])
+        );
+        assert_eq!(
+            tokenize("1.0 1e+5 _1a2 1"),
+            Ok(vec![
+                Token::Float(1.0),
+                Token::Float(100000.0),
+                Token::Identifier(String::from("_1a2")),
+                Token::Int(1)
+            ])
+        );
+        // assert_eq!(tokenize("string"))
     }
 }
