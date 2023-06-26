@@ -1,4 +1,4 @@
-use crate::function::builtin::builtin_function;
+use crate::{function::builtin::builtin_function, FloatType};
 
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
@@ -329,9 +329,23 @@ impl Operator {
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
-                Ok(Value::Float(
-                    arguments[0].as_number()?.powf(arguments[1].as_number()?),
-                ))
+                Ok({
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        use rust_decimal::prelude::*;
+                        Value::Float(
+                            arguments[0]
+                                .as_number()?
+                                .checked_powd(arguments[1].as_number()?)
+                                //FIXME
+                                //`rust_decimal` doesn't support `INFINITY` yet
+                                //issue: https://github.com/paupino/rust-decimal/issues/466
+                                .unwrap_or(FloatType::MAX),
+                        )
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    Value::Float(arguments[0].as_number()?.powf(arguments[1].as_number()?))
+                })
             },
             Eq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;

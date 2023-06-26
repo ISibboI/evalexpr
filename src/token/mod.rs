@@ -350,7 +350,18 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     cutoff = 1;
                     if let Ok(number) = parse_dec_or_hex(&literal) {
                         Some(Token::Int(number))
-                    } else if let Ok(number) = literal.parse::<FloatType>() {
+                    } else if let Ok(number) = {
+                        #[cfg(feature = "decimal_support")]
+                        {
+                            literal
+                                .parse::<FloatType>()
+                                .or_else(|_| FloatType::from_scientific(&literal))
+                        }
+                        #[cfg(not(feature = "decimal_support"))]
+                        {
+                            literal.parse::<FloatType>()
+                        }
+                    } {
                         Some(Token::Float(number))
                     } else if let Ok(boolean) = literal.parse::<bool>() {
                         Some(Token::Boolean(boolean))
@@ -364,9 +375,19 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                                 if second == PartialToken::Minus
                                     || second == PartialToken::Plus =>
                             {
-                                if let Ok(number) =
-                                    format!("{}{}{}", literal, second, third).parse::<FloatType>()
-                                {
+                                if let Ok(number) = {
+                                    let num_lit = format!("{}{}{}", literal, second, third);
+                                    #[cfg(feature = "decimal_support")]
+                                    {
+                                        num_lit
+                                            .parse::<FloatType>()
+                                            .or_else(|_| FloatType::from_scientific(&num_lit))
+                                    }
+                                    #[cfg(not(feature = "decimal_support"))]
+                                    {
+                                        num_lit.parse::<FloatType>()
+                                    }
+                                } {
                                     cutoff = 3;
                                     Some(Token::Float(number))
                                 } else {

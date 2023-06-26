@@ -8,6 +8,10 @@ pub mod value_type;
 pub type IntType = i64;
 
 /// The type used to represent floats in `Value::Float`.
+#[cfg(feature = "decimal_support")]
+pub type FloatType = rust_decimal::Decimal;
+/// The type used to represent floats in `Value::Float`.
+#[cfg(not(feature = "decimal_support"))]
 pub type FloatType = f64;
 
 /// The type used to represent tuples in `Value::Tuple`.
@@ -102,6 +106,9 @@ impl Value {
     pub fn as_number(&self) -> EvalexprResult<FloatType> {
         match self {
             Value::Float(f) => Ok(*f),
+            #[cfg(feature = "decimal_support")]
+            Value::Int(i) => Ok((*i).into()),
+            #[cfg(not(feature = "decimal_support"))]
             Value::Int(i) => Ok(*i as FloatType),
             value => Err(EvalexprError::expected_number(value.clone())),
         }
@@ -269,6 +276,8 @@ impl TryFrom<Value> for () {
 #[cfg(test)]
 mod tests {
     use crate::value::{TupleType, Value};
+    #[cfg(feature = "decimal_support")]
+    use rust_decimal::prelude::*;
 
     #[test]
     fn test_value_conversions() {
@@ -277,6 +286,12 @@ mod tests {
             Ok(String::from("string"))
         );
         assert_eq!(Value::from(3).as_int(), Ok(3));
+        #[cfg(feature = "decimal_support")]
+        assert_eq!(
+            Value::from(Decimal::from_f32(3.3).unwrap()).as_float(),
+            Ok(Decimal::from_f32(3.3).unwrap())
+        );
+        #[cfg(not(feature = "decimal_support"))]
         assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
         assert_eq!(Value::from(true).as_boolean(), Ok(true));
         assert_eq!(
@@ -289,6 +304,9 @@ mod tests {
     fn test_value_checks() {
         assert!(Value::from("string").is_string());
         assert!(Value::from(3).is_int());
+        #[cfg(feature = "decimal_support")]
+        assert!(Value::from(Decimal::from_f32(3.3).unwrap()).is_float());
+        #[cfg(not(feature = "decimal_support"))]
         assert!(Value::from(3.3).is_float());
         assert!(Value::from(true).is_boolean());
         assert!(Value::from(TupleType::new()).is_tuple());
