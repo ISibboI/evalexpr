@@ -89,6 +89,7 @@ impl Display for Node {
 #[cfg(test)]
 mod tests {
     use crate::build_operator_tree;
+    
     #[test]
     fn test_display() {
         let pairs = [
@@ -111,6 +112,18 @@ mod tests {
                     build_operator_tree(i).expect("Could not build operator tree")
                 ),
                 o
+            );
+        }
+    }
+    
+    #[test]
+    fn test_display_with_float_precision() {
+            assert_eq!(
+                &format!(
+                    "{:.1}",
+                    build_operator_tree("0.111").expect("Could not build operator tree")
+                ),
+                "0.1"
             );
         }
     }
