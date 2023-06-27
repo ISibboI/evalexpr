@@ -109,22 +109,21 @@ mod tests {
             assert_eq!(
                 &&format!(
                     "{}",
-                    build_operator_tree(i).expect("Could not build operator tree")
+                    build_operator_tree(i).expect("Could not build operator tree"),
                 ),
-                o
+                o,
             );
         }
     }
     
     #[test]
     fn test_display_with_float_precision() {
-            assert_eq!(
-                &format!(
-                    "{:.1}",
-                    build_operator_tree("0.111").expect("Could not build operator tree")
-                ),
-                "0.1"
-            );
-        }
+        assert_eq!(
+            &format!(
+                "{:.1}",
+                build_operator_tree("0.111").expect("Could not build operator tree"),
+            ),
+            "0.1",
+        );
     }
 }
