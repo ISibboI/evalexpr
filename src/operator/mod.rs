@@ -1,4 +1,4 @@
-use crate::{function::builtin::builtin_function, FloatType};
+use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
@@ -340,7 +340,7 @@ impl Operator {
                                 //FIXME
                                 //`rust_decimal` doesn't support `INFINITY` yet
                                 //issue: https://github.com/paupino/rust-decimal/issues/466
-                                .unwrap_or(FloatType::MAX),
+                                .unwrap_or(Decimal::MAX),
                         )
                     }
                     #[cfg(not(feature = "decimal_support"))]
