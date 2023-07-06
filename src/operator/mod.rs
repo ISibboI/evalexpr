@@ -214,7 +214,22 @@ impl Operator {
                     }
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_number(), arguments[1].as_number())
                 {
-                    Ok(Value::Float(a + b))
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        let result = a.checked_add(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::addition_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    {
+                        Ok(Value::Float(a + b))
+                    }
                 } else {
                     Err(EvalexprError::wrong_type_combination(
                         self.clone(),
@@ -227,23 +242,52 @@ impl Operator {
             },
             Sub => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_sub(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::subtraction_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? - arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? - arguments[1].as_number()?,
-                    ))
                 }
             },
             Neg => {
@@ -263,65 +307,152 @@ impl Operator {
             },
             Mul => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_mul(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::multiplication_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? * arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? * arguments[1].as_number()?,
-                    ))
                 }
             },
             Div => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_div(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::division_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? / arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? / arguments[1].as_number()?,
-                    ))
                 }
             },
             Mod => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_rem(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::modulation_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? % arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? % arguments[1].as_number()?,
-                    ))
                 }
             },
             Exp => {
