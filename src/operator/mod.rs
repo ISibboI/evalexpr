@@ -194,6 +194,12 @@ impl Operator {
             },
             Add => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -242,6 +248,12 @@ impl Operator {
             },
             Sub => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 #[cfg(feature = "decimal_support")]
                 {
                     if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
@@ -292,6 +304,12 @@ impl Operator {
             },
             Neg => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
@@ -307,6 +325,12 @@ impl Operator {
             },
             Mul => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 #[cfg(feature = "decimal_support")]
                 {
                     if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
@@ -357,6 +381,12 @@ impl Operator {
             },
             Div => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 #[cfg(feature = "decimal_support")]
                 {
                     if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
@@ -407,6 +437,12 @@ impl Operator {
             },
             Mod => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 #[cfg(feature = "decimal_support")]
                 {
                     if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
@@ -457,6 +493,12 @@ impl Operator {
             },
             Exp => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
@@ -480,16 +522,32 @@ impl Operator {
             },
             Eq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 Ok(Value::Boolean(arguments[0] == arguments[1]))
             },
             Neq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 Ok(Value::Boolean(arguments[0] != arguments[1]))
             },
             Gt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -505,6 +563,12 @@ impl Operator {
             },
             Lt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -520,6 +584,12 @@ impl Operator {
             },
             Geq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -535,6 +605,12 @@ impl Operator {
             },
             Leq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -550,6 +626,12 @@ impl Operator {
             },
             And => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
@@ -557,6 +639,22 @@ impl Operator {
             },
             Or => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        if arguments[1].as_boolean()? {
+                            return Ok(Value::Boolean(true));
+                        } else {
+                            return Ok(Value::Empty);
+                        }
+                    } else if arguments[1].is_empty() {
+                        if arguments[0].as_boolean()? {
+                            return Ok(Value::Boolean(true));
+                        } else {
+                            return Ok(Value::Empty);
+                        }
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
@@ -564,6 +662,12 @@ impl Operator {
             },
             Not => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
 
                 Ok(Value::Boolean(!a))

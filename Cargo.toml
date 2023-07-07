@@ -1,6 +1,6 @@
 [package]
 name = "evalexpr"
-version = "11.0.0-rc.3"
+version = "11.0.0-rc.4"
 description = "[FORK] A powerful arithmetic and boolean expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "arithmetic", "boolean"]
 categories = ["parsing", "game-engines"]
@@ -34,6 +34,7 @@ rust_decimal = { version = "1.30.0", features = ["maths"], optional = true }
 serde_support = ["serde", "serde_derive"]
 regex_support = ["regex"]
 decimal_support = ["rust_decimal"]
+empty_is_null = []
 
 [dev-dependencies]
 ron = "0.7.0"
