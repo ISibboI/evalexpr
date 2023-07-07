@@ -215,6 +215,13 @@ impl Context for HashMapContext {
 impl ContextWithMutableVariables for HashMapContext {
     fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
+            #[cfg(feature = "empty_is_null")]
+            {
+                if value.is_empty() {
+                    *existing_value = value;
+                    return Ok(());
+                }
+            }
             if ValueType::from(&existing_value) == ValueType::from(&value) {
                 *existing_value = value;
                 return Ok(());
