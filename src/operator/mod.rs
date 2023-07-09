@@ -194,6 +194,12 @@ impl Operator {
             },
             Add => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -214,7 +220,22 @@ impl Operator {
                     }
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_number(), arguments[1].as_number())
                 {
-                    Ok(Value::Float(a + b))
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        let result = a.checked_add(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::addition_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    {
+                        Ok(Value::Float(a + b))
+                    }
                 } else {
                     Err(EvalexprError::wrong_type_combination(
                         self.clone(),
@@ -227,27 +248,68 @@ impl Operator {
             },
             Sub => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_sub(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::subtraction_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_sub(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::subtraction_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? - arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? - arguments[1].as_number()?,
-                    ))
                 }
             },
             Neg => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
@@ -263,88 +325,229 @@ impl Operator {
             },
             Mul => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_mul(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::multiplication_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_mul(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::multiplication_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? * arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? * arguments[1].as_number()?,
-                    ))
                 }
             },
             Div => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_div(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::division_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_div(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::division_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? / arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? / arguments[1].as_number()?,
-                    ))
                 }
             },
             Mod => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-                arguments[0].as_number()?;
-                arguments[1].as_number()?;
-
-                if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_rem(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
+                #[cfg(feature = "decimal_support")]
+                {
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
                     } else {
-                        Err(EvalexprError::modulation_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
+                        let a = arguments[0].as_number()?;
+                        let b = arguments[1].as_number()?;
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Float(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    arguments[0].as_number()?;
+                    arguments[1].as_number()?;
+
+                    if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
+                        let result = a.checked_rem(b);
+                        if let Some(result) = result {
+                            Ok(Value::Int(result))
+                        } else {
+                            Err(EvalexprError::modulation_error(
+                                arguments[0].clone(),
+                                arguments[1].clone(),
+                            ))
+                        }
+                    } else {
+                        Ok(Value::Float(
+                            arguments[0].as_number()? % arguments[1].as_number()?,
                         ))
                     }
-                } else {
-                    Ok(Value::Float(
-                        arguments[0].as_number()? % arguments[1].as_number()?,
-                    ))
                 }
             },
             Exp => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 arguments[0].as_number()?;
                 arguments[1].as_number()?;
 
-                Ok(Value::Float(
-                    arguments[0].as_number()?.powf(arguments[1].as_number()?),
-                ))
+                Ok({
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        use rust_decimal::prelude::*;
+                        Value::Float(
+                            arguments[0]
+                                .as_number()?
+                                .checked_powd(arguments[1].as_number()?)
+                                //FIXME
+                                //`rust_decimal` doesn't support `INFINITY` yet
+                                //issue: https://github.com/paupino/rust-decimal/issues/466
+                                .unwrap_or(Decimal::MAX),
+                        )
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    Value::Float(arguments[0].as_number()?.powf(arguments[1].as_number()?))
+                })
             },
             Eq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 Ok(Value::Boolean(arguments[0] == arguments[1]))
             },
             Neq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
-
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 Ok(Value::Boolean(arguments[0] != arguments[1]))
             },
             Gt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -360,6 +563,12 @@ impl Operator {
             },
             Lt => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -375,6 +584,12 @@ impl Operator {
             },
             Geq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -390,6 +605,12 @@ impl Operator {
             },
             Leq => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 expect_number_or_string(&arguments[0])?;
                 expect_number_or_string(&arguments[1])?;
 
@@ -405,6 +626,12 @@ impl Operator {
             },
             And => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() || arguments[1].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
@@ -412,6 +639,22 @@ impl Operator {
             },
             Or => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        if arguments[1].as_boolean()? {
+                            return Ok(Value::Boolean(true));
+                        } else {
+                            return Ok(Value::Empty);
+                        }
+                    } else if arguments[1].is_empty() {
+                        if arguments[0].as_boolean()? {
+                            return Ok(Value::Boolean(true));
+                        } else {
+                            return Ok(Value::Empty);
+                        }
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
                 let b = arguments[1].as_boolean()?;
 
@@ -419,6 +662,12 @@ impl Operator {
             },
             Not => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
+                #[cfg(feature = "empty_is_null")]
+                {
+                    if arguments[0].is_empty() {
+                        return Ok(Value::Empty);
+                    }
+                }
                 let a = arguments[0].as_boolean()?;
 
                 Ok(Value::Boolean(!a))

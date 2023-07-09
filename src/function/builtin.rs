@@ -23,6 +23,7 @@ macro_rules! simple_math {
     };
 }
 
+#[allow(unused)]
 fn float_is(func: fn(FloatType) -> bool) -> Option<Function> {
     Some(Function::new(move |argument| {
         Ok(func(argument.as_number()?).into())
@@ -46,46 +47,89 @@ macro_rules! int_function {
 }
 
 pub fn builtin_function(identifier: &str) -> Option<Function> {
+    #[cfg(feature = "decimal_support")]
+    use rust_decimal::prelude::*;
     match identifier {
         // Log
         "math::ln" => simple_math!(ln),
+        #[cfg(not(feature = "decimal_support"))]
         "math::log" => simple_math!(log, 2),
+        #[cfg(not(feature = "decimal_support"))]
         "math::log2" => simple_math!(log2),
         "math::log10" => simple_math!(log10),
         // Exp
         "math::exp" => simple_math!(exp),
+        #[cfg(not(feature = "decimal_support"))]
         "math::exp2" => simple_math!(exp2),
         // Pow
+        #[cfg(feature = "decimal_support")]
+        "math::pow" => Some(Function::new(|argument| {
+            let tuple = argument.as_fixed_len_tuple(2)?;
+            let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
+            Ok(Value::Float(a.powf(b.to_f64().unwrap())))
+        })),
+        #[cfg(not(feature = "decimal_support"))]
         "math::pow" => simple_math!(powf, 2),
         // Cos
         "math::cos" => simple_math!(cos),
+        #[cfg(not(feature = "decimal_support"))]
         "math::acos" => simple_math!(acos),
+        #[cfg(not(feature = "decimal_support"))]
         "math::cosh" => simple_math!(cosh),
+        #[cfg(not(feature = "decimal_support"))]
         "math::acosh" => simple_math!(acosh),
         // Sin
         "math::sin" => simple_math!(sin),
+        #[cfg(not(feature = "decimal_support"))]
         "math::asin" => simple_math!(asin),
+        #[cfg(not(feature = "decimal_support"))]
         "math::sinh" => simple_math!(sinh),
+        #[cfg(not(feature = "decimal_support"))]
         "math::asinh" => simple_math!(asinh),
         // Tan
         "math::tan" => simple_math!(tan),
+        #[cfg(not(feature = "decimal_support"))]
         "math::atan" => simple_math!(atan),
+        #[cfg(not(feature = "decimal_support"))]
         "math::tanh" => simple_math!(tanh),
+        #[cfg(not(feature = "decimal_support"))]
         "math::atanh" => simple_math!(atanh),
+        #[cfg(not(feature = "decimal_support"))]
         "math::atan2" => simple_math!(atan2, 2),
         // Root
+        #[cfg(feature = "decimal_support")]
+        "math::sqrt" => Some(Function::new(|argument| {
+            let num = argument.as_number()?;
+            Ok(Value::Float(num.sqrt().unwrap()))
+        })),
+        #[cfg(not(feature = "decimal_support"))]
         "math::sqrt" => simple_math!(sqrt),
+        #[cfg(not(feature = "decimal_support"))]
         "math::cbrt" => simple_math!(cbrt),
         // Hypotenuse
+        #[cfg(not(feature = "decimal_support"))]
         "math::hypot" => simple_math!(hypot, 2),
         // Rounding
         "floor" => simple_math!(floor),
+        #[cfg(feature = "decimal_support")]
+        "round" => Some(Function::new(|argument| {
+            let num = argument.as_number()?;
+            Ok(Value::Float(num.round_dp_with_strategy(
+                0,
+                RoundingStrategy::MidpointAwayFromZero,
+            )))
+        })),
+        #[cfg(not(feature = "decimal_support"))]
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
         // Float special values
+        #[cfg(not(feature = "decimal_support"))]
         "math::is_nan" => float_is(FloatType::is_nan),
+        #[cfg(not(feature = "decimal_support"))]
         "math::is_finite" => float_is(FloatType::is_finite),
+        #[cfg(not(feature = "decimal_support"))]
         "math::is_infinite" => float_is(FloatType::is_infinite),
+        #[cfg(not(feature = "decimal_support"))]
         "math::is_normal" => float_is(FloatType::is_normal),
         // Absolute
         "math::abs" => Some(Function::new(|argument| match argument {
@@ -108,12 +152,15 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut min_int = IntType::max_value();
-            let mut min_float: FloatType = 1.0 / 0.0;
-            debug_assert!(min_float.is_infinite());
+            let mut min_float = Option::<FloatType>::None;
 
             for argument in arguments {
                 if let Value::Float(float) = argument {
-                    min_float = min_float.min(float);
+                    if let Some(min) = min_float {
+                        min_float = Some(min.max(float));
+                    } else {
+                        min_float = Some(float);
+                    }
                 } else if let Value::Int(int) = argument {
                     min_int = min_int.min(int);
                 } else {
@@ -121,21 +168,38 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 }
             }
 
-            if (min_int as FloatType) < min_float {
-                Ok(Value::Int(min_int))
+            if let Some(min_float) = min_float {
+                if ({
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        FloatType::from_i64(min_int).unwrap()
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    {
+                        min_int as FloatType
+                    }
+                }) < min_float
+                {
+                    Ok(Value::Int(min_int))
+                } else {
+                    Ok(Value::Float(min_float))
+                }
             } else {
-                Ok(Value::Float(min_float))
+                Ok(Value::Int(min_int))
             }
         })),
         "max" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
             let mut max_int = IntType::min_value();
-            let mut max_float: FloatType = -1.0 / 0.0;
-            debug_assert!(max_float.is_infinite());
+            let mut max_float = Option::<FloatType>::None;
 
             for argument in arguments {
                 if let Value::Float(float) = argument {
-                    max_float = max_float.max(float);
+                    if let Some(max) = max_float {
+                        max_float = Some(max.max(float));
+                    } else {
+                        max_float = Some(float);
+                    }
                 } else if let Value::Int(int) = argument {
                     max_int = max_int.max(int);
                 } else {
@@ -143,10 +207,24 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 }
             }
 
-            if (max_int as FloatType) > max_float {
-                Ok(Value::Int(max_int))
+            if let Some(max_float) = max_float {
+                if ({
+                    #[cfg(feature = "decimal_support")]
+                    {
+                        FloatType::from_i64(max_int).unwrap()
+                    }
+                    #[cfg(not(feature = "decimal_support"))]
+                    {
+                        max_int as FloatType
+                    }
+                }) > max_float
+                {
+                    Ok(Value::Int(max_int))
+                } else {
+                    Ok(Value::Float(max_float))
+                }
             } else {
-                Ok(Value::Float(max_float))
+                Ok(Value::Int(max_int))
             }
         })),
         "if" => Some(Function::new(|argument| {
@@ -270,7 +348,16 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         #[cfg(feature = "rand")]
         "random" => Some(Function::new(|argument| {
             argument.as_empty()?;
-            Ok(Value::Float(rand::random()))
+            Ok(Value::Float({
+                #[cfg(feature = "decimal_support")]
+                {
+                    FloatType::from_f64(rand::random()).unwrap()
+                }
+                #[cfg(not(feature = "decimal_support"))]
+                {
+                    rand::random()
+                }
+            }))
         })),
         // Bitwise operators
         "bitand" => int_function!(bitand, 2),

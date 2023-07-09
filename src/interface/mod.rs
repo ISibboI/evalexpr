@@ -180,6 +180,9 @@ pub fn eval_number_with_context<C: Context>(
 ) -> EvalexprResult<FloatType> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
+        #[cfg(feature = "decimal_support")]
+        Ok(Value::Int(int)) => Ok(int.into()),
+        #[cfg(not(feature = "decimal_support"))]
         Ok(Value::Int(int)) => Ok(int as FloatType),
         Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),
@@ -271,6 +274,9 @@ pub fn eval_number_with_context_mut<C: ContextWithMutableVariables>(
 ) -> EvalexprResult<FloatType> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Float(float)) => Ok(float),
+        #[cfg(feature = "decimal_support")]
+        Ok(Value::Int(int)) => Ok(int.into()),
+        #[cfg(not(feature = "decimal_support"))]
         Ok(Value::Int(int)) => Ok(int as FloatType),
         Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),

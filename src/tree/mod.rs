@@ -388,6 +388,9 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_number_with_context<C: Context>(&self, context: &C) -> EvalexprResult<FloatType> {
         match self.eval_with_context(context) {
+            #[cfg(feature = "decimal_support")]
+            Ok(Value::Int(int)) => Ok(int.into()),
+            #[cfg(not(feature = "decimal_support"))]
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_number(value)),
@@ -479,6 +482,9 @@ impl Node {
         context: &mut C,
     ) -> EvalexprResult<FloatType> {
         match self.eval_with_context_mut(context) {
+            #[cfg(feature = "decimal_support")]
+            Ok(Value::Int(int)) => Ok(int.into()),
+            #[cfg(not(feature = "decimal_support"))]
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_number(value)),
