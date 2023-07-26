@@ -2304,3 +2304,8 @@ fn test_hex() {
         Err(EvalexprError::VariableIdentifierNotFound("0x".into()))
     );
 }
+
+#[test]
+fn test_broken_string() {
+    assert!(eval(r#""abc" == "broken string"#).is_err());
+}
