@@ -429,8 +429,7 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
                     },
                     _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
                 },
-            }
-            .into_iter(),
+            },
         );
 
         tokens = &tokens[cutoff..];
