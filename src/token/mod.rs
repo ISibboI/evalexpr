@@ -298,139 +298,136 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
         let third = tokens.get(2).cloned();
         let mut cutoff = 2;
 
-        result.extend(
-            match first {
-                PartialToken::Token(token) => {
+        result.extend(match first {
+            PartialToken::Token(token) => {
+                cutoff = 1;
+                Some(token)
+            },
+            PartialToken::Plus => match second {
+                Some(PartialToken::Eq) => Some(Token::PlusAssign),
+                _ => {
                     cutoff = 1;
-                    Some(token)
-                },
-                PartialToken::Plus => match second {
-                    Some(PartialToken::Eq) => Some(Token::PlusAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Plus)
-                    },
-                },
-                PartialToken::Minus => match second {
-                    Some(PartialToken::Eq) => Some(Token::MinusAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Minus)
-                    },
-                },
-                PartialToken::Star => match second {
-                    Some(PartialToken::Eq) => Some(Token::StarAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Star)
-                    },
-                },
-                PartialToken::Slash => match second {
-                    Some(PartialToken::Eq) => Some(Token::SlashAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Slash)
-                    },
-                },
-                PartialToken::Percent => match second {
-                    Some(PartialToken::Eq) => Some(Token::PercentAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Percent)
-                    },
-                },
-                PartialToken::Hat => match second {
-                    Some(PartialToken::Eq) => Some(Token::HatAssign),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Hat)
-                    },
-                },
-                PartialToken::Literal(literal) => {
-                    cutoff = 1;
-                    if let Ok(number) = parse_dec_or_hex(&literal) {
-                        Some(Token::Int(number))
-                    } else if let Ok(number) = literal.parse::<FloatType>() {
-                        Some(Token::Float(number))
-                    } else if let Ok(boolean) = literal.parse::<bool>() {
-                        Some(Token::Boolean(boolean))
-                    } else {
-                        // If there are two tokens following this one, check if the next one is
-                        // a plus or a minus. If so, then attempt to parse all three tokens as a
-                        // scientific notation number of the form `<coefficient>e{+,-}<exponent>`,
-                        // for example [Literal("10e"), Minus, Literal("3")] => "1e-3".parse().
-                        match (second, third) {
-                            (Some(second), Some(third))
-                                if second == PartialToken::Minus
-                                    || second == PartialToken::Plus =>
-                            {
-                                if let Ok(number) =
-                                    format!("{}{}{}", literal, second, third).parse::<FloatType>()
-                                {
-                                    cutoff = 3;
-                                    Some(Token::Float(number))
-                                } else {
-                                    Some(Token::Identifier(literal.to_string()))
-                                }
-                            },
-                            _ => Some(Token::Identifier(literal.to_string())),
-                        }
-                    }
-                },
-                PartialToken::Whitespace => {
-                    cutoff = 1;
-                    None
-                },
-                PartialToken::Eq => match second {
-                    Some(PartialToken::Eq) => Some(Token::Eq),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Assign)
-                    },
-                },
-                PartialToken::ExclamationMark => match second {
-                    Some(PartialToken::Eq) => Some(Token::Neq),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Not)
-                    },
-                },
-                PartialToken::Gt => match second {
-                    Some(PartialToken::Eq) => Some(Token::Geq),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Gt)
-                    },
-                },
-                PartialToken::Lt => match second {
-                    Some(PartialToken::Eq) => Some(Token::Leq),
-                    _ => {
-                        cutoff = 1;
-                        Some(Token::Lt)
-                    },
-                },
-                PartialToken::Ampersand => match second {
-                    Some(PartialToken::Ampersand) => match third {
-                        Some(PartialToken::Eq) => {
-                            cutoff = 3;
-                            Some(Token::AndAssign)
-                        },
-                        _ => Some(Token::And),
-                    },
-                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
-                },
-                PartialToken::VerticalBar => match second {
-                    Some(PartialToken::VerticalBar) => match third {
-                        Some(PartialToken::Eq) => {
-                            cutoff = 3;
-                            Some(Token::OrAssign)
-                        },
-                        _ => Some(Token::Or),
-                    },
-                    _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
+                    Some(Token::Plus)
                 },
             },
-        );
+            PartialToken::Minus => match second {
+                Some(PartialToken::Eq) => Some(Token::MinusAssign),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Minus)
+                },
+            },
+            PartialToken::Star => match second {
+                Some(PartialToken::Eq) => Some(Token::StarAssign),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Star)
+                },
+            },
+            PartialToken::Slash => match second {
+                Some(PartialToken::Eq) => Some(Token::SlashAssign),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Slash)
+                },
+            },
+            PartialToken::Percent => match second {
+                Some(PartialToken::Eq) => Some(Token::PercentAssign),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Percent)
+                },
+            },
+            PartialToken::Hat => match second {
+                Some(PartialToken::Eq) => Some(Token::HatAssign),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Hat)
+                },
+            },
+            PartialToken::Literal(literal) => {
+                cutoff = 1;
+                if let Ok(number) = parse_dec_or_hex(&literal) {
+                    Some(Token::Int(number))
+                } else if let Ok(number) = literal.parse::<FloatType>() {
+                    Some(Token::Float(number))
+                } else if let Ok(boolean) = literal.parse::<bool>() {
+                    Some(Token::Boolean(boolean))
+                } else {
+                    // If there are two tokens following this one, check if the next one is
+                    // a plus or a minus. If so, then attempt to parse all three tokens as a
+                    // scientific notation number of the form `<coefficient>e{+,-}<exponent>`,
+                    // for example [Literal("10e"), Minus, Literal("3")] => "1e-3".parse().
+                    match (second, third) {
+                        (Some(second), Some(third))
+                            if second == PartialToken::Minus || second == PartialToken::Plus =>
+                        {
+                            if let Ok(number) =
+                                format!("{}{}{}", literal, second, third).parse::<FloatType>()
+                            {
+                                cutoff = 3;
+                                Some(Token::Float(number))
+                            } else {
+                                Some(Token::Identifier(literal.to_string()))
+                            }
+                        },
+                        _ => Some(Token::Identifier(literal.to_string())),
+                    }
+                }
+            },
+            PartialToken::Whitespace => {
+                cutoff = 1;
+                None
+            },
+            PartialToken::Eq => match second {
+                Some(PartialToken::Eq) => Some(Token::Eq),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Assign)
+                },
+            },
+            PartialToken::ExclamationMark => match second {
+                Some(PartialToken::Eq) => Some(Token::Neq),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Not)
+                },
+            },
+            PartialToken::Gt => match second {
+                Some(PartialToken::Eq) => Some(Token::Geq),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Gt)
+                },
+            },
+            PartialToken::Lt => match second {
+                Some(PartialToken::Eq) => Some(Token::Leq),
+                _ => {
+                    cutoff = 1;
+                    Some(Token::Lt)
+                },
+            },
+            PartialToken::Ampersand => match second {
+                Some(PartialToken::Ampersand) => match third {
+                    Some(PartialToken::Eq) => {
+                        cutoff = 3;
+                        Some(Token::AndAssign)
+                    },
+                    _ => Some(Token::And),
+                },
+                _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
+            },
+            PartialToken::VerticalBar => match second {
+                Some(PartialToken::VerticalBar) => match third {
+                    Some(PartialToken::Eq) => {
+                        cutoff = 3;
+                        Some(Token::OrAssign)
+                    },
+                    _ => Some(Token::Or),
+                },
+                _ => return Err(EvalexprError::unmatched_partial_token(first, second)),
+            },
+        });
 
         tokens = &tokens[cutoff..];
     }
