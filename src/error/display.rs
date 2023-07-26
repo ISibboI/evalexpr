@@ -69,6 +69,7 @@ impl fmt::Display for EvalexprError {
             ),
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
+            UnmatchedDoubleQuote => write!(f, "Found an unmatched double quote '\"'"),
             MissingOperatorOutsideOfBrace { .. } => write!(
                 f,
                 "Found an opening parenthesis that is preceded by something that does not take \
