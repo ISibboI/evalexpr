@@ -2307,5 +2307,8 @@ fn test_hex() {
 
 #[test]
 fn test_broken_string() {
-    assert!(eval(r#""abc" == "broken string"#).is_err());
+    assert_eq!(
+        eval(r#""abc" == "broken string"#),
+        Err(EvalexprError::UnmatchedDoubleQuote)
+    );
 }

@@ -251,13 +251,13 @@ fn parse_string_literal<Iter: Iterator<Item = char>>(
 
     while let Some(c) = iter.next() {
         match c {
-            '"' => break,
+            '"' => return Ok(PartialToken::Token(Token::String(result))),
             '\\' => result.push(parse_escape_sequence(&mut iter)?),
             c => result.push(c),
         }
     }
 
-    Ok(PartialToken::Token(Token::String(result)))
+    Err(EvalexprError::UnmatchedDoubleQuote)
 }
 
 /// Converts a string to a vector of partial tokens.

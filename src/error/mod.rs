@@ -129,6 +129,9 @@ pub enum EvalexprError {
     /// A closing brace without a matching opening brace was found.
     UnmatchedRBrace,
 
+    /// A double quote without a matching second double quote was found.
+    UnmatchedDoubleQuote,
+
     /// Left of an opening brace or right of a closing brace is a token that does not expect the brace next to it.
     /// For example, writing `4(5)` would yield this error, as the `4` does not have any operands.
     MissingOperatorOutsideOfBrace,
