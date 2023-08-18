@@ -2312,3 +2312,34 @@ fn test_broken_string() {
         Err(EvalexprError::UnmatchedDoubleQuote)
     );
 }
+
+#[test]
+fn test_comments() {
+    assert_eq!(
+        eval(
+            "
+            // input
+            a = 1;  // assignment
+            // output
+            a + 2  // add"
+        ),
+        Ok(Value::Int(3))
+    );
+
+    assert_eq!(
+        eval("0 /*"),
+        Err(EvalexprError::CustomMessage(
+            "unmatched inline comment".into()
+        ))
+    );
+
+    assert_eq!(
+        eval("1 % 4 + /*inline comment*/ 6 /*END*/"),
+        Ok(Value::Int(7))
+    );
+
+    assert_eq!(
+        eval("/* begin */ 10 /* middle */ + 5 /* end */ + 6 // DONE"),
+        Ok(Value::Int(21))
+    );
+}
