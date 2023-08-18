@@ -520,6 +520,21 @@ Here are some examples and counter-examples on expressions that are interpreted 
 
 Functions have a precedence of 190.
 
+### Comments
+
+Both C like comments are supported.
+
+```rust
+use evalexpr::*;
+
+assert_eq!(eval("1 + /* inline comment */ 2"), Ok(Value::from(3)));
+assert_eq!(eval("
+    a = 1;
+    // line comment
+    a + 2
+    "), Ok(Value::from(3)));
+```
+
 ### [Serde](https://serde.rs)
 
 To use this crate with serde, the `serde_support` feature flag has to be set.
