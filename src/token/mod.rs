@@ -260,6 +260,41 @@ fn parse_string_literal<Iter: Iterator<Item = char>>(
     Err(EvalexprError::UnmatchedDoubleQuote)
 }
 
+fn try_skip_comment(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> EvalexprResult<bool> {
+    let mut matched = false;
+    if let Some(lookahead) = iter.peek() {
+        if *lookahead == '/' {
+            matched = true;
+            iter.next();
+            // line comment
+            for c in iter {
+                if c == '\n' {
+                    break;
+                }
+            }
+        } else if *lookahead == '*' {
+            // inline commment
+            iter.next();
+            while let Some(c) = iter.next() {
+                if let Some(next) = iter.peek() {
+                    if c == '*' && *next == '/' {
+                        matched = true;
+                        iter.next();
+                        break;
+                    }
+                }
+            }
+            if !matched {
+                return Err(EvalexprError::CustomMessage(
+                    "unmatched inline comment".into(),
+                ));
+            }
+        }
+    }
+
+    Ok(matched)
+}
+
 /// Converts a string to a vector of partial tokens.
 fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
     let mut result = Vec::new();
@@ -270,6 +305,12 @@ fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
             result.push(parse_string_literal(&mut iter)?);
         } else {
             let partial_token = char_to_partial_token(c);
+
+            if let PartialToken::Slash = partial_token {
+                if try_skip_comment(&mut iter)? {
+                    continue;
+                }
+            }
 
             let if_let_successful =
                 if let (Some(PartialToken::Literal(last)), PartialToken::Literal(literal)) =
@@ -470,6 +511,28 @@ mod tests {
         let token_string =
             "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
         let tokens = tokenize(token_string).unwrap();
+        let mut result_string = String::new();
+
+        for token in tokens {
+            write!(result_string, "{} ", token).unwrap();
+        }
+
+        assert_eq!(token_string, result_string);
+    }
+
+    #[test]
+    fn test_skip_comment() {
+        let token_string =
+            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
+
+        let token_string_with_comments = r"+ - * / % ^ == != > 
+            < >= <= && /* inline comment */ || ! ( ) 
+            = += -= *= /= %= ^=
+            // line comment
+            &&= ||= , ; 
+            ";
+
+        let tokens = tokenize(token_string_with_comments).unwrap();
         let mut result_string = String::new();
 
         for token in tokens {
