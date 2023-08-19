@@ -37,7 +37,7 @@ assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
 // while `eval_[type]` returns the respective type directly.
 // Both can be used interchangeably.
 assert_eq!(eval_int("1 + 2 + 3"), Ok(6));
-assert_eq!(eval("1 - 2 * 3"), Ok(Value::from(-5)));
+assert_eq!(eval("1 /* inline comments are supported */ - 2 * 3 // as are end-of-line comments"), Ok(Value::from(-5)));
 assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
 assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
 ```
@@ -533,6 +533,28 @@ evalexpr = {version = "7", features = ["serde_support"]}
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
 The implementation expects a [serde `string`](https://serde.rs/data-model.html) as input.
 Example parsing with [ron format](docs.rs/ron):
+
+### Comments
+
+Evalexpr supports C-style inline comments and end-of-line comments.
+Inline comments are started with a `/*` and terminated with a `*/`.
+End-of-line comments are started with a `//` and terminated with a newline character.
+For example:
+
+```rust
+use evalexpr::*;
+
+assert_eq!(
+    eval(
+        "
+        // input
+        a = 1;  // assignment
+        // output
+        2 * a /* first double a */ + 2 // then add 2"
+    ),
+    Ok(Value::Int(4))
+);
+```
 
 ```rust
 extern crate ron;
