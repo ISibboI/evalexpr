@@ -1,3 +1,5 @@
+use std::vec;
+
 use crate::function::builtin::builtin_function;
 
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
@@ -446,6 +448,25 @@ impl Operator {
             VariableIdentifierRead { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
+                // object.attribute
+                if is_identifier(identifier) {
+                    if let Some((id, attribute)) = identifier.split_once('.') {
+                        if is_identifier(id) && is_identifier(attribute) {
+                            let object = match context.get_value(id) {
+                                Some(x) => Ok(x),
+                                None => Err(EvalexprError::VariableIdentifierNotFound(id.into())),
+                            }?;
+                            let params = vec![
+                                object.clone(),
+                                Value::String(attribute.into()),
+                                Value::Empty,
+                            ];
+                            // dot(object, "attribute", empty)
+                            return context.call_function("dot", &Value::Tuple(params));
+                        }
+                    }
+                }
+
                 if let Some(value) = context.get_value(identifier).cloned() {
                     Ok(value)
                 } else {
@@ -457,6 +478,23 @@ impl Operator {
             FunctionIdentifier { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 1)?;
                 let arguments = &arguments[0];
+
+                // object.method()
+                if let Some((id, method)) = identifier.split_once('.') {
+                    if is_identifier(id) && is_identifier(method) {
+                        let object = match context.get_value(id) {
+                            Some(x) => Ok(x),
+                            None => Err(EvalexprError::VariableIdentifierNotFound(id.into())),
+                        }?;
+                        let params = vec![
+                            object.clone(),
+                            Value::String(method.into()),
+                            arguments.clone(),
+                        ];
+                        // dot(object, "method", arguments)
+                        return context.call_function("dot", &Value::Tuple(params));
+                    }
+                }
 
                 match context.call_function(identifier, arguments) {
                     Err(EvalexprError::FunctionIdentifierNotFound(_))
@@ -522,5 +560,12 @@ impl Operator {
             },
             _ => self.eval(arguments, context),
         }
+    }
+}
+
+fn is_identifier(id: &str) -> bool {
+    match id.chars().next() {
+        Some(c) => c.is_ascii_alphabetic(),
+        None => false,
     }
 }
