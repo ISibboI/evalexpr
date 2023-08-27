@@ -6,8 +6,6 @@
 
 ### Added
 
- * Methods to mutably iterate over operators (`Node::iter_operators_mut`) and all types of identifiers (`Node::iter_identifiers_mut`, `Node::iter_*_identifiers_mut`) (#136)
-
 ### Removed
 
 ### Changed
@@ -15,6 +13,32 @@
 ### Fixed
 
 ### Deprecated
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+## [11.1.0](https://github.com/ISibboI/evalexpr/compare/11.0.1...11.1.0) - 2023-08-19
+
+### Added
+
+ * C-style comments (#148)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Alex Wei](https://github.com/sweihub)
+
+## [11.0.1](https://github.com/ISibboI/evalexpr/compare/11.0.0...11.0.1) - 2023-07-26
+
+### Notes
+
+This should have been a minor release instead of a patch.
+
+### Added
+
+ * Methods to mutably iterate over operators (`Node::iter_operators_mut`) and all types of identifiers (`Node::iter_identifiers_mut`, `Node::iter_*_identifiers_mut`) (#136)
 
 ### Contributors
 
