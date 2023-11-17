@@ -185,6 +185,16 @@ impl HashMapContext {
     pub fn new() -> Self {
         Default::default()
     }
+
+    /// Clears the [variables] HashMap so it can re-populated if needed
+    pub fn clear_variables_map(&mut self) {
+        self.variables.clear()
+    }
+
+    /// Clears the [functions] HashMap so it can re-populated if needed
+    pub fn clear_functions_map(&mut self) {
+        self.functions.clear()
+    }
 }
 
 impl Context for HashMapContext {
