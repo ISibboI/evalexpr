@@ -570,6 +570,7 @@
 
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
+#![allow(clippy::get_first)]
 
 #[cfg(feature = "regex_support")]
 extern crate regex;
