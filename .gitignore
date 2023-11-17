@@ -16,4 +16,3 @@ target/
 .idea
 *.gcda
 *.gcno
-Cargo.lock
