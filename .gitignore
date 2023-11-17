@@ -16,3 +16,4 @@ target/
 .idea
 *.gcda
 *.gcno
+lcov.info
