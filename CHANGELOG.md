@@ -18,6 +18,18 @@
 
 My warmhearted thanks goes to:
 
+## [11.2.0](https://github.com/ISibboI/evalexpr/compare/11.1.0...11.2.0) - 2023-11-17
+
+### Added
+
+ * Functions `clear`, `clear_variables` and `clear_functions` to `HashMapContext` (#156)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Cake Tully](https://github.com/jbham)
+
 ## [11.1.0](https://github.com/ISibboI/evalexpr/compare/11.0.1...11.1.0) - 2023-08-19
 
 ### Added
