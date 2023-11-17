@@ -209,6 +209,25 @@ impl HashMapContext {
     pub fn clear_functions(&mut self) {
         self.functions.clear()
     }
+
+    /// Removes all variables and functions from the context.
+    /// This allows to reuse the context without allocating a new HashMap.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use evalexpr::*;
+    ///
+    /// let mut context = HashMapContext::new();
+    /// context.set_value("abc".into(), "def".into()).unwrap();
+    /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    /// context.clear();
+    /// assert_eq!(context.get_value("abc"), None);
+    /// ```
+    pub fn clear(&mut self) {
+        self.clear_variables();
+        self.clear_functions();
+    }
 }
 
 impl Context for HashMapContext {
