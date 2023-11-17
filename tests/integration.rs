@@ -2343,3 +2343,47 @@ fn test_comments() {
         Ok(Value::Int(21))
     );
 }
+
+#[test]
+fn test_clear() {
+    let mut context = HashMapContext::new();
+    context.set_value("abc".into(), "def".into()).unwrap();
+    assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    context.clear_functions();
+    assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    context.clear_variables();
+    assert_eq!(context.get_value("abc"), None);
+
+    context
+        .set_function(
+            "abc".into(),
+            Function::new(|input| Ok(Value::String(format!("{input}")))),
+        )
+        .unwrap();
+    assert_eq!(
+        eval_with_context("abc(5)", &context).unwrap(),
+        Value::String("5".into())
+    );
+    context.clear_variables();
+    assert_eq!(
+        eval_with_context("abc(5)", &context).unwrap(),
+        Value::String("5".into())
+    );
+    context.clear_functions();
+    assert!(eval_with_context("abc(5)", &context).is_err());
+
+    context.set_value("five".into(), 5.into()).unwrap();
+    context
+        .set_function(
+            "abc".into(),
+            Function::new(|input| Ok(Value::String(format!("{input}")))),
+        )
+        .unwrap();
+    assert_eq!(
+        eval_with_context("abc(five)", &context).unwrap(),
+        Value::String("5".into())
+    );
+    context.clear();
+    assert!(context.get_value("five").is_none());
+    assert!(eval_with_context("abc(5)", &context).is_err());
+}
