@@ -186,13 +186,27 @@ impl HashMapContext {
         Default::default()
     }
 
-    /// Clears the [variables] HashMap so it can re-populated if needed
-    pub fn clear_variables_map(&mut self) {
+    /// Removes all variables from the context.
+    /// This allows to reuse the context without allocating a new HashMap.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use evalexpr::*;
+    ///
+    /// let mut context = HashMapContext::new();
+    /// context.set_value("abc".into(), "def".into()).unwrap();
+    /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    /// context.clear_variables();
+    /// assert_eq!(context.get_value("abc"), None);
+    /// ```
+    pub fn clear_variables(&mut self) {
         self.variables.clear()
     }
 
-    /// Clears the [functions] HashMap so it can re-populated if needed
-    pub fn clear_functions_map(&mut self) {
+    /// Removes all functions from the context.
+    /// This allows to reuse the context without allocating a new HashMap.
+    pub fn clear_functions(&mut self) {
         self.functions.clear()
     }
 }
