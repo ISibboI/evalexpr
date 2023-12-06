@@ -407,6 +407,7 @@ Symmetrically, the `EmptyContextWithBuiltinFunctions` has builtin functions enab
 | `str::to_uppercase`  | 1               | String                        | Returns the upper-case version of the string |
 | `str::trim`          | 1               | String                        | Strips whitespace from the start and the end of the string |
 | `str::from`          | >= 0            | Any                           | Returns passed value as string |
+| `str::substring`     | 3               | String, Int, Int              | Returns a substring of the first argument, starting at the second argument and ending at the third argument. If the last argument is omitted, the substring extends to the end of the string |
 | `bitand`             | 2               | Int                           | Computes the bitwise and of the given integers |
 | `bitor`              | 2               | Int                           | Computes the bitwise or of the given integers |
 | `bitxor`             | 2               | Int                           | Computes the bitwise xor of the given integers |
