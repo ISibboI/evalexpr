@@ -515,6 +515,22 @@ fn test_builtin_functions() {
         Ok(Value::String(String::from("(1, 2, 3)")))
     );
     assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()"))));
+    assert_eq!(
+        eval("str::substring(\"foobar\", 3)"),
+        Ok(Value::String(String::from("bar")))
+    );
+    assert_eq!(
+        eval("str::substring(\"foobar\", 3, 3)"),
+        Ok(Value::String(String::from("")))
+    );
+    assert_eq!(
+        eval("str::substring(\"foobar\", 3, 4)"),
+        Ok(Value::String(String::from("b")))
+    );
+    assert_eq!(
+        eval("str::substring(\"foobar\", 99999)"),
+        Ok(Value::String(String::from("")))
+    );
     // Bitwise
     assert_eq!(eval("bitand(5, -1)"), Ok(Value::Int(5)));
     assert_eq!(eval("bitand(6, 5)"), Ok(Value::Int(4)));

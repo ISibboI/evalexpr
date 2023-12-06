@@ -267,6 +267,26 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         "str::from" => Some(Function::new(|argument| {
             Ok(Value::String(argument.to_string()))
         })),
+        "str::substring" => Some(Function::new(|argument| {
+            let args = argument.as_tuple()?;
+            let subject = args
+                .get(0)
+                .ok_or_else(|| EvalexprError::wrong_function_argument_amount(0, 2))?
+                .as_string()?;
+            let start = args
+                .get(1)
+                .ok_or_else(|| EvalexprError::wrong_function_argument_amount(1, 2))?
+                .as_int()? as usize;
+            let end = args
+                .get(2)
+                .and_then(|arg| arg.as_int().ok())
+                .map(|a| a as usize)
+                .unwrap_or_else(|| subject.len());
+            let start = start.min(subject.len());
+            let end = end.min(subject.len()).max(start);
+            let substr = &subject[start..end];
+            Ok(Value::from(substr))
+        })),
         #[cfg(feature = "rand")]
         "random" => Some(Function::new(|argument| {
             argument.as_empty()?;
