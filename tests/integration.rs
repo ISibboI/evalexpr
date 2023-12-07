@@ -527,6 +527,8 @@ fn test_builtin_functions() {
         eval("str::substring(\"foobar\", 3, 4)"),
         Ok(Value::String(String::from("b")))
     );
+    assert!(eval("str::substring()").is_err());
+    assert!(eval("str::substring(\"foobar\")").is_err());
     assert!(eval("str::substring(\"foobar\", 2, 1)").is_err());
     assert!(eval("str::substring(\"foobar\", 99999)").is_err());
     assert!(eval("str::substring(\"foobar\", -1)").is_err());
