@@ -527,7 +527,7 @@ This can be done like this in the `Cargo.toml`:
 
 ```toml
 [dependencies]
-evalexpr = {version = "7", features = ["serde_support"]}
+evalexpr = {version = "<desired version>", features = ["serde_support"]}
 ```
 
 This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.

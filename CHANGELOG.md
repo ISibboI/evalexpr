@@ -12,6 +12,8 @@
 
 ### Fixed
 
+ * Minor error in README.
+
 ### Deprecated
 
 ### Contributors
