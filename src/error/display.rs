@@ -128,6 +128,7 @@ impl fmt::Display for EvalexprError {
                 write!(f, "This context does not allow disabling builtin functions")
             },
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
+            OutOfBoundsAccess => write!(f, "Tried to access a tuple or string at an invalid index"),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

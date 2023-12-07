@@ -5,7 +5,10 @@ use crate::{
     value::{FloatType, IntType},
     EvalexprError, Function, Value, ValueType,
 };
-use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
+use std::{
+    convert::TryFrom,
+    ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr},
+};
 
 macro_rules! simple_math {
     ($func:ident) => {
@@ -276,16 +279,17 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             let start = args
                 .get(1)
                 .ok_or_else(|| EvalexprError::wrong_function_argument_amount(1, 2))?
-                .as_int()? as usize;
-            let end = args
-                .get(2)
-                .and_then(|arg| arg.as_int().ok())
-                .map(|a| a as usize)
-                .unwrap_or_else(|| subject.len());
-            let start = start.min(subject.len());
-            let end = end.min(subject.len()).max(start);
-            let substr = &subject[start..end];
-            Ok(Value::from(substr))
+                .as_int()?;
+            let start = usize::try_from(start).map_err(|_| EvalexprError::OutOfBoundsAccess)?;
+            let end = if let Some(end) = args.get(2) {
+                usize::try_from(end.as_int()?).map_err(|_| EvalexprError::OutOfBoundsAccess)?
+            } else {
+                subject.len()
+            };
+            if start > end || end > subject.len() {
+                return Err(EvalexprError::OutOfBoundsAccess);
+            }
+            Ok(Value::from(&subject[start..end]))
         })),
         #[cfg(feature = "rand")]
         "random" => Some(Function::new(|argument| {
