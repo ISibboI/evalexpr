@@ -5,6 +5,8 @@
 //! The module also contains some helper functions starting with `expect_` that check for a condition and return `Err(_)` if the condition is not fulfilled.
 //! They are meant as shortcuts to not write the same error checking code everywhere.
 
+use std::ops::RangeInclusive;
+
 use crate::{token::PartialToken, value::value_type::ValueType};
 
 use crate::{operator::Operator, value::Value};
@@ -28,7 +30,7 @@ pub enum EvalexprError {
     /// A function was called with a wrong amount of arguments.
     WrongFunctionArgumentAmount {
         /// The expected amount of arguments.
-        expected: usize,
+        expected: RangeInclusive<usize>,
         /// The actual amount of arguments.
         actual: usize,
     },
@@ -217,11 +219,24 @@ pub enum EvalexprError {
 }
 
 impl EvalexprError {
-    pub(crate) fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
+    /// Construct a `WrongOperatorArgumentAmount` error.
+    pub fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
         EvalexprError::WrongOperatorArgumentAmount { actual, expected }
     }
 
-    pub(crate) fn wrong_function_argument_amount(actual: usize, expected: usize) -> Self {
+    /// Construct a `WrongFunctionArgumentAmount` error for a function with a fixed amount of arguments.
+    pub fn wrong_function_argument_amount(actual: usize, expected: usize) -> Self {
+        EvalexprError::WrongFunctionArgumentAmount {
+            actual,
+            expected: expected..=expected,
+        }
+    }
+
+    /// Construct a `WrongFunctionArgumentAmount` error for a function with a range of possible amounts of arguments.
+    pub fn wrong_function_argument_amount_range(
+        actual: usize,
+        expected: RangeInclusive<usize>,
+    ) -> Self {
         EvalexprError::WrongFunctionArgumentAmount { actual, expected }
     }
 

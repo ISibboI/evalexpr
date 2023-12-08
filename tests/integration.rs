@@ -1737,7 +1737,7 @@ fn test_error_constructors() {
     assert_eq!(
         expect_function_argument_amount(2, 3),
         Err(EvalexprError::WrongFunctionArgumentAmount {
-            expected: 3,
+            expected: 3..=3,
             actual: 2
         })
     );
