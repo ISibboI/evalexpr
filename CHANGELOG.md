@@ -10,9 +10,12 @@
 
 ### Changed
 
+ * The error type `WrongFunctionArgumentAmount` now expects a range of argument amounts instead of a single one (#159)
+
 ### Fixed
 
  * Minor error in README.
+ * Regex functions do not silently ignore superfluous arguments anymore.
 
 ### Deprecated
 
