@@ -214,7 +214,7 @@ pub enum EvalexprError {
     /// This context does not allow disabling builtin functions.
     BuiltinFunctionsCannotBeDisabled,
 
-    /// Out of bounds sequence access
+    /// Out of bounds sequence access.
     OutOfBoundsAccess,
 
     /// A custom error explained by its message.
