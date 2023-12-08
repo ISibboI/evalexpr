@@ -223,7 +223,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         // String functions
         #[cfg(feature = "regex_support")]
         "str::regex_matches" => Some(Function::new(|argument| {
-            let arguments = argument.as_tuple()?;
+            let arguments = argument.as_fixed_len_tuple(2)?;
 
             let subject = arguments[0].as_string()?;
             let re_str = arguments[1].as_string()?;
@@ -237,7 +237,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         })),
         #[cfg(feature = "regex_support")]
         "str::regex_replace" => Some(Function::new(|argument| {
-            let arguments = argument.as_tuple()?;
+            let arguments = argument.as_fixed_len_tuple(3)?;
 
             let subject = arguments[0].as_string()?;
             let re_str = arguments[1].as_string()?;

@@ -11,11 +11,18 @@ impl fmt::Display for EvalexprError {
                 "An operator expected {} arguments, but got {}.",
                 expected, actual
             ),
-            WrongFunctionArgumentAmount { expected, actual } => write!(
-                f,
-                "A function expected {} arguments, but got {}.",
-                expected, actual
-            ),
+            WrongFunctionArgumentAmount { expected, actual } => {
+                let expected_arguments = if expected.start() == expected.end() {
+                    format!("{}", expected.start())
+                } else {
+                    format!("{} to {}", expected.start(), expected.end())
+                };
+                write!(
+                    f,
+                    "A function expected {} arguments, but got {}.",
+                    expected_arguments, actual
+                )
+            },
             ExpectedString { actual } => {
                 write!(f, "Expected a Value::String, but got {:?}.", actual)
             },
