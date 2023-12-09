@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [11.3.0](https://github.com/ISibboI/evalexpr/compare/11.2.0...11.3.0) - 2023-12-09
 
 ### Added
 
