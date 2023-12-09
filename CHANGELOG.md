@@ -2,11 +2,9 @@
 
 ## Unreleased
 
-### Notes
-
 ### Added
 
-### Removed
+ * Builtin function `str::substring` (#158)
 
 ### Changed
 
@@ -17,11 +15,11 @@
  * Minor error in README.
  * Regex functions do not silently ignore superfluous arguments anymore.
 
-### Deprecated
-
 ### Contributors
 
 My warmhearted thanks goes to:
+
+ * [Ophir LOJKINE](https://github.com/lovasoa)
 
 ## [11.2.0](https://github.com/ISibboI/evalexpr/compare/11.1.0...11.2.0) - 2023-11-17
 
