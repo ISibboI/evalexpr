@@ -1,5 +1,5 @@
 use crate::error::{EvalexprError, EvalexprResult};
-use std::convert::TryFrom;
+use std::{convert::TryFrom, ops::RangeInclusive};
 
 mod display;
 pub mod value_type;
@@ -131,6 +131,23 @@ impl Value {
                     Ok(tuple.clone())
                 } else {
                     Err(EvalexprError::expected_fixed_len_tuple(len, self.clone()))
+                }
+            },
+            value => Err(EvalexprError::expected_tuple(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` with length in the required range.
+    pub fn as_ranged_len_tuple(&self, range: RangeInclusive<usize>) -> EvalexprResult<TupleType> {
+        match self {
+            Value::Tuple(tuple) => {
+                if range.contains(&tuple.len()) {
+                    Ok(tuple.clone())
+                } else {
+                    Err(EvalexprError::expected_ranged_len_tuple(
+                        range,
+                        self.clone(),
+                    ))
                 }
             },
             value => Err(EvalexprError::expected_tuple(value.clone())),

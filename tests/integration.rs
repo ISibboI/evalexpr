@@ -533,6 +533,7 @@ fn test_builtin_functions() {
     assert!(eval("str::substring(\"foobar\", 99999)").is_err());
     assert!(eval("str::substring(\"foobar\", -1)").is_err());
     assert!(eval("str::substring(\"foobar\", 0, -1)").is_err());
+    assert!(eval("str::substring(\"foobar\", 0, 1, 1)").is_err());
     // Bitwise
     assert_eq!(eval("bitand(5, -1)"), Ok(Value::Int(5)));
     assert_eq!(eval("bitand(6, 5)"), Ok(Value::Int(4)));
@@ -1732,8 +1733,8 @@ fn test_error_constructors() {
     );
     assert_eq!(
         Value::Tuple(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3),
-        Err(EvalexprError::ExpectedFixedLenTuple {
-            expected_len: 3,
+        Err(EvalexprError::ExpectedFixedLengthTuple {
+            expected_length: 3,
             actual: Value::Tuple(vec![Value::Int(4), Value::Int(5)])
         })
     );

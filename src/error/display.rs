@@ -42,13 +42,23 @@ impl fmt::Display for EvalexprError {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             },
             ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
-            ExpectedFixedLenTuple {
-                expected_len,
+            ExpectedFixedLengthTuple {
+                expected_length,
                 actual,
             } => write!(
                 f,
-                "Expected a Value::Tuple of len {}, but got {:?}.",
-                expected_len, actual
+                "Expected a Value::Tuple of length {}, but got {:?}.",
+                expected_length, actual
+            ),
+            ExpectedRangedLengthTuple {
+                expected_length,
+                actual,
+            } => write!(
+                f,
+                "Expected a Value::Tuple of length {} to {}, but got {:?}.",
+                expected_length.start(),
+                expected_length.end(),
+                actual
             ),
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
             AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),

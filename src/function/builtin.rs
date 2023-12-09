@@ -271,15 +271,9 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             Ok(Value::String(argument.to_string()))
         })),
         "str::substring" => Some(Function::new(|argument| {
-            let args = argument.as_tuple()?;
-            let subject = args
-                .get(0)
-                .ok_or_else(|| EvalexprError::wrong_function_argument_amount(0, 2))?
-                .as_string()?;
-            let start = args
-                .get(1)
-                .ok_or_else(|| EvalexprError::wrong_function_argument_amount(1, 2))?
-                .as_int()?;
+            let args = argument.as_ranged_len_tuple(2..=3)?;
+            let subject = args[0].as_string()?;
+            let start = args[1].as_int()?;
             let start = usize::try_from(start).map_err(|_| EvalexprError::OutOfBoundsAccess)?;
             let end = if let Some(end) = args.get(2) {
                 usize::try_from(end.as_int()?).map_err(|_| EvalexprError::OutOfBoundsAccess)?

@@ -80,9 +80,17 @@ pub enum EvalexprError {
     },
 
     /// A tuple value of a certain length was expected.
-    ExpectedFixedLenTuple {
-        /// The expected len
-        expected_len: usize,
+    ExpectedFixedLengthTuple {
+        /// The expected length.
+        expected_length: usize,
+        /// The actual value.
+        actual: Value,
+    },
+
+    /// A tuple value of a certain length range was expected.
+    ExpectedRangedLengthTuple {
+        /// The expected length range.
+        expected_length: RangeInclusive<usize>,
         /// The actual value.
         actual: Value,
     },
@@ -290,8 +298,16 @@ impl EvalexprError {
 
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
     pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
-        EvalexprError::ExpectedFixedLenTuple {
-            expected_len,
+        EvalexprError::ExpectedFixedLengthTuple {
+            expected_length: expected_len,
+            actual,
+        }
+    }
+
+    /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
+    pub fn expected_ranged_len_tuple(expected_len: RangeInclusive<usize>, actual: Value) -> Self {
+        EvalexprError::ExpectedRangedLengthTuple {
+            expected_length: expected_len,
             actual,
         }
     }
