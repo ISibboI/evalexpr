@@ -104,6 +104,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Value::Int(_) => "int",
                 Value::Boolean(_) => "boolean",
                 Value::Tuple(_) => "tuple",
+                Value::Array(_) => "array",
                 Value::Empty => "empty",
             }
             .into())
@@ -159,67 +160,55 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
         })),
         "contains" => Some(Function::new(move |argument| {
             let arguments = argument.as_fixed_len_tuple(2)?;
-            if let (Value::Tuple(a), b) = (&arguments[0].clone(), &arguments[1].clone()) {
-                if let Value::String(_) | Value::Int(_) | Value::Float(_) | Value::Boolean(_) = b {
-                    Ok(a.contains(b).into())
+            let (a, b) = (arguments[0].as_slice()?, &arguments[1].clone());
+            if let Value::String(_) | Value::Int(_) | Value::Float(_) | Value::Boolean(_) = b {
+                Ok(a.contains(b).into())
+            } else {
+                Err(EvalexprError::type_error(
+                    b.clone(),
+                    vec![
+                        ValueType::String,
+                        ValueType::Int,
+                        ValueType::Float,
+                        ValueType::Boolean,
+                    ],
+                ))
+            }
+        })),
+        "contains_any" => Some(Function::new(move |argument| {
+            let arguments = argument.as_fixed_len_tuple(2)?;
+            let (a, b) = (arguments[0].as_slice()?, arguments[1].as_slice()?);
+            let mut contains = false;
+            for value in b {
+                if let Value::String(_) | Value::Int(_) | Value::Float(_) | Value::Boolean(_) =
+                    value
+                {
+                    if a.contains(value) {
+                        contains = true;
+                    }
                 } else {
-                    Err(EvalexprError::type_error(
-                        b.clone(),
+                    return Err(EvalexprError::type_error(
+                        value.clone(),
                         vec![
                             ValueType::String,
                             ValueType::Int,
                             ValueType::Float,
                             ValueType::Boolean,
                         ],
-                    ))
+                    ));
                 }
-            } else {
-                Err(EvalexprError::expected_tuple(arguments[0].clone()))
             }
-        })),
-        "contains_any" => Some(Function::new(move |argument| {
-            let arguments = argument.as_fixed_len_tuple(2)?;
-            if let (Value::Tuple(a), b) = (&arguments[0].clone(), &arguments[1].clone()) {
-                if let Value::Tuple(b) = b {
-                    let mut contains = false;
-                    for value in b {
-                        if let Value::String(_)
-                        | Value::Int(_)
-                        | Value::Float(_)
-                        | Value::Boolean(_) = value
-                        {
-                            if a.contains(value) {
-                                contains = true;
-                            }
-                        } else {
-                            return Err(EvalexprError::type_error(
-                                value.clone(),
-                                vec![
-                                    ValueType::String,
-                                    ValueType::Int,
-                                    ValueType::Float,
-                                    ValueType::Boolean,
-                                ],
-                            ));
-                        }
-                    }
-                    Ok(contains.into())
-                } else {
-                    Err(EvalexprError::expected_tuple(b.clone()))
-                }
-            } else {
-                Err(EvalexprError::expected_tuple(arguments[0].clone()))
-            }
+            Ok(contains.into())
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
                 Ok(Value::from(subject.len() as IntType))
-            } else if let Ok(subject) = argument.as_tuple() {
+            } else if let Ok(subject) = argument.as_slice() {
                 Ok(Value::from(subject.len() as IntType))
             } else {
                 Err(EvalexprError::type_error(
                     argument.clone(),
-                    vec![ValueType::String, ValueType::Tuple],
+                    vec![ValueType::String, ValueType::Tuple, ValueType::Array],
                 ))
             }
         })),

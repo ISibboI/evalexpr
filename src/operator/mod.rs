@@ -66,6 +66,8 @@ pub enum Operator {
 
     /// An n-ary tuple constructor.
     Tuple,
+    /// An n-ary array.
+    Array,
     /// An n-ary subexpression chain.
     Chain,
 
@@ -129,6 +131,7 @@ impl Operator {
             | AndAssign | OrAssign => 50,
 
             Tuple => 40,
+            Array => 45,
             Chain => 0,
 
             Const { .. } => 200,
@@ -164,7 +167,7 @@ impl Operator {
             Add | Sub | Mul | Div | Mod | Exp | Eq | Neq | Gt | Lt | Geq | Leq | And | Or
             | Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => Some(2),
-            Tuple | Chain => None,
+            Tuple | Chain | Array => None,
             Not | Neg | RootNode => Some(1),
             Const { .. } => Some(0),
             VariableIdentifierWrite { .. } | VariableIdentifierRead { .. } => Some(0),
@@ -426,6 +429,7 @@ impl Operator {
             Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign | ExpAssign
             | AndAssign | OrAssign => Err(EvalexprError::ContextNotMutable),
             Tuple => Ok(Value::Tuple(arguments.into())),
+            Array => Ok(Value::Array(arguments.into())),
             Chain => {
                 if arguments.is_empty() {
                     return Err(EvalexprError::wrong_operator_argument_amount(0, 1));

@@ -22,6 +22,19 @@ impl Display for Value {
                 }
                 write!(f, ")")
             },
+            Value::Array(array) => {
+                write!(f, "{{")?;
+                let mut once = false;
+                for value in array {
+                    if once {
+                        write!(f, ", ")?;
+                    } else {
+                        once = true;
+                    }
+                    value.fmt(f)?;
+                }
+                write!(f, "}}")
+            },
             Value::Empty => write!(f, "()"),
         }
     }

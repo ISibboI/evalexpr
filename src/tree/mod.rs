@@ -1,6 +1,6 @@
 use crate::{
     token::Token,
-    value::{TupleType, EMPTY_VALUE},
+    value::{ArrayType, TupleType, EMPTY_VALUE},
     Context, ContextWithMutableVariables, EmptyType, FloatType, HashMapContext, IntType,
 };
 
@@ -417,6 +417,17 @@ impl Node {
         }
     }
 
+    /// Evaluates the operator tree rooted at this node into a array with an the given context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_array_with_context<C: Context>(&self, context: &C) -> EvalexprResult<ArrayType> {
+        match self.eval_with_context(context) {
+            Ok(Value::Array(array)) => Ok(array),
+            Ok(value) => Err(EvalexprError::expected_array(value)),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Evaluates the operator tree rooted at this node into an empty value with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
@@ -514,6 +525,20 @@ impl Node {
         }
     }
 
+    /// Evaluates the operator tree rooted at this node into a array with an the given mutable context.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_array_with_context_mut<C: ContextWithMutableVariables>(
+        &self,
+        context: &mut C,
+    ) -> EvalexprResult<ArrayType> {
+        match self.eval_with_context_mut(context) {
+            Ok(Value::Array(array)) => Ok(array),
+            Ok(value) => Err(EvalexprError::expected_array(value)),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Evaluates the operator tree rooted at this node into an empty value with an the given mutable context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
@@ -569,6 +594,13 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_tuple(&self) -> EvalexprResult<TupleType> {
         self.eval_tuple_with_context_mut(&mut HashMapContext::new())
+    }
+
+    /// Evaluates the operator tree rooted at this node into an array.
+    ///
+    /// Fails, if one of the operators in the expression tree fails.
+    pub fn eval_array(&self) -> EvalexprResult<ArrayType> {
+        self.eval_array_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into an empty value.
@@ -765,10 +797,17 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
     Ok(())
 }
 
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+enum ParsingContext {
+    InsideBraces,
+    InsideArray,
+}
+
 pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node> {
     let mut root_stack = vec![Node::root_node()];
     let mut last_token_is_rightsided_value = false;
     let mut token_iter = tokens.iter().peekable();
+    let mut parsing_context_stack: Vec<ParsingContext> = vec![];
 
     while let Some(token) = token_iter.next().cloned() {
         let next = token_iter.peek().cloned();
@@ -799,14 +838,53 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
 
             Token::LBrace => {
                 root_stack.push(Node::root_node());
+                parsing_context_stack.push(ParsingContext::InsideBraces);
                 None
             },
             Token::RBrace => {
-                if root_stack.len() <= 1 {
-                    return Err(EvalexprError::UnmatchedRBrace);
+                if let Some(parsing_context) = parsing_context_stack.pop() {
+                    match parsing_context {
+                        ParsingContext::InsideBraces => {
+                            collapse_all_sequences(&mut root_stack)?;
+                            root_stack.pop()
+                        },
+                        ParsingContext::InsideArray => {
+                            return Err(EvalexprError::UnmatchedLCurlyBrace)
+                        },
+                    }
                 } else {
-                    collapse_all_sequences(&mut root_stack)?;
-                    root_stack.pop()
+                    return Err(EvalexprError::UnmatchedRBrace);
+                }
+            },
+            Token::LCurlyBrace => {
+                root_stack.push(Node::root_node());
+                parsing_context_stack.push(ParsingContext::InsideArray);
+                None
+            },
+            Token::RCurlyBrace => {
+                if let Some(parsing_context) = parsing_context_stack.pop() {
+                    match parsing_context {
+                        ParsingContext::InsideBraces => {
+                            return Err(EvalexprError::UnmatchedLBrace);
+                        },
+                        ParsingContext::InsideArray => {
+                            collapse_all_sequences(&mut root_stack)?;
+                            let mut arr_node = Node::new(Operator::Array);
+                            if let Some(mut root) = root_stack.pop() {
+                                if let Some(real_root) = root.children.get(0) {
+                                    if real_root.operator().is_sequence() {
+                                        let real_node = root.children.remove(0);
+                                        arr_node.children = real_node.children;
+                                    } else {
+                                        arr_node.children = root.children;
+                                    }
+                                }
+                            }
+                            Some(arr_node)
+                        },
+                    }
+                } else {
+                    return Err(EvalexprError::UnmatchedRCurlyBrace);
                 }
             },
 
@@ -820,7 +898,18 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
             Token::AndAssign => Some(Node::new(Operator::AndAssign)),
             Token::OrAssign => Some(Node::new(Operator::OrAssign)),
 
-            Token::Comma => Some(Node::new(Operator::Tuple)),
+            Token::Comma => {
+                // This if-statement is here to ignore trailing comma at the end of array.
+                if matches!(
+                    parsing_context_stack.last(),
+                    Some(ParsingContext::InsideArray)
+                ) && matches!(next, Some(Token::RCurlyBrace))
+                {
+                    None
+                } else {
+                    Some(Node::new(Operator::Tuple))
+                }
+            },
             Token::Semicolon => Some(Node::new(Operator::Chain)),
 
             Token::Identifier(identifier) => {
@@ -897,7 +986,16 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
                     root_stack.push(root);
                 }
             } else {
-                return Err(EvalexprError::UnmatchedRBrace);
+                return Err(
+                    if matches!(
+                        parsing_context_stack.pop(),
+                        Some(ParsingContext::InsideArray)
+                    ) {
+                        EvalexprError::UnmatchedLCurlyBrace
+                    } else {
+                        EvalexprError::UnmatchedLBrace
+                    },
+                );
             }
         }
 
@@ -908,10 +1006,28 @@ pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node
     collapse_all_sequences(&mut root_stack)?;
 
     if root_stack.len() > 1 {
-        Err(EvalexprError::UnmatchedLBrace)
+        Err(
+            if matches!(
+                parsing_context_stack.pop(),
+                Some(ParsingContext::InsideArray)
+            ) {
+                EvalexprError::UnmatchedLCurlyBrace
+            } else {
+                EvalexprError::UnmatchedLBrace
+            },
+        )
     } else if let Some(root) = root_stack.pop() {
         Ok(root)
     } else {
-        Err(EvalexprError::UnmatchedRBrace)
+        Err(
+            if matches!(
+                parsing_context_stack.pop(),
+                Some(ParsingContext::InsideArray)
+            ) {
+                EvalexprError::UnmatchedRCurlyBrace
+            } else {
+                EvalexprError::UnmatchedRBrace
+            },
+        )
     }
 }

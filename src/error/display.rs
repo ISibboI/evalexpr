@@ -41,6 +41,7 @@ impl fmt::Display for EvalexprError {
             ExpectedBoolean { actual } => {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             },
+            ExpectedArray { actual } => write!(f, "Expected a Value::Array, but got {:?}.", actual),
             ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
             ExpectedFixedLengthTuple {
                 expected_length,
@@ -58,6 +59,11 @@ impl fmt::Display for EvalexprError {
                 "Expected a Value::Tuple of length {} to {}, but got {:?}.",
                 expected_length.start(),
                 expected_length.end(),
+                actual
+            ),
+            ExpectedVec { actual } => write!(
+                f,
+                "Expected a Value which can be interpreted as vec, but got {:?}.",
                 actual
             ),
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
@@ -86,6 +92,8 @@ impl fmt::Display for EvalexprError {
             ),
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
+            UnmatchedLCurlyBrace => write!(f, "Found an unmatched opening curly brace '{{'."),
+            UnmatchedRCurlyBrace => write!(f, "Found an unmatched closing curly brace '}}'."),
             UnmatchedDoubleQuote => write!(f, "Found an unmatched double quote '\"'"),
             MissingOperatorOutsideOfBrace { .. } => write!(
                 f,

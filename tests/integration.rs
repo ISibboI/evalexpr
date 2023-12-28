@@ -80,6 +80,63 @@ fn test_braced_examples() {
 }
 
 #[test]
+fn test_array_examples() {
+    assert_eq!(eval("{}"), Ok(Value::Array(vec![])));
+    assert_eq!(eval("{()}"), Ok(Value::Array(vec![Value::Empty])));
+
+    assert_eq!(
+        eval("{(),()}"),
+        Ok(Value::Array(vec![Value::Empty, Value::Empty]))
+    );
+
+    assert_eq!(eval("{1}"), Ok(Value::Array(vec![Value::Int(1)])));
+
+    assert_eq!(eval("{1, }"), Ok(Value::Array(vec![Value::Int(1)])));
+
+    assert_eq!(
+        eval("{1,, }"),
+        Ok(Value::Array(vec![Value::Int(1), Value::Empty]))
+    );
+    assert_eq!(
+        eval("{1,,2}"),
+        Ok(Value::Array(vec![
+            Value::Int(1),
+            Value::Empty,
+            Value::Int(2)
+        ]))
+    );
+
+    assert_eq!(
+        eval("({1, 2}, {3, 4})"),
+        Ok(Value::Tuple(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ]))
+    );
+    assert_eq!(
+        eval("{(1, 2), (3, 4)}"),
+        Ok(Value::Array(vec![
+            Value::Tuple(vec![Value::Int(1), Value::Int(2)]),
+            Value::Tuple(vec![Value::Int(3), Value::Int(4)])
+        ]))
+    );
+    assert_eq!(
+        eval("{{1, 2}, {3, 4}}"),
+        Ok(Value::Array(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ]))
+    );
+    assert_eq!(
+        eval("{{1, 1 + 1}, {(1 - 2) * -3, 2*2}}"),
+        Ok(Value::Array(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ]))
+    );
+}
+
+#[test]
 fn test_mod_examples() {
     assert_eq!(eval("1 % 4"), Ok(Value::Int(1)));
     assert_eq!(eval("6 % 4"), Ok(Value::Int(2)));
@@ -391,6 +448,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::abs(-15)"), Ok(Value::Int(15)));
     // Other
     assert_eq!(eval("typeof(4.0, 3)"), Ok(Value::String("tuple".into())));
+    assert_eq!(eval("typeof({4.0, 3})"), Ok(Value::String("array".into())));
     assert_eq!(eval("typeof(4.0)"), Ok(Value::String("float".into())));
     assert_eq!(eval("typeof(4)"), Ok(Value::String("int".into())));
     assert_eq!(eval("typeof(\"\")"), Ok(Value::String("string".into())));
@@ -418,7 +476,7 @@ fn test_builtin_functions() {
     );
     assert_eq!(
         eval("contains(\"foo\", \"bar\")"),
-        Err(EvalexprError::expected_tuple(Value::String("foo".into())))
+        Err(EvalexprError::expected_vec(Value::String("foo".into())))
     );
     assert_eq!(
         eval("contains((\"foo\", \"bar\", 123), 123)"),
@@ -469,11 +527,11 @@ fn test_builtin_functions() {
     );
     assert_eq!(
         eval("contains_any(\"foo\", \"bar\")"),
-        Err(EvalexprError::expected_tuple(Value::String("foo".into())))
+        Err(EvalexprError::expected_vec(Value::String("foo".into())))
     );
     assert_eq!(
         eval("contains_any((\"foo\", \"bar\"), \"buzz\")"),
-        Err(EvalexprError::expected_tuple(Value::String("buzz".into())))
+        Err(EvalexprError::expected_vec(Value::String("buzz".into())))
     );
     assert_eq!(
         eval("contains_any((\"foo\", \"bar\"), (\"buzz\", (1, 2, 3)))"),
