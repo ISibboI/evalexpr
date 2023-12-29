@@ -466,6 +466,10 @@ mod tests {
             EvalexprError::expected_tuple(Value::Empty)
         );
         assert_eq!(
+            EvalexprError::expected_type(&Value::Array(vec![]), Value::Empty),
+            EvalexprError::expected_array(Value::Empty)
+        );
+        assert_eq!(
             EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),
             EvalexprError::expected_empty(Value::String("abc".to_string()))
         );

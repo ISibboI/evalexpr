@@ -315,7 +315,10 @@ impl TryFrom<Value> for () {
 
 #[cfg(test)]
 mod tests {
-    use crate::value::{TupleType, Value};
+    use crate::{
+        value::{ArrayType, TupleType, Value},
+        EvalexprError,
+    };
 
     #[test]
     fn test_value_conversions() {
@@ -330,6 +333,20 @@ mod tests {
             Value::from(TupleType::new()).as_tuple(),
             Ok(TupleType::new())
         );
+        assert_eq!(
+            Value::from(2).as_vec(),
+            Err(EvalexprError::expected_vec(Value::from(2)))
+        );
+        assert_eq!(Value::from(TupleType::new()).as_vec(), Ok(vec![]));
+        assert_eq!(Value::Array(ArrayType::new()).as_vec(), Ok(vec![]));
+        assert_eq!(
+            Value::from(TupleType::new()).as_slice(),
+            Ok(vec![].as_slice())
+        );
+        assert_eq!(
+            Value::Array(ArrayType::new()).as_slice(),
+            Ok(vec![].as_slice())
+        );
     }
 
     #[test]
@@ -339,5 +356,6 @@ mod tests {
         assert!(Value::from(3.3).is_float());
         assert!(Value::from(true).is_boolean());
         assert!(Value::from(TupleType::new()).is_tuple());
+        assert!(Value::Array(ArrayType::new()).is_array());
     }
 }

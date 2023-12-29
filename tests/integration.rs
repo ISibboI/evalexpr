@@ -81,59 +81,17 @@ fn test_braced_examples() {
 
 #[test]
 fn test_array_examples() {
+    assert_eq!(
+        eval("{3, 55.0, false, ()}"),
+        Ok(Value::Array(vec![
+            Value::from(3),
+            Value::from(55.0),
+            Value::from(false),
+            Value::from(())
+        ]))
+    );
+    assert_eq!(eval("{1}"), Ok(Value::Array(vec![Value::from(1),])));
     assert_eq!(eval("{}"), Ok(Value::Array(vec![])));
-    assert_eq!(eval("{()}"), Ok(Value::Array(vec![Value::Empty])));
-
-    assert_eq!(
-        eval("{(),()}"),
-        Ok(Value::Array(vec![Value::Empty, Value::Empty]))
-    );
-
-    assert_eq!(eval("{1}"), Ok(Value::Array(vec![Value::Int(1)])));
-
-    assert_eq!(eval("{1, }"), Ok(Value::Array(vec![Value::Int(1)])));
-
-    assert_eq!(
-        eval("{1,, }"),
-        Ok(Value::Array(vec![Value::Int(1), Value::Empty]))
-    );
-    assert_eq!(
-        eval("{1,,2}"),
-        Ok(Value::Array(vec![
-            Value::Int(1),
-            Value::Empty,
-            Value::Int(2)
-        ]))
-    );
-
-    assert_eq!(
-        eval("({1, 2}, {3, 4})"),
-        Ok(Value::Tuple(vec![
-            Value::Array(vec![Value::Int(1), Value::Int(2)]),
-            Value::Array(vec![Value::Int(3), Value::Int(4)])
-        ]))
-    );
-    assert_eq!(
-        eval("{(1, 2), (3, 4)}"),
-        Ok(Value::Array(vec![
-            Value::Tuple(vec![Value::Int(1), Value::Int(2)]),
-            Value::Tuple(vec![Value::Int(3), Value::Int(4)])
-        ]))
-    );
-    assert_eq!(
-        eval("{{1, 2}, {3, 4}}"),
-        Ok(Value::Array(vec![
-            Value::Array(vec![Value::Int(1), Value::Int(2)]),
-            Value::Array(vec![Value::Int(3), Value::Int(4)])
-        ]))
-    );
-    assert_eq!(
-        eval("{{1, 1 + 1}, {(1 - 2) * -3, 2*2}}"),
-        Ok(Value::Array(vec![
-            Value::Array(vec![Value::Int(1), Value::Int(2)]),
-            Value::Array(vec![Value::Int(3), Value::Int(4)])
-        ]))
-    );
 }
 
 #[test]
@@ -458,6 +416,14 @@ fn test_builtin_functions() {
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
     assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
     assert_eq!(eval("len(\"a\", \"b\")"), Ok(Value::Int(2)));
+    assert_eq!(eval("len({1, 2, 3})"), Ok(Value::Int(3)));
+    assert_eq!(
+        eval("len(3)"),
+        Err(EvalexprError::type_error(
+            Value::Int(3),
+            vec![ValueType::String, ValueType::Tuple, ValueType::Array],
+        ))
+    );
     //Contians
     assert_eq!(
         eval("contains(1, 2, 3)"),
@@ -571,6 +537,10 @@ fn test_builtin_functions() {
     assert_eq!(
         eval("str::from(1, 2, 3)"),
         Ok(Value::String(String::from("(1, 2, 3)")))
+    );
+    assert_eq!(
+        eval("str::from({1, 2, 3})"),
+        Ok(Value::String(String::from("{1, 2, 3}")))
     );
     assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()"))));
     assert_eq!(
@@ -907,6 +877,46 @@ fn test_shortcut_functions() {
     );
     assert_eq!(
         eval_tuple_with_context_mut("3a3", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+
+    assert_eq!(eval_array("{3,3}"), Ok(vec![Value::Int(3), Value::Int(3)]));
+    assert_eq!(
+        eval_array("33"),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_array("3a3"),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+    assert_eq!(
+        eval_array_with_context("{3,3}", &context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        eval_array_with_context("33", &context),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_array_with_context("3a3", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+    assert_eq!(
+        eval_array_with_context_mut("{3,3}", &mut context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        eval_array_with_context_mut("33", &mut context),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        eval_array_with_context_mut("3a3", &mut context),
         Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
     );
 
@@ -1283,6 +1293,61 @@ fn test_shortcut_functions() {
     );
 
     assert_eq!(
+        build_operator_tree("{3,3}").unwrap().eval_array(),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        build_operator_tree("33").unwrap().eval_array(),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        build_operator_tree("3a3").unwrap().eval_array(),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+    assert_eq!(
+        build_operator_tree("{3,3}")
+            .unwrap()
+            .eval_array_with_context(&context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        build_operator_tree("33")
+            .unwrap()
+            .eval_array_with_context(&context),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        build_operator_tree("3a3")
+            .unwrap()
+            .eval_array_with_context(&context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+    assert_eq!(
+        build_operator_tree("{3,3}")
+            .unwrap()
+            .eval_array_with_context_mut(&mut context),
+        Ok(vec![Value::Int(3), Value::Int(3)])
+    );
+    assert_eq!(
+        build_operator_tree("33")
+            .unwrap()
+            .eval_array_with_context_mut(&mut context),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(33)
+        })
+    );
+    assert_eq!(
+        build_operator_tree("3a3")
+            .unwrap()
+            .eval_array_with_context_mut(&mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
+    );
+
+    assert_eq!(
         build_operator_tree("").unwrap().eval_empty(),
         Ok(EMPTY_VALUE)
     );
@@ -1438,6 +1503,65 @@ fn test_string_escaping() {
     assert_eq!(
         eval("\"\\\"str\\\\ing\\\"\""),
         Ok(Value::from("\"str\\ing\""))
+    );
+}
+
+#[test]
+fn test_array_and_braces() {
+    assert_eq!(eval("("), Err(EvalexprError::UnmatchedLBrace));
+    assert_eq!(eval("{"), Err(EvalexprError::UnmatchedLCurlyBrace));
+    assert_eq!(eval(")"), Err(EvalexprError::UnmatchedRBrace));
+    assert_eq!(eval("}"), Err(EvalexprError::UnmatchedRCurlyBrace));
+    assert_eq!(eval("{)}"), Err(EvalexprError::UnmatchedLCurlyBrace));
+    assert_eq!(eval("(})"), Err(EvalexprError::UnmatchedLBrace));
+    assert_eq!(eval("{(}"), Err(EvalexprError::UnmatchedLBrace));
+    assert_eq!(eval("({)"), Err(EvalexprError::UnmatchedLCurlyBrace));
+}
+
+#[test]
+fn test_array_definitions() {
+    assert_eq!(eval_array("{}"), Ok(vec![]));
+    assert_eq!(eval_array("{()}"), Ok(vec![Value::Empty]));
+
+    assert_eq!(eval_array("{(),()}"), Ok(vec![Value::Empty, Value::Empty]));
+
+    assert_eq!(eval_array("{1}"), Ok(vec![Value::Int(1)]));
+
+    assert_eq!(eval_array("{1, }"), Ok(vec![Value::Int(1)]));
+
+    assert_eq!(eval_array("{1,, }"), Ok(vec![Value::Int(1), Value::Empty]));
+    assert_eq!(
+        eval_array("{1,,2}"),
+        Ok(vec![Value::Int(1), Value::Empty, Value::Int(2)])
+    );
+
+    assert_eq!(
+        eval_tuple("({1, 2}, {3, 4})"),
+        Ok(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ])
+    );
+    assert_eq!(
+        eval_array("{(1, 2), (3, 4)}"),
+        Ok(vec![
+            Value::Tuple(vec![Value::Int(1), Value::Int(2)]),
+            Value::Tuple(vec![Value::Int(3), Value::Int(4)])
+        ])
+    );
+    assert_eq!(
+        eval_array("{{1, 2}, {3, 4}}"),
+        Ok(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ])
+    );
+    assert_eq!(
+        eval_array("{{1, 1 + 1}, {(1 - 2) * -3, 2*2}}"),
+        Ok(vec![
+            Value::Array(vec![Value::Int(1), Value::Int(2)]),
+            Value::Array(vec![Value::Int(3), Value::Int(4)])
+        ])
     );
 }
 
@@ -1790,6 +1914,12 @@ fn test_error_constructors() {
         })
     );
     assert_eq!(
+        eval_array("4"),
+        Err(EvalexprError::ExpectedArray {
+            actual: Value::Int(4)
+        })
+    );
+    assert_eq!(
         Value::Tuple(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3),
         Err(EvalexprError::ExpectedFixedLengthTuple {
             expected_length: 3,
@@ -1898,6 +2028,7 @@ fn test_value_type() {
     assert_eq!(ValueType::from(&Value::Int(0)), ValueType::Int);
     assert_eq!(ValueType::from(&Value::Boolean(true)), ValueType::Boolean);
     assert_eq!(ValueType::from(&Value::Tuple(Vec::new())), ValueType::Tuple);
+    assert_eq!(ValueType::from(&Value::Array(Vec::new())), ValueType::Array);
     assert_eq!(ValueType::from(&Value::Empty), ValueType::Empty);
 
     assert_eq!(
@@ -1914,6 +2045,10 @@ fn test_value_type() {
         ValueType::from(&mut Value::Tuple(Vec::new())),
         ValueType::Tuple
     );
+    assert_eq!(
+        ValueType::from(&mut Value::Array(Vec::new())),
+        ValueType::Array
+    );
     assert_eq!(ValueType::from(&mut Value::Empty), ValueType::Empty);
 
     assert!(!Value::String(String::new()).is_number());
@@ -1921,6 +2056,7 @@ fn test_value_type() {
     assert!(Value::Int(0).is_number());
     assert!(!Value::Boolean(true).is_number());
     assert!(!Value::Tuple(Vec::new()).is_number());
+    assert!(!Value::Array(Vec::new()).is_number());
     assert!(!Value::Empty.is_number());
 
     assert!(!Value::String(String::new()).is_empty());
@@ -1928,6 +2064,7 @@ fn test_value_type() {
     assert!(!Value::Int(0).is_empty());
     assert!(!Value::Boolean(true).is_empty());
     assert!(!Value::Tuple(Vec::new()).is_empty());
+    assert!(!Value::Array(Vec::new()).is_empty());
     assert!(Value::Empty.is_empty());
 
     assert_eq!(
@@ -1953,6 +2090,12 @@ fn test_value_type() {
         Value::Tuple(Vec::new()).as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Tuple(Vec::new())
+        })
+    );
+    assert_eq!(
+        Value::Array(Vec::new()).as_float(),
+        Err(EvalexprError::ExpectedFloat {
+            actual: Value::Array(Vec::new())
         })
     );
     assert_eq!(
@@ -2057,6 +2200,12 @@ fn test_value_type() {
         Value::Tuple(Vec::new()).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Tuple(Vec::new())
+        })
+    );
+    assert_eq!(
+        Value::Array(Vec::new()).as_empty(),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: Value::Array(Vec::new())
         })
     );
     assert_eq!(Value::Empty.as_empty(), Ok(()));
