@@ -131,7 +131,7 @@ impl Operator {
             | AndAssign | OrAssign => 50,
 
             Tuple => 40,
-            Array => 45,
+            Array => 200,
             Chain => 0,
 
             Const { .. } => 200,

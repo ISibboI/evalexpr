@@ -1566,6 +1566,29 @@ fn test_array_definitions() {
 }
 
 #[test]
+fn test_array_invalid_computation() {
+    assert_eq!(
+        eval("{}+"),
+        Err(EvalexprError::WrongOperatorArgumentAmount {
+            expected: 2,
+            actual: 1
+        })
+    );
+    assert_eq!(
+        eval("1+{}"),
+        Err(EvalexprError::ExpectedNumberOrString {
+            actual: Value::Array(vec![])
+        })
+    );
+    assert_eq!(
+        eval("{1, 2, 3}+2"),
+        Err(EvalexprError::ExpectedNumberOrString {
+            actual: Value::Array(vec![1.into(), 2.into(), 3.into()])
+        })
+    );
+}
+
+#[test]
 fn test_tuple_definitions() {
     assert_eq!(eval_empty("()"), Ok(()));
     assert_eq!(eval_int("(3)"), Ok(3));
