@@ -38,6 +38,7 @@ impl Display for Operator {
             OrAssign => write!(f, " ||= "),
 
             Tuple => write!(f, ", "),
+            Array => write!(f, "{{}} "),
             Chain => write!(f, "; "),
 
             Const { value } => write!(f, "{}", value),

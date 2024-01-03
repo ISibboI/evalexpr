@@ -44,6 +44,8 @@ pub enum Token {
     // Special
     Comma,
     Semicolon,
+    LCurlyBrace,
+    RCurlyBrace,
 
     // Values, Variables and Functions
     Identifier(String),
@@ -103,6 +105,8 @@ fn char_to_partial_token(c: char) -> PartialToken {
 
         ',' => PartialToken::Token(Token::Comma),
         ';' => PartialToken::Token(Token::Semicolon),
+        '{' => PartialToken::Token(Token::LCurlyBrace),
+        '}' => PartialToken::Token(Token::RCurlyBrace),
 
         '=' => PartialToken::Eq,
         '!' => PartialToken::ExclamationMark,
@@ -144,6 +148,8 @@ impl Token {
 
             Token::LBrace => true,
             Token::RBrace => false,
+            Token::LCurlyBrace => false,
+            Token::RCurlyBrace => false,
 
             Token::Comma => false,
             Token::Semicolon => false,
@@ -191,6 +197,8 @@ impl Token {
 
             Token::Comma => false,
             Token::Semicolon => false,
+            Token::LCurlyBrace => false,
+            Token::RCurlyBrace => false,
 
             Token::Assign => false,
             Token::PlusAssign => false,
@@ -509,7 +517,7 @@ mod tests {
     #[test]
     fn test_token_display() {
         let token_string =
-            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; ";
+            "+ - * / % ^ == != > < >= <= && || ! ( ) = += -= *= /= %= ^= &&= ||= , ; { } ";
         let tokens = tokenize(token_string).unwrap();
         let mut result_string = String::new();
 

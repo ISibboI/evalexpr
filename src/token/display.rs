@@ -42,6 +42,8 @@ impl fmt::Display for Token {
             // Special
             Comma => write!(f, ","),
             Semicolon => write!(f, ";"),
+            LCurlyBrace => write!(f, "{{"),
+            RCurlyBrace => write!(f, "}}"),
 
             // Values => write!(f, ""), Variables and Functions
             Identifier(identifier) => identifier.fmt(f),

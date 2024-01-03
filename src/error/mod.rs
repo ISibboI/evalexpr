@@ -79,6 +79,12 @@ pub enum EvalexprError {
         actual: Value,
     },
 
+    /// A array value was expected.
+    ExpectedArray {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// A tuple value of a certain length was expected.
     ExpectedFixedLengthTuple {
         /// The expected length.
@@ -91,6 +97,12 @@ pub enum EvalexprError {
     ExpectedRangedLengthTuple {
         /// The expected length range.
         expected_length: RangeInclusive<usize>,
+        /// The actual value.
+        actual: Value,
+    },
+
+    /// A value which can be interpreted as vec was expected
+    ExpectedVec {
         /// The actual value.
         actual: Value,
     },
@@ -138,6 +150,12 @@ pub enum EvalexprError {
 
     /// A closing brace without a matching opening brace was found.
     UnmatchedRBrace,
+
+    /// An opening curly brace without a matching closing brace was found.
+    UnmatchedLCurlyBrace,
+
+    /// A closing curly brace without a matching opening brace was found.
+    UnmatchedRCurlyBrace,
 
     /// A double quote without a matching second double quote was found.
     UnmatchedDoubleQuote,
@@ -296,6 +314,11 @@ impl EvalexprError {
         EvalexprError::ExpectedTuple { actual }
     }
 
+    /// Constructs `EvalexprError::ExpectedArray{actual}`.
+    pub fn expected_array(actual: Value) -> Self {
+        EvalexprError::ExpectedArray { actual }
+    }
+
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
     pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
         EvalexprError::ExpectedFixedLengthTuple {
@@ -312,6 +335,11 @@ impl EvalexprError {
         }
     }
 
+    /// Constructs `EvalexprError::ExpectedVec{actual}`.
+    pub fn expected_vec(actual: Value) -> Self {
+        EvalexprError::ExpectedVec { actual }
+    }
+
     /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
     pub fn expected_empty(actual: Value) -> Self {
         EvalexprError::ExpectedEmpty { actual }
@@ -325,6 +353,7 @@ impl EvalexprError {
             ValueType::Float => Self::expected_float(actual),
             ValueType::Boolean => Self::expected_boolean(actual),
             ValueType::Tuple => Self::expected_tuple(actual),
+            ValueType::Array => Self::expected_array(actual),
             ValueType::Empty => Self::expected_empty(actual),
         }
     }
@@ -435,6 +464,10 @@ mod tests {
         assert_eq!(
             EvalexprError::expected_type(&Value::Tuple(vec![]), Value::Empty),
             EvalexprError::expected_tuple(Value::Empty)
+        );
+        assert_eq!(
+            EvalexprError::expected_type(&Value::Array(vec![]), Value::Empty),
+            EvalexprError::expected_array(Value::Empty)
         );
         assert_eq!(
             EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),

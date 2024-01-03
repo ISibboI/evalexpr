@@ -13,6 +13,8 @@ pub enum ValueType {
     Boolean,
     /// The `Value::Tuple` type.
     Tuple,
+    /// The `Value::Array` type.
+    Array,
     /// The `Value::Empty` type.
     Empty,
 }
@@ -25,6 +27,7 @@ impl From<&Value> for ValueType {
             Value::Int(_) => ValueType::Int,
             Value::Boolean(_) => ValueType::Boolean,
             Value::Tuple(_) => ValueType::Tuple,
+            Value::Array(_) => ValueType::Array,
             Value::Empty => ValueType::Empty,
         }
     }

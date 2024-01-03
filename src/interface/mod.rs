@@ -1,6 +1,8 @@
 use crate::{
-    token, tree, value::TupleType, Context, ContextWithMutableVariables, EmptyType, EvalexprError,
-    EvalexprResult, FloatType, HashMapContext, IntType, Node, Value, EMPTY_VALUE,
+    token, tree,
+    value::{ArrayType, TupleType},
+    Context, ContextWithMutableVariables, EmptyType, EvalexprError, EvalexprResult, FloatType,
+    HashMapContext, IntType, Node, Value, EMPTY_VALUE,
 };
 
 /// Evaluate the given expression string.
@@ -130,6 +132,13 @@ pub fn eval_tuple(string: &str) -> EvalexprResult<TupleType> {
     eval_tuple_with_context_mut(string, &mut HashMapContext::new())
 }
 
+/// Evaluate the given expression string into a array.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_array(string: &str) -> EvalexprResult<ArrayType> {
+    eval_array_with_context_mut(string, &mut HashMapContext::new())
+}
+
 /// Evaluate the given expression string into an empty value.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -204,6 +213,17 @@ pub fn eval_tuple_with_context<C: Context>(string: &str, context: &C) -> Evalexp
     match eval_with_context(string, context) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string into an array with the given context.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_array_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<TupleType> {
+    match eval_with_context(string, context) {
+        Ok(Value::Array(array)) => Ok(array),
+        Ok(value) => Err(EvalexprError::expected_array(value)),
         Err(error) => Err(error),
     }
 }
@@ -301,6 +321,20 @@ pub fn eval_tuple_with_context_mut<C: ContextWithMutableVariables>(
     match eval_with_context_mut(string, context) {
         Ok(Value::Tuple(tuple)) => Ok(tuple),
         Ok(value) => Err(EvalexprError::expected_tuple(value)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Evaluate the given expression string into a array with the given mutable context.
+///
+/// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
+pub fn eval_array_with_context_mut<C: ContextWithMutableVariables>(
+    string: &str,
+    context: &mut C,
+) -> EvalexprResult<ArrayType> {
+    match eval_with_context_mut(string, context) {
+        Ok(Value::Array(array)) => Ok(array),
+        Ok(value) => Err(EvalexprError::expected_array(value)),
         Err(error) => Err(error),
     }
 }

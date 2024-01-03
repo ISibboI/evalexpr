@@ -13,6 +13,9 @@ pub type FloatType = f64;
 /// The type used to represent tuples in `Value::Tuple`.
 pub type TupleType = Vec<Value>;
 
+/// The type used to represent tuples in `Value::Array`.
+pub type ArrayType = Vec<Value>;
+
 /// The type used to represent empty values in `Value::Empty`.
 pub type EmptyType = ();
 
@@ -34,6 +37,8 @@ pub enum Value {
     Boolean(bool),
     /// A tuple value.
     Tuple(TupleType),
+    /// An array value.
+    Array(ArrayType),
     /// An empty value.
     Empty,
 }
@@ -66,6 +71,11 @@ impl Value {
     /// Returns true if `self` is a `Value::Tuple`.
     pub fn is_tuple(&self) -> bool {
         matches!(self, Value::Tuple(_))
+    }
+
+    /// Returns true if `self` is a `Value::Array`.
+    pub fn is_array(&self) -> bool {
+        matches!(self, Value::Array(_))
     }
 
     /// Returns true if `self` is a `Value::Empty`.
@@ -151,6 +161,26 @@ impl Value {
                 }
             },
             value => Err(EvalexprError::expected_tuple(value.clone())),
+        }
+    }
+
+    /// Clones the value stored in `self` as `Vec<Value>`, or returns `Err` if `self` is not a
+    /// `Value::Tuple` or `Value::Array`
+    pub fn as_vec(&self) -> EvalexprResult<Vec<Value>> {
+        match self {
+            Value::Tuple(tuple) => Ok(tuple.clone()),
+            Value::Array(array) => Ok(array.clone()),
+            value => Err(EvalexprError::expected_vec(value.clone())),
+        }
+    }
+
+    /// Returns the value stored in `self` as `&[Value]`, or returns `Err` if `self` is not a
+    /// `Value::Tuple` or `Value::Array`
+    pub fn as_slice(&self) -> EvalexprResult<&[Value]> {
+        match self {
+            Value::Tuple(tuple) => Ok(tuple.as_slice()),
+            Value::Array(array) => Ok(array.as_slice()),
+            value => Err(EvalexprError::expected_vec(value.clone())),
         }
     }
 
@@ -285,7 +315,10 @@ impl TryFrom<Value> for () {
 
 #[cfg(test)]
 mod tests {
-    use crate::value::{TupleType, Value};
+    use crate::{
+        value::{ArrayType, TupleType, Value},
+        EvalexprError,
+    };
 
     #[test]
     fn test_value_conversions() {
@@ -300,6 +333,20 @@ mod tests {
             Value::from(TupleType::new()).as_tuple(),
             Ok(TupleType::new())
         );
+        assert_eq!(
+            Value::from(2).as_vec(),
+            Err(EvalexprError::expected_vec(Value::from(2)))
+        );
+        assert_eq!(Value::from(TupleType::new()).as_vec(), Ok(vec![]));
+        assert_eq!(Value::Array(ArrayType::new()).as_vec(), Ok(vec![]));
+        assert_eq!(
+            Value::from(TupleType::new()).as_slice(),
+            Ok(vec![].as_slice())
+        );
+        assert_eq!(
+            Value::Array(ArrayType::new()).as_slice(),
+            Ok(vec![].as_slice())
+        );
     }
 
     #[test]
@@ -309,5 +356,6 @@ mod tests {
         assert!(Value::from(3.3).is_float());
         assert!(Value::from(true).is_boolean());
         assert!(Value::from(TupleType::new()).is_tuple());
+        assert!(Value::Array(ArrayType::new()).is_array());
     }
 }
