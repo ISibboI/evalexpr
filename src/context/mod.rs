@@ -37,6 +37,14 @@ pub trait ContextWithMutableVariables: Context {
     fn set_value(&mut self, _identifier: String, _value: Value) -> EvalexprResult<()> {
         Err(EvalexprError::ContextNotMutable)
     }
+
+    /// Checks if type-safety assignment checks have been disabled.
+    fn are_type_safety_checks_disabled(&self) -> bool;
+
+    /// Disables type-safety assignment checks if `disabled` is `true`, and enables them otherwise.
+    fn set_type_safety_checks_disabled(&mut self, _disabled: bool) -> EvalexprResult<()> {
+        Err(EvalexprError::ContextNotMutable)
+    }
 }
 
 /// A context that allows to assign to function identifiers.
@@ -168,7 +176,7 @@ impl IterateVariablesContext for EmptyContextWithBuiltinFunctions {
 ///
 /// *Value and function mappings are stored independently, meaning that there can be a function and a value with the same identifier.*
 ///
-/// This context is type-safe, meaning that an identifier that is assigned a value of some type once cannot be assigned a value of another type.
+/// By default, this context is type-safe, meaning that an identifier that is assigned a value of some type once cannot be assigned a value of another type.
 #[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct HashMapContext {
@@ -178,6 +186,9 @@ pub struct HashMapContext {
 
     /// True if builtin functions are disabled.
     without_builtin_functions: bool,
+
+    /// True if type-unsafe assignments are allowed.
+    without_type_safety_check: bool,
 }
 
 impl HashMapContext {
@@ -258,7 +269,9 @@ impl Context for HashMapContext {
 impl ContextWithMutableVariables for HashMapContext {
     fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
-            if ValueType::from(&existing_value) == ValueType::from(&value) {
+            if self.without_type_safety_check
+                || ValueType::from(&existing_value) == ValueType::from(&value)
+            {
                 *existing_value = value;
                 return Ok(());
             } else {
@@ -268,6 +281,15 @@ impl ContextWithMutableVariables for HashMapContext {
 
         // Implicit else, because `self.variables` and `identifier` are not unborrowed in else
         self.variables.insert(identifier, value);
+        Ok(())
+    }
+
+    fn are_type_safety_checks_disabled(&self) -> bool {
+        self.without_type_safety_check
+    }
+
+    fn set_type_safety_checks_disabled(&mut self, disabled: bool) -> EvalexprResult<()> {
+        self.without_type_safety_check = disabled;
         Ok(())
     }
 }

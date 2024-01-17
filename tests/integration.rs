@@ -1661,6 +1661,43 @@ fn test_hashmap_context_type_safety() {
 }
 
 #[test]
+fn test_disabled_hashmap_context_type_safety() {
+    let mut context = context_map! {"a" => 5, "b" => 5.0}.unwrap();
+    assert!(!context.are_type_safety_checks_disabled());
+    context.set_type_safety_checks_disabled(true).unwrap();
+    assert!(context.are_type_safety_checks_disabled());
+
+    // Assignment to same type still works
+    assert_eq!(
+        eval_with_context_mut("a = 4", &mut context),
+        Ok(Value::Empty)
+    );
+    assert_eq!(context.get_value("a").unwrap().as_int(), Ok(4));
+
+    // Assignment to another type works
+    assert_eq!(
+        eval_with_context_mut(r#"b = "foo""#, &mut context),
+        Ok(Value::Empty)
+    );
+    assert_eq!(
+        context.get_value("b").unwrap().as_string(),
+        Ok("foo".into())
+    );
+
+    // Assignment to empty value then another type works
+    assert_eq!(
+        eval_with_context_mut("c = ()", &mut context),
+        Ok(Value::Empty)
+    );
+    assert_eq!(context.get_value("c").unwrap().as_empty(), Ok(()));
+    assert_eq!(
+        eval_with_context_mut("c = 5", &mut context),
+        Ok(Value::Empty)
+    );
+    assert_eq!(context.get_value("c").unwrap().as_int(), Ok(5));
+}
+
+#[test]
 fn test_hashmap_context_clone_debug() {
     let mut context = HashMapContext::new();
     // this variable is captured by the function
