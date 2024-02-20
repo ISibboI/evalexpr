@@ -519,7 +519,6 @@
 //! See [LICENSE](LICENSE) for details.
 //!
 
-#![deny(missing_docs)]
 #![forbid(unsafe_code)]
 
 #[cfg(feature = "regex_support")]

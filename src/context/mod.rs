@@ -5,7 +5,7 @@
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
 use std::{borrow::Cow, collections::HashMap};
-
+use thin_trait_object::thin_trait_object;
 use crate::{
     function::Function,
     value::{value_type::ValueType, Value},
@@ -14,34 +14,7 @@ use crate::{
 
 mod predefined;
 
-/// An immutable context.
-pub trait Context {
-    /// Returns the value that is linked to the given identifier.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use evalexpr::*;
-    /// use std::borrow::Cow;
-    /// use std::collections::HashMap;
-    ///
-    /// struct HashMapContext {
-    ///     variables: HashMap<String, Value>
-    /// }
-    ///
-    /// impl Context for HashMapContext {
-    ///     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
-    ///         self.variables.get(identifier).map(Cow::Borrowed)
-    ///     }
-    ///     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> { todo!() }
-    /// }
-    /// ```
-    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>>;
 
-    /// Calls the function that is linked to the given identifier with the given argument.
-    /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
-    fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value>;
-}
 
 /// A context that allows to assign to variables.
 pub trait ContextWithMutableVariables: Context {
@@ -142,6 +115,21 @@ impl ContextWithMutableFunctions for HashMapContext {
         self.functions.insert(identifier, function);
         Ok(())
     }
+}
+
+pub trait Context {
+/// A context defines methods to retrieve variable values and call functions for literals in an expression tree.
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>>;
+/// Retrieves the value of the given identifier.
+    fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
+}
+
+#[thin_trait_object]
+pub trait ThinTraitContext {
+
+    fn get_value(&self, identifier: &str) -> Option<Value>;
+
+    fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
 }
 
 /// This macro provides a convenient syntax for creating a static context.
