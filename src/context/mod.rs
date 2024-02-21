@@ -17,7 +17,7 @@ mod predefined;
 /// An immutable context.
 pub trait Context {
     /// Returns the value that is linked to the given identifier.
-    fn get_value(&self, identifier: &str) -> Option<&Value>;
+    fn get_value(&self, identifier: &str) -> Option<Value>;
 
     /// Calls the function that is linked to the given identifier with the given argument.
     /// If no function with the given identifier is found, this method returns `EvalexprError::FunctionIdentifierNotFound`.
@@ -82,7 +82,7 @@ pub trait GetFunctionContext: Context {
 pub struct EmptyContext;
 
 impl Context for EmptyContext {
-    fn get_value(&self, _identifier: &str) -> Option<&Value> {
+    fn get_value(&self, _identifier: &str) -> Option<Value> {
         None
     }
 
@@ -126,7 +126,7 @@ impl IterateVariablesContext for EmptyContext {
 pub struct EmptyContextWithBuiltinFunctions;
 
 impl Context for EmptyContextWithBuiltinFunctions {
-    fn get_value(&self, _identifier: &str) -> Option<&Value> {
+    fn get_value(&self, _identifier: &str) -> Option<Value> {
         None
     }
 
@@ -196,7 +196,7 @@ impl HashMapContext {
     ///
     /// let mut context = HashMapContext::new();
     /// context.set_value("abc".into(), "def".into()).unwrap();
-    /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    /// assert_eq!(context.get_value("abc"), Some(("def".into())));
     /// context.clear_variables();
     /// assert_eq!(context.get_value("abc"), None);
     /// ```
@@ -220,7 +220,7 @@ impl HashMapContext {
     ///
     /// let mut context = HashMapContext::new();
     /// context.set_value("abc".into(), "def".into()).unwrap();
-    /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
+    /// assert_eq!(context.get_value("abc"), Some(("def".into())));
     /// context.clear();
     /// assert_eq!(context.get_value("abc"), None);
     /// ```
@@ -231,8 +231,8 @@ impl HashMapContext {
 }
 
 impl Context for HashMapContext {
-    fn get_value(&self, identifier: &str) -> Option<&Value> {
-        self.variables.get(identifier)
+    fn get_value(&self, identifier: &str) -> Option<Value> {
+        self.variables.get(identifier).cloned()
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {

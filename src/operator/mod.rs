@@ -446,7 +446,7 @@ impl Operator {
             VariableIdentifierRead { identifier } => {
                 expect_operator_argument_amount(arguments.len(), 0)?;
 
-                if let Some(value) = context.get_value(identifier).cloned() {
+                if let Some(value) = context.get_value(identifier) {
                     Ok(value)
                 } else {
                     Err(EvalexprError::VariableIdentifierNotFound(
