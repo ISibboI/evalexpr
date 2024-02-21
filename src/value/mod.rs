@@ -22,6 +22,7 @@ pub const EMPTY_VALUE: () = ();
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[repr(C)]
 pub enum Value {
     /// A string value.
     String(String),
