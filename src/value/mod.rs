@@ -194,10 +194,211 @@ impl From<()> for Value {
     }
 }
 
+use std::ops::{Div, Rem};
+
+use std::ops::Mul;
+
+#[derive(Debug, Clone)]
+pub enum Error {
+    UnsupportedOperation,
+    DivisionByZero,
+}
+
+pub trait ToErrorType {
+    fn to_error_code(&self) -> i32;
+}
+
+impl ToErrorType for Error {
+    fn to_error_code(&self) -> i32 {
+        match self {
+            Error::UnsupportedOperation => 1,
+            Error::DivisionByZero => 2,
+        }
+    }
+}
+
+use std::ops::Sub;
+
+use std::ops::Add;
+
+impl Add for Value {
+    type Output = Result<Self, Error>; // Assuming you have an error type defined
+
+    fn add(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(a as FloatType + b)),
+            (Value::String(a), Value::String(b)) => Ok(Value::String(a + &b)),
+            // Handle combinations with strings and numeric types if desired
+            (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b))),
+            (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b))),
+            // Add cases for other Value variants as necessary
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+
+impl Sub for Value {
+    type Output = Result<Self, Error>;
+
+    fn sub(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
+            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(a as f64 - b)),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(a - b as f64)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+impl Mul for Value {
+    type Output = Result<Self, Error>;
+
+    fn mul(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(a as f64 * b)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+impl Div for Value {
+    type Output = Result<Value, Error>;
+
+    fn div(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => {
+                if b == 0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Int(a / b))
+                }
+            },
+            (Value::Float(a), Value::Float(b)) => {
+                if b == 0.0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(a / b))
+                }
+            },
+            (Value::Int(a), Value::Float(b)) => {
+                if b == 0.0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(a as f64 / b))
+                }
+            },
+            (Value::Float(a), Value::Int(b)) => {
+                if b == 0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(a / b as f64))
+                }
+            },
+            // Add cases for other combinations as needed, returning UnsupportedOperation for non-numeric types
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+
+use std::ops::Neg;
+
+impl Neg for Value {
+    type Output = Result<Self, Error>;
+
+    fn neg(self) -> Self::Output {
+        match self {
+            Value::Int(a) => Ok(Value::Int(-a)),
+            Value::Float(a) => Ok(Value::Float(-a)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+
+impl Rem for Value {
+    type Output = Result<Self, Error>;
+
+    fn rem(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a % b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a % b)),
+            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(a as f64 % b)),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(a % b as f64)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+#[repr(C)]
+pub struct FfiResult<T> {
+    /// The value, which will be a default value in case of an error.
+    pub value: T,
+    /// An integer error code. 0 indicates success, non-zero indicates an error.
+    pub error_code: i32,
+}
+
+/// Converts a Rust `Result<T, i32>` to an `FfiResult<T>`, where `T: Default`.
+pub fn to_ffi_result<T: Default, E: ToErrorType>(result: Result<T, E>) -> FfiResult<T> {
+    match result {
+        Ok(value) => FfiResult {
+            value,
+            error_code: 0, // Indicate success
+        },
+        Err(e) => FfiResult {
+            value: T::default(),
+            error_code : e.to_error_code(), // Use the provided error code
+        },
+    }
+}
+
+
+
+
+
+macro_rules! declare_arithmetic_for_result {
+    ($trait:ident, $fn:ident) => {
+        impl std::ops::$trait<Value> for Result<Value, Error> {
+            type Output = Result<Value, Error>;
+
+            fn $fn(self, other: Value) -> Self::Output {
+                match self {
+                    Ok(self_val) => self_val.$fn(other),
+                    Err(e) => Err(e),
+                }
+            }
+        }
+
+        impl std::ops::$trait<Result<Value, Error>> for Value {
+            type Output = Result<Value, Error>;
+
+            fn $fn(self, other: Result<Value, Error>) -> Self::Output {
+                match other {
+                    Ok(other_val) => self.$fn(other_val),
+                    Err(e) => Err(e),
+                }
+            }
+        }
+    };
+}
+
+declare_arithmetic_for_result!(Rem, rem);
+declare_arithmetic_for_result!(Add, add);
+declare_arithmetic_for_result!(Sub, sub);
+declare_arithmetic_for_result!(Mul, mul);
+declare_arithmetic_for_result!(Div, div);
+
+
 #[cfg(test)]
 mod tests {
     use crate::value::{TupleType, Value};
-
+    use super::*;
     #[test]
     fn test_value_conversions() {
         assert_eq!(
@@ -221,4 +422,64 @@ mod tests {
         assert!(Value::from(true).is_boolean());
         assert!(Value::from(TupleType::new()).is_tuple());
     }
-}
+
+    #[test]
+    fn test_add_integers() {
+        let a = Value::Int(10);
+        let b = Value::Int(20);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.add(b).unwrap(), Value::Int(30));
+    }
+
+    #[test]
+    fn test_add_integers_to_add() {
+        let a = Value::Int(10);
+        let b = Value::Int(20);
+        let c = Value::Int(20);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.add(b).add(c).unwrap(), Value::Int(50));
+    }
+
+    #[test]
+    fn test_subtract_floats() {
+        let a = Value::Float(20.5);
+        let b = Value::Float(10.25);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.sub(b).unwrap(), Value::Float(10.25));
+    }
+
+    #[test]
+    fn test_multiply_int_float() {
+        let a = Value::Int(2);
+        let b = Value::Float(3.5);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.mul(b).unwrap(), Value::Float(7.0));
+    }
+
+    #[test]
+    fn test_divide_float_by_int() {
+        let a = Value::Float(10.0);
+        let b = Value::Int(2);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.div(b).unwrap(), Value::Float(5.0));
+    }
+
+    #[test]
+    fn test_integer_remainder() {
+        let a = Value::Int(10);
+        let b = Value::Int(4);
+        // Unwrap the result to compare the value directly
+        assert_eq!(a.rem(b).unwrap(), Value::Int(2));
+    }
+
+    #[test]
+    fn test_error_on_divide_by_zero() {
+        let a = Value::Int(10);
+        let b = Value::Int(0);
+        // Here, we expect an error, so no unwrap is needed
+        assert!(matches!(a.div(b), Err(Error::DivisionByZero)));
+    }
+
+        // Add more tests to cover other operations, edge cases, and error scenarios
+    }
+
