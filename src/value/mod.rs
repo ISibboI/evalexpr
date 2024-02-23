@@ -221,92 +221,6 @@ use std::ops::Sub;
 
 use std::ops::Add;
 
-impl Add for Value {
-    type Output = Result<Self, Error>; // Assuming you have an error type defined
-
-    fn add(self, other: Self) -> Self::Output {
-        match (self, other) {
-            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
-            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
-            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(a as FloatType + b)),
-            (Value::String(a), Value::String(b)) => Ok(Value::String(a + &b)),
-            // Handle combinations with strings and numeric types if desired
-            (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b))),
-            (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b))),
-            // Add cases for other Value variants as necessary
-            _ => Err(Error::UnsupportedOperation),
-        }
-    }
-}
-
-
-impl Sub for Value {
-    type Output = Result<Self, Error>;
-
-    fn sub(self, other: Self) -> Self::Output {
-        match (self, other) {
-            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
-            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
-            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(a as f64 - b)),
-            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(a - b as f64)),
-            _ => Err(Error::UnsupportedOperation),
-        }
-    }
-}
-
-impl Mul for Value {
-    type Output = Result<Self, Error>;
-
-    fn mul(self, other: Self) -> Self::Output {
-        match (self, other) {
-            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
-            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
-            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(a as f64 * b)),
-            _ => Err(Error::UnsupportedOperation),
-        }
-    }
-}
-
-impl Div for Value {
-    type Output = Result<Value, Error>;
-
-    fn div(self, other: Self) -> Self::Output {
-        match (self, other) {
-            (Value::Int(a), Value::Int(b)) => {
-                if b == 0 {
-                    Err(Error::DivisionByZero)
-                } else {
-                    Ok(Value::Int(a / b))
-                }
-            },
-            (Value::Float(a), Value::Float(b)) => {
-                if b == 0.0 {
-                    Err(Error::DivisionByZero)
-                } else {
-                    Ok(Value::Float(a / b))
-                }
-            },
-            (Value::Int(a), Value::Float(b)) => {
-                if b == 0.0 {
-                    Err(Error::DivisionByZero)
-                } else {
-                    Ok(Value::Float(a as f64 / b))
-                }
-            },
-            (Value::Float(a), Value::Int(b)) => {
-                if b == 0 {
-                    Err(Error::DivisionByZero)
-                } else {
-                    Ok(Value::Float(a / b as f64))
-                }
-            },
-            // Add cases for other combinations as needed, returning UnsupportedOperation for non-numeric types
-            _ => Err(Error::UnsupportedOperation),
-        }
-    }
-}
-
-
 use std::ops::Neg;
 
 impl Neg for Value {
@@ -322,19 +236,108 @@ impl Neg for Value {
 }
 
 
-impl Rem for Value {
-    type Output = Result<Self, Error>;
+
+
+impl Rem for &Value {
+    type Output = Result<Value, Error>;
 
     fn rem(self, other: Self) -> Self::Output {
         match (self, other) {
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a % b)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a % b)),
-            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(a as f64 % b)),
-            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(a % b as f64)),
+            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 % b)),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a % *b as f64)),
             _ => Err(Error::UnsupportedOperation),
         }
     }
 }
+
+impl Add for &Value {
+    type Output = Result<Value, Error>; // Assuming you have an error type defined
+
+    fn add(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as FloatType + b)),
+            (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))),
+            // Handle combinations with strings and numeric types if desired
+            (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b))),
+            (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b))),
+            // Add cases for other Value variants as necessary
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+
+impl Sub for &Value {
+    type Output = Result<Value, Error>;
+
+    fn sub(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
+            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 - b)),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a - *b as f64)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+impl Mul for &Value {
+    type Output = Result<Value, Error>;
+
+    fn mul(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as f64 * b)),
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+impl Div for &Value {
+    type Output = Result<Value, Error>;
+
+    fn div(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Value::Int(a), Value::Int(b)) => {
+                if b == &0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Int(a / b))
+                }
+            },
+            (Value::Float(a), Value::Float(b)) => {
+                if b == &0.0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(a / b))
+                }
+            },
+            (Value::Int(a), Value::Float(b)) => {
+                if b == &0.0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(*a as f64 / b))
+                }
+            },
+            (Value::Float(a), Value::Int(b)) => {
+                if b == &0 {
+                    Err(Error::DivisionByZero)
+                } else {
+                    Ok(Value::Float(*a / *b as f64))
+                }
+            },
+            // Add cases for other combinations as needed, returning UnsupportedOperation for non-numeric types
+            _ => Err(Error::UnsupportedOperation),
+        }
+    }
+}
+
+
 
 #[repr(C)]
 pub struct FfiResult<T> {
@@ -369,7 +372,7 @@ macro_rules! declare_arithmetic_for_result {
 
             fn $fn(self, other: Value) -> Self::Output {
                 match self {
-                    Ok(self_val) => self_val.$fn(other),
+                    Ok(ref self_val) => self_val.$fn(&other),
                     Err(e) => Err(e),
                 }
             }
@@ -380,13 +383,49 @@ macro_rules! declare_arithmetic_for_result {
 
             fn $fn(self, other: Result<Value, Error>) -> Self::Output {
                 match other {
-                    Ok(other_val) => self.$fn(other_val),
+                    Ok(ref other_val) => (&self).$fn(other_val),
                     Err(e) => Err(e),
                 }
             }
         }
+
+        impl std::ops::$trait for Value {
+            type Output = Result<Value, Error>;
+
+            fn $fn(self, other: Self) -> Self::Output {
+                (&self).$fn(&other)
+            }
+        }
+
+        impl std::ops::$trait<&Value> for Value {
+            type Output = Result<Value, Error>;
+            fn $fn(self, other: &Self) -> Self::Output {
+                 (&self).$fn(other)
+            }
+        }
+
+        impl std::ops::$trait<Value> for &Value {
+            type Output = Result<Value, Error>;
+            fn $fn(self, other: Value) -> Self::Output {
+                 self.$fn(&other)
+            }
+        }
+
+        impl std::ops::$trait<Result<Value, Error>> for &Value {
+            type Output = Result<Value, Error>;
+
+            fn $fn(self, other: Result<Value, Error>) -> Self::Output {
+                match other {
+                    Ok(ref other_val) => self.$fn(other_val),
+                    Err(e) => Err(e),
+                }
+            }
+        }
+
     };
 }
+
+
 
 declare_arithmetic_for_result!(Rem, rem);
 declare_arithmetic_for_result!(Add, add);
@@ -480,6 +519,123 @@ mod tests {
         assert!(matches!(a.div(b), Err(Error::DivisionByZero)));
     }
 
-        // Add more tests to cover other operations, edge cases, and error scenarios
+
+        #[test]
+        fn test_add_integers_with_refs() {
+            let a = Value::Int(10);
+            let b = Value::Int(20);
+            // Using references in the add operation
+            assert_eq!((&a).add(&b).unwrap(), Value::Int(30));
+        }
+
+        #[test]
+        fn test_add_integers_to_add_with_refs() {
+            let a = Value::Int(10);
+            let b = Value::Int(20);
+            let c = Value::Int(20);
+            // Using references in chained add operations
+            assert_eq!((&a).add(&b).unwrap().add(&c).unwrap(), Value::Int(50));
+        }
+
+        #[test]
+        fn test_subtract_floats_with_refs() {
+            let a = Value::Float(20.5);
+            let b = Value::Float(10.25);
+            // Using references in the sub operation
+            assert_eq!((&a).sub(&b).unwrap(), Value::Float(10.25));
+        }
+
+        #[test]
+        fn test_multiply_int_float_with_refs() {
+            let a = Value::Int(2);
+            let b = Value::Float(3.5);
+            // Using references in the mul operation
+            assert_eq!((&a).mul(&b).unwrap(), Value::Float(7.0));
+        }
+
+        #[test]
+        fn test_divide_float_by_int_with_refs() {
+            let a = Value::Float(10.0);
+            let b = Value::Int(2);
+            // Using references in the div operation
+            assert_eq!((&a).div(&b).unwrap(), Value::Float(5.0));
+        }
+
+        #[test]
+        fn test_integer_remainder_with_refs() {
+            let a = Value::Int(10);
+            let b = Value::Int(4);
+            // Using references in the rem operation
+            assert_eq!((&a).rem(&b).unwrap(), Value::Int(2));
+        }
+
+        #[test]
+        fn test_error_on_divide_by_zero_with_refs() {
+            let a = Value::Int(10);
+            let b = Value::Int(0);
+            // Using references, expecting an error on division by zero
+            assert!(matches!((&a).div(&b), Err(Error::DivisionByZero)));
+        }
+
+    #[test]
+    fn test_add_ref_and_value() {
+        let a = Value::Int(10);
+        let b = Value::Int(20);
+        // Reference on the left, value on the right
+        assert_eq!((&a).add(b.clone()).unwrap(), Value::Int(30));
+        // Value on the left, reference on the right
+        assert_eq!(a.add(&b).unwrap(), Value::Int(30));
+    }
+
+    #[test]
+    fn test_subtract_ref_and_value() {
+        let a = Value::Float(20.5);
+        let b = Value::Float(10.25);
+        // Reference on the left, value on the right
+        assert_eq!((&a).sub(b.clone()).unwrap(), Value::Float(10.25));
+        // Value on the left, reference on the right
+        assert_eq!(a.sub(&b).unwrap(), Value::Float(10.25));
+    }
+
+    #[test]
+    fn test_multiply_ref_and_value() {
+        let a = Value::Int(2);
+        let b = Value::Float(3.5);
+        // Reference on the left, value on the right
+        assert_eq!((&a).mul(b.clone()).unwrap(), Value::Float(7.0));
+        // Value on the left, reference on the right
+        assert_eq!(a.mul(&b).unwrap(), Value::Float(7.0));
+    }
+
+    #[test]
+    fn test_divide_ref_and_value() {
+        let a = Value::Float(10.0);
+        let b = Value::Int(2);
+        // Reference on the left, value on the right
+        assert_eq!((&a).div(b.clone()).unwrap(), Value::Float(5.0));
+        // Value on the left, reference on the right
+        assert_eq!(a.div(&b).unwrap(), Value::Float(5.0));
+    }
+
+    #[test]
+    fn test_remainder_ref_and_value() {
+        let a = Value::Int(10);
+        let b = Value::Int(4);
+        // Reference on the left, value on the right
+        assert_eq!((&a).rem(b.clone()).unwrap(), Value::Int(2));
+        // Value on the left, reference on the right
+        assert_eq!(a.rem(&b).unwrap(), Value::Int(2));
+    }
+
+    #[test]
+    fn test_error_on_divide_by_zero_ref_and_value() {
+        let a = Value::Int(10);
+        let b = Value::Int(0);
+        // Reference on the left, value on the right
+        assert!(matches!((&a).div(b.clone()), Err(Error::DivisionByZero)));
+        // Value on the left, reference on the right
+        assert!(matches!(a.div(&b), Err(Error::DivisionByZero)));
+    }
+
     }
 
