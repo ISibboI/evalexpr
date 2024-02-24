@@ -542,7 +542,7 @@ pub use crate::{
     operator::Operator,
     token::PartialToken,
     tree::Node,
-    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult,to_ffi_result},
+    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult,to_ffi_result, Error},
 };
 
 mod context;
