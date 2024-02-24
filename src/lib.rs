@@ -533,16 +533,17 @@ extern crate serde_derive;
 
 pub use crate::{
     context::{
-        Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext, ThinTraitContext,BoxedThinTraitContext,
+        Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext, ThinTraitContext, BoxedThinTraitContext,
         HashMapContext,
     },
     error::{EvalexprError, EvalexprResult},
     function::Function,
     interface::*,
+    custom_functions::*,
     operator::Operator,
     token::PartialToken,
     tree::Node,
-    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult,to_ffi_result, Error},
+    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult, to_ffi_result, Error},
 };
 
 mod context;
@@ -554,13 +555,7 @@ mod interface;
 mod operator;
 mod token;
 mod tree;
+mod custom_functions;
 mod value;
-
-pub fn is_null(value: &Value) -> &Value {
-    match value {
-        Value::Empty => &Value::Int(0),
-        _ => value,
-    }
-}
 
 // Exports
