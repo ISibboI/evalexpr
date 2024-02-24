@@ -4,29 +4,21 @@ pub fn simple_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, 
     if columns.is_empty() {
         return Ok(Value::Empty);
     }
-    let mut sum: Value = Value::Float(0.0);
-    let mut count = 0usize;
 
-    for &col_index in columns {
-        match row.get(col_index) {
-            Some(Value::Float(val)) => {
-                if let Value::Float(sum_val) = sum {
-                    sum = Value::Float(sum_val + val);
-                    count += 1;
-                }
-            }
-            _ => continue,
-        }
-    }
+    let (sum, count) = columns.iter()
+        .filter_map(|&col_index| match row.get(col_index) {
+            Some(Value::Float(val)) => Some(val),
+            _ => None,
+        })
+        .fold((0.0f64, 0usize), |(acc_sum, acc_count), &val| (acc_sum + val, acc_count + 1));
 
     if count > 0 {
-        if let Value::Float(sum_val) = sum {
-            return Ok(Value::Float(sum_val / count as f64));
-        }
+        Ok(Value::Float(sum / count as f64))
+    } else {
+        Ok(Value::Empty)
     }
-
-    Ok(Value::Empty)
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -63,4 +55,27 @@ mod tests {
         let result = simple_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
     }
+
+    //Time: 4.481µs
+    #[test]
+    fn test_triangular_moving_average_normal_operation() {
+
+        let row = (0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>(); // Simple case with enough columns
+        let columns = (0..110).collect::<Vec<usize>>(); // Simple case with enough columns
+        let start = std::time::Instant::now();
+        let result = simple_moving_average(&row, &columns);
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        match value {
+            Value::Float(avg) => {
+                // Perform your assertion here based on expected calculation
+                // This is just an example; the exact value will depend on your calculation
+                assert!(avg > 0.0);
+            },
+            _ => panic!("Expected Value::Float from TMA calculation"),
+        }
+        println!("Time: {:?}", start.elapsed());
+    }
+
+
 }
