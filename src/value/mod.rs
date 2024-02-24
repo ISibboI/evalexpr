@@ -38,6 +38,12 @@ pub enum Value {
     Empty,
 }
 
+impl Default for Value {
+    fn default() -> Self {
+        Value::Empty
+    }
+}
+
 impl Value {
     /// Returns true if `self` is a `Value::String`.
     pub fn is_string(&self) -> bool {
