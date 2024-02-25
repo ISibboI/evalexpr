@@ -4,21 +4,22 @@ pub fn simple_cumulative_sum(row: &[Value], columns: &[usize]) -> Result<Value, 
     if columns.is_empty() {
         return Ok(Value::Empty);
     }
-    let mut sum: Value = Value::Float(0.0);
+    // Initialize sum directly as f64 to avoid repeated matching and unwrapping of Value::Float.
+    let mut sum = 0.0f64;
 
+    // Iterate through columns once, accumulating only if the value is a Float.
     for &col_index in columns {
-        match row.get(col_index) {
-            Some(Value::Float(val)) => {
-                if let Value::Float(sum_val) = sum {
-                    sum = Value::Float(sum_val + val);
-                }
-            }
-            _ => continue,
+        // Directly access the value without intermediate matching if it's safe (i.e., within bounds)
+        // This avoids the need for matching on Option from row.get()
+        if let Some(Value::Float(val)) = row.get(col_index) {
+            sum += val;
         }
     }
 
-    Ok(sum)
+    // Only wrap the final sum into Value::Float here.
+    Ok(Value::Float(sum))
 }
+
 
 #[cfg(test)]
 mod tests {
