@@ -215,6 +215,17 @@ pub trait ToErrorType {
     fn to_error_code(&self) -> i32;
 }
 
+impl Error{
+    pub fn from_error_code(code: i32) -> Self {
+        match code {
+            1 => Error::UnsupportedOperation,
+            2 => Error::DivisionByZero,
+            3 => Error::NonNumericType,
+            _ => Error::UnsupportedOperation,
+        }
+    }
+}
+
 impl ToErrorType for Error {
     fn to_error_code(&self) -> i32 {
         match self {

@@ -11,7 +11,18 @@ pub fn simple_cumulative_sum(row: &[Value], columns: &[usize]) -> Result<Value, 
         // Directly access the value without intermediate matching if it's safe (i.e., within bounds)
         // This avoids the need for matching on Option from row.get()
         if let Some(val) = row.get(col_index) {
-            sum += val.as_number().map_err(|_| Error::NonNumericType)?;
+            match val {
+                Value::Float(val) => {
+                    sum += val;
+                    continue;
+                }
+                Value::Int(val) => {
+                    sum += *val as f64;
+                    continue;
+                }
+                Value::Empty => {}
+                _ => return Err(Error::NonNumericType),
+            }
         }
     }
 
