@@ -7,10 +7,11 @@ pub fn simple_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, 
 
     let (sum, count) = columns.iter()
         .filter_map(|&col_index| match row.get(col_index) {
-            Some(Value::Float(val)) => Some(val),
+            Some(Value::Float(val)) => Some(*val),
+            Some(Value::Int(val)) => Some(*val as f64),
             _ => None,
         })
-        .fold((0.0f64, 0usize), |(acc_sum, acc_count), &val| (acc_sum + val, acc_count + 1));
+        .fold((0.0f64, 0usize), |(acc_sum, acc_count), val| (acc_sum + val, acc_count + 1));
 
     if count > 0 {
         Ok(Value::Float(sum / count as f64))

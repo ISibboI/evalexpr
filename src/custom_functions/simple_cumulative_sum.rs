@@ -6,13 +6,12 @@ pub fn simple_cumulative_sum(row: &[Value], columns: &[usize]) -> Result<Value, 
     }
     // Initialize sum directly as f64 to avoid repeated matching and unwrapping of Value::Float.
     let mut sum = 0.0f64;
-
     // Iterate through columns once, accumulating only if the value is a Float.
     for &col_index in columns {
         // Directly access the value without intermediate matching if it's safe (i.e., within bounds)
         // This avoids the need for matching on Option from row.get()
-        if let Some(Value::Float(val)) = row.get(col_index) {
-            sum += val;
+        if let Some(val) = row.get(col_index) {
+            sum += val.as_number().map_err(|_| Error::NonNumericType)?;
         }
     }
 

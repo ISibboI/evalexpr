@@ -208,6 +208,7 @@ use std::ops::Mul;
 pub enum Error {
     UnsupportedOperation,
     DivisionByZero,
+    NonNumericType,
 }
 
 pub trait ToErrorType {
@@ -219,6 +220,7 @@ impl ToErrorType for Error {
         match self {
             Error::UnsupportedOperation => 1,
             Error::DivisionByZero => 2,
+            Error::NonNumericType => 3,
         }
     }
 }
