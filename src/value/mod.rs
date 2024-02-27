@@ -64,6 +64,8 @@ impl PartialEq for Value {
         match (self, other) {
             (Value::String(a), Value::String(b)) => a == b,
             (Value::Float(a), Value::Float(b)) => a == b,
+            (Value::Float(a), Value::Int(b)) => *a == *b as FloatType,
+            (Value::Int(a), Value::Float(b)) => *a  as FloatType == *b,
             (Value::Int(a), Value::Int(b)) => a == b,
             (Value::Boolean(a), Value::Boolean(b)) => a == b,
             // For simplicity, Tuple and Empty equality checks are not fully implemented
