@@ -71,7 +71,7 @@ impl PartialEq for Value {
             // For simplicity, Tuple and Empty equality checks are not fully implemented
             (Value::Tuple(_), Value::Tuple(_)) => false, // Simplified; real implementation would require element-wise comparison
             (Value::Empty, Value::Empty) => true,
-            _ => false,
+            (left,right) => panic!("Cannot compare {:?} and {:?}", left, right),
         }
     }
 }
