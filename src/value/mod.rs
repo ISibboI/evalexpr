@@ -242,6 +242,7 @@ use std::ops::Mul;
 
 #[derive(Debug, Clone)]
 pub enum Error {
+    UnsupportedArithmeticBetweenTypes,
     UnsupportedOperation,
     DivisionByZero,
     NonNumericType,
@@ -257,6 +258,7 @@ impl Error{
             1 => Error::UnsupportedOperation,
             2 => Error::DivisionByZero,
             3 => Error::NonNumericType,
+            4 => Error::UnsupportedArithmeticBetweenTypes,
             _ => Error::UnsupportedOperation,
         }
     }
@@ -268,6 +270,7 @@ impl ToErrorType for Error {
             Error::UnsupportedOperation => 1,
             Error::DivisionByZero => 2,
             Error::NonNumericType => 3,
+            Error::UnsupportedArithmeticBetweenTypes => 4,
         }
     }
 }
@@ -285,7 +288,7 @@ impl Neg for Value {
         match self {
             Value::Int(a) => Ok(Value::Int(-a)),
             Value::Float(a) => Ok(Value::Float(-a)),
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
@@ -302,7 +305,7 @@ impl Rem for &Value {
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a % b)),
             (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 % b)),
             (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a % *b as f64)),
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
@@ -321,7 +324,7 @@ impl Add for &Value {
             (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b))),
             (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b))),
             // Add cases for other Value variants as necessary
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
@@ -336,7 +339,7 @@ impl Sub for &Value {
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
             (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 - b)),
             (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a - *b as f64)),
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
@@ -349,7 +352,7 @@ impl Mul for &Value {
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
             (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as f64 * b)),
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
@@ -388,7 +391,7 @@ impl Div for &Value {
                 }
             },
             // Add cases for other combinations as needed, returning UnsupportedOperation for non-numeric types
-            _ => Err(Error::UnsupportedOperation),
+            _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
 }
