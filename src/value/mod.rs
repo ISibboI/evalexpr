@@ -313,6 +313,7 @@ impl Add for &Value {
     fn add(self, other: Self) -> Self::Output {
         match (self, other) {
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a + *b as f64)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
             (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as FloatType + b)),
             (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))),
