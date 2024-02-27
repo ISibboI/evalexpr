@@ -286,6 +286,7 @@ impl Neg for Value {
 
     fn neg(self) -> Self::Output {
         match self {
+            (Value::Empty) => Ok(Value::Empty),
             Value::Int(a) => Ok(Value::Int(-a)),
             Value::Float(a) => Ok(Value::Float(-a)),
             _ => Err(Error::UnsupportedArithmeticBetweenTypes),
@@ -301,6 +302,9 @@ impl Rem for &Value {
 
     fn rem(self, other: Self) -> Self::Output {
         match (self, other) {
+            (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, _) => Ok(Value::Empty),
+            (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a % b)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a % b)),
             (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 % b)),
@@ -315,6 +319,9 @@ impl Add for &Value {
 
     fn add(self, other: Self) -> Self::Output {
         match (self, other) {
+            (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, _) => Ok(Value::Empty),
+            (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
             (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a + *b as f64)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
@@ -335,6 +342,9 @@ impl Sub for &Value {
 
     fn sub(self, other: Self) -> Self::Output {
         match (self, other) {
+            (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, _) => Ok(Value::Empty),
+            (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
             (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 - b)),
@@ -349,6 +359,9 @@ impl Mul for &Value {
 
     fn mul(self, other: Self) -> Self::Output {
         match (self, other) {
+            (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, _) => Ok(Value::Empty),
+            (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
             (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as f64 * b)),
@@ -362,6 +375,9 @@ impl Div for &Value {
 
     fn div(self, other: Self) -> Self::Output {
         match (self, other) {
+            (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, _) => Ok(Value::Empty),
+            (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => {
                 if b == &0 {
                     Err(Error::DivisionByZero)
