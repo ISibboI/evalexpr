@@ -40,6 +40,19 @@ pub enum Value {
 }
 
 
+impl From<&Value> for Value {
+    fn from(value: &Value) -> Self {
+        match value {
+            Value::String(s) => Value::String(s.clone()),
+            Value::Float(f) => Value::Float(*f),
+            Value::Int(i) => Value::Int(*i),
+            Value::Boolean(b) => Value::Boolean(*b),
+            Value::Tuple(t) => Value::Tuple(t.iter().map(|v| v.into()).collect()),
+            Value::Empty => Value::Empty,
+        }
+    }
+}
+
 impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {

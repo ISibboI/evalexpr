@@ -77,3 +77,62 @@ pub fn min<'a>(value1: &'a Value, value2: &'a Value) -> &'a Value {
         value2
     }
 }
+
+
+mod test{
+
+    use super::*;
+    #[test]
+    fn test_round_date_to_m1() {
+        let input = (
+            Value::String("BTCUSD_2024.02.13 10:05:23".into()),
+            Value::String("m1".into())
+        );
+        let expected = Utc.ymd(2024, 2, 13).and_hms(10, 5, 0).format("%Y.%m.%d %H:%M:%S").to_string();
+        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+    }
+
+    #[test]
+    fn test_round_date_to_h1() {
+        let input = (
+            Value::String("BTCUSD_2024.02.13 10:05:23".into()),
+            Value::String("h1".into())
+        );
+        let expected = Utc.ymd(2024, 2, 13).and_hms(10, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
+        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+    }
+
+    #[test]
+    fn test_round_date_to_1w() {
+        let input = (
+            Value::String("BTCUSD_2024.02.13 10:05:23".into()),
+            Value::String("1w".into())
+        );
+        // Assuming 2024-02-13 is a Wednesday, rounding to the start of the week (Sunday)
+        let expected = Utc.ymd(2024, 2, 11).and_hms(0, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
+        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+    }
+
+    #[test]
+    fn test_invalid_date_format() {
+        let input = (
+            Value::String("BTCUSD_ThisIsNotADate".into()),
+            Value::String("m1".into())
+        );
+        let result = impl_round_date_to_precision(&input.0, &input.1);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_invalid_precision() {
+        let input = (
+            Value::String("BTCUSD_2024.02.13 10:05:00".into()),
+            Value::String("m60".into())
+        );
+        let result = impl_round_date_to_precision(&input.0, &input.1);
+        assert!(result.is_err(), "Expected an error for invalid precision");
+    }
+}
