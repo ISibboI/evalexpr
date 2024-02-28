@@ -66,6 +66,7 @@ mod tests {
             Value::Float(avg) => {
                 // Perform your assertion here based on expected calculation
                 // This is just an example; the exact value will depend on your calculation
+                println!("Average: {}", avg);
                 assert!(avg > 0.0);
             }
             _ => panic!("Expected Value::Float from TMA calculation"),

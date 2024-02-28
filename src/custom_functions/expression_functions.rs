@@ -1,11 +1,11 @@
 use crate::{Error, Value};
 use chrono::{NaiveDateTime,Timelike,Utc, DateTime, Duration, Datelike, TimeZone};
 
-pub fn is_null(value: &Value) -> &Value {
-    match value {
+pub fn is_null(value: &Value) ->  Result<&Value, Error>  {
+    Ok(match value {
         Value::Empty => &Value::Int(0),
         _ => value,
-    }
+    })
 }
 
 pub fn abs(value: &Value) -> Result<Value, Error> {
@@ -17,13 +17,13 @@ pub fn abs(value: &Value) -> Result<Value, Error> {
     }
 }
 
-pub fn starts_with(message: &Value, prefix: &Value) -> Value {
+pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     if let (Value::String(message), Value::String(prefix)) = (message, prefix) {
         if message.starts_with(prefix) {
-            return Value::Boolean(true);
+            return Ok(Value::Boolean(true));
         }
     }
-    return Value::Boolean(false);
+    return Ok(Value::Boolean(false));
 }
 
 fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Result<DateTime<Utc>, crate::Error> {
@@ -62,20 +62,20 @@ fn impl_round_date_to_precision(string: &Value, precision: &Value) -> Result<Val
     }
 }
 
-pub fn max<'a>(value1: &'a Value, value2: &'a Value) -> &'a Value {
-    if value1 > value2 {
+pub fn max<'a>(value1: &'a Value, value2: &'a Value) ->  Result<&'a Value, Error>  {
+    Ok(if value1 > value2 {
         value1
     } else {
         value2
-    }
+    })
 }
 
-pub fn min<'a>(value1: &'a Value, value2: &'a Value) -> &'a Value {
-    if value1 < value2 {
+pub fn min<'a>(value1: &'a Value, value2: &'a Value) -> Result<&'a Value, Error>  {
+    Ok(if value1 < value2 {
         value1
     } else {
         value2
-    }
+    })
 }
 
 
