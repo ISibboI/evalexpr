@@ -250,6 +250,7 @@ pub enum Error {
     UnsupportedOperation,
     DivisionByZero,
     NonNumericType,
+    InvalidArgumentType,
 }
 
 pub trait ToErrorType {
@@ -263,6 +264,7 @@ impl Error{
             2 => Error::DivisionByZero,
             3 => Error::NonNumericType,
             4 => Error::UnsupportedArithmeticBetweenTypes,
+            5 => Error::InvalidArgumentType,
             _ => Error::UnsupportedOperation,
         }
     }
@@ -275,6 +277,7 @@ impl ToErrorType for Error {
             Error::DivisionByZero => 2,
             Error::NonNumericType => 3,
             Error::UnsupportedArithmeticBetweenTypes => 4,
+            Error::InvalidArgumentType => 5,
         }
     }
 }

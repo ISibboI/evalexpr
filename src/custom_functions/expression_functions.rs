@@ -1,9 +1,18 @@
-use crate::Value;
+use crate::{Error, Value};
 
 pub fn is_null(value: &Value) -> &Value {
     match value {
         Value::Empty => &Value::Int(0),
         _ => value,
+    }
+}
+
+pub fn abs(value: &Value) -> Result<Value, Error> {
+    match value {
+        Value::Float(fl) => { Ok(Value::Float(fl.abs())) }
+        Value::Int(nn) => { Ok(Value::Int(nn.abs())) }
+        Value::Empty => {Ok(Value::Empty)}
+        _ => Err(Error::InvalidArgumentType),
     }
 }
 
