@@ -1,6 +1,6 @@
 [package]
 name = "evalexpr"
-version = "7.2.30"
+version = "7.2.31"
 description = "A powerful arithmetic and boolean expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "arithmetic", "boolean"]
 categories = ["parsing", "game-engines"]
@@ -27,6 +27,7 @@ regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
 serde_derive = { version = "1.0.133", optional = true}
 thin_trait_object = { git = "https://github.com/gbemiga-viewserver/thin_trait_object", branch = "main" }
+chrono = { version = "0.4.19", default-features = false, features = ["clock", "std"] }
 
 [features]
 serde_support = ["serde", "serde_derive"]

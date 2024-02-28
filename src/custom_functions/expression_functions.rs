@@ -1,4 +1,5 @@
 use crate::{Error, Value};
+use chrono::{NaiveDateTime,Timelike,Utc, DateTime, Duration, Datelike, TimeZone};
 
 pub fn is_null(value: &Value) -> &Value {
     match value {
@@ -23,6 +24,42 @@ pub fn starts_with(message: &Value, prefix: &Value) -> Value {
         }
     }
     return Value::Boolean(false);
+}
+
+fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Result<DateTime<Utc>, crate::Error> {
+    Ok(match precision {
+        "m1" => datetime.date().and_hms(datetime.hour(), datetime.minute(), 0),
+        "m5" => datetime.date().and_hms(datetime.hour(), (datetime.minute() / 5) * 5, 0),
+        "m15" => datetime.date().and_hms(datetime.hour(), (datetime.minute() / 15) * 15, 0),
+        "m30" => datetime.date().and_hms(datetime.hour(), (datetime.minute() / 30) * 30, 0),
+        "h1" => datetime.date().and_hms(datetime.hour(), 0, 0),
+        "h4" => datetime.date().and_hms((datetime.hour() / 4) * 4, 0, 0),
+        "d1" => datetime.date().and_hms(0, 0, 0),
+        "1w" => (datetime - Duration::days(datetime.date().weekday().num_days_from_sunday() as i64)).date().and_hms(0, 0, 0),
+        "1M" => datetime.date().with_day(1).unwrap().and_hms(0, 0, 0),
+        val => {
+            return Err(Error::CustomError(format!("Precision {val} is not recognised")));
+        } // If the precision is not recognized, return the original datetime
+    })
+}
+
+fn impl_round_date_to_precision(string: &Value, precision: &Value) -> Result<Value, crate::Error> {
+    if let (Value::String(string), Value::String(precision)) = (string, precision) {
+        // Extract the date-time part from the input string
+        let parts: Vec<&str> = string.split('_').collect();
+        let datetime_str = parts.last().ok_or_else(|| Error::InvalidInputString)?;
+
+        let naive_datetime = NaiveDateTime::parse_from_str(datetime_str, "%Y.%m.%d %H:%M:%S")
+            .map_err(|_| Error::InvalidDateFormat)?;
+        let datetime = Utc.from_utc_datetime(&naive_datetime);
+        let rounded_datetime = round_datetime_to_precision(datetime, &precision.to_lowercase())?;
+        let result = format!("{}_{}", parts.iter().take(parts.len() - 1).map(|prt|prt.to_string()).collect::<Vec<String>>().join("_"), rounded_datetime.format("%Y.%m.%d %H:%M:%S").to_string());
+
+        Ok(Value::String(result))
+    } else {
+        // If arguments are not strings, return an error
+        Err(Error::InvalidArgumentType)
+    }
 }
 
 pub fn max<'a>(value1: &'a Value, value2: &'a Value) -> &'a Value {

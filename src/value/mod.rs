@@ -251,20 +251,27 @@ pub enum Error {
     DivisionByZero,
     NonNumericType,
     InvalidArgumentType,
+    InvalidInputString,
+    InvalidDateFormat,
+    CustomError(String),
 }
 
 pub trait ToErrorType {
     fn to_error_code(&self) -> i32;
+    fn to_error_message(&self) -> Option<String>;
 }
 
 impl Error{
-    pub fn from_error_code(code: i32) -> Self {
+    pub fn from_error_code(code: i32, custom_error: Option<String>) -> Self {
         match code {
             1 => Error::UnsupportedOperation,
             2 => Error::DivisionByZero,
             3 => Error::NonNumericType,
             4 => Error::UnsupportedArithmeticBetweenTypes,
             5 => Error::InvalidArgumentType,
+            6 => Error::InvalidInputString,
+            7 => Error::InvalidDateFormat,
+            8 => Error::CustomError(custom_error.unwrap_or("Custom error".to_string())),
             _ => Error::UnsupportedOperation,
         }
     }
@@ -278,6 +285,16 @@ impl ToErrorType for Error {
             Error::NonNumericType => 3,
             Error::UnsupportedArithmeticBetweenTypes => 4,
             Error::InvalidArgumentType => 5,
+            Error::InvalidInputString => 6,
+            Error::InvalidDateFormat => 7,
+            Error::CustomError(_) => 8
+        }
+    }
+
+    fn to_error_message(&self) -> Option<String> {
+        match self {
+            Error::CustomError(message) => Some(message.clone()),
+            _ => None,
         }
     }
 }
@@ -427,6 +444,8 @@ pub struct FfiResult<T> {
     pub value: T,
     /// An integer error code. 0 indicates success, non-zero indicates an error.
     pub error_code: i32,
+
+    pub error_message: String,
 }
 
 /// Converts a Rust `Result<T, i32>` to an `FfiResult<T>`, where `T: Default`.
@@ -435,10 +454,12 @@ pub fn to_ffi_result<T: Default, E: ToErrorType>(result: Result<T, E>) -> FfiRes
         Ok(value) => FfiResult {
             value,
             error_code: 0, // Indicate success
+            error_message: "".to_string(),
         },
         Err(e) => FfiResult {
             value: T::default(),
             error_code : e.to_error_code(), // Use the provided error code
+            error_message: format!("{}", e.to_error_message().unwrap_or("".to_string())),
         },
     }
 }
