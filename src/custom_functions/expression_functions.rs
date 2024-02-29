@@ -43,7 +43,7 @@ fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Resu
     })
 }
 
-fn round_date_to_precision(string: &Value, precision: &Value) -> Result<Value, crate::Error> {
+pub fn round_date_to_precision(string: &Value, precision: &Value) -> Result<Value, crate::Error> {
     if let (Value::String(string), Value::String(precision)) = (string, precision) {
         // Extract the date-time part from the input string
         let parts: Vec<&str> = string.split('_').collect();
