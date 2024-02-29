@@ -43,7 +43,7 @@ fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Resu
     })
 }
 
-fn impl_round_date_to_precision(string: &Value, precision: &Value) -> Result<Value, crate::Error> {
+fn round_date_to_precision(string: &Value, precision: &Value) -> Result<Value, crate::Error> {
     if let (Value::String(string), Value::String(precision)) = (string, precision) {
         // Extract the date-time part from the input string
         let parts: Vec<&str> = string.split('_').collect();
@@ -89,7 +89,7 @@ mod test{
             Value::String("m1".into())
         );
         let expected = Utc.ymd(2024, 2, 13).and_hms(10, 5, 0).format("%Y.%m.%d %H:%M:%S").to_string();
-        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        let result = round_date_to_precision(&input.0, &input.1).unwrap();
         assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
     }
 
@@ -100,7 +100,7 @@ mod test{
             Value::String("h1".into())
         );
         let expected = Utc.ymd(2024, 2, 13).and_hms(10, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
-        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        let result = round_date_to_precision(&input.0, &input.1).unwrap();
         assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
     }
 
@@ -112,7 +112,7 @@ mod test{
         );
         // Assuming 2024-02-13 is a Wednesday, rounding to the start of the week (Sunday)
         let expected = Utc.ymd(2024, 2, 11).and_hms(0, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
-        let result = impl_round_date_to_precision(&input.0, &input.1).unwrap();
+        let result = round_date_to_precision(&input.0, &input.1).unwrap();
         assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
     }
 
@@ -122,7 +122,7 @@ mod test{
             Value::String("BTCUSD_ThisIsNotADate".into()),
             Value::String("m1".into())
         );
-        let result = impl_round_date_to_precision(&input.0, &input.1);
+        let result = round_date_to_precision(&input.0, &input.1);
         assert!(result.is_err());
     }
 
@@ -132,7 +132,7 @@ mod test{
             Value::String("BTCUSD_2024.02.13 10:05:00".into()),
             Value::String("m60".into())
         );
-        let result = impl_round_date_to_precision(&input.0, &input.1);
+        let result = round_date_to_precision(&input.0, &input.1);
         assert!(result.is_err(), "Expected an error for invalid precision");
     }
 }
