@@ -3,6 +3,7 @@ pub mod expression_functions;
 pub mod simple_moving_average;
 pub mod simple_cumulative_sum;
 pub mod back;
+mod calc_conviction;
 
 
 // Re-export the functions to the root of the crate
