@@ -5,7 +5,7 @@ use crate::{BoxedThinTraitContext, Error, FloatType, ThinTraitContext, Value, Va
 use crate::custom_functions::compiled_transpose_calcuation_template::{CompiledTransposeCalculationTemplate, context};
 
 
-struct BasherTradeModel {
+pub struct BasherTradeModel {
     
 }
 
