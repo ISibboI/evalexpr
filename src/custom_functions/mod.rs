@@ -3,7 +3,7 @@ pub mod expression_functions;
 pub mod simple_moving_average;
 pub mod simple_cumulative_sum;
 pub mod back;
-mod calc_conviction;
+mod basher_trade_model;
 mod compiled_transpose_calcuation_template;
 
 
