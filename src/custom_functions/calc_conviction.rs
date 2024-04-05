@@ -4,6 +4,7 @@ use std::fmt::Display;
 use crate::{BoxedThinTraitContext, Error, FloatType, ThinTraitContext, Value, ValueType};
 use crate::custom_functions::compiled_transpose_calcuation_template::{CompiledTransposeCalculationTemplate, context};
 
+
 struct BasherTradeModel {
     
 }
@@ -24,7 +25,7 @@ impl CompiledTransposeCalculationTemplate for BasherTradeModel {
     fn dependencies(&self) -> Vec<String> {
         vec!["signal".to_string(), "close".to_string()]
     }
-    fn commit_row(self: &mut Box<Self>, row: &mut BoxedThinTraitContext, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
+    fn commit_row(&self, row: &mut BoxedThinTraitContext, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
 
 
         let mut prev_trade_signal: Option<bool> = None;
