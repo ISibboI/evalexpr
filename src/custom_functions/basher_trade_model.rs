@@ -11,6 +11,10 @@ pub struct BasherTradeModel {
 
 
 impl CompiledTransposeCalculationTemplate for BasherTradeModel {
+    fn test(&self) -> usize {
+        6
+    }
+
     fn schema(&self) -> HashMap<String, ValueType> {
         vec![
             ("active_trade", ValueType::Boolean),

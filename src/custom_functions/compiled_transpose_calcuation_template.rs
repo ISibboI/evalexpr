@@ -7,6 +7,7 @@ use crate::Error::CustomError;
 
 #[thin_trait_object]
 pub trait CompiledTransposeCalculationTemplate {
+    fn test(&self) -> usize;
     fn schema(&self) -> HashMap<String,ValueType>;
     fn dependencies(&self) -> Vec<String>;
     fn commit_row(&self, context: &mut BoxedThinTraitContext, ordered_transpose_values: &[Value], current_position: usize) -> Result<(), Error>;
