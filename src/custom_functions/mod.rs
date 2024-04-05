@@ -4,6 +4,7 @@ pub mod simple_moving_average;
 pub mod simple_cumulative_sum;
 pub mod back;
 mod calc_conviction;
+mod compiled_transpose_calcuation_template;
 
 
 // Re-export the functions to the root of the crate

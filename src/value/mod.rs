@@ -139,6 +139,14 @@ impl Value {
             value => Err(EvalexprError::expected_string(value.clone())),
         }
     }
+ /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
+    pub fn as_string_or_none(&self) -> EvalexprResult<Option<String>> {
+        match self {
+            Value::String(string) => Ok(Some(string.clone())),
+            Value::Empty => Ok(None),
+            value => Err(EvalexprError::expected_string(value.clone())),
+        }
+    }
 
     /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
     pub fn as_int(&self) -> EvalexprResult<IntType> {
@@ -148,10 +156,27 @@ impl Value {
         }
     }
 
+    /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
+    pub fn as_int_or_none(&self) -> EvalexprResult<Option<IntType>> {
+        match self {
+            Value::Int(i) => Ok(Some(*i)),
+            Value::Empty => Ok(None),
+            value => Err(EvalexprError::expected_int(value.clone())),
+        }
+    }
+
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
     pub fn as_float(&self) -> EvalexprResult<FloatType> {
         match self {
             Value::Float(f) => Ok(*f),
+            value => Err(EvalexprError::expected_float(value.clone())),
+        }
+    }
+    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
+    pub fn as_float_or_none(&self) -> EvalexprResult<Option<FloatType>> {
+        match self {
+            Value::Float(f) => Ok(Some(*f)),
+            Value::Empty => Ok(None),
             value => Err(EvalexprError::expected_float(value.clone())),
         }
     }
@@ -166,10 +191,29 @@ impl Value {
         }
     }
 
+    /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
+    /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
+    pub fn as_number_or_none(&self) -> EvalexprResult<Option<FloatType>> {
+        match self {
+            Value::Float(f) => Ok(Some(*f)),
+            Value::Int(i) => Ok(Some(*i as FloatType)),
+            Value::Empty => Ok(None),
+            value => Err(EvalexprError::expected_number(value.clone())),
+        }
+    }
+
     /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
     pub fn as_boolean(&self) -> EvalexprResult<bool> {
         match self {
             Value::Boolean(boolean) => Ok(*boolean),
+            value => Err(EvalexprError::expected_boolean(value.clone())),
+        }
+    }
+    /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
+    pub fn as_boolean_or_none(&self) -> EvalexprResult<Option<bool>> {
+        match self {
+            Value::Boolean(boolean) => Ok( Some(*boolean)),
+            Value::Empty => Ok(None),
             value => Err(EvalexprError::expected_boolean(value.clone())),
         }
     }
@@ -267,6 +311,12 @@ pub enum Error {
     InvalidInputString,
     InvalidDateFormat,
     CustomError(String),
+}
+
+impl From<EvalexprError> for Error {
+    fn from(err: EvalexprError) -> Self {
+        Error::CustomError(format!("{}",err))
+    }
 }
 
 pub trait ToErrorType {

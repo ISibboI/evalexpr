@@ -126,7 +126,7 @@ pub trait Context {
 
 #[thin_trait_object]
 pub trait ThinTraitContext {
-    fn get_value(&self, identifier: &str) -> Option<Value>;
+    fn get_value(&self, identifier: &str) -> EvalexprResult<Value>;
     fn set_value(&self, identifier: &str, value: Value) -> EvalexprResult<()>;
     fn set_row(&self, row: usize);
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
