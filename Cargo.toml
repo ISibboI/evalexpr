@@ -1,6 +1,6 @@
 [package]
 name = "evalexpr"
-version = "7.2.37"
+version = "7.2.38"
 description = "A powerful arithmetic and boolean expression evaluator"
 keywords = ["expression", "evaluate", "evaluator", "arithmetic", "boolean"]
 categories = ["parsing", "game-engines"]
