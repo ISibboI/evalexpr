@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 
-use crate::{BoxedThinTraitContext, Error, FloatType, ThinTraitContext, Value, ValueType};
+use crate::{BoxedThinTraitContext, Error, FloatType, generate_column_name, ThinTraitContext, Value, ValueType};
 use crate::custom_functions::compiled_transpose_calcuation_template::{CompiledTransposeCalculationTemplate, context};
 
 
@@ -111,6 +111,4 @@ impl CompiledTransposeCalculationTemplate for BasherTradeModel {
     }
 }
 
-fn generate_column_name(field: &str, p1: &Value) -> String {
-    format!("{}_{}", field, p1)
-}
+
