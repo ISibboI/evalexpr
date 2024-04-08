@@ -169,6 +169,7 @@ impl Value {
     pub fn as_float(&self) -> EvalexprResult<FloatType> {
         match self {
             Value::Float(f) => Ok(*f),
+            Value::Int(i) => Ok(*i as FloatType),
             value => Err(EvalexprError::expected_float(value.clone())),
         }
     }
@@ -176,6 +177,7 @@ impl Value {
     pub fn as_float_or_none(&self) -> EvalexprResult<Option<FloatType>> {
         match self {
             Value::Float(f) => Ok(Some(*f)),
+            Value::Int(i) => Ok(Some(*i as FloatType)),
             Value::Empty => Ok(None),
             value => Err(EvalexprError::expected_float(value.clone())),
         }
