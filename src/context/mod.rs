@@ -130,6 +130,7 @@ pub trait ThinTraitContext {
     fn set_value(&mut self, identifier: &str, value: Value) -> EvalexprResult<()>;
     fn set_row(&self, row: usize);
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
+    fn has_changes(&self) -> bool;
 }
 
 /// This macro provides a convenient syntax for creating a static context.
