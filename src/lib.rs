@@ -540,6 +540,7 @@ pub use crate::{
     function::Function,
     interface::*,
     custom_functions::*,
+    templates::*,
     operator::Operator,
     token::PartialToken,
     tree::Node,
@@ -556,6 +557,7 @@ mod operator;
 mod token;
 mod tree;
 mod custom_functions;
+mod templates;
 mod value;
 
 // Exports

@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Display;
-
-use crate::{BoxedOperatorRowTrait, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
-use crate::custom_functions::compiled_transpose_calcuation_template::{CompiledTransposeCalculationTemplate, context};
+use crate::context;
+use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
 
 
 pub struct AdaptiveStopLossTradeModel {
