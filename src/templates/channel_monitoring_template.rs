@@ -17,7 +17,7 @@ pub struct ChannelMonitor {
 }
 
 impl ChannelMonitor {
-    pub fn new(lower_band_field_name: String, upper_band_field_name: String, value_field_name: String, output_field_name: String) -> ChannelMonitor {
+    pub fn new(lower_band_field_name: &str, upper_band_field_name: &str, value_field_name: &str, output_field_name: &str) -> ChannelMonitor {
 
         let within_bounds_field_name = format!("{}_within_bounds", output_field_name);
         let left_above_field_name = format!("{}_left_above", output_field_name);
@@ -26,15 +26,15 @@ impl ChannelMonitor {
         let re_entered_below_field_name = format!("{}_re_entered_below", output_field_name);
 
         ChannelMonitor {
-            lower_band_field_name,
-            upper_band_field_name,
-            value_field_name,
+            lower_band_field_name : lower_band_field_name.to_owned(),
+            upper_band_field_name : upper_band_field_name.to_owned(),
+            value_field_name : value_field_name.to_owned(),
             within_bounds_field_name,
             left_above_field_name,
             left_below_field_name,
             re_entered_above_field_name,
             re_entered_below_field_name,
-            output_field_name
+            output_field_name : output_field_name.to_owned()
         }
     }
 }
@@ -108,10 +108,10 @@ mod commit_row_tests {
     #[test]
     fn test_commit_row_value_below_lower_band() -> Result<(), Error> {
         let monitor = ChannelMonitor::new(
-            "lower_band".to_string(),
-            "upper_band".to_string(),
-            "value".to_string(),
-            "output".to_string(),
+            "lower_band",
+            "upper_band",
+            "value",
+            "output",
         );
 
         let mut row = MockRow::new();
@@ -136,10 +136,10 @@ mod commit_row_tests {
     #[test]
     fn test_commit_row_re_entered_above_after_being_below() -> Result<(), Error> {
         let monitor = ChannelMonitor::new(
-            "lower_band".to_string(),
-            "upper_band".to_string(),
-            "value".to_string(),
-            "output".to_string(),
+            "lower_band",
+            "upper_band",
+            "value",
+            "output",
         );
 
         let mut row = MockRow::new();
@@ -178,10 +178,10 @@ mod commit_row_tests {
     #[test]
     fn test_commit_row_re_entered_below_after_being_above() -> Result<(), Error> {
         let monitor = ChannelMonitor::new(
-            "lower_band".to_string(),
-            "upper_band".to_string(),
-            "value".to_string(),
-            "output".to_string(),
+            "lower_band",
+            "upper_band",
+            "value",
+            "output",
         );
 
         let mut row = MockRow::new();
