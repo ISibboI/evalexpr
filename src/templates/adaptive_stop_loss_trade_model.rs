@@ -65,13 +65,13 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
 
         if cycle_epoch > 1 {
             let transpose_value_before_epoch = &ordered_transpose_values[cycle_epoch - 2];
-            prev_trade_signal = row.get_value(&generate_column_name("signal", transpose_value_before_epoch))?.as_boolean_or_none()?;
+            prev_trade_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value_before_epoch))?.as_boolean_or_none()?;
         }
 
         for i in cycle_epoch ..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            if let Some(current_close_value) = row.get_value(&generate_column_name("close", transpose_value))?.as_float_or_none()? {
-                let current_signal = row.get_value(&generate_column_name("signal", transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
+            if let Some(current_close_value) = row.get_value(&generate_column_name(&self.value_field, transpose_value))?.as_float_or_none()? {
+                let current_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
                 let loop_active_trade = active_trade.is_some_and(|tv| tv);
 
                 if loop_active_trade {
@@ -98,7 +98,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                         stop_loss = Some(loop_initiation_price + self.break_even_threshold);
                     }
                 } else {
-                    let loop_trade_signal = row.get_value(&generate_column_name("signal", transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
+                    let loop_trade_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
                     if loop_trade_signal {
                         if !prev_trade_signal.unwrap_or_default() {
                             initiation_price = Some(current_close_value);
