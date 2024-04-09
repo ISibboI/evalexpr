@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::convert::TryInto;
 use crate::error::{EvalexprError, EvalexprResult};
 
 mod display;
@@ -94,6 +95,17 @@ impl PartialEq for Value {
 impl Default for Value {
     fn default() -> Self {
         Value::Empty
+    }
+}
+
+impl TryInto<bool> for Value{
+    type Error = EvalexprError;
+
+    fn try_into(self) -> Result<bool, Self::Error> {
+        match self {
+            Value::Boolean(b) => Ok(b),
+            value => Err(EvalexprError::expected_boolean(value)),
+        }
     }
 }
 
