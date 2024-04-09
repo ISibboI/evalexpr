@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 use thin_trait_object::thin_trait_object;
-use crate::{BoxedThinTraitContext, Error, Value, ValueType};
+use crate::{BoxedOperatorRowTrait, Error, Value, ValueType};
 use crate::Error::CustomError;
 
 
@@ -9,7 +9,7 @@ use crate::Error::CustomError;
 pub trait CompiledTransposeCalculationTemplate : Send {
     fn schema(&self) -> HashMap<String,ValueType>;
     fn dependencies(&self) -> Vec<String>;
-    fn commit_row(&self, context: &mut BoxedThinTraitContext, ordered_transpose_values: &[Value], current_position: usize) -> Result<(), Error>;
+    fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error>;
 }
 
 pub fn context<C,T>(sself : Option<T>, context: C) -> Result<T, Error>

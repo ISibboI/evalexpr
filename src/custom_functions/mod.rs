@@ -3,8 +3,10 @@ pub mod expression_functions;
 pub mod simple_moving_average;
 pub mod simple_cumulative_sum;
 pub mod back;
-pub mod basher_trade_model;
+pub mod adaptive_stop_loss_trade_model;
 pub mod compiled_transpose_calcuation_template;
+mod channel_monitoring_template;
+mod test_utils;
 
 
 use std::fmt::Display;
