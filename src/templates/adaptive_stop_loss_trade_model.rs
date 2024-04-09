@@ -5,6 +5,8 @@ use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, 
 
 
 pub struct AdaptiveStopLossTradeModel {
+    signal_field: String,
+    value_field: String,
     stop_loss_threshold: FloatType,
     take_profit_threshold: FloatType,
     break_even_threshold: FloatType
@@ -12,8 +14,10 @@ pub struct AdaptiveStopLossTradeModel {
 
 
 impl AdaptiveStopLossTradeModel {
-    pub fn new(stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
+    pub fn new(signal_field_name: &str, value_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
         AdaptiveStopLossTradeModel {
+            signal_field: signal_field_name.to_string(),
+            value_field: value_field_name.to_string(),
             stop_loss_threshold,
             take_profit_threshold,
             break_even_threshold
@@ -34,7 +38,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
     fn dependencies(&self) -> Vec<String> {
-        vec!["signal".to_string(), "close".to_string()]
+        vec![self.signal_field.to_string(), self.value_field.to_string()]
     }
     fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
 
