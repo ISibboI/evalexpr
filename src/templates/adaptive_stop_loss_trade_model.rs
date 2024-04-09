@@ -33,6 +33,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
             ("reason", ValueType::String),
             ("initiation_price", ValueType::Float),
             ("stop_loss", ValueType::Float),
+            ("delta", ValueType::Float),
             ("take_profit", ValueType::Float),
             ("break_even", ValueType::Float)
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
@@ -51,6 +52,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         let mut stop_loss: Option<FloatType> = None;
         let mut take_profit: Option<FloatType> = None;
         let mut break_even: Option<FloatType> = None;
+        let mut delta: Option<FloatType> = None;
         let mut reason: Option<String> = None;
 
         if cycle_epoch > 0 {
@@ -80,20 +82,24 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     let loop_take_profit = context(take_profit, "Should have take profit active trade")?;
                     let loop_break_even = context(break_even, "Should break even on active trade")?;
 
+                    let delta_val = current_close_value - loop_initiation_price;
                     if current_close_value <= loop_stop_loss {
                         active_trade = Some(false);
                         initiation_price = None;
                         stop_loss = None;
                         take_profit = None;
                         break_even = None;
-                        reason = Some(format!("Closing trade. Current price ({}) has fallen to or below stop loss from entry price ({}).", current_close_value, loop_initiation_price));
+
+                        delta = Some(delta_val);
+                        reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss from entry price ({}).",delta_val, current_close_value, loop_initiation_price));
                     } else if current_close_value >= loop_take_profit {
                         active_trade = Some(false);
                         initiation_price = None;
                         stop_loss = None;
                         take_profit = None;
                         break_even = None;
-                        reason = Some(format!("Closing trade. Current price ({}) has reached or exceeded take profit level from entry price ({}).", current_close_value, loop_initiation_price));
+                        delta = Some(current_close_value - loop_initiation_price);
+                        reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level from entry price ({}).",delta_val, current_close_value, loop_initiation_price));
                     } else if current_close_value > loop_break_even {
                         stop_loss = Some(loop_initiation_price + self.break_even_threshold);
                     }
@@ -113,11 +119,13 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 row.set_value(&generate_column_name("active_trade", transpose_value), Value::Boolean(active_trade.unwrap_or_default()))?;
                 row.set_value(&generate_column_name("reason", transpose_value), reason.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("initiation_price", transpose_value), initiation_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("delta", transpose_value), delta.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("take_profit", transpose_value), take_profit.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("break_even", transpose_value), break_even.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 prev_trade_signal = Some(current_signal);
                 reason = None;
+                delta = None;
             }
         }
         Ok(())
