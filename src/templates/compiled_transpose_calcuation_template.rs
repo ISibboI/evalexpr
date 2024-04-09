@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use thin_trait_object::thin_trait_object;
 use crate::{BoxedOperatorRowTrait, Error, Value, ValueType};
 use crate::Error::CustomError;
@@ -19,5 +19,14 @@ pub fn context<C,T>(sself : Option<T>, context: C) -> Result<T, Error>
     match sself {
         Some(ok) => Ok(ok),
         None => Err(CustomError(format!("{}", context))),
+    }
+}
+pub fn context_result<C,T, E : Debug>(sself : Result<T, E>, context: C) -> Result<T, Error>
+    where
+        C: Display + Send + Sync + 'static,
+{
+    match sself {
+        Ok(ok) => Ok(ok),
+        Err(err) => Err(CustomError(format!("{} - {:?}", context, err))),
     }
 }
