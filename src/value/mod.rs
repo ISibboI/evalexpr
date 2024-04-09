@@ -98,13 +98,13 @@ impl Default for Value {
     }
 }
 
-impl TryInto<bool> for Value{
+impl TryInto<bool> for &Value{
     type Error = EvalexprError;
 
     fn try_into(self) -> Result<bool, Self::Error> {
         match self {
-            Value::Boolean(b) => Ok(b),
-            value => Err(EvalexprError::expected_boolean(value)),
+            Value::Boolean(b) => Ok(b.clone()),
+            value => Err(EvalexprError::expected_boolean(value.clone())),
         }
     }
 }
