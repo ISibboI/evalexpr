@@ -1,22 +1,22 @@
 use crate::{Error, FloatType, Value};
 use chrono::{NaiveDateTime,Timelike,Utc, DateTime, Duration, Datelike, TimeZone};
 
-pub fn is_null(value: &Value) ->  Result<&Value, Error>  {
-    Ok(match value {
-        Value::Empty => &Value::Int(0),
-        _ => value,
+pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
+    Ok(match value.into() {
+        Value::Empty => Value::Int(0),
+        v => v,
     })
 }
 
-pub fn abs(value: &Value) -> Result<Value, Error> {
-    match value {
+pub fn abs<T: Into<Value>>(value: T) -> Result<Value, Error> {
+    match value.into() {
         Value::Float(fl) => { Ok(Value::Float(fl.abs())) }
         Value::Int(nn) => { Ok(Value::Int(nn.abs())) }
         Value::Empty => {Ok(Value::Empty)}
         _ => Err(Error::InvalidArgumentType),
     }
 }
-pub fn safe_divide<T : Into<Value>>(left: T, right: T) -> Result<Value, Error> {
+pub fn safe_divide<TL: Into<Value>,TR: Into<Value>>(left: TL, right: TR) -> Result<Value, Error> {
     match (left.into(), right.into()) {
         (Value::Float(left), Value::Float(right)) => {
             if right == 0.0 {
@@ -102,19 +102,23 @@ pub fn round_date_to_precision(string: &Value, precision: &Value) -> Result<Valu
     }
 }
 
-pub fn max<'a>(value1: &'a Value, value2: &'a Value) ->  Result<&'a Value, Error>  {
-    Ok(if value1 > value2 {
-        value1
+pub fn max<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) ->  Result<Value, Error>  {
+    let x = value1.into();
+    let x1 = value2.into();
+    Ok(if x > x1 {
+        x
     } else {
-        value2
+        x1
     })
 }
 
-pub fn min<'a>(value1: &'a Value, value2: &'a Value) -> Result<&'a Value, Error>  {
-    Ok(if value1 < value2 {
-        value1
+pub fn min<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) -> Result<Value, Error>  {
+    let x = value1.into();
+    let x1 = value2.into();
+    Ok(if x < x1 {
+        x
     } else {
-        value2
+        x1
     })
 }
 
