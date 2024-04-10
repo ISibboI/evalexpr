@@ -16,31 +16,31 @@ pub fn abs(value: &Value) -> Result<Value, Error> {
         _ => Err(Error::InvalidArgumentType),
     }
 }
-pub fn safe_divide(left: &Value, right: Value) -> Result<Value, Error> {
+pub fn safe_divide(left: &Value, right: &Value) -> Result<Value, Error> {
     match (left, right) {
         (Value::Float(left), Value::Float(right)) => {
-            if right == 0.0 {
+            if *right == 0.0 {
                 Ok(Value::Empty)
             } else {
                 Ok(Value::Float(left / right))
             }
         }
         (Value::Int(left), Value::Int(right)) => {
-            if right == 0 {
+            if *right == 0 {
                 Ok(Value::Empty)
             } else {
                 Ok(Value::Int(left / right))
             }
         }
         (Value::Float(left), Value::Int(right)) => {
-            if right == 0 {
+            if *right == 0 {
                 Ok(Value::Empty)
             } else {
-                Ok(Value::Float(left / right as FloatType))
+                Ok(Value::Float(left / *right as FloatType))
             }
         }
         (Value::Int(left), Value::Float(right)) => {
-            if right == 0.0 {
+            if *right == 0.0 {
                 Ok(Value::Empty)
             } else {
                 Ok(Value::Float(*left as FloatType / right))
