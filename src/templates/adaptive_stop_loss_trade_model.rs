@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::context;
+use crate::{context, get_string};
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
 
 
 pub struct AdaptiveStopLossTradeModel {
     signal_field: String,
-    date_field: String,
     value_field: String,
     stop_loss_threshold: FloatType,
     take_profit_threshold: FloatType,
@@ -15,10 +14,9 @@ pub struct AdaptiveStopLossTradeModel {
 
 
 impl AdaptiveStopLossTradeModel {
-    pub fn new(date_field: &str,signal_field_name: &str, value_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
+    pub fn new(signal_field_name: &str, value_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
         AdaptiveStopLossTradeModel {
             signal_field: signal_field_name.to_string(),
-            date_field: date_field.to_string(),
             value_field: value_field_name.to_string(),
             stop_loss_threshold,
             take_profit_threshold,
@@ -77,10 +75,9 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
 
         for i in cycle_epoch ..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            if let (Some(current_close_value), Some(current_date)) = (
-                row.get_value(&generate_column_name(&self.value_field, transpose_value))?.as_float_or_none()?,
-                row.get_value(&generate_column_name(&self.date_field, transpose_value))?.as_string_or_none()?
-            ){
+            if let Some(current_close_value) =
+                row.get_value(&generate_column_name(&self.value_field, transpose_value))?.as_float_or_none()?
+            {
                 let current_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
                 let loop_active_trade = active_trade.is_some_and(|tv| tv);
                 let mut loop_trade_closed = false;
@@ -107,7 +104,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     if loop_trade_signal {
                         if !prev_trade_signal.unwrap_or_default() {
                             initiation_price = Some(current_close_value);
-                            initiation_date = Some(current_date);
+                            initiation_date = Some(get_string(&transpose_value));
                             stop_loss = Some(current_close_value - self.stop_loss_threshold);
                             take_profit = Some(current_close_value + self.take_profit_threshold);
                             break_even = Some(current_close_value + self.break_even_threshold);
