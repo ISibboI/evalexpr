@@ -91,7 +91,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     if current_close_value <= loop_stop_loss {
                         loop_trade_closed = true;
                         delta = Some(delta_val);
-                        reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {} from entry price ({}).",delta_val, current_close_value,loop_stop_loss, loop_initiation_price));
+                        reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {}({}) from entry price ({}).",delta_val, current_close_value,loop_stop_loss,self.stop_loss_threshold, loop_initiation_price));
                     } else if current_close_value >= loop_take_profit {
                         loop_trade_closed = true;
                         delta = Some(current_close_value - loop_initiation_price);
