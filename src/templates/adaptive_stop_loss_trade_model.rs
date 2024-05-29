@@ -87,15 +87,13 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     let loop_take_profit = context(take_profit, "Should have take profit active trade")?;
                     let loop_break_even = context(break_even, "Should break even on active trade")?;
 
-                    let delta_val = current_close_value - loop_initiation_price;
+                    delta = Some(current_close_value - loop_initiation_price);
                     if current_close_value <= loop_stop_loss {
                         loop_trade_closed = true;
-                        delta = Some(delta_val);
-                        reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {}({}) from entry price ({}).",delta_val, current_close_value,loop_stop_loss,self.stop_loss_threshold, loop_initiation_price));
+                        reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {}({}) from entry price ({}).",delta.unwrap(), current_close_value,loop_stop_loss,self.stop_loss_threshold, loop_initiation_price));
                     } else if current_close_value >= loop_take_profit {
                         loop_trade_closed = true;
-                        delta = Some(current_close_value - loop_initiation_price);
-                        reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta_val, current_close_value,loop_take_profit, loop_initiation_price));
+                        reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta.unwrap(), current_close_value,loop_take_profit, loop_initiation_price));
                     } else if current_close_value > loop_break_even {
                         stop_loss = Some(loop_initiation_price + self.break_even_threshold);
                     }
