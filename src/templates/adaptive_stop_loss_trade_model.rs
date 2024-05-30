@@ -33,6 +33,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
             ("initiation_date", ValueType::String),
             ("reason", ValueType::String),
             ("initiation_price", ValueType::Float),
+            ("exit_price", ValueType::Float),
             ("stop_loss", ValueType::Float),
             ("delta", ValueType::Float),
             ("take_profit", ValueType::Float),
@@ -50,6 +51,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
 
         let mut active_trade: Option<bool> = None;
         let mut initiation_price: Option<FloatType> = None;
+        let mut exit_price: Option<FloatType> = None;
         let mut initiation_date: Option<String> = None;
         let mut stop_loss: Option<FloatType> = None;
         let mut take_profit: Option<FloatType> = None;
@@ -90,9 +92,11 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     delta = Some(current_close_value - loop_initiation_price);
                     if current_close_value <= loop_stop_loss {
                         loop_trade_closed = true;
+                        exit_price = Some(current_close_value);
                         reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {}({}) from entry price ({}).",delta.unwrap(), current_close_value,loop_stop_loss,self.stop_loss_threshold, loop_initiation_price));
                     } else if current_close_value >= loop_take_profit {
                         loop_trade_closed = true;
+                        exit_price = Some(current_close_value);
                         reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta.unwrap(), current_close_value,loop_take_profit, loop_initiation_price));
                     } else if current_close_value > loop_break_even {
                         stop_loss = Some(loop_initiation_price + self.break_even_threshold);
@@ -116,16 +120,19 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 row.set_value(&generate_column_name("initiation_price", transpose_value), initiation_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("initiation_date", transpose_value), initiation_date.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("delta", transpose_value), delta.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("exit_price", transpose_value), exit_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("take_profit", transpose_value), take_profit.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("break_even", transpose_value), break_even.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 prev_trade_signal = Some(current_signal);
                 reason = None;
                 delta = None;
+                exit_price = None;
                 if loop_trade_closed {
                     active_trade = Some(false);
                     initiation_price = None;
                     initiation_date = None;
+
                     stop_loss = None;
                     take_profit = None;
                     break_even = None;
