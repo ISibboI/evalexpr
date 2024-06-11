@@ -39,6 +39,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
             ("stop_loss", ValueType::Float),
             ("delta", ValueType::Float),
             ("take_profit", ValueType::Float),
+            ("avg_daily_range", ValueType::Float),
             ("break_even", ValueType::Float)
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
@@ -104,7 +105,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                         exit_price = Some(current_close_value);
                         reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta.unwrap(), current_close_value,loop_take_profit, loop_initiation_price));
                     } else if current_close_value > loop_break_even {
-                        stop_loss = Some(loop_initiation_price + (trading_range * self.break_even_threshold));
+                        stop_loss = Some(loop_initiation_price - (trading_range * self.break_even_threshold));
                     }
                 } else {
                     let loop_trade_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
@@ -129,6 +130,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("take_profit", transpose_value), take_profit.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("break_even", transpose_value), break_even.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("avg_daily_range", transpose_value), trading_range.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 prev_trade_signal = Some(current_signal);
                 reason = None;
                 delta = None;
