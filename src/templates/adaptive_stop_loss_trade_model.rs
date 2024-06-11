@@ -7,6 +7,7 @@ use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, 
 pub struct AdaptiveStopLossTradeModel {
     signal_field: String,
     value_field: String,
+    trading_range_field_name: String,
     stop_loss_threshold: FloatType,
     take_profit_threshold: FloatType,
     break_even_threshold: FloatType
@@ -14,10 +15,11 @@ pub struct AdaptiveStopLossTradeModel {
 
 
 impl AdaptiveStopLossTradeModel {
-    pub fn new(signal_field_name: &str, value_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
+    pub fn new(signal_field_name: &str, value_field_name: &str,trading_range_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
         AdaptiveStopLossTradeModel {
             signal_field: signal_field_name.to_string(),
             value_field: value_field_name.to_string(),
+            trading_range_field_name: trading_range_field_name.to_string(),
             stop_loss_threshold,
             take_profit_threshold,
             break_even_threshold
@@ -41,7 +43,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
     fn dependencies(&self) -> Vec<String> {
-        vec![self.signal_field.to_string(), self.value_field.to_string()]
+        vec![self.signal_field.to_string(), self.value_field.to_string(), self.trading_range_field_name.to_string()]
     }
     fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
 
@@ -77,8 +79,11 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
 
         for i in cycle_epoch ..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            if let Some(current_close_value) =
-                row.get_value(&generate_column_name(&self.value_field, transpose_value))?.as_float_or_none()?
+            if let (Some(current_close_value),Some(trading_range)) =
+                (
+                    row.get_value(&generate_column_name(&self.value_field, transpose_value))?.as_float_or_none()?,
+                    row.get_value(&generate_column_name(&self.trading_range_field_name, transpose_value))?.as_float_or_none()?
+                )
             {
                 let current_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
                 let loop_active_trade = active_trade.is_some_and(|tv| tv);
@@ -99,7 +104,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                         exit_price = Some(current_close_value);
                         reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta.unwrap(), current_close_value,loop_take_profit, loop_initiation_price));
                     } else if current_close_value > loop_break_even {
-                        stop_loss = Some(loop_initiation_price + self.break_even_threshold);
+                        stop_loss = Some(loop_initiation_price + (trading_range * self.break_even_threshold));
                     }
                 } else {
                     let loop_trade_signal = row.get_value(&generate_column_name(&self.signal_field, transpose_value))?.as_boolean_or_none()?.unwrap_or_default();
@@ -107,9 +112,9 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                         if !prev_trade_signal.unwrap_or_default() {
                             initiation_price = Some(current_close_value);
                             initiation_date = Some(get_string(&transpose_value));
-                            stop_loss = Some(current_close_value - self.stop_loss_threshold);
-                            take_profit = Some(current_close_value + self.take_profit_threshold);
-                            break_even = Some(current_close_value + self.break_even_threshold);
+                            stop_loss = Some(current_close_value - (trading_range *self.stop_loss_threshold));
+                            take_profit = Some(current_close_value + (trading_range *self.take_profit_threshold));
+                            break_even = Some(current_close_value + (trading_range *self.break_even_threshold));
                             active_trade = Some(true);
                         }
                     }
