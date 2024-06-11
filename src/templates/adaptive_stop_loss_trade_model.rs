@@ -130,7 +130,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("take_profit", transpose_value), take_profit.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("break_even", transpose_value), break_even.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
-                row.set_value(&generate_column_name("avg_daily_range", transpose_value), trading_range.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("avg_daily_range", transpose_value), Value::Float(trading_range.clone()))?;
                 prev_trade_signal = Some(current_signal);
                 reason = None;
                 delta = None;
