@@ -1,37 +1,38 @@
 use crate::{Error, Value};
 use crate::Error::UnsupportedOperation;
 
-pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
-    if columns.len() <= 2 {
-        return Ok(Value::Empty);
+pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, &'static str> {
+    if columns.len() < 3 {
+        return Ok(Value::Empty); // Not enough data to calculate
     }
 
     let mut total_sum = 0.0;
     let mut total_weight = 0;
     let half_length = columns.len() / 2;
 
-    for i in half_length..columns.len() {
+    for i in 0..columns.len() {
         let mut sum: f64 = 0.0;
-        let mut sum_weight: usize = half_length + 1;
-        let mut k = half_length;
+        let mut sum_weight = 0;
+        let mut k = 1;
 
-        if let Some(price_i) = get_price(row, columns, i) {
-            sum += price_i * sum_weight as f64; // Price(i) * (HalfLength + 1)
+        // Sum over the symmetric window around the current index `i`
+        for j in 0..=half_length {
+            // Forward direction
+            if i + j < columns.len() {
+                if let Some(price) = get_price(row, columns, i + j) {
+                    let weight = if j == 0 { half_length + 1 } else { half_length + 1 - j };
+                    sum += price * weight as f64;
+                    sum_weight += weight;
+                }
+            }
 
-            for j in 1..=half_length {
-                if i + j < columns.len() {
-                    if let Some(price) = get_price(row, columns, i + j) {
-                        sum += price * k as f64; // Price(i + j)
-                        sum_weight += k;
-                    }
+            // Backward direction, skipping the center when j == 0
+            if j != 0 && i >= j {
+                if let Some(price) = get_price(row, columns, i - j) {
+                    let weight = half_length + 1 - j;
+                    sum += price * weight as f64;
+                    sum_weight += weight;
                 }
-                if j <= i && i >= j {
-                    if let Some(price) = get_price(row, columns, i - j) {
-                        sum += price * k as f64; // Price(i - j)
-                        sum_weight += k;
-                    }
-                }
-                k -= 1;
             }
         }
 
