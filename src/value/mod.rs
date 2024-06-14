@@ -541,6 +541,30 @@ pub fn to_ffi_result<T: Default, E: ToErrorType>(result: Result<T, E>) -> FfiRes
     }
 }
 
+pub fn to_nested_ffi_result<T: Default, E: ToErrorType>(
+    result: Result<Result<T, E>, Box<dyn std::any::Any + Send + 'static>>,
+) -> FfiResult<T> {
+    match result {
+        Ok(inner_result) => match inner_result {
+            Ok(value) => FfiResult {
+                value,
+                error_code: 0, // Indicate success
+                error_message: "".to_string(),
+            },
+            Err(e) => FfiResult {
+                value: T::default(),
+                error_code: e.to_error_code(),
+                error_message: e.to_error_message().unwrap_or_else(|| "".to_string()),
+            },
+        },
+        Err(err) => FfiResult {
+            value: T::default(),
+            error_code: -1, // Indicate a panic occurred
+            error_message: format!("A panic occurred during execution {:?}.",err),
+        },
+    }
+}
+
 
 
 
