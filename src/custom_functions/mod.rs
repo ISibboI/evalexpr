@@ -8,6 +8,7 @@ pub mod back;
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
 pub use triangular_moving_average::triangular_moving_average;
+pub use triangular_moving_average::columns_len;
 pub use expression_functions::*;
 pub use back::*;
 pub use simple_moving_average::simple_moving_average;
