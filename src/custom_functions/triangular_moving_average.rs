@@ -2,7 +2,6 @@ use crate::{Error, Value};
 use crate::Error::UnsupportedOperation;
 
 pub fn columns_len(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
-    panic!("Not implemented 2");
     Ok(Value::Int(columns.len() as i64))
 }
 pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
