@@ -557,11 +557,21 @@ pub fn to_nested_ffi_result<T: Default, E: ToErrorType>(
                 error_message: e.to_error_message().unwrap_or_else(|| "".to_string()),
             },
         },
-        Err(err) => FfiResult {
-            value: T::default(),
-            error_code: 8, // Indicate a panic occurred
-            error_message: format!("A panic occurred during execution {:?}.",err),
-        },
+        Err(panic_info) => {
+            let error_message = if let Some(s) = panic_info.downcast_ref::<&str>() {
+                s.to_string()
+            } else if let Some(s) = panic_info.downcast_ref::<String>() {
+                s.clone()
+            } else {
+                "Unknown panic".to_string()
+            };
+
+            FfiResult {
+                value: T::default(),
+                error_code: 8,
+                error_message,
+            }
+        }
     }
 }
 
