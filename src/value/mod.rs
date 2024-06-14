@@ -559,7 +559,7 @@ pub fn to_nested_ffi_result<T: Default, E: ToErrorType>(
         },
         Err(err) => FfiResult {
             value: T::default(),
-            error_code: -1, // Indicate a panic occurred
+            error_code: 8, // Indicate a panic occurred
             error_message: format!("A panic occurred during execution {:?}.",err),
         },
     }
