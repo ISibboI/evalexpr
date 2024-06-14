@@ -4,7 +4,7 @@ use crate::Error::UnsupportedOperation;
 pub fn columns_len(row: &[Value], columns: &[usize]) -> Result<Value, &'static str> {
     Ok(Value::Int(columns.len() as i64))
 }
-pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, &'static str> {
+pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
     if columns.len() < 3 {
         return Ok(Value::Empty); // Not enough data to calculate
     }
