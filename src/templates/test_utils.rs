@@ -35,7 +35,15 @@ impl OperatorRowTrait for MockRow {
         Ok(())
     }
 
-    fn set_row(&self, row: usize) {
+    fn get_value_for_column(&self, col: usize) -> EvalexprResult<Value> {
+        todo!()
+    }
+
+    fn set_value_for_column(&mut self, col: usize, value: Value) -> EvalexprResult<()> {
+        todo!()
+    }
+
+    fn set_row(&mut self, row: usize) {
         todo!()
     }
 
@@ -47,4 +55,7 @@ impl OperatorRowTrait for MockRow {
         todo!()
     }
 
+    fn get_dirty_flags(&self) -> EvalexprResult<Vec<usize>> {
+        todo!()
+    }
 }
