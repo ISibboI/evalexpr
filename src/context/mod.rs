@@ -124,6 +124,7 @@ pub trait Context {
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
 }
 
+
 #[thin_trait_object]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
