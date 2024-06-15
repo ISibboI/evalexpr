@@ -533,7 +533,7 @@ extern crate serde_derive;
 
 pub use crate::{
     context::{
-        Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext, OperatorRowTrait, BoxedOperatorRowTrait,
+        Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext, OperatorRowTrait, BoxedOperatorRowTrait,BoxedOperatorSchemaTrait,
         HashMapContext,
     },
     error::{EvalexprError, EvalexprResult},

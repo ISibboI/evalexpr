@@ -128,9 +128,18 @@ pub trait Context {
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> EvalexprResult<Value>;
     fn set_value(&mut self, identifier: &str, value: Value) -> EvalexprResult<()>;
+    fn get_value_for_column(&self, col: usize) -> EvalexprResult<Value>;
+    fn set_value_for_column(&mut self, col: usize, value: Value) -> EvalexprResult<()>;
     fn set_row(&mut self, row: usize);
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
     fn has_changes(&self) -> bool;
+    fn get_dirty_flags(&self) -> EvalexprResult<Vec<usize>>;
+}
+#[thin_trait_object]
+pub trait OperatorSchemaTrait {
+    fn get_ordered_column_names(&self) -> EvalexprResult<Vec<String>>;
+    fn get_column_name_for_column(&self, column: usize) -> EvalexprResult<String>;
+    fn get_index_for_column(&self, column: &str) -> EvalexprResult<usize>;
 }
 
 /// This macro provides a convenient syntax for creating a static context.
