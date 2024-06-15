@@ -126,22 +126,22 @@ pub trait Context {
 
 #[thin_trait_object]
 pub trait OperatorRowTrait {
-    fn get_value(&self, identifier: &str) -> EvalexprResult<Value>;
-    fn set_value(&mut self, identifier: &str, value: Value) -> EvalexprResult<()>;
-    fn get_value_for_column(&self, col: usize) -> EvalexprResult<Value>;
-    fn set_value_for_column(&mut self, col: usize, value: Value) -> EvalexprResult<()>;
+    fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
+    fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
+    fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
+    fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
     fn set_row(&mut self, row: usize);
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
     fn has_changes(&self) -> bool;
-    fn get_dirty_flags(&self) -> EvalexprResult<Vec<usize>>;
+    fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error>;
 }
 
 #[thin_trait_object]
 pub trait ActiveRowTrackerTrait {
-    fn all_active_rows(&self) -> EvalexprResult<Vec<usize>>;
-    fn all_changes(&self) -> EvalexprResult<Vec<usize>>;
-    fn set_active(&self, row: usize) -> EvalexprResult<()>;
-    fn is_active(&self, row: usize) -> EvalexprResult<bool>;
+    fn all_active_rows(&self) -> Result<Vec<usize>, crate::Error>;
+    fn all_changes(&self) -> Result<Vec<usize>, crate::Error>;
+    fn set_active(&self, row: usize) -> Result<(),crate::Error>;
+    fn is_active(&self, row: usize) -> Result<bool, crate::Error>;
 }
 
 #[repr(C)]
