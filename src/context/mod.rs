@@ -135,11 +135,30 @@ pub trait OperatorRowTrait {
     fn has_changes(&self) -> bool;
     fn get_dirty_flags(&self) -> EvalexprResult<Vec<usize>>;
 }
+
+#[thin_trait_object]
+pub trait ActiveRowTrackerTrait {
+    fn all_active_rows(&self) -> EvalexprResult<Vec<usize>>;
+    fn all_changes(&self) -> EvalexprResult<Vec<usize>>;
+    fn set_active(&self, row: usize) -> EvalexprResult<()>;
+    fn is_active(&self, row: usize) -> EvalexprResult<bool>;
+}
+
+#[repr(C)]
+pub struct FFIColumn{
+    pub name: String,
+    pub data_type: ValueType,
+    pub is_pk: bool,
+    pub meta_data: String
+}
+
 #[thin_trait_object]
 pub trait OperatorSchemaTrait {
-    fn get_ordered_column_names(&self) -> EvalexprResult<Vec<String>>;
-    fn get_column_name_for_column(&self, column: usize) -> EvalexprResult<String>;
+    fn get_schema(&self) -> EvalexprResult<Vec<FFIColumn>>;
+    fn get_column_for_index(&self, column: usize) -> EvalexprResult<FFIColumn>;
     fn get_index_for_column(&self, column: &str) -> EvalexprResult<usize>;
+    fn add_column(&mut self, column: FFIColumn) -> EvalexprResult<()>;
+    fn remove_column(&mut self, column_name: &str) -> EvalexprResult<()>;
 }
 
 /// This macro provides a convenient syntax for creating a static context.
