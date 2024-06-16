@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::convert::TryInto;
+use std::fmt;
 use crate::error::{EvalexprError, EvalexprResult};
 
 mod display;
@@ -325,6 +326,27 @@ pub enum Error {
     InvalidInputString,
     InvalidDateFormat,
     CustomError(String),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Error::UnsupportedArithmeticBetweenTypes => write!(f, "Unsupported arithmetic between types"),
+            Error::UnsupportedOperation => write!(f, "Unsupported operation"),
+            Error::DivisionByZero => write!(f, "Division by zero"),
+            Error::NonNumericType => write!(f, "Non-numeric type"),
+            Error::InvalidArgumentType => write!(f, "Invalid argument type"),
+            Error::InvalidInputString => write!(f, "Invalid input string"),
+            Error::InvalidDateFormat => write!(f, "Invalid date format"),
+            Error::CustomError(ref msg) => write!(f, "Custom error: {}", msg),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 impl From<EvalexprError> for Error {
