@@ -315,7 +315,7 @@ use std::ops::{Div, Rem};
 
 use std::ops::Mul;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Error {
     UnsupportedArithmeticBetweenTypes,
     UnsupportedOperation,

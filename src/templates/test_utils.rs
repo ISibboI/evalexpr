@@ -47,9 +47,10 @@ impl OperatorRowTrait for MockRow {
         todo!()
     }
 
-    fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value> {
+    fn call_function(&self, idt: &str, argument: Value) -> Result<Value, Error> {
         todo!()
     }
+
 
     fn has_changes(&self) -> bool {
         todo!()

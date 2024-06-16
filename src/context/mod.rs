@@ -125,19 +125,19 @@ pub trait Context {
 }
 
 
-#[thin_trait_object]
+#[thin_trait_object(generate_dotnet_wrappers=true)]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
     fn set_row(&mut self, row: usize);
-    fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
+    fn call_function(&self, idt: &str, argument: Value) -> Result<Value, crate::Error>;
     fn has_changes(&self) -> bool;
     fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error>;
 }
 
-#[thin_trait_object]
+#[thin_trait_object(generate_dotnet_wrappers=true)]
 pub trait ActiveRowTrackerTrait {
     fn all_active_rows(&self) -> Result<Vec<usize>, crate::Error>;
     fn all_changes(&self) -> Result<Vec<usize>, crate::Error>;
@@ -146,6 +146,7 @@ pub trait ActiveRowTrackerTrait {
 }
 
 #[repr(C)]
+#[derive(Serialize, Deserialize)]
 pub struct FFIColumn{
     pub name: String,
     pub data_type: ValueType,
@@ -153,13 +154,13 @@ pub struct FFIColumn{
     pub meta_data: String
 }
 
-#[thin_trait_object]
+#[thin_trait_object(generate_dotnet_wrappers=true)]
 pub trait OperatorSchemaTrait {
-    fn get_schema(&self) -> EvalexprResult<Vec<FFIColumn>>;
-    fn get_column_for_index(&self, column: usize) -> EvalexprResult<FFIColumn>;
-    fn get_index_for_column(&self, column: &str) -> EvalexprResult<usize>;
-    fn add_column(&mut self, column: FFIColumn) -> EvalexprResult<()>;
-    fn remove_column(&mut self, column_name: &str) -> EvalexprResult<()>;
+    fn get_schema(&self) -> Result<Vec<FFIColumn>, crate::Error>;
+    fn get_column_for_index(&self, column: usize) -> Result<FFIColumn, crate::Error>;
+    fn get_index_for_column(&self, column: &str) -> Result<usize, crate::Error>;
+    fn add_column(&mut self, column: FFIColumn) -> Result<(), crate::Error>;
+    fn remove_column(&mut self, column_name: &str) -> Result<(), crate::Error>;
 }
 
 /// This macro provides a convenient syntax for creating a static context.
