@@ -542,6 +542,22 @@ pub use crate::{
         BoxedOperatorSchemaTrait,
         BoxedActiveRowTrackerTrait,
         FFIColumn,
+        HashMapContext,
+    },
+    error::{EvalexprError, EvalexprResult},
+    function::Function,
+    interface::*,
+    custom_functions::*,
+    templates::*,
+    operator::Operator,
+    token::PartialToken,
+    tree::Node,
+    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult, to_ffi_result, to_nested_ffi_result,Error},
+};
+
+#[cfg(feature = "serde_json_support")]
+pub use crate::{
+    context::{
         ActiveRowTrackerTrait_all_active_rows,
         ActiveRowTrackerTrait_all_changes,
         ActiveRowTrackerTrait_set_active,
@@ -559,17 +575,7 @@ pub use crate::{
         OperatorSchemaTrait_get_index_for_column,
         OperatorSchemaTrait_add_column,
         OperatorSchemaTrait_remove_column,
-        HashMapContext,
-    },
-    error::{EvalexprError, EvalexprResult},
-    function::Function,
-    interface::*,
-    custom_functions::*,
-    templates::*,
-    operator::Operator,
-    token::PartialToken,
-    tree::Node,
-    value::{value_type::ValueType, EmptyType, FloatType, IntType, TupleType, Value, EMPTY_VALUE, FfiResult, to_ffi_result, to_nested_ffi_result,Error},
+    }
 };
 
 mod context;

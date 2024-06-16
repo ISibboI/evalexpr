@@ -25,7 +25,6 @@ path = "src/lib.rs"
 [dependencies]
 regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
-serde_json = "1.0.117"
 serde_derive = { version = "1.0.133", optional = true}
 #csv = "1.1"
 #anyhow = "1.0.86"
@@ -33,10 +32,16 @@ thin_trait_object = { git = "https://github.com/gbemiga-viewserver/thin_trait_ob
 chrono = { version = "0.4.19", default-features = false, features = ["clock", "std"] }
 
 
+
 [features]
 serde_support = ["serde", "serde_derive"]
 default = ["serde_support"]
 regex_support = ["regex"]
+serde_json_support = ["serde_json"]
+
+[dependencies.serde_json]
+version = "*"
+optional = true
 
 [dev-dependencies]
 ron = "0.7.0"

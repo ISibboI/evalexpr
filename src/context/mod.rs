@@ -125,7 +125,8 @@ pub trait Context {
 }
 
 
-#[thin_trait_object(generate_dotnet_wrappers=true)]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
@@ -137,7 +138,8 @@ pub trait OperatorRowTrait {
     fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error>;
 }
 
-#[thin_trait_object(generate_dotnet_wrappers=true)]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait ActiveRowTrackerTrait {
     fn all_active_rows(&self) -> Result<Vec<usize>, crate::Error>;
     fn all_changes(&self) -> Result<Vec<usize>, crate::Error>;
@@ -154,7 +156,8 @@ pub struct FFIColumn{
     pub meta_data: String
 }
 
-#[thin_trait_object(generate_dotnet_wrappers=true)]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorSchemaTrait {
     fn get_schema(&self) -> Result<Vec<FFIColumn>, crate::Error>;
     fn get_column_for_index(&self, column: usize) -> Result<FFIColumn, crate::Error>;
