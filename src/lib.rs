@@ -577,6 +577,11 @@ pub use crate::{
         OperatorSchemaTrait_get_index_for_column,
         OperatorSchemaTrait_add_column,
         OperatorSchemaTrait_remove_column,
+        OperatorStatusContainerTrait_add,
+        OperatorStatusContainerTrait_remove,
+        OperatorStatusContainerTrait_changes,
+        OperatorStatusContainerTrait_contains,
+        OperatorStatusContainerTrait_statuses,
     }
 };
 
