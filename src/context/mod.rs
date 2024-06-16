@@ -165,6 +165,15 @@ pub trait OperatorSchemaTrait {
     fn add_column(&mut self, column: FFIColumn) -> Result<(), crate::Error>;
     fn remove_column(&mut self, column_name: &str) -> Result<(), crate::Error>;
 }
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
+pub trait OperatorStatusContainerTrait {
+    fn statuses(&self) -> Result<Vec<u8>, crate::Error>;
+    fn changes(&self) -> Result<Vec<(u8, u8)>, crate::Error>;
+    fn add(&self, status: u8, context: &str) -> Result<(), crate::Error>;
+    fn remove(&self, status: u8) -> Result<(), crate::Error>;
+    fn contains(&mut self, status: u8) -> Result<bool, crate::Error>;
+}
 
 /// This macro provides a convenient syntax for creating a static context.
 ///
