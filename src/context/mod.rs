@@ -134,7 +134,7 @@ pub trait OperatorRowTrait {
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
     fn set_row(&mut self, row: usize);
     fn call_function(&self, idt: &str, argument: Value) -> Result<Value, crate::Error>;
-    fn has_changes(&self) -> bool;
+    fn has_changes(&self) -> Result<bool,crate::Error>;
     fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error>;
 }
 
