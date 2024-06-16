@@ -27,8 +27,8 @@ regex = { version = "1.5.5", optional = true}
 serde = { version = "1.0.133", optional = true}
 serde_json = "1.0.117"
 serde_derive = { version = "1.0.133", optional = true}
-csv = "1.1"
-anyhow = "1.0.86"
+#csv = "1.1"
+#anyhow = "1.0.86"
 thin_trait_object = { git = "https://github.com/gbemiga-viewserver/thin_trait_object", branch = "main" }
 chrono = { version = "0.4.19", default-features = false, features = ["clock", "std"] }
 
