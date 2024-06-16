@@ -51,10 +51,10 @@ impl OperatorRowTrait for MockRow {
         todo!()
     }
 
-
-    fn has_changes(&self) -> bool {
+    fn has_changes(&self) -> Result<bool, Error> {
         todo!()
     }
+
 
     fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error> {
         todo!()
