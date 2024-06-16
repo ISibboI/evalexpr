@@ -142,7 +142,7 @@ pub trait OperatorRowTrait {
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait ActiveRowTrackerTrait {
     fn all_active_rows(&self) -> Result<Vec<usize>, crate::Error>;
-    fn all_changes(&self) -> Result<Vec<usize>, crate::Error>;
+    fn all_changes(&self) -> Result<Vec<(u8,usize)>, crate::Error>;
     fn set_active(&self, row: usize) -> Result<(),crate::Error>;
     fn is_active(&self, row: usize) -> Result<bool, crate::Error>;
 }
