@@ -150,7 +150,7 @@ pub trait ActiveRowTrackerTrait {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize,Debug)]
 pub struct FFIColumn{
     pub name: String,
     pub data_type: ValueType,
