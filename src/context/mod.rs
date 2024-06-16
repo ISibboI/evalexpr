@@ -143,7 +143,9 @@ pub trait OperatorRowTrait {
 pub trait ActiveRowTrackerTrait {
     fn all_active_rows(&self) -> Result<Vec<usize>, crate::Error>;
     fn all_changes(&self) -> Result<Vec<(u8,usize)>, crate::Error>;
-    fn set_active(&mut self, row: usize) -> Result<(),crate::Error>;
+    fn handle_add(&mut self, row: usize) -> Result<(),crate::Error>;
+    fn handle_update(&mut self, row: usize) -> Result<(),crate::Error>;
+    fn handle_remove(&mut self, row: usize) -> Result<(),crate::Error>;
     fn is_active(&self, row: usize) -> Result<bool, crate::Error>;
 }
 

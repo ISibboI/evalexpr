@@ -564,7 +564,9 @@ pub use crate::{
     context::{
         ActiveRowTrackerTrait_all_active_rows,
         ActiveRowTrackerTrait_all_changes,
-        ActiveRowTrackerTrait_set_active,
+        ActiveRowTrackerTrait_handle_add,
+        ActiveRowTrackerTrait_handle_update,
+        ActiveRowTrackerTrait_handle_remove,
         ActiveRowTrackerTrait_is_active,
         OperatorRowTrait_get_value,
         OperatorRowTrait_set_value,
