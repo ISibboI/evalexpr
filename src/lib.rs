@@ -539,6 +539,7 @@ pub use crate::{
         EmptyContext,
         OperatorRowTrait,
         BoxedOperatorRowTrait,
+        BoxedOperatorStatusContainerTrait,
         OperatorSchemaTrait,
         BoxedOperatorSchemaTrait,
         ActiveRowTrackerTrait,
