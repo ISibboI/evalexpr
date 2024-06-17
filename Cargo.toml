@@ -37,9 +37,12 @@ chrono = { version = "0.4.19", default-features = false, features = ["clock", "s
 serde_support = ["serde", "serde_derive"]
 default = ["serde_support"]
 regex_support = ["regex"]
-serde_json_support = ["serde_json"]
+serde_json_support = ["serde_json", "log"]
 
 [dependencies.serde_json]
+version = "*"
+optional = true
+[dependencies.log]
 version = "*"
 optional = true
 
