@@ -163,12 +163,12 @@ pub struct FFIColumn{
 pub trait OperatorSchemaTrait {
     fn get_schema(&self) -> Result<Vec<FFIColumn>, crate::Error>;
     fn get_column_for_index(&self, column: usize) -> Result<FFIColumn, crate::Error>;
-    fn get_index_for_column(&self, column: &str) -> Result<usize, crate::Error>;
+    fn get_index_for_column(&self, column: String) -> Result<usize, crate::Error>;
     fn add_column(&mut self, column: FFIColumn) -> Result<(), crate::Error>;
-    fn remove_column(&mut self, column_name: &str) -> Result<(), crate::Error>;
+    fn remove_column(&mut self, column_name: String) -> Result<(), crate::Error>;
 
-    fn get_value(&self, identifier: &str, row: usize) -> Result<Value,crate::Error>;
-    fn set_value(&mut self, identifier: &str, row: usize, value: Value) -> Result<(),crate::Error>;
+    fn get_value(&self, identifier: String, row: usize) -> Result<Value,crate::Error>;
+    fn set_value(&mut self, identifier: String, row: usize, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize, row: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value, row: usize) -> Result<(),crate::Error>;
 }
@@ -177,7 +177,7 @@ pub trait OperatorSchemaTrait {
 pub trait OperatorStatusContainerTrait {
     fn statuses(&self) -> Result<Vec<u8>, crate::Error>;
     fn changes(&self) -> Result<Vec<(u8, u8)>, crate::Error>;
-    fn add(&mut self, status: u8, context: &str) -> Result<(), crate::Error>;
+    fn add(&mut self, status: u8, context: String) -> Result<(), crate::Error>;
     fn remove(&mut self, status: u8) -> Result<(), crate::Error>;
     fn contains(&mut self, status: u8) -> Result<bool, crate::Error>;
 }
