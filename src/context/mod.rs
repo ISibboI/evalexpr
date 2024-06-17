@@ -150,12 +150,23 @@ pub trait ActiveRowTrackerTrait {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize,Debug)]
-pub struct FFIColumn{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FFIColumn {
     pub name: String,
     pub data_type: ValueType,
+    #[serde(default = "default_is_pk")]
     pub is_pk: bool,
-    pub meta_data: String
+    #[serde(default = "default_meta_data")]
+    pub meta_data: String,
+}
+
+// Provide default values for the fields
+fn default_is_pk() -> bool {
+    false
+}
+
+fn default_meta_data() -> String {
+    String::from("")
 }
 
 #[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
