@@ -188,7 +188,7 @@ pub trait OperatorSchemaTrait {
 pub trait OperatorStatusContainerTrait {
     fn statuses(&self) -> Result<Vec<u8>, crate::Error>;
     fn changes(&self) -> Result<Vec<(u8, u8)>, crate::Error>;
-    fn add(&mut self, status: u8, context: String) -> Result<(), crate::Error>;
+    fn add(&mut self, status: u8, context: String) -> Result<bool, crate::Error>;
     fn remove(&mut self, status: u8) -> Result<(), crate::Error>;
     fn contains(&mut self, status: u8) -> Result<bool, crate::Error>;
 }
