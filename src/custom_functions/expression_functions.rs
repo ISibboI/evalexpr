@@ -82,6 +82,18 @@ pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     return Ok(Value::Boolean(false));
 }
 
+pub fn ternary(condition: &Value, true_value: &Value, false_value: &Value) -> Result<Value, Error> {
+    if let Value::Boolean(cond) = condition {
+        if *cond {
+            return Ok(true_value.clone());
+        } else {
+            return Ok(false_value.clone());
+        }
+    }
+    // Return an error if the first parameter is not a boolean
+    Err(Error::CustomError("First parameter must be a boolean".to_owned()))
+}
+
 fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Result<DateTime<Utc>, crate::Error> {
     Ok(match precision {
         "m1" => datetime.date().and_hms(datetime.hour(), datetime.minute(), 0),
