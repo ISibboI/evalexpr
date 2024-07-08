@@ -57,6 +57,20 @@ pub fn safe_divide<TL: Into<Value>,TR: Into<Value>>(left: TL, right: TR) -> Resu
     }
 }
 
+
+pub fn substring(message: &Value, start: usize, len: usize) -> Result<Value, Error> {
+    if let Value::String(message) = message {
+        // Ensure start is within bounds and len does not exceed the message length
+        if start < message.len() {
+            let end = if start + len > message.len() { message.len() } else { start + len };
+            let substring = &message[start..end];
+            return Ok(Value::String(substring.to_string()));
+        }
+    }
+    return Ok(Value::String("".to_string()));
+}
+
+
 pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     if let (Value::String(message), Value::String(prefix)) = (message, prefix) {
         if message.starts_with(prefix) {
