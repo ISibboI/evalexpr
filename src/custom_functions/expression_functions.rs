@@ -82,12 +82,12 @@ pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     return Ok(Value::Boolean(false));
 }
 
-pub fn ternary(condition: &Value, true_value: &Value, false_value: &Value) -> Result<Value, Error> {
+pub fn ternary<TL: Into<Value>,TR: Into<Value>>(condition: &Value, true_value: TL, false_value: TR) -> Result<Value, Error> {
     if let Value::Boolean(cond) = condition {
         if *cond {
-            return Ok(true_value.clone());
+            return Ok(true_value.into());
         } else {
-            return Ok(false_value.clone());
+            return Ok(false_value.into());
         }
     }
     // Return an error if the first parameter is not a boolean
