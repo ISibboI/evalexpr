@@ -50,7 +50,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
     fn dependencies(&self) -> Vec<String> {
-        vec![self.signal_field.to_string(), self.close_value_field.to_string(), self.trading_range_field_name.to_string(), self.ask_value_field .to_string()]
+        vec![self.instrument_field_name.to_string(), self.signal_field.to_string(), self.close_value_field.to_string(), self.trading_range_field_name.to_string(), self.ask_value_field .to_string()]
     }
     fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
         let mut prev_trade_signal: Option<bool> = None;
