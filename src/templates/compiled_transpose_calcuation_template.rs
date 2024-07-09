@@ -20,9 +20,9 @@ pub trait CompiledTransposeCalculationTemplate : Send {
 
 pub fn extract_message_from_any_error(err: Box<dyn Any+ Send>) -> String {
     if let Some(s) = err.downcast_ref::<&str>() {
-        format!("Caught a panic with a string: {}", s)
+        s.to_owned()
     } else if let Some(s) = err.downcast_ref::<String>() {
-        format!("Caught a panic with a string: {}", s)
+        s.to_owned()
     } else {
         format!("Caught a panic with an unknown type.")
     }

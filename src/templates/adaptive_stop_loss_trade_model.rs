@@ -109,6 +109,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     } else if current_close_value >= loop_take_profit {
                         loop_trade_closed = true;
                         exit_price = Some(current_close_value);
+                        delta = Some(current_close_value - loop_initiation_price);
                         reason = Some(format!("Won {} Closing trade. Current price ({}) has reached or exceeded take profit level {} from entry price ({}).",delta.unwrap(), current_close_value,loop_take_profit, loop_initiation_price));
                     } else if current_close_value > next_stop_loss_step {
                         stop_loss = Some(loop_stop_loss + (trading_range * self.break_even_threshold));
