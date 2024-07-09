@@ -98,12 +98,12 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     let loop_take_profit = context(take_profit, "Should have take profit active trade")?;
                     //let loop_break_even = context(break_even, "Should break even on active trade")?;
                     let next_stop_loss_step = loop_stop_loss + ((trading_range * self.break_even_threshold) * 2f64);
-                    delta = Some(current_close_value - loop_initiation_price);
                     trade_age = Some(context(trade_age, "Should have trade age for active trade")? + 1);
                     if current_close_value <= loop_stop_loss {
                         if trade_age.unwrap_or_default() >= MIN_TRADE_DURATION {
                             loop_trade_closed = true;
                             exit_price = Some(current_close_value);
+                            delta = Some(current_close_value - loop_initiation_price);
                             reason = Some(format!("Lost {} Closing trade. Current price ({}) has fallen to or below stop loss {}({}) from entry price ({}).", delta.unwrap(), current_close_value, loop_stop_loss, self.stop_loss_threshold, loop_initiation_price));
                         }
                     } else if current_close_value >= loop_take_profit {
