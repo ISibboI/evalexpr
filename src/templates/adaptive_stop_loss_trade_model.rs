@@ -9,6 +9,7 @@ pub struct AdaptiveStopLossTradeModel {
     close_value_field: String,
     ask_value_field: String,
     trading_range_field_name: String,
+    instrument_field_name: String,
     stop_loss_threshold: FloatType,
     take_profit_threshold: FloatType,
     break_even_threshold: FloatType
@@ -16,8 +17,9 @@ pub struct AdaptiveStopLossTradeModel {
 
 
 impl AdaptiveStopLossTradeModel {
-    pub fn new(signal_field_name: &str, close_value_field_name: &str,  ask_value_field_name: &str, trading_range_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
+    pub fn new(instrument_field_name: &str,signal_field_name: &str, close_value_field_name: &str,  ask_value_field_name: &str, trading_range_field_name: &str, stop_loss_threshold: FloatType, take_profit_threshold: FloatType, break_even_threshold: FloatType) -> AdaptiveStopLossTradeModel {
         AdaptiveStopLossTradeModel {
+            instrument_field_name: instrument_field_name.to_string(),
             signal_field: signal_field_name.to_string(),
             close_value_field: close_value_field_name.to_string(),
             ask_value_field: ask_value_field_name.to_string(),
@@ -35,6 +37,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         vec![
             ("active_trade", ValueType::Boolean),
             ("initiation_date", ValueType::String),
+            ("trade_id", ValueType::String),
             ("reason", ValueType::String),
             ("initiation_price", ValueType::Float),
             ("exit_price", ValueType::Float),
@@ -55,6 +58,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         let mut initiation_price: Option<FloatType> = None;
         let mut exit_price: Option<FloatType> = None;
         let mut initiation_date: Option<String> = None;
+        let mut trade_id: Option<String> = None;
         let mut stop_loss: Option<FloatType> = None;
         let mut take_profit: Option<FloatType> = None;
         //let mut break_even: Option<FloatType> = None;
@@ -66,6 +70,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
         if cycle_epoch > 0 {
             let transpose_value_before_epoch = &ordered_transpose_values[cycle_epoch - 1];
             active_trade = row.get_value(&generate_column_name("active_trade", transpose_value_before_epoch))?.as_boolean_or_none()?;
+            trade_id = row.get_value(&generate_column_name("trade_id", transpose_value_before_epoch))?.as_string_or_none()?;
             initiation_price = row.get_value(&generate_column_name("initiation_price", transpose_value_before_epoch))?.as_float_or_none()?;
             trade_age = row.get_value(&generate_column_name("trade_age", transpose_value_before_epoch))?.as_int_or_none()?;
             initiation_date = row.get_value(&generate_column_name("initiation_date", transpose_value_before_epoch))?.as_string_or_none()?;
@@ -82,8 +87,9 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
 
         for i in cycle_epoch ..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            if let (Some(current_close_value),Some(current_ask_value),Some(trading_range)) =
+            if let (Some(instrument_name),Some(current_close_value),Some(current_ask_value),Some(trading_range)) =
                 (
+                    row.get_value(&generate_column_name(&self.instrument_field_name, transpose_value))?.as_string_or_none()?,
                     row.get_value(&generate_column_name(&self.close_value_field, transpose_value))?.as_float_or_none()?,
                     row.get_value(&generate_column_name(&self.ask_value_field, transpose_value))?.as_float_or_none()?,
                     row.get_value(&generate_column_name(&self.trading_range_field_name, transpose_value))?.as_float_or_none()?
@@ -120,6 +126,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                         if !prev_trade_signal.unwrap_or_default() {
                             initiation_price = Some(current_ask_value);
                             initiation_date = Some(get_string(&transpose_value));
+                            trade_id = Some(get_string(&transpose_value) + &instrument_name);
                             stop_loss = Some(current_close_value - (trading_range *self.stop_loss_threshold));
                             take_profit = Some(current_close_value + (trading_range *self.take_profit_threshold));
                             //break_even = Some(current_close_value + (trading_range *self.break_even_threshold));
@@ -133,6 +140,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 row.set_value(&generate_column_name("reason", transpose_value), reason.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("initiation_price", transpose_value), initiation_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("initiation_date", transpose_value), initiation_date.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("trade_id", transpose_value), trade_id.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("delta", transpose_value), delta.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("exit_price", transpose_value), exit_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
@@ -148,6 +156,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                     active_trade = Some(false);
                     initiation_price = None;
                     initiation_date = None;
+                    trade_id = None;
                     trade_age = None;
                     stop_loss = None;
                     take_profit = None;
