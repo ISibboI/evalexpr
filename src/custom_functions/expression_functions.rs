@@ -83,7 +83,7 @@ pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
 }
 
 pub fn ternary<TC: Into<Value>,TL: Into<Value>,TR: Into<Value>>(condition: TC, true_value: TL, false_value: TR) -> Result<Value, Error> {
-    if let Value::Boolean(cond) = condition {
+    if let Value::Boolean(cond) = condition.into() {
         if cond {
             return Ok(true_value.into());
         } else {
