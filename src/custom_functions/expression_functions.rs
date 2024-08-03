@@ -121,8 +121,11 @@ pub fn round_date_to_precision<TL: Into<Value>,TR: Into<Value>>(string: TL, prec
             .map_err(|_| Error::InvalidDateFormat)?;
         let datetime = Utc.from_utc_datetime(&naive_datetime);
         let rounded_datetime = round_datetime_to_precision(datetime, &precision.to_lowercase())?;
-        let result = format!("{}_{}", parts.iter().take(parts.len() - 1).map(|prt|prt.to_string()).collect::<Vec<String>>().join("_"), rounded_datetime.format("%Y.%m.%d %H:%M:%S").to_string());
-
+        let mut string1 = parts.iter().take(parts.len() - 1).map(|prt| prt.to_string()).collect::<Vec<String>>().join("_");
+        if string1.len() > 0 {
+            string1.push_str("_");
+        }
+        let result = format!("{}{}", string1, rounded_datetime.format("%Y.%m.%d %H:%M:%S").to_string());
         Ok(Value::String(result))
     } else {
         // If arguments are not strings, return an error
