@@ -58,11 +58,11 @@ pub fn safe_divide<TL: Into<Value>,TR: Into<Value>>(left: TL, right: TR) -> Resu
 }
 
 
-pub fn substring(message: &Value, start: &Value, len: &Value) -> Result<Value, Error> {
-    if let Value::String(message) = message {
+pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, start: TR, len: TC) -> Result<Value, Error> {
+    if let Value::String(message) = message.into() {
         // Ensure start is within bounds and len does not exceed the message length
-        let start_int = start.as_int()? as usize;
-        let len_int = len.as_int()? as usize;
+        let start_int = Into::<Value>::into(start).as_int()? as usize;
+        let len_int = Into::<Value>::into(len).as_int()? as usize;
         if start_int < message.len()  {
             let end = if start_int + len_int > message.len() { message.len() } else { start_int + len_int };
             let substring = &message[start_int..end];

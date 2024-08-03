@@ -1,7 +1,7 @@
 #![cfg(not(tarpaulin_include))]
 #![cfg(feature = "serde")]
 
-use evalexpr::{build_operator_tree, Node};
+use evalexpr::{build_operator_tree, Node, Value};
 
 #[test]
 fn test_serde() {
@@ -12,6 +12,13 @@ fn test_serde() {
         let serde_tree: Node = ron::de::from_str(&format!("\"{}\"", string)).unwrap();
         assert_eq!(manual_tree.eval(), serde_tree.eval());
     }
+}
+
+#[test]
+fn test_string_serialization() {
+    let string = Value::String("Item1".to_owned());
+
+    println!("{:?}", ron::ser::to_string(&string).unwrap());
 }
 
 #[test]
