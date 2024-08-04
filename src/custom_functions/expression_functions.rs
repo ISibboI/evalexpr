@@ -1,5 +1,8 @@
+use std::convert::{TryFrom, TryInto};
+use std::fmt::Debug;
 use crate::{Error, FloatType, Value};
 use chrono::{NaiveDateTime,Timelike,Utc, DateTime, Duration, Datelike, TimeZone};
+use crate::Error::CustomError;
 
 pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
     Ok(match value.into() {
@@ -8,8 +11,11 @@ pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
     })
 }
 
-pub fn abs<T: Into<Value>>(value: T) -> Result<Value, Error> {
-    match value.into() {
+pub fn abs<T: TryInto<Value>>(value: T) -> Result<Value, Error>
+    where <T as TryInto<Value>>::Error: Debug
+{
+
+    match value.try_into().map_err(|err| CustomError(format!("{err:?}")))? {
         Value::Float(fl) => { Ok(Value::Float(fl.abs())) }
         Value::Int(nn) => { Ok(Value::Int(nn.abs())) }
         Value::Empty => {Ok(Value::Empty)}
@@ -54,6 +60,17 @@ pub fn safe_divide<TL: Into<Value>,TR: Into<Value>>(left: TL, right: TR) -> Resu
         }
 
         _ => Err(Error::InvalidArgumentType),
+    }
+}
+
+impl TryFrom<Result<Value, String>> for Value {
+    type Error = String;
+
+    fn try_from(value: Result<Value, String>) -> Result<Self, Self::Error> {
+        match value {
+            Ok(num) => Ok(num),
+            Err(e) => Err(e),
+        }
     }
 }
 
