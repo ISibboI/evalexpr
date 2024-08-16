@@ -754,6 +754,13 @@ mod tests {
         // Here, we expect an error, so no unwrap is needed
         assert!(matches!(a.div(b), Err(Error::DivisionByZero)));
     }
+ #[test]
+    fn test_error_divide_zero_by_something() {
+        let a = Value::Int(10);
+        let b = Value::Int(0);
+        // Here, we expect an error, so no unwrap is needed
+        assert!(matches!(b.div(a).unwrap(),  Value::Int(0)));
+    }
 
 
         #[test]

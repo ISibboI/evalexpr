@@ -18,6 +18,26 @@ pub fn is_null_or<T: Into<Value>,S: Into<Value>>(value: T, alternative: S) ->  R
     })
 }
 
+pub fn clip_value_to_range<T: Into<Value>, S: Into<Value>>(value: T, constant: S) -> Result<Value, Error> {
+    let value: Value = value.into();
+    let constant: Value = constant.into();
+
+    let value_as_float = value.as_float_or_none()?.unwrap_or(0.0);
+    let constant_as_float = constant.as_float_or_none()?.unwrap_or(0.0);
+
+    let adjusted_value = if value_as_float > constant_as_float {
+        constant_as_float
+    } else if value_as_float < -constant_as_float {
+        -constant_as_float
+    } else {
+        value_as_float
+    };
+
+    Ok(Value::Float(adjusted_value))
+}
+
+
+
 pub fn abs<T: TryInto<Value>>(value: T) -> Result<Value, Error>
     where <T as TryInto<Value>>::Error: Debug
 {
