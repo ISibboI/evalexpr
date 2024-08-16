@@ -9,6 +9,14 @@ pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
         Value::Empty => Value::Int(0),
         v => v,
     })
+}pub fn negate<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
+    Ok(match value.into() {
+        Value::Empty => Value::Empty,
+        Value::Int(v) => Value::Int(-v),
+        Value::Float(v) => Value::Float(-v),
+        Value::Boolean(v) => Value::Boolean(!v),
+        v => return Err(Error::CustomError(format!("Cannot negate a value {v:?}"))),
+    })
 }
 
 pub fn is_null_or<T: Into<Value>,S: Into<Value>>(value: T, alternative: S) ->  Result<Value, Error>  {
