@@ -11,6 +11,13 @@ pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
     })
 }
 
+pub fn is_null_or<T: Into<Value>,S: Into<Value>>(value: T, alternative: S) ->  Result<Value, Error>  {
+    Ok(match value.into() {
+        Value::Empty => alternative.into(),
+        v => v,
+    })
+}
+
 pub fn abs<T: TryInto<Value>>(value: T) -> Result<Value, Error>
     where <T as TryInto<Value>>::Error: Debug
 {
