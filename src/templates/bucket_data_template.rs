@@ -45,16 +45,13 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         ordered_transpose_values: &[Value],
         cycle_epoch: usize
     ) -> Result<(), Error> {
-        // Maps transpose values to field values
         let mut transpose_value_to_field_value_map: HashMap<Value, Value> = HashMap::new();
-        // Maps field values to their corresponding bucket
         let mut value_to_bucket_map: HashMap<Value, u8> = HashMap::new();
         let mut min_values_for_bucket: HashMap<u8, Value> = HashMap::new();
         let mut max_values_for_bucket: HashMap<u8, Value> = HashMap::new();
 
         // Populate transpose_value_to_field_value_map
-        for i in 0..ordered_transpose_values.len() {
-            let transpose_value = &ordered_transpose_values[i];
+        for transpose_value in ordered_transpose_values {
             let field_to_bucket = row.get_value(&generate_column_name(&self.field_name_to_bucket, transpose_value))?;
             transpose_value_to_field_value_map.insert(transpose_value.clone(), field_to_bucket);
         }
@@ -62,34 +59,35 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Calculate buckets and populate value_to_bucket_map
         let num_buckets = self.no_buckets;
         let mut sorted_field_values: Vec<_> = transpose_value_to_field_value_map.values().cloned().collect();
-        sorted_field_values.sort_by(|a, b| b.partial_cmp(a).unwrap_or(cmp::Ordering::Equal));
+        sorted_field_values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(cmp::Ordering::Equal));  // Sort in ascending order
 
         for (i, field_value) in sorted_field_values.iter().enumerate() {
             let bucket = (i * num_buckets as usize) / sorted_field_values.len();
-            value_to_bucket_map.entry(field_value.clone()).or_insert(bucket as u8);
-            if !min_values_for_bucket.contains_key(&(bucket as u8)) {
-                min_values_for_bucket.insert(bucket as u8, field_value.clone());
-            }else{
-                let min_value = min_values_for_bucket.get(&(bucket as u8)).unwrap();
-                if field_value < min_value {
-                    min_values_for_bucket.insert(bucket as u8, field_value.clone());
-                }
-            }
-            if  !max_values_for_bucket.contains_key(&(bucket as u8)) {
-                max_values_for_bucket.insert(bucket as u8, field_value.clone());
-            }else{
-                let max_value = max_values_for_bucket.get(&(bucket as u8)).unwrap();
-                if field_value > max_value {
-                    max_values_for_bucket.insert(bucket as u8, field_value.clone());
-                }
-            }
+            let bucket_u8 = bucket as u8;
+
+            value_to_bucket_map.entry(field_value.clone()).or_insert(bucket_u8);
+
+            min_values_for_bucket
+                .entry(bucket_u8)
+                .and_modify(|min_value| if field_value < min_value { *min_value = field_value.clone(); })
+                .or_insert(field_value.clone());
+
+            max_values_for_bucket
+                .entry(bucket_u8)
+                .and_modify(|max_value| if field_value > max_value { *max_value = field_value.clone(); })
+                .or_insert(field_value.clone());
         }
 
         // Set bucket values in the row
         for (transpose_value, field_value) in transpose_value_to_field_value_map.iter() {
             if let Some(bucket) = value_to_bucket_map.get(field_value) {
-                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64 + 1))?;
-                row.set_value(&generate_column_name(&self.bucket_range_output_field_name, transpose_value), Value::String(format!("{} to {}", min_values_for_bucket.get(bucket).unwrap_or(&Value::Empty),max_values_for_bucket.get(bucket).unwrap_or(&Value::Empty))))?;
+                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64));
+                let bucket_range = format!(
+                    "{} to {}",
+                    min_values_for_bucket.get(bucket).unwrap_or(&Value::Empty),
+                    max_values_for_bucket.get(bucket).unwrap_or(&Value::Empty)
+                );
+                row.set_value(&generate_column_name(&self.bucket_range_output_field_name, transpose_value), Value::String(bucket_range))?;
             }
         }
         Ok(())
