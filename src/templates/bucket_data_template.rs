@@ -20,8 +20,8 @@ impl BucketData {
         let bucket_field_name = format!("{}bucket", field_to_bucket);
         let bucket_range_field_name = format!("{}bucketrange", field_to_bucket);
         BucketData {
-            bucket_range_output_field_name: bucket_field_name,
-            bucket_output_field_name: bucket_range_field_name,
+            bucket_range_output_field_name: bucket_range_field_name,
+            bucket_output_field_name: bucket_field_name,
             field_name_to_bucket: field_to_bucket.to_owned(),
             no_buckets
         }
