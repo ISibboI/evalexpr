@@ -64,7 +64,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Calculate buckets and populate value_to_bucket_map
         let num_buckets = self.no_buckets;
         let mut sorted_field_values: Vec<_> = transpose_value_to_field_value_map.values().cloned().collect();
-        sorted_field_values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(cmp::Ordering::Equal));  // Sort in ascending order
+        sorted_field_values.sort_by(|a, b| b.partial_cmp(a).unwrap_or(cmp::Ordering::Equal));  // Sort in ascending order
 
         for (i, field_value) in sorted_field_values.iter().enumerate() {
             
@@ -91,7 +91,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Set bucket values in the row
         for (transpose_value, field_value) in transpose_value_to_field_value_map.iter() {
             if let Some(bucket) = value_to_bucket_map.get(field_value) {
-                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64));
+                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64 + 1));
                 let bucket_range = format!(
                     "{} to {}",
                     min_values_for_bucket.get(bucket).unwrap_or(&Value::Empty),
