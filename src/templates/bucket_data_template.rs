@@ -7,6 +7,7 @@ use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, 
 
 pub struct BucketData {
     bucket_output_field_name: String,
+    bucket_range_output_field_name: String,
     field_name_to_bucket: String,
     no_buckets: u8
 }
@@ -17,8 +18,10 @@ impl BucketData {
             no_buckets = 1;
         }
         let bucket_field_name = format!("{}bucket", field_to_bucket);
+        let bucket_range_field_name = format!("{}bucketrange", field_to_bucket);
         BucketData {
-            bucket_output_field_name: bucket_field_name,
+            bucket_range_output_field_name: bucket_field_name,
+            bucket_output_field_name: bucket_range_field_name,
             field_name_to_bucket: field_to_bucket.to_owned(),
             no_buckets
         }
@@ -27,6 +30,7 @@ impl BucketData {
 impl CompiledTransposeCalculationTemplate for BucketData {
     fn schema(&self) -> HashMap<String, ValueType> {
         vec![
+            (self.bucket_range_output_field_name.clone(), ValueType::String),
             (self.bucket_output_field_name.clone(), ValueType::Int),
         ].iter().map(|(nm, val)| (nm.to_string(), *val)).collect()
     }
@@ -45,6 +49,8 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         let mut transpose_value_to_field_value_map: HashMap<Value, Value> = HashMap::new();
         // Maps field values to their corresponding bucket
         let mut value_to_bucket_map: HashMap<Value, u8> = HashMap::new();
+        let mut min_values_for_bucket: HashMap<u8, Value> = HashMap::new();
+        let mut max_values_for_bucket: HashMap<u8, Value> = HashMap::new();
 
         // Populate transpose_value_to_field_value_map
         for i in 0..ordered_transpose_values.len() {
@@ -61,12 +67,29 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         for (i, field_value) in sorted_field_values.iter().enumerate() {
             let bucket = (i * num_buckets as usize) / sorted_field_values.len();
             value_to_bucket_map.entry(field_value.clone()).or_insert(bucket as u8);
+            if !min_values_for_bucket.contains_key(&(bucket as u8)) {
+                min_values_for_bucket.insert(bucket as u8, field_value.clone());
+            }else{
+                let min_value = min_values_for_bucket.get(&(bucket as u8)).unwrap();
+                if field_value < min_value {
+                    min_values_for_bucket.insert(bucket as u8, field_value.clone());
+                }
+            }
+            if  !max_values_for_bucket.contains_key(&(bucket as u8)) {
+                max_values_for_bucket.insert(bucket as u8, field_value.clone());
+            }else{
+                let max_value = max_values_for_bucket.get(&(bucket as u8)).unwrap();
+                if field_value > max_value {
+                    max_values_for_bucket.insert(bucket as u8, field_value.clone());
+                }
+            }
         }
 
         // Set bucket values in the row
         for (transpose_value, field_value) in transpose_value_to_field_value_map.iter() {
             if let Some(bucket) = value_to_bucket_map.get(field_value) {
                 row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64 + 1))?;
+                row.set_value(&generate_column_name(&self.bucket_range_output_field_name, transpose_value), Value::String(format!("{} to {}", min_values_for_bucket.get(bucket).unwrap_or(&Value::Empty),max_values_for_bucket.get(bucket).unwrap_or(&Value::Empty))))?;
             }
         }
         Ok(())
@@ -97,6 +120,7 @@ mod tests {
             field_name_to_bucket: field_to_bucket.to_owned(),
             bucket_output_field_name: "bucket".to_string(),
             no_buckets: 3,
+            bucket_range_output_field_name: "bucketRange".to_string(),
         };
 
         // Ordered transpose values (these should correspond to the field names)
@@ -112,8 +136,11 @@ mod tests {
 
         // Check that the correct bucket values have been set
         assert_eq!(row.get_value("bucket_date1").unwrap(), Value::Int(0));
+        assert_eq!(row.get_value("bucketRange_date1").unwrap(), Value::String("foo".to_string()));
         assert_eq!(row.get_value("bucket_date2").unwrap(), Value::Int(2));
+        assert_eq!(row.get_value("bucketRange_date2").unwrap(), Value::String("foo".to_string()));
         assert_eq!(row.get_value("bucket_date3").unwrap(), Value::Int(1));
+        assert_eq!(row.get_value("bucketRange_date3").unwrap(), Value::String("foo".to_string()));
     }
 
     #[test]
@@ -130,6 +157,7 @@ mod tests {
             field_name_to_bucket: field_to_bucket.to_owned(),
             bucket_output_field_name: "bucket".to_string(),
             no_buckets: 3,
+            bucket_range_output_field_name: "bucketRange".to_string(),
         };
 
         // Ordered transpose values (these should correspond to the field names)
@@ -164,6 +192,7 @@ mod tests {
             field_name_to_bucket: field_to_bucket.to_owned(),
             bucket_output_field_name: "bucket".to_string(),
             no_buckets: 3,
+            bucket_range_output_field_name: "bucketRange".to_string(),
         };
 
         // Ordered transpose values (these should correspond to the field names)
