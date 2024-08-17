@@ -52,7 +52,7 @@ impl Hash for Value {
                 s.hash(state);
             }
             Value::Float(f) => {
-                f.to_bits().hash(state); // Hash the bit representation of the float
+                OrderedFloat::from(*f).to_bits().hash(state); // Hash the bit representation of the float
             }
             Value::Int(i) => {
                 i.hash(state);
