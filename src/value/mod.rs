@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::convert::TryInto;
 use std::fmt;
 use crate::error::{EvalexprError, EvalexprResult};
-
+use std::hash::{Hash, Hasher};
 mod display;
 pub mod value_type;
 
@@ -42,6 +42,36 @@ pub enum Value {
 }
 
 
+impl Eq for Value {}
+
+// Implement Hash for Value
+impl Hash for Value {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Value::String(s) => {
+                s.hash(state);
+            }
+            Value::Float(f) => {
+                f.to_bits().hash(state); // Hash the bit representation of the float
+            }
+            Value::Int(i) => {
+                i.hash(state);
+            }
+            Value::Boolean(b) => {
+                b.hash(state);
+            }
+            Value::Tuple(t) => {
+                t.hash(state);
+            }
+            Value::Empty => {
+                // Use a constant to represent the Empty variant
+                std::mem::discriminant(self).hash(state);
+            }
+        }
+    }
+}
+
+
 impl From<&Value> for Value {
     fn from(value: &Value) -> Self {
         match value {
@@ -61,7 +91,7 @@ impl PartialOrd for Value {
             (Value::String(a), Value::String(b)) => a.partial_cmp(b),
             (Value::Float(a), Value::Float(b)) => a.partial_cmp(b),
             (Value::Int(a), Value::Int(b)) => a.partial_cmp(b),
-            (Value::Float(a), Value::Int(b)) => (*a).partial_cmp(&(*b as FloatType)),
+            (Value::Float(a), Value::Int(b)) => OrderedFloat::from(*a).partial_cmp(&OrderedFloat::from((*b as FloatType))),
             (Value::Int(a), Value::Float(b)) => (*a as FloatType).partial_cmp(b),
             (Value::Boolean(a), Value::Boolean(b)) => a.partial_cmp(b),
             // For simplicity, Tuple and Empty comparisons are not implemented
@@ -78,9 +108,9 @@ impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Value::String(a), Value::String(b)) => a == b,
-            (Value::Float(a), Value::Float(b)) => a == b,
-            (Value::Float(a), Value::Int(b)) => *a == *b as FloatType,
-            (Value::Int(a), Value::Float(b)) => *a  as FloatType == *b,
+            (Value::Float(a), Value::Float(b)) => OrderedFloat::from(*a) == OrderedFloat::from(*b),
+            (Value::Float(a), Value::Int(b)) => OrderedFloat::from(*a) == OrderedFloat::from(*b as FloatType),
+            (Value::Int(a), Value::Float(b)) => OrderedFloat::from(*a as FloatType) == OrderedFloat::from(*b),
             (Value::Int(a), Value::Int(b)) => a == b,
             (Value::Boolean(a), Value::Boolean(b)) => a == b,
             // For simplicity, Tuple and Empty equality checks are not fully implemented
@@ -403,6 +433,7 @@ use std::ops::Sub;
 use std::ops::Add;
 
 use std::ops::Neg;
+use crate::ordered_float::OrderedFloat;
 
 impl Neg for Value {
     type Output = Result<Self, Error>;
