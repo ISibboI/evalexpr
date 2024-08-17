@@ -500,9 +500,9 @@ impl Sub for &Value {
             (Value::Empty, _) => Ok(Value::Empty),
             (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
-            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
-            (Value::Int(a), Value::Float(b)) => Ok(Value::Float(*a as f64 - b)),
-            (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a - *b as f64)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float((&OrderedFloat::from(*a) - &OrderedFloat::from(*b)).into())),
+            (Value::Int(a), Value::Float(b)) => Ok(Value::Float((&OrderedFloat::from(*a as f64) - &OrderedFloat::from(*b)).into())),
+            (Value::Float(a), Value::Int(b)) => Ok(Value::Float((&OrderedFloat::from(*a) - &OrderedFloat::from(*b as f64)).into())),
             _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }
     }
