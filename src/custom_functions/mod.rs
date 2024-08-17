@@ -3,7 +3,7 @@ pub mod expression_functions;
 pub mod simple_moving_average;
 pub mod simple_cumulative_sum;
 pub mod back;
-
+pub  mod simple_cumilative_returns;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -13,6 +13,7 @@ pub use expression_functions::*;
 pub use back::*;
 pub use simple_moving_average::simple_moving_average;
 pub use simple_cumulative_sum::simple_cumulative_sum;
+pub use simple_cumilative_returns::simple_cumulative_returns;
 use crate::Value;
 
 pub fn generate_column_name(field: &str, p1: &Value) -> String {
