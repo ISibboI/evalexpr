@@ -16,7 +16,7 @@ impl BucketData {
         if no_buckets == 0 {
             no_buckets = 1;
         }
-        let bucket_field_name = format!("{}_bucket", field_to_bucket);
+        let bucket_field_name = format!("{}bucket", field_to_bucket);
         BucketData {
             bucket_output_field_name: bucket_field_name,
             field_name_to_bucket: field_to_bucket.to_owned(),

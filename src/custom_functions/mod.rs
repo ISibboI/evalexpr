@@ -16,7 +16,7 @@ pub use simple_cumulative_sum::simple_cumulative_sum;
 use crate::Value;
 
 pub fn generate_column_name(field: &str, p1: &Value) -> String {
-    format!("{}_{}", field.to_string(), sanitize_with_char(&get_string(p1), 'x'))
+    format!("{}__{}", field.to_string(), sanitize_with_char(&get_string(p1), 'x'))
 }
 
 pub fn sanitize_with_char<T: Display>(value: &T, ch: char) -> String {
