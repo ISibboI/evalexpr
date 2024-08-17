@@ -56,7 +56,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Calculate buckets and populate value_to_bucket_map
         let num_buckets = self.no_buckets;
         let mut sorted_field_values: Vec<_> = transpose_value_to_field_value_map.values().cloned().collect();
-        sorted_field_values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(cmp::Ordering::Equal));
+        sorted_field_values.sort_by(|a, b| b.partial_cmp(a).unwrap_or(cmp::Ordering::Equal));
 
         for (i, field_value) in sorted_field_values.iter().enumerate() {
             let bucket = (i * num_buckets as usize) / sorted_field_values.len();
