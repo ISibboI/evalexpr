@@ -62,6 +62,11 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         sorted_field_values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(cmp::Ordering::Equal));  // Sort in ascending order
 
         for (i, field_value) in sorted_field_values.iter().enumerate() {
+            
+            if  field_value == &Value::Empty {
+                continue;
+            }
+            
             let bucket = (i * num_buckets as usize) / sorted_field_values.len();
             let bucket_u8 = bucket as u8;
 
