@@ -66,7 +66,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Set bucket values in the row
         for (transpose_value, field_value) in transpose_value_to_field_value_map.iter() {
             if let Some(bucket) = value_to_bucket_map.get(field_value) {
-                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64))?;
+                row.set_value(&generate_column_name(&self.bucket_output_field_name, transpose_value), Value::Int(*bucket as i64 + 1))?;
             }
         }
         Ok(())
