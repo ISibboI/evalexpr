@@ -31,8 +31,8 @@ impl OperatorRowTrait for MockRow {
         }
     }
 
-    fn get_value_by_index(&self, idx: &usize) -> Result<Value, Error> {
-        let option = self.values.get_index(*idx);
+    fn get_value_by_index(&self, idx: usize) -> Result<Value, Error> {
+        let option = self.values.get_index(idx);
         match option {
             None => { Ok(Value::Empty)}
             Some(val) => {
