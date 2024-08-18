@@ -31,8 +31,8 @@ impl OperatorRowTrait for MockRow {
         }
     }
 
-    fn get_value_by_index(&self, idx: usize) -> Result<Value, Error> {
-        let option = self.values.get_index(idx);
+    fn get_value_for_column(&self, col: usize) -> Result<Value, Error> {
+        let option = self.values.get_index(col);
         match option {
             None => { Ok(Value::Empty)}
             Some(val) => {
@@ -46,9 +46,6 @@ impl OperatorRowTrait for MockRow {
         Ok(())
     }
 
-    fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error> {
-        todo!()
-    }
 
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error> {
         todo!()

@@ -188,7 +188,6 @@ pub trait Context {
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
-    fn get_value_by_index(&self, idx: usize) -> Result<Value,crate::Error>;
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
