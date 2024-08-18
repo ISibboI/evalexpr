@@ -546,6 +546,7 @@ pub use crate::{
         BoxedActiveRowTrackerTrait,
         FFIColumn,
         HashMapContext,
+        IndexMapContext
     },
     error::{EvalexprError, EvalexprResult},
     function::Function,
