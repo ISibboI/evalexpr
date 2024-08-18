@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use indexmap::IndexMap;
-use crate::{context, Error, EvalexprResult, OperatorRowTrait, Value};
+use crate::{context, BoxedOperatorRowTrait, Error, EvalexprResult, OperatorRowTrait, Value};
 
 pub struct MockRow {
     values: IndexMap<String, Value>,
@@ -13,6 +13,21 @@ impl MockRow {
         }
     }
 
+    pub fn from_values(row: Vec<Value>) -> Self {
+        let mut mock_row = MockRow::new();
+
+        // Iterate over the values and insert them into the mock_row with a key
+        for (idx, value) in row.into_iter().enumerate() {
+            let key = format!("col_{}", idx); // Generate a key for each value
+            mock_row.insert_value(key, value);
+        }
+
+        mock_row
+    }
+    
+    pub fn into_boxed<'inner>(self) -> BoxedOperatorRowTrait<'inner> {
+        BoxedOperatorRowTrait::new(self)
+    }
     pub fn insert_value(&mut self, key: String, value: Value) {
         self.values.insert(key, value);
     }

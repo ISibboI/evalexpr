@@ -1,10 +1,10 @@
-use crate::{Error, Value};
+use crate::{BoxedOperatorRowTrait, Error, OperatorRowTrait, Value};
 use crate::Error::UnsupportedOperation;
 
-pub fn columns_len(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
+pub fn columns_len(row: &BoxedOperatorRowTrait, columns: &[usize]) -> Result<Value, Error> {
     Ok(Value::Int(columns.len() as i64))
 }
-pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
+pub fn triangular_moving_average(row: &BoxedOperatorRowTrait, columns: &[usize]) -> Result<Value, Error> {
     if columns.len() < 3 {
         return Ok(Value::Empty); // Not engh data to calculate
     }
@@ -50,26 +50,28 @@ pub fn triangular_moving_average(row: &[Value], columns: &[usize]) -> Result<Val
     }
 }
 
-fn get_price(row: &[Value], columns: &[usize], index: usize) -> Option<f64> {
-    row.get(columns[index]).and_then(|value| match value {
-        Value::Float(val) => Some(*val),
-        Value::Int(val) => Some(*val as f64),
+fn get_price(row: &BoxedOperatorRowTrait, columns: &[usize], index: usize) -> Option<f64> {
+    row.get_value_for_column(columns[index]).ok().and_then(|value| match value {
+        Value::Float(val) => Some(val),
+        Value::Int(val) => Some(val as f64),
         _ => None,
     })
 }
 
+
 #[cfg(test)]
 mod tests {
     use std::process::id;
+    use crate::templates::test_utils::MockRow;
     use super::*;
 
     //Time: 4.481µs
     #[test]
     fn test_triangular_moving_average_normal_operation() {
-        let row = (0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>(); // Simple case with enough columns
+        let row = MockRow::from_values((0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>()); // Simple case with enough columns
         let columns = (0..5).collect::<Vec<usize>>(); // Simple case with enough columns
         let start = std::time::Instant::now();
-        let result = triangular_moving_average(&row, &columns);
+        let result = triangular_moving_average(&BoxedOperatorRowTrait::new(row), &columns);
         assert!(result.is_ok());
         let value = result.unwrap();
         match value {
@@ -87,7 +89,7 @@ mod tests {
 
     #[test]
     fn test_triangular_moving_average_empty_input() {
-        let row: Vec<Value> = vec![];
+        let row = MockRow::from_values(vec![]).into_boxed();
         let columns: Vec<usize> = vec![];
         let result = triangular_moving_average(&row, &columns);
         assert!(result.is_ok());
@@ -97,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_triangular_moving_average_empty() {
-        let row = vec![];
+        let row = MockRow::from_values(vec![]).into_boxed();
         let columns = vec![];
         let result = triangular_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
@@ -106,7 +108,7 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_basic() {
         // Setup a simple scenario
-        let row = vec![Value::Int(10), Value::Int(20), Value::Int(30), Value::Int(40), Value::Int(50)];
+        let row =  MockRow::from_values(vec![Value::Int(10), Value::Int(20), Value::Int(30), Value::Int(40), Value::Int(50)]).into_boxed();
         let columns = vec![0, 1, 2, 3, 4]; // Direct mapping for simplicity
         let result = triangular_moving_average(&row, &columns).unwrap();
 
@@ -120,13 +122,13 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_with_floats() {
         // Test the function with floating point numbers
-        let row = vec![
+        let row = MockRow::from_values(vec![
             Value::Float(10.5),
             Value::Float(20.5),
             Value::Float(30.5),
             Value::Float(40.5),
             Value::Float(50.5)
-        ];
+        ]).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = triangular_moving_average(&row, &columns).unwrap();
 
@@ -139,7 +141,7 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_invalid_values() {
         // Test how the function handles invalid (non-numeric) values
-        let row = vec![Value::Empty, Value::Int(20), Value::Empty, Value::Int(40), Value::Empty];
+        let row =  MockRow::from_values(vec![Value::Empty, Value::Int(20), Value::Empty, Value::Int(40), Value::Empty]).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = triangular_moving_average(&row, &columns).unwrap();
 

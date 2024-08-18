@@ -3,7 +3,7 @@ pub mod ordered_float;
 pub mod bucket_data_template;
 pub mod compiled_transpose_calcuation_template;
 pub  mod channel_monitoring_template;
-mod test_utils;
+pub(crate) mod test_utils;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate

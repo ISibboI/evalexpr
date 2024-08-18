@@ -1,14 +1,14 @@
-use crate::{Error, Value};
+use crate::{BoxedOperatorRowTrait, Error, OperatorRowTrait, Value};
 
-pub fn simple_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, Error> {
+pub fn simple_moving_average(row: &BoxedOperatorRowTrait, columns: &[usize]) -> Result<Value, Error> {
     if columns.is_empty() {
         return Ok(Value::Empty);
     }
 
     let (sum, count) = columns.iter()
-        .filter_map(|&col_index| match row.get(col_index) {
-            Some(Value::Float(val)) => Some(*val),
-            Some(Value::Int(val)) => Some(*val as f64),
+        .filter_map(|&col_index| match row.get_value_for_column(col_index).ok() {
+            Some(Value::Float(val)) => Some(val),
+            Some(Value::Int(val)) => Some(val as f64),
             _ => None,
         })
         .fold((0.0f64, 0usize), |(acc_sum, acc_count), val| (acc_sum + val, acc_count + 1));
@@ -23,11 +23,12 @@ pub fn simple_moving_average(row: &[Value], columns: &[usize]) -> Result<Value, 
 
 #[cfg(test)]
 mod tests {
+    use crate::templates::test_utils::MockRow;
     use super::*;
 
     #[test]
     fn test_simple_moving_average_normal_operation() {
-        let row = vec![Value::Float(10.0), Value::Float(20.0), Value::Float(30.0), Value::Float(40.0)];
+        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Float(20.0), Value::Float(30.0), Value::Float(40.0)]).into_boxed();
         let columns = vec![0, 1, 2, 3];
         let result = simple_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Float(25.0));
@@ -35,7 +36,7 @@ mod tests {
 
     #[test]
     fn test_simple_moving_average_partial_data() {
-        let row = vec![Value::Float(10.0), Value::Empty, Value::Float(30.0), Value::Empty];
+        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Empty, Value::Float(30.0), Value::Empty]).into_boxed();
         let columns = vec![0, 1, 2, 3];
         let result = simple_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Float(20.0));
@@ -43,7 +44,7 @@ mod tests {
 
     #[test]
     fn test_simple_moving_average_empty_input() {
-        let row: Vec<Value> = vec![];
+        let row = MockRow::from_values(vec![]).into_boxed();
         let columns: Vec<usize> = vec![];
         let result = simple_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
@@ -51,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_simple_moving_average_no_valid_columns() {
-        let row = vec![Value::Empty, Value::Empty];
+        let row = MockRow::from_values(vec![Value::Empty, Value::Empty]).into_boxed();
         let columns = vec![0, 1];
         let result = simple_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
@@ -61,7 +62,7 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_normal_operation() {
 
-        let row = (0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>(); // Simple case with enough columns
+        let row = MockRow::from_values((0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>()).into_boxed(); // Simple case with enough columns
         let columns = (0..110).collect::<Vec<usize>>(); // Simple case with enough columns
         let start = std::time::Instant::now();
         let result = simple_moving_average(&row, &columns);
