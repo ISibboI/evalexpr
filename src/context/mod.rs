@@ -5,6 +5,7 @@
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
 use std::{borrow::Cow, collections::HashMap};
+use indexmap::IndexMap;
 use thin_trait_object::thin_trait_object;
 use crate::{
     function::Function,
@@ -50,6 +51,10 @@ impl Context for EmptyContext {
         None
     }
 
+    fn get_value_by_index(&self, identifier: &usize) -> Option<Cow<'_, Value>> {
+        None
+    }
+
     fn call_function(&self, identifier: &str, _argument: &Value) -> EvalexprResult<Value> {
         Err(EvalexprError::FunctionIdentifierNotFound(
             identifier.to_string(),
@@ -70,7 +75,19 @@ pub struct HashMapContext {
     functions: HashMap<String, Function>,
 }
 
+#[derive(Clone, Debug, Default)]
+pub struct IndexMapContext {
+    variables: IndexMap<String, Value>,
+    functions: HashMap<String, Function>,
+}
+
 impl HashMapContext {
+    /// Constructs a `HashMapContext` with no mappings.
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+impl IndexMapContext {
     /// Constructs a `HashMapContext` with no mappings.
     pub fn new() -> Self {
         Default::default()
@@ -80,6 +97,30 @@ impl HashMapContext {
 impl Context for HashMapContext {
     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
         self.variables.get(identifier).map(Cow::Borrowed)
+    }
+
+    fn get_value_by_index(&self, identifier: &usize) -> Option<Cow<'_, Value>> {
+        todo!("Get value by index not implemented for hashmap context")
+    }
+
+    fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
+        if let Some(function) = self.functions.get(identifier) {
+            function.call(argument)
+        } else {
+            Err(EvalexprError::FunctionIdentifierNotFound(
+                identifier.to_string(),
+            ))
+        }
+    }
+}
+
+impl Context for IndexMapContext {
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+        self.variables.get(identifier).map(Cow::Borrowed)
+    }
+
+    fn get_value_by_index(&self, identifier: &usize) -> Option<Cow<'_, Value>> {
+        self.variables.get_index(*identifier).map(|(_, v)| Cow::Borrowed(v))
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
@@ -120,6 +161,7 @@ impl ContextWithMutableFunctions for HashMapContext {
 pub trait Context {
 /// A context defines methods to retrieve variable values and call functions for literals in an expression tree.
     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>>;
+    fn get_value_by_index(&self, identifier: &usize) -> Option<Cow<'_, Value>>;
 /// Retrieves the value of the given identifier.
     fn call_function(&self, idt: &str, argument: &Value) -> EvalexprResult<Value>;
 }
