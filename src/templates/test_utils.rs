@@ -1,14 +1,15 @@
 use std::collections::HashMap;
+use indexmap::IndexMap;
 use crate::{context, Error, EvalexprResult, OperatorRowTrait, Value};
 
 pub struct MockRow {
-    values: HashMap<String, Value>,
+    values: IndexMap<String, Value>,
 }
 
 impl MockRow {
     pub fn new() -> Self {
         MockRow {
-            values: HashMap::new(),
+            values: IndexMap::new(),
         }
     }
 
@@ -26,6 +27,16 @@ impl OperatorRowTrait for MockRow {
             None => { Ok(Value::Empty)}
             Some(val) => {
                          Ok(val.clone())
+            }
+        }
+    }
+
+    fn get_value_by_index(&self, idx: &usize) -> Result<Value, Error> {
+        let option = self.values.get_index(*idx);
+        match option {
+            None => { Ok(Value::Empty)}
+            Some(val) => {
+                Ok(val.1.clone())
             }
         }
     }
