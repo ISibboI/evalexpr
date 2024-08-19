@@ -119,6 +119,26 @@ impl Context for HashMapContext {
     }
 }
 
+impl Context for &mut IndexMapContext {
+    fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
+        self.variables.get(identifier).map(Cow::Borrowed)
+    }
+
+    fn get_value_by_index(&self, identifier: &usize) -> Option<Cow<'_, Value>> {
+        self.variables.get_index(*identifier).map(|(_, v)| Cow::Borrowed(v))
+    }
+
+    fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
+        if let Some(function) = self.functions.get(identifier) {
+            function.call(argument)
+        } else {
+            Err(EvalexprError::FunctionIdentifierNotFound(
+                identifier.to_string(),
+            ))
+        }
+    }
+}
+
 impl Context for IndexMapContext {
     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
         self.variables.get(identifier).map(Cow::Borrowed)
@@ -166,6 +186,30 @@ impl ContextWithMutableVariables for HashMapContext {
     }
 }
 
+impl ContextWithMutableVariables for &mut IndexMapContext {
+    fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
+        if let Some(existing_value) = self.variables.get_mut(&identifier) {
+            if ValueType::from(&existing_value) == ValueType::from(&value) {
+                *existing_value = value;
+                if track_changes {
+                    self.changed_variables.insert(identifier);
+                }
+                return Ok(());
+            } else {
+                return Err(EvalexprError::expected_type(existing_value, value));
+            }
+        }
+        if track_changes {
+            self.changed_variables.insert(identifier.clone());
+        }
+        self.variables.insert(identifier, value);
+        Ok(())
+    }
+
+    fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
+        Ok(self.changed_variables.clone())
+    }
+}
 impl ContextWithMutableVariables for IndexMapContext {
     fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
@@ -188,6 +232,40 @@ impl ContextWithMutableVariables for IndexMapContext {
 
     fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
         Ok(self.changed_variables.clone())
+    }
+}
+
+impl OperatorRowTrait for &mut IndexMapContext {
+    fn get_value(&self, identifier: &str) -> Result<Value, Error> {
+        Ok(Context::get_value(self, identifier).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
+    }
+
+    fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
+        Ok(ContextWithMutableVariables::set_value(self, identifier.to_string(), value, true)?)
+    }
+
+    fn get_value_for_column(&self, col: usize) -> Result<Value, Error> {
+        Ok(Context::get_value_by_index(self, &col).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
+    }
+
+    fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(), Error> {
+        todo!()
+    }
+
+    fn set_row(&mut self, row: usize) {
+        todo!()
+    }
+
+    fn call_function(&self, idt: &str, argument: Value) -> Result<Value, Error> {
+        todo!()
+    }
+
+    fn has_changes(&self) -> Result<bool, Error> {
+        Ok(!self.changed_variables.is_empty())
+    }
+
+    fn get_dirty_flags(&self) -> Result<Vec<usize>, Error> {
+        todo!()
     }
 }
 
