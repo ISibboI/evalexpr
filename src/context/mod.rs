@@ -90,6 +90,7 @@ impl HashMapContext {
         Default::default()
     }
 }
+
 impl IndexMapContext {
     /// Constructs a `HashMapContext` with no mappings.
     pub fn new() -> Self {
