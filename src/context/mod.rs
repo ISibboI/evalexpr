@@ -162,7 +162,7 @@ impl Context for IndexMapContext {
 impl ContextWithMutableVariables for HashMapContext {
     fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
-            if ValueType::from(&existing_value) == ValueType::from(&value) {
+            if ValueType::from(&existing_value) == ValueType::from(&value) ||  existing_value.is_empty() {
                 *existing_value = value;
                 if track_changes {
                     self.changed_variables.insert(identifier);
@@ -189,7 +189,7 @@ impl ContextWithMutableVariables for HashMapContext {
 impl ContextWithMutableVariables for &mut IndexMapContext {
     fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
-            if ValueType::from(&existing_value) == ValueType::from(&value) {
+            if ValueType::from(&existing_value) == ValueType::from(&value) ||  existing_value.is_empty()  {
                 *existing_value = value;
                 if track_changes {
                     self.changed_variables.insert(identifier);
@@ -213,7 +213,7 @@ impl ContextWithMutableVariables for &mut IndexMapContext {
 impl ContextWithMutableVariables for IndexMapContext {
     fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
-            if ValueType::from(&existing_value) == ValueType::from(&value) {
+            if ValueType::from(&existing_value) == ValueType::from(&value)  ||  existing_value.is_empty() {
                 *existing_value = value;
                 if track_changes {
                     self.changed_variables.insert(identifier);
