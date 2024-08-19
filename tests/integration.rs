@@ -108,15 +108,15 @@ fn test_boolean_examples() {
 fn test_with_context() {
     let mut context = HashMapContext::new();
     context
-        .set_value("tr".into(), Value::Boolean(true))
+        .set_value("tr".into(), Value::Boolean(true),true)
         .unwrap();
     context
-        .set_value("fa".into(), Value::Boolean(false))
+        .set_value("fa".into(), Value::Boolean(false),true)
         .unwrap();
-    context.set_value("five".into(), Value::Int(5)).unwrap();
-    context.set_value("six".into(), Value::Int(6)).unwrap();
-    context.set_value("half".into(), Value::Float(0.5)).unwrap();
-    context.set_value("zero".into(), Value::Int(0)).unwrap();
+    context.set_value("five".into(), Value::Int(5),true).unwrap();
+    context.set_value("six".into(), Value::Int(6),true).unwrap();
+    context.set_value("half".into(), Value::Float(0.5),true).unwrap();
+    context.set_value("zero".into(), Value::Int(0),true).unwrap();
 
     assert_eq!(eval_with_context("tr", &context), Ok(Value::Boolean(true)));
     assert_eq!(eval_with_context("fa", &context), Ok(Value::Boolean(false)));
@@ -156,7 +156,7 @@ fn test_functions() {
         )
         .unwrap();
     context
-        .set_value("five".to_string(), Value::Int(5))
+        .set_value("five".to_string(), Value::Int(5),true)
         .unwrap();
 
     assert_eq!(eval_with_context("sub2 5", &context), Ok(Value::Int(3)));
@@ -237,7 +237,7 @@ fn test_n_ary_functions() {
         )
         .unwrap();
     context
-        .set_value("five".to_string(), Value::Int(5))
+        .set_value("five".to_string(), Value::Int(5),false)
         .unwrap();
     context
         .set_function("function_four".into(), Function::new(|_| Ok(Value::Int(4))))
@@ -501,7 +501,7 @@ fn test_no_panic() {
 fn test_shortcut_functions() {
     let mut context = HashMapContext::new();
     context
-        .set_value("string".into(), Value::from("a string"))
+        .set_value("string".into(), Value::from("a string"),true)
         .unwrap();
 
     assert_eq!(eval_string("\"3.3\""), Ok("3.3".to_owned()));
@@ -1539,7 +1539,7 @@ fn test_hashmap_context_clone_debug() {
             Function::new(move |_| Ok(Value::Int(four))),
         )
         .unwrap();
-    context.set_value("variable_five".into(), 5.into()).unwrap();
+    context.set_value("variable_five".into(), 5.into(), false).unwrap();
     let context = context;
     let cloned_context = context.clone();
 

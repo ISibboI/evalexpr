@@ -5,6 +5,7 @@
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
 use std::{borrow::Cow, collections::HashMap};
+use std::collections::HashSet;
 use indexmap::IndexMap;
 use thin_trait_object::thin_trait_object;
 use crate::{
@@ -20,7 +21,11 @@ mod predefined;
 /// A context that allows to assign to variables.
 pub trait ContextWithMutableVariables: Context {
     /// Sets the variable with the given identifier to the given value.
-    fn set_value(&mut self, _identifier: String, _value: Value) -> EvalexprResult<()> {
+    fn set_value(&mut self, _identifier: String, _value: Value, _track_changes: bool) -> EvalexprResult<()> {
+        Err(EvalexprError::ContextNotMutable)
+    }
+    
+    fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
         Err(EvalexprError::ContextNotMutable)
     }
 }
@@ -73,12 +78,14 @@ pub struct HashMapContext {
     variables: HashMap<String, Value>,
     #[cfg_attr(feature = "serde_support", serde(skip))]
     functions: HashMap<String, Function>,
+    changed_variables: HashSet<String>
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct IndexMapContext {
-    variables: IndexMap<String, Value>,
-    functions: HashMap<String, Function>,
+    pub  variables: IndexMap<String, Value>,
+    pub  changed_variables: HashSet<String>,
+    pub  functions: HashMap<String, Function>,
 }
 
 impl HashMapContext {
@@ -135,36 +142,54 @@ impl Context for IndexMapContext {
 }
 
 impl ContextWithMutableVariables for HashMapContext {
-    fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
+    fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
             if ValueType::from(&existing_value) == ValueType::from(&value) {
                 *existing_value = value;
+                if track_changes {
+                    self.changed_variables.insert(identifier);
+                }
                 return Ok(());
             } else {
                 return Err(EvalexprError::expected_type(existing_value, value));
             }
         }
 
+        if track_changes {
+            self.changed_variables.insert(identifier.clone());
+        }
         // Implicit else, because `self.variables` and `identifier` are not unborrowed in else
         self.variables.insert(identifier, value);
         Ok(())
     }
+
+    fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
+        Ok(self.changed_variables.clone())
+    }
 }
 
 impl ContextWithMutableVariables for IndexMapContext {
-    fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
+    fn set_value(&mut self, identifier: String, value: Value, track_changes: bool) -> EvalexprResult<()> {
         if let Some(existing_value) = self.variables.get_mut(&identifier) {
             if ValueType::from(&existing_value) == ValueType::from(&value) {
                 *existing_value = value;
+                if track_changes {
+                    self.changed_variables.insert(identifier);
+                }
                 return Ok(());
             } else {
                 return Err(EvalexprError::expected_type(existing_value, value));
             }
         }
-
-        // Implicit else, because `self.variables` and `identifier` are not unborrowed in else
+        if track_changes {
+            self.changed_variables.insert(identifier.clone());
+        }
         self.variables.insert(identifier, value);
         Ok(())
+    }
+
+    fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
+        Ok(self.changed_variables.clone())
     }
 }
 
@@ -283,7 +308,7 @@ macro_rules! context_map {
     }};
     // add a value, and chain the eventual error with the ones in the next values
     ( ($ctx:expr) $k:expr => $v:expr , $($tt:tt)*) => {{
-        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), $v.into())
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), $v.into(),false)
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
 

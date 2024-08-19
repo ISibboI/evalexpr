@@ -464,7 +464,7 @@ impl Operator {
             Assign => {
                 expect_operator_argument_amount(arguments.len(), 2)?;
                 let target = arguments[0].as_string()?;
-                context.set_value(target, arguments[1].clone())?;
+                context.set_value(target, arguments[1].clone(),false)?;
 
                 Ok(Value::Empty)
             },
@@ -493,7 +493,7 @@ impl Operator {
                         self
                     ),
                 }?;
-                context.set_value(target, result)?;
+                context.set_value(target, result, false)?;
 
                 Ok(Value::Empty)
             },
