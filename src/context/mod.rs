@@ -8,11 +8,7 @@ use std::{borrow::Cow, collections::HashMap};
 use std::collections::HashSet;
 use indexmap::IndexMap;
 use thin_trait_object::thin_trait_object;
-use crate::{
-    function::Function,
-    value::{value_type::ValueType, Value},
-    EvalexprError, EvalexprResult,
-};
+use crate::{function::Function, value::{value_type::ValueType, Value}, Error, EvalexprError, EvalexprResult};
 
 mod predefined;
 
@@ -100,6 +96,8 @@ impl IndexMapContext {
         Default::default()
     }
 }
+
+
 
 impl Context for HashMapContext {
     fn get_value(&self, identifier: &str) -> Option<Cow<'_, Value>> {
@@ -190,6 +188,40 @@ impl ContextWithMutableVariables for IndexMapContext {
 
     fn get_changed_variables(&self) -> EvalexprResult<HashSet<String>> {
         Ok(self.changed_variables.clone())
+    }
+}
+
+impl OperatorRowTrait for IndexMapContext {
+    fn get_value(&self, identifier: &str) -> Result<Value, Error> {
+        Ok(Context::get_value(self, identifier).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
+    }
+
+    fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
+        Ok(ContextWithMutableVariables::set_value(self, identifier.to_string(), value, true)?)
+    }
+
+    fn get_value_for_column(&self, col: usize) -> Result<Value, Error> {
+        Ok(Context::get_value_by_index(self, &col).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
+    }
+
+    fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(), Error> {
+        todo!()
+    }
+
+    fn set_row(&mut self, row: usize) {
+        todo!()
+    }
+
+    fn call_function(&self, idt: &str, argument: Value) -> Result<Value, Error> {
+        todo!()
+    }
+
+    fn has_changes(&self) -> Result<bool, Error> {
+        Ok(!self.changed_variables.is_empty())
+    }
+
+    fn get_dirty_flags(&self) -> Result<Vec<usize>, Error> {
+        todo!()
     }
 }
 
