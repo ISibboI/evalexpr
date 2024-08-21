@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 use crate::{context, BoxedOperatorRowTrait, Error, EvalexprResult, OperatorRowTrait, Value};
 
+
+#[derive(Debug, Clone)]
 pub struct MockRow {
     values: IndexMap<String, Value>,
 }
