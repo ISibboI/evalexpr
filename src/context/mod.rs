@@ -382,13 +382,13 @@ pub trait OperatorSchemaTrait {
 }
 
 
-#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=false))]
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait TransposeColumnIndex {
     fn col_idx(&self, transpose_index: usize) -> Result<usize,crate::Error>;
 }
 
-#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=false))]
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait TransposeColumnIndexHolder {
     fn get_index_for_column(&self, column_name: String) -> Result<BoxedTransposeColumnIndex<'static>,crate::Error>;
