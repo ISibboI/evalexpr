@@ -88,7 +88,7 @@ impl From<&Value> for Value {
 impl Ord for Value {
     fn cmp(&self, other: &Self) -> Ordering {
         // Assuming that `partial_cmp` should never return `None` for `Ord` types
-        self.partial_cmp(other).unwrap()
+        self.partial_cmp(other).expect(format!("Cannot compare {:?} and {:?}", self, other).as_str())
     }
 }
 
