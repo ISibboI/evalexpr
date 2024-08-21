@@ -201,6 +201,7 @@ mod tests {
         assert_eq!(row.get_value("prefixhasdata__date3").unwrap(), Value::Boolean(true));
         assert_eq!(row.get_value("prefixhasdata__date4").unwrap(), Value::Boolean(true));
 
+        
         // Test for the actual computed values
         // Replace with the actual expected values based on your calculations
         assert_eq!(row.get_value("prefixzscore__date3").unwrap(), Value::Float(1.414213562373095f64));
