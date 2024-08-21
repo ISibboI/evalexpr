@@ -6,8 +6,10 @@ pub fn simple_cumulative_returns(row: &BoxedOperatorRowTrait, columns: &[usize])
     }
 
     let mut cumulative_return = 1.0f64;
+    let mut last_val = None;
     for &col_index in columns {
         if let Some(val) = row.get_value_for_column(col_index).ok() {
+            last_val = Some(val.clone());
             match val {
                 Value::Float(val) => {
                     cumulative_return *= 1.0 + val;
@@ -15,7 +17,23 @@ pub fn simple_cumulative_returns(row: &BoxedOperatorRowTrait, columns: &[usize])
                 Value::Int(val) => {
                     cumulative_return *= 1.0 + (val as f64);
                 }
-                Value::Empty => {}
+                Value::Empty => {
+                    match last_val {
+                        None => {}
+                        Some(val) => {
+                            match val {
+                                Value::Float(val) => {
+                                    cumulative_return *= 1.0 + val;
+                                },
+                                Value::Int(val) => {
+                                    cumulative_return *= 1.0 + (val as f64);
+                                },
+                                Value::Empty => {}
+                                _ => return Err(Error::NonNumericType),
+                            }
+                        }
+                    }
+                }
                 _ => return Err(Error::NonNumericType),
             }
         }
