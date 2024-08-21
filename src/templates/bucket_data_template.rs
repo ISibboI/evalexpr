@@ -63,6 +63,9 @@ impl CompiledTransposeCalculationTemplate for BucketData {
         // Populate transpose_value_to_field_value_map
         for (idx, transpose_value) in ordered_transpose_values.iter().enumerate() {
             let field_to_bucket = row.get_value_for_column(field_to_bucket_index.col_idx(idx)?)?;
+            if  field_to_bucket == Value::Empty {
+                continue;
+            }
             value_to_bucket_map.entry(field_to_bucket).or_default().push(idx);
         }
 
