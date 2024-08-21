@@ -6,6 +6,7 @@
 
 use std::{borrow::Cow, collections::HashMap};
 use std::collections::HashSet;
+use std::fmt::{Debug, Formatter};
 use indexmap::IndexMap;
 use thin_trait_object::thin_trait_object;
 use crate::{function::Function, value::{value_type::ValueType, Value}, Error, EvalexprError, EvalexprResult};
@@ -391,6 +392,12 @@ pub trait TransposeColumnIndex {
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait TransposeColumnIndexHolder {
     fn get_index_for_column(&self, column_name: String) -> Result<BoxedTransposeColumnIndex<'static>,crate::Error>;
+}
+
+impl<'a> Debug for BoxedTransposeColumnIndex<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "BoxedTransposeColumnIndex")
+    }
 }
 
 
