@@ -370,6 +370,7 @@ pub trait OperatorSchemaTrait {
     fn get_schema(&self) -> Result<Vec<FFIColumn>, crate::Error>;
     fn get_column_for_index(&self, column: usize) -> Result<FFIColumn, crate::Error>;
     fn get_index_for_column(&self, column: String) -> Result<usize, crate::Error>;
+    
     fn add_column(&mut self, column: FFIColumn) -> Result<(), crate::Error>;
     fn remove_column(&mut self, column_name: String) -> Result<(), crate::Error>;
 
@@ -378,6 +379,22 @@ pub trait OperatorSchemaTrait {
     fn get_value_for_column(&self, col: usize, row: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value, row: usize) -> Result<(),crate::Error>;
 }
+
+
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
+pub trait TransposeColumnIndex {
+    fn col_idx(&self, transpose_index: usize) -> Result<usize,crate::Error>;
+}
+
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
+pub trait TransposeColumnIndexHolder {
+    fn get_index_for_column(&self, column_name: String) -> Result<BoxedTransposeColumnIndex<'static>,crate::Error>;
+}
+
+
+
 #[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorStatusContainerTrait {

@@ -33,12 +33,13 @@ pub fn simple_cumulative_sum(row: &BoxedOperatorRowTrait, columns: &[usize]) -> 
 
 #[cfg(test)]
 mod tests {
-    use crate::templates::test_utils::MockRow;
+    use crate::templates::test_utils::{MockIndexHolder, MockRow};
     use super::*;
 
     #[test]
     fn test_simple_cumulative_sum_normal_operation() {
-        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Float(20.0), Value::Float(30.0), Value::Float(40.0)]).into_boxed();
+        let holder = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Float(20.0), Value::Float(30.0), Value::Float(40.0)],&holder).into_boxed();
         let columns = vec![0, 1, 2, 3];
         let result = simple_cumulative_sum(&row, &columns).unwrap();
         assert_eq!(result, Value::Float(100.0));
@@ -46,7 +47,8 @@ mod tests {
 
     #[test]
     fn test_simple_cumulative_sum_partial_data() {
-        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Empty, Value::Float(30.0), Value::Empty]).into_boxed();
+        let holder = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![Value::Float(10.0), Value::Empty, Value::Float(30.0), Value::Empty],&holder).into_boxed();
         let columns = vec![0, 1, 2, 3];
         let result = simple_cumulative_sum(&row, &columns).unwrap();
         assert_eq!(result, Value::Float(40.0));
@@ -54,7 +56,8 @@ mod tests {
 
     #[test]
     fn test_simple_cumulative_sum_empty_input() {
-        let row = MockRow::from_values(vec![]).into_boxed();
+        let holder = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![],&holder).into_boxed();
         let columns: Vec<usize> = vec![];
         let result = simple_cumulative_sum(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
@@ -62,7 +65,8 @@ mod tests {
 
     #[test]
     fn test_simple_cumulative_sum_no_valid_columns() {
-        let row = MockRow::from_values(vec![Value::Empty, Value::Empty]).into_boxed();
+        let holder = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![Value::Empty, Value::Empty],&holder).into_boxed();
         let columns = vec![0, 1];
         let result = simple_cumulative_sum(&row, &columns).unwrap();
         assert_eq!(result, Value::Float(0.0)); // Assuming Value::Float(0.0) for no valid data

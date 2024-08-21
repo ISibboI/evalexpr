@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType, AdaptiveStopLossTradeModel};
+use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder, TransposeColumnIndex, TransposeColumnIndexHolder};
 
 pub struct RollingZScore {
     avg_output_field_name: String,
@@ -30,6 +31,7 @@ impl RollingZScore {
 }
 
 impl CompiledTransposeCalculationTemplate for RollingZScore {
+
     fn schema(&self) -> HashMap<String, ValueType> {
         vec![
             (self.has_data_output_field_name.clone(), ValueType::Boolean),
@@ -45,7 +47,7 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
         vec![self.field_to_zscore.clone()]
     }
 
-    fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
+    fn commit_row(&self, row: &mut BoxedOperatorRowTrait,indexes: &BoxedTransposeColumnIndexHolder, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
         let mut score_window = Vec::with_capacity(self.window_size as usize);
         let mut window_sum = 0.0;
         let mut window_sum_squares = 0.0;
@@ -55,10 +57,16 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
         let mut last_stdev: Option<FloatType> = None;
         let mut last_zscore: Option<FloatType> = None;
         let mut last_value: Option<FloatType> = None;
+        
+        let zscore_output_index = indexes.get_index_for_column(self.zscore_output_field_name.clone())?;
+        let stdev_index = indexes.get_index_for_column(self.stdev_output_field_name.clone())?;
+        let avg_index = indexes.get_index_for_column(self.avg_output_field_name.clone())?;
+        let has_data_index = indexes.get_index_for_column(self.has_data_output_field_name.clone())?;
+        let field_to_zscore_index = indexes.get_index_for_column(self.field_to_zscore.clone())?;
 
         for i in cmp::max(cycle_epoch as isize - self.window_size as isize, 0) as usize..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            let value_opt = row.get_value(&generate_column_name(&self.field_to_zscore, transpose_value))?.as_float_or_none()?;
+            let value_opt = row.get_value_for_column(field_to_zscore_index.col_idx(i)?)?.as_float_or_none()?;
 
             // Process non-null values and update the window
             if let Some(value) = value_opt.or(last_value) {
@@ -90,27 +98,27 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
                     last_zscore = Some(zscore);
 
                     // Set the calculated values
-                    row.set_value(&generate_column_name(&self.zscore_output_field_name, transpose_value), Value::Float(zscore))?;
-                    row.set_value(&generate_column_name(&self.stdev_output_field_name, transpose_value), Value::Float(stdev))?;
-                    row.set_value(&generate_column_name(&self.avg_output_field_name, transpose_value), Value::Float(avg))?;
-                    row.set_value(&generate_column_name(&self.has_data_output_field_name, transpose_value), Value::Boolean(true))?;
+                    row.set_value_for_column(zscore_output_index.col_idx(i)?, Value::Float(zscore))?;
+                    row.set_value_for_column(stdev_index.col_idx(i)?, Value::Float(stdev))?;
+                    row.set_value_for_column(avg_index.col_idx(i)?, Value::Float(avg))?;
+                    row.set_value_for_column(has_data_index.col_idx(i)?, Value::Boolean(true))?;
                 }
             } else if score_window.len() == self.window_size as usize {
                 // If the current value is null but the window is full, output the last valid values
-                row.set_value(
-                    &generate_column_name(&self.zscore_output_field_name, transpose_value),
+                row.set_value_for_column(
+                zscore_output_index.col_idx(i)?,
                     last_zscore.map(Value::Float).unwrap_or(Value::Empty),
                 )?;
-                row.set_value(
-                    &generate_column_name(&self.stdev_output_field_name, transpose_value),
+                row.set_value_for_column(
+                    stdev_index.col_idx(i)?,
                     last_stdev.map(Value::Float).unwrap_or(Value::Empty),
                 )?;
-                row.set_value(
-                    &generate_column_name(&self.avg_output_field_name, transpose_value),
+                row.set_value_for_column(
+                    avg_index.col_idx(i)?,
                     last_avg.map(Value::Float).unwrap_or(Value::Empty),
                 )?;
-                row.set_value(
-                    &generate_column_name(&self.has_data_output_field_name, transpose_value),
+                row.set_value_for_column(
+                    has_data_index.col_idx(i)?,
                     Value::Boolean(true),
                 )?;
             }
@@ -127,22 +135,12 @@ mod tests {
     use super::*;
     use std::collections::HashMap;
     use std::time::Instant;
-    use crate::templates::test_utils::MockRow;
+    use crate::templates::test_utils::{MockIndexHolder, MockRow};
 
     #[test]
     fn test_commit_row_basic() {
         // Create a mock row with initial values
-        let mut row = MockRow::new();
-        let field_to_zscore = "price";
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(4.0)).unwrap();
 
-        // Instantiate RollingZScore with dummy values
-        let rolling_zscore = RollingZScore::new(field_to_zscore, "prefix", 3);
-
-        // Ordered transpose values (these should correspond to the field names)
         let ordered_transpose_values = vec![
             Value::String("date1".to_string()),
             Value::String("date2".to_string()),
@@ -150,9 +148,27 @@ mod tests {
             Value::String("date4".to_string()),
         ];
 
+        let field_to_zscore = "price";
+        let rolling_zscore = RollingZScore::new(field_to_zscore, "prefix", 3);
+        
+        let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
+        let mut row = MockRow::new(&mock_index_column_holder);
+        
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(4.0)).unwrap();
+
+        // Instantiate RollingZScore with dummy values
+  
+
+        // Ordered transpose values (these should correspond to the field names)
+    
+
         // Call commit_row and check the results
         let mut row = BoxedOperatorRowTrait::new(row);
-        rolling_zscore.commit_row(&mut row, &ordered_transpose_values, 0).unwrap();
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
+        rolling_zscore.commit_row(&mut row,&index_holder_trait, &ordered_transpose_values, 0).unwrap();
 
         // Check that the correct zscore, avg, stdev, and has_data values have been set
         assert!(row.get_value("prefixzscore__date3").unwrap() != Value::Empty); // First full window
@@ -169,30 +185,44 @@ mod tests {
         assert_eq!(row.get_value("prefixzscore__date4").unwrap(), Value::Float(1.2247448713915896f64));
     }
 
+    fn create_index_holder(ordered_transpose_values: &Vec<Value>, rolling_zscore: &RollingZScore) -> MockIndexHolder {
+        let mut mock_index_column_holder = MockIndexHolder::new();
+        mock_index_column_holder.register_index(rolling_zscore.field_to_zscore.to_string(), &ordered_transpose_values);
+        mock_index_column_holder.register_index(rolling_zscore.zscore_output_field_name.to_string(), &ordered_transpose_values);
+        mock_index_column_holder.register_index(rolling_zscore.avg_output_field_name.to_string(), &ordered_transpose_values);
+        mock_index_column_holder.register_index(rolling_zscore.stdev_output_field_name.to_string(), &ordered_transpose_values);
+        mock_index_column_holder.register_index(rolling_zscore.has_data_output_field_name.to_string(), &ordered_transpose_values);
+        mock_index_column_holder
+    }
+
     #[test]
     fn test_commit_row_with_nulls() {
         // Create a mock row with initial values, including a null value
-        let mut row = MockRow::new();
         let field_to_zscore = "price";
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Empty).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(3.0)).unwrap();
-
-        // Instantiate RollingZScore with dummy values
+        
         let rolling_zscore = RollingZScore::new(field_to_zscore, "prefix",  3);
-
-        // Ordered transpose values (these should correspond to the field names)
         let ordered_transpose_values = vec![
             Value::String("date1".to_string()),
             Value::String("date2".to_string()),
             Value::String("date3".to_string()),
             Value::String("date4".to_string()),
         ];
+        let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
+        let mut row = MockRow::new(&mock_index_column_holder);
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Empty).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(3.0)).unwrap();
+
+        // Instantiate RollingZScore with dummy values
+
+        // Ordered transpose values (these should correspond to the field names)
+
 
         // Call commit_row and check the results
         let mut row = BoxedOperatorRowTrait::new(row);
-        rolling_zscore.commit_row(&mut row, &ordered_transpose_values, 0).unwrap();
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
+        rolling_zscore.commit_row(&mut row,&index_holder_trait, &ordered_transpose_values, 0).unwrap();
 
         // Check that the correct zscore, avg, stdev, and has_data values have been set
         assert!(row.get_value("prefixzscore__date2").unwrap() == Value::Empty); // Should be empty because it's null
@@ -209,24 +239,30 @@ mod tests {
 
     #[test]
     fn test_commit_row_window_not_full() {
+        
         // Create a mock row with initial values
-        let mut row = MockRow::new();
+
         let field_to_zscore = "price";
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
-
-        // Instantiate RollingZScore with dummy values
         let rolling_zscore = RollingZScore::new(field_to_zscore, "zscore_",  3);
-
-        // Ordered transpose values (these should correspond to the field names)
         let ordered_transpose_values = vec![
             Value::String("date1".to_string()),
             Value::String("date2".to_string()),
         ];
 
+        let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
+        let mut row = MockRow::new(&mock_index_column_holder);
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
+
+        // Instantiate RollingZScore with dummy values
+
+        // Ordered transpose values (these should correspond to the field names)
+    
+
         // Call commit_row and check the results
         let mut row = BoxedOperatorRowTrait::new(row);
-        rolling_zscore.commit_row(&mut row, &ordered_transpose_values, 2).unwrap();
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
+        rolling_zscore.commit_row(&mut row,&index_holder_trait, &ordered_transpose_values, 2).unwrap();
 
         // Check that no values have been set because the window is not full
         assert!(row.get_value("zscore_zscore_date1").unwrap() == Value::Empty); // Should be empty because the window isn't full
@@ -236,8 +272,16 @@ mod tests {
     #[test]
     fn test_commit_row_performance() {
         // Create a mock row with initial values
-        let mut row = MockRow::new();
+
+        let ordered_transpose_values: Vec<Value> = (1..=15000)
+            .map(|i| Value::String(format!("date{}", i)))
+            .collect();
+
+
         let field_to_zscore = "price";
+        let rolling_zscore = RollingZScore::new(field_to_zscore, "prefix", 522);
+        let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
+        let mut row = MockRow::new(&mock_index_column_holder);
 
         // Fill the row with 15,000 values
         for i in 1..=15000 {
@@ -248,21 +292,19 @@ mod tests {
         }
 
         // Instantiate RollingZScore with window size of 522
-        let rolling_zscore = RollingZScore::new(field_to_zscore, "prefix", 522);
 
         // Generate the ordered transpose values
-        let ordered_transpose_values: Vec<Value> = (1..=15000)
-            .map(|i| Value::String(format!("date{}", i)))
-            .collect();
+   
 
         // Call commit_row multiple times and measure the time
         let iterations = 10;
         let mut total_duration = 0;
 
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
         for _ in 0..iterations {
             let mut row_clone = BoxedOperatorRowTrait::new(row.clone()); // Clone the row to reset the state for each iteration
             let start_time = Instant::now();
-            rolling_zscore.commit_row(&mut row_clone, &ordered_transpose_values, 0).unwrap();
+            rolling_zscore.commit_row(&mut row_clone,&index_holder_trait, &ordered_transpose_values, 0).unwrap();
             let duration = start_time.elapsed();
             total_duration += duration.as_millis();
         }

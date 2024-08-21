@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use crate::{context, get_string, IntType};
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
-
+use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder};
 
 pub struct AdaptiveStopLossTradeModel {
     signal_field: String,
@@ -33,6 +33,7 @@ impl AdaptiveStopLossTradeModel {
 
 
 impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
+
     fn schema(&self) -> HashMap<String, ValueType> {
         vec![
             ("active_trade", ValueType::Boolean),
@@ -52,7 +53,7 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
     fn dependencies(&self) -> Vec<String> {
         vec![self.instrument_field_name.to_string(), self.signal_field.to_string(), self.close_value_field.to_string(), self.trading_range_field_name.to_string(), self.ask_value_field .to_string()]
     }
-    fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
+    fn commit_row(&self, row: &mut BoxedOperatorRowTrait,indexes: &BoxedTransposeColumnIndexHolder, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
         let mut prev_trade_signal: Option<bool> = None;
         let mut active_trade: Option<bool> = None;
         let mut initiation_price: Option<FloatType> = None;

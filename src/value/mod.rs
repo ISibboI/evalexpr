@@ -85,6 +85,13 @@ impl From<&Value> for Value {
     }
 }
 
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Assuming that `partial_cmp` should never return `None` for `Ord` types
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {

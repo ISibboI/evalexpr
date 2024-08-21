@@ -38,11 +38,12 @@ pub fn rolling_stdev(row: &BoxedOperatorRowTrait, columns: &[usize]) -> Result<V
 
 #[cfg(test)]
 mod tests {
-    use crate::templates::test_utils::MockRow;
+    use crate::templates::test_utils::{MockIndexHolder, MockRow};
     use super::*;
 
     #[test]
     fn test_rolling_stdev_basic_case() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(10.0),
             Value::Float(12.0),
@@ -52,7 +53,7 @@ mod tests {
             Value::Float(23.0),
             Value::Float(21.0),
             Value::Float(16.0),
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4, 5, 6, 7];
         let result = rolling_stdev(&row, &columns).unwrap();
 
@@ -65,13 +66,14 @@ mod tests {
 
     #[test]
     fn test_rolling_stdev_mixed_values() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(1.0),
             Value::Int(3),
             Value::Float(4.0),
             Value::Int(2),
             Value::Float(5.0),
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = rolling_stdev(&row, &columns).unwrap();
 
@@ -84,13 +86,14 @@ mod tests {
 
     #[test]
     fn test_rolling_stdev_with_empty_values() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(0.1),
             Value::Empty,
             Value::Float(0.3),
             Value::Empty,
             Value::Float(0.5),
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = rolling_stdev(&row, &columns).unwrap();
 
@@ -103,11 +106,12 @@ mod tests {
 
     #[test]
     fn test_rolling_stdev_empty_columns() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(1.0),
             Value::Int(3),
             Value::Float(4.0),
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns: Vec<usize> = vec![];
         let result = rolling_stdev(&row, &columns).unwrap();
 
@@ -116,9 +120,10 @@ mod tests {
 
     #[test]
     fn test_rolling_stdev_single_value() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(2.5),
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns = vec![0];
         let result = rolling_stdev(&row, &columns).unwrap();
 
@@ -127,11 +132,12 @@ mod tests {
 
     #[test]
     fn test_rolling_stdev_all_empty_values() {
+        let mock_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Empty,
             Value::Empty,
             Value::Empty,
-        ]).into_boxed();
+        ],&mock_holder).into_boxed();
         let columns = vec![0, 1, 2];
         let result = rolling_stdev(&row, &columns).unwrap();
 

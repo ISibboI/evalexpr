@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
-
+use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder};
 
 pub struct ChannelMonitor {
     lower_band_field_name: String,
@@ -40,6 +40,7 @@ impl ChannelMonitor {
 }
 
 impl CompiledTransposeCalculationTemplate for ChannelMonitor {
+
     fn schema(&self) -> HashMap<String, ValueType> {
         vec![
             (self.within_bounds_field_name.clone(), ValueType::Boolean),
@@ -57,7 +58,7 @@ impl CompiledTransposeCalculationTemplate for ChannelMonitor {
             self.value_field_name.clone()
         ]
     }
-    fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
+    fn commit_row(&self, row: &mut BoxedOperatorRowTrait ,indexes: &BoxedTransposeColumnIndexHolder, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
 
         let mut within_bounds: Option<bool> = None;
         let mut left_above: Option<bool> = None;
@@ -103,7 +104,7 @@ impl CompiledTransposeCalculationTemplate for ChannelMonitor {
 mod commit_row_tests {
     use super::*;
     use std::collections::HashMap;
-    use crate::templates::test_utils::MockRow;
+    use crate::templates::test_utils::{MockIndexHolder, MockRow};
 
     #[test]
     fn test_commit_row_value_below_lower_band() -> Result<(), Error> {
@@ -114,7 +115,8 @@ mod commit_row_tests {
             "output",
         );
 
-        let mut row = MockRow::new();
+        let holder = MockIndexHolder::new();
+        let mut row = MockRow::new(&holder);
         let cycle_epoch = 0;
         let transpose_value = Value::String("02_01_2024".to_owned());
         let ordered_transpose_values = vec![transpose_value.clone()];
@@ -124,7 +126,8 @@ mod commit_row_tests {
         row.insert_value(generate_column_name("value", &transpose_value), Value::Float(5.0));
 
         let mut row_trait = BoxedOperatorRowTrait::new(row);
-        monitor.commit_row(&mut row_trait, &ordered_transpose_values, cycle_epoch)?;
+        let mut index_hodlder_trait = BoxedTransposeColumnIndexHolder::new(&holder);
+        monitor.commit_row(&mut row_trait,&index_hodlder_trait, &ordered_transpose_values, cycle_epoch)?;
 
         assert_eq!(row_trait.get_value(&generate_column_name("output_within_bounds", &transpose_value))?, Value::Boolean(false));
         assert_eq!(row_trait.get_value(&generate_column_name("output_left_above", &transpose_value))?, Value::Boolean(false));
@@ -142,7 +145,8 @@ mod commit_row_tests {
             "output",
         );
 
-        let mut row = MockRow::new();
+        let mock_index_column_holder = MockIndexHolder::new();
+        let mut row = MockRow::new(&mock_index_column_holder);
         let prev_transpose_value = Value::String("01_01_2024".to_owned());
         let current_transpose_value = Value::String("02_01_2024".to_owned());
         let ordered_transpose_values = vec![prev_transpose_value.clone(), current_transpose_value.clone()];
@@ -159,7 +163,8 @@ mod commit_row_tests {
         row.insert_value(generate_column_name("value", &current_transpose_value), Value::Float(15.0));
 
         let mut row_trait = BoxedOperatorRowTrait::new(row);
-        monitor.commit_row(&mut row_trait, &ordered_transpose_values, 0)?;
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
+        monitor.commit_row(&mut row_trait,&index_holder_trait, &ordered_transpose_values, 0)?;
 
         assert_eq!(row_trait.get_value(&generate_column_name("output_within_bounds", &prev_transpose_value))?, Value::Boolean(false));
         assert_eq!(row_trait.get_value(&generate_column_name("output_left_below", &prev_transpose_value))?, Value::Boolean(true));
@@ -184,7 +189,8 @@ mod commit_row_tests {
             "output",
         );
 
-        let mut row = MockRow::new();
+        let mut mock_index_column_holder = MockIndexHolder::new();
+        let mut row = MockRow::new(&mock_index_column_holder);
         let prev_transpose_value = Value::String("01_01_2024".to_owned());
         let current_transpose_value = Value::String("02_01_2024".to_owned());
         let ordered_transpose_values = vec![prev_transpose_value.clone(), current_transpose_value.clone()];
@@ -201,7 +207,8 @@ mod commit_row_tests {
         row.insert_value(generate_column_name("value", &current_transpose_value), Value::Float(15.0));
 
         let mut row_trait = BoxedOperatorRowTrait::new(row);
-        monitor.commit_row(&mut row_trait, &ordered_transpose_values, 0)?;
+        let mut index_holder_trait = BoxedTransposeColumnIndexHolder::new(&mock_index_column_holder);
+        monitor.commit_row(&mut row_trait,&index_holder_trait, &ordered_transpose_values, 0)?;
 
         assert_eq!(row_trait.get_value(&generate_column_name("output_re_entered_below", &current_transpose_value))?, Value::Boolean(false));
         assert_eq!(row_trait.get_value(&generate_column_name("output_re_entered_above", &current_transpose_value))?, Value::Boolean(true));

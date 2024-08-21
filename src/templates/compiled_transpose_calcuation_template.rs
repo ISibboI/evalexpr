@@ -5,16 +5,18 @@ use std::panic;
 use std::panic::AssertUnwindSafe;
 use thin_trait_object::thin_trait_object;
 use crate::{BoxedOperatorRowTrait, Error, Value, ValueType};
+use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder};
 use crate::Error::CustomError;
 
 
 #[thin_trait_object]
 pub trait CompiledTransposeCalculationTemplate : Send {
+
     fn schema(&self) -> HashMap<String,ValueType>;
     fn dependencies(&self) -> Vec<String>;
-    fn commit_row(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error>;
-    fn commit_row_wrapped(&self, row: &mut BoxedOperatorRowTrait, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error>{
-        panic::catch_unwind(AssertUnwindSafe(|| self.commit_row(row, ordered_transpose_values, cycle_epoch))).map_err(|err| Error::CustomError(format!("{}", extract_message_from_any_error(err))))?
+    fn commit_row(&self, row: &mut BoxedOperatorRowTrait,indexes: &BoxedTransposeColumnIndexHolder,ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error>;
+    fn commit_row_wrapped(&self, row: &mut BoxedOperatorRowTrait,indexes: &BoxedTransposeColumnIndexHolder, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error>{
+        panic::catch_unwind(AssertUnwindSafe(|| self.commit_row(row, indexes,ordered_transpose_values, cycle_epoch))).map_err(|err| Error::CustomError(format!("{}", extract_message_from_any_error(err))))?
     }
 }
 

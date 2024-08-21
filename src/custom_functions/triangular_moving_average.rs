@@ -62,13 +62,14 @@ fn get_price(row: &BoxedOperatorRowTrait, columns: &[usize], index: usize) -> Op
 #[cfg(test)]
 mod tests {
     use std::process::id;
-    use crate::templates::test_utils::MockRow;
+    use crate::templates::test_utils::{MockIndex, MockIndexHolder, MockRow};
     use super::*;
 
     //Time: 4.481µs
     #[test]
     fn test_triangular_moving_average_normal_operation() {
-        let row = MockRow::from_values((0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>()); // Simple case with enough columns
+        let mock_index = MockIndexHolder::new();
+        let row = MockRow::from_values((0..1111111).map(|idx| Value::Float(idx as f64)).collect::<Vec<Value>>(), &mock_index); // Simple case with enough columns
         let columns = (0..5).collect::<Vec<usize>>(); // Simple case with enough columns
         let start = std::time::Instant::now();
         let result = triangular_moving_average(&BoxedOperatorRowTrait::new(row), &columns);
@@ -89,7 +90,8 @@ mod tests {
 
     #[test]
     fn test_triangular_moving_average_empty_input() {
-        let row = MockRow::from_values(vec![]).into_boxed();
+        let mock_index = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![], &mock_index).into_boxed();
         let columns: Vec<usize> = vec![];
         let result = triangular_moving_average(&row, &columns);
         assert!(result.is_ok());
@@ -99,7 +101,8 @@ mod tests {
 
     #[test]
     fn test_triangular_moving_average_empty() {
-        let row = MockRow::from_values(vec![]).into_boxed();
+        let mock_index = MockIndexHolder::new();
+        let row = MockRow::from_values(vec![],&mock_index).into_boxed();
         let columns = vec![];
         let result = triangular_moving_average(&row, &columns).unwrap();
         assert_eq!(result, Value::Empty);
@@ -108,7 +111,9 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_basic() {
         // Setup a simple scenario
-        let row =  MockRow::from_values(vec![Value::Int(10), Value::Int(20), Value::Int(30), Value::Int(40), Value::Int(50)]).into_boxed();
+        
+        let mock_index_holder = MockIndexHolder::new();
+        let row =  MockRow::from_values(vec![Value::Int(10), Value::Int(20), Value::Int(30), Value::Int(40), Value::Int(50)], &mock_index_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4]; // Direct mapping for simplicity
         let result = triangular_moving_average(&row, &columns).unwrap();
 
@@ -122,13 +127,14 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_with_floats() {
         // Test the function with floating point numbers
+        let mock_index_holder = MockIndexHolder::new();
         let row = MockRow::from_values(vec![
             Value::Float(10.5),
             Value::Float(20.5),
             Value::Float(30.5),
             Value::Float(40.5),
             Value::Float(50.5)
-        ]).into_boxed();
+        ], &mock_index_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = triangular_moving_average(&row, &columns).unwrap();
 
@@ -141,7 +147,8 @@ mod tests {
     #[test]
     fn test_triangular_moving_average_invalid_values() {
         // Test how the function handles invalid (non-numeric) values
-        let row =  MockRow::from_values(vec![Value::Empty, Value::Int(20), Value::Empty, Value::Int(40), Value::Empty]).into_boxed();
+        let mock_index_holder = MockIndexHolder::new();
+        let row =  MockRow::from_values(vec![Value::Empty, Value::Int(20), Value::Empty, Value::Int(40), Value::Empty], &mock_index_holder).into_boxed();
         let columns = vec![0, 1, 2, 3, 4];
         let result = triangular_moving_average(&row, &columns).unwrap();
 
