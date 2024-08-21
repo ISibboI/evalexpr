@@ -45,18 +45,18 @@ pub fn clip_value_to_range<T: Into<Value>, S: Into<Value>>(value: T, constant: S
 }
 
 pub fn fallback_with_range_clipping<P: Into<Value>, L: Into<Value>, C: Into<Value>, D: Into<Value>>(
-    p_emin: P,
+    should_use_primary: P,
     rel_score_long_temp_ps: L,
     rel_score_long_temp: L,
     range_to_clip: C,
     empty_value: D,
 ) -> Result<Value, Error> {
-    let p_emin: Value = p_emin.into();
+    let should_use_primary: Value = should_use_primary.into();
     let rel_score_long_temp_ps: Value = rel_score_long_temp_ps.into();
     let rel_score_long_temp: Value = rel_score_long_temp.into();
     let constant: Value = range_to_clip.into();
 
-    if p_emin.as_float_or_none()?.unwrap_or(0.0) <= 0.0 {
+    if should_use_primary.as_boolean_or_none()?.unwrap_or(false) {
         if !rel_score_long_temp_ps.is_empty() {
             clip_value_to_range(rel_score_long_temp_ps, constant)
         } else {
