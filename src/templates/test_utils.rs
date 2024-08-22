@@ -181,9 +181,9 @@ impl<'a> OperatorRowTrait for MockRow<'a> {
         Ok(result)
     }
 
-    fn set_values_for_columns(&mut self, columns: &Vec<usize>, mut values: &Vec<Value>) -> Result<(), Error> {
+    fn set_values_for_columns(&mut self, columns: Vec<usize>, mut values: Vec<Value>) -> Result<(), Error> {
         for column in columns {
-            self.set_value_for_column(*column, values[*column].clone())?;
+            self.set_value_for_column(column.clone(), values.remove(column))?;
         }
         Ok(())
     }

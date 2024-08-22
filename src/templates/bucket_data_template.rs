@@ -107,7 +107,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
             }
         }
         
-        row.set_values_for_columns(&modified_columns,&output_values)?;
+        row.set_values_for_columns(modified_columns,output_values)?;
         Ok(())
     }
 

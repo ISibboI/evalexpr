@@ -119,7 +119,7 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
             }
         }
 
-        row.set_values_for_columns(&modified_columns,&output_values)?;
+        row.set_values_for_columns(modified_columns,output_values)?;
 
         Ok(())
     }

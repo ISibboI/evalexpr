@@ -258,9 +258,9 @@ impl OperatorRowTrait for &mut IndexMapContext {
         todo!()
     }
 
-    fn set_values_for_columns(&mut self, colums: &Vec<usize>, mut values: &Vec<Value>) -> Result<(), Error> {
+    fn set_values_for_columns(&mut self, colums: Vec<usize>, mut values: Vec<Value>) -> Result<(), Error> {
         for column in colums {
-            self.set_value_for_column(*column, values[*column].clone())?;
+            self.set_value_for_column(column.clone(), values.remove(column))?;
         }
         Ok(())
     }
@@ -303,9 +303,9 @@ impl OperatorRowTrait for IndexMapContext {
         todo!()
     }
 
-    fn set_values_for_columns(&mut self, columns: &Vec<usize>, values: &Vec<Value>) -> Result<(), Error> {
+    fn set_values_for_columns(&mut self, columns: Vec<usize>, mut values: Vec<Value>) -> Result<(), Error> {
         for column in columns {
-            self.set_value_for_column(*column, values[*column].clone())?;
+            self.set_value_for_column(column, values.remove(column))?;
         }
         Ok(())
     }
@@ -343,7 +343,7 @@ pub trait Context {
 }
 
 
-#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=false))]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
@@ -351,7 +351,7 @@ pub trait OperatorRowTrait {
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
-    fn set_values_for_columns(&mut self, columns: &Vec<usize>, values: &Vec<Value>) -> Result<(),crate::Error>;
+    fn set_values_for_columns(&mut self, columns: Vec<usize>, values: Vec<Value>) -> Result<(),crate::Error>;
     fn set_row(&mut self, row: usize);
     fn call_function(&self, idt: &str, argument: Value) -> Result<Value, crate::Error>;
     fn has_changes(&self) -> Result<bool,crate::Error>;
