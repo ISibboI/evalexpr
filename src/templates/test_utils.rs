@@ -183,7 +183,7 @@ impl<'a> OperatorRowTrait for MockRow<'a> {
 
     fn set_values_for_columns(&mut self, columns: Vec<usize>, mut values: Vec<Value>) -> Result<(), Error> {
         for column in columns {
-            self.set_value_for_column(column.clone(), values.remove(column))?;
+            self.set_value_for_column(column.clone(), values.get(column).unwrap().clone())?;
         }
         Ok(())
     }
