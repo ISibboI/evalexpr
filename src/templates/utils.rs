@@ -1,0 +1,13 @@
+﻿use crate::{Error, Value};
+
+pub  fn get_value_indirect<'a>(values: &'a Vec<Value>, column_index: &Vec<usize>, idx: usize) -> Result<&'a Value, Error> {
+    let column = column_index.get(idx).ok_or_else(|| Error::CustomError(format!("Column not found in index{}", idx)))?;
+    let result = values.get(*column).ok_or_else(|| Error::CustomError(format!("Column {column} not found in row")))?;
+    Ok(result)
+}pub  fn set_value_indirect<'a>(values: &'a mut  Vec<Value>,dirty_columns: &'a mut  Vec<usize>, column_index: &Vec<usize>, idx: usize, value: Value, ) -> Result<(), Error> {
+    let column = column_index.get(idx).ok_or_else(|| Error::CustomError(format!("Column not found in index{}", idx)))?;
+    let mut result = values.get_mut(*column).ok_or_else(|| Error::CustomError(format!("Column {column} not found in row")))?;
+    *result = value;
+    dirty_columns.push(*column);
+    Ok(())
+}

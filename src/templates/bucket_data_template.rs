@@ -1,10 +1,11 @@
 use std::cmp;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Display;
-
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType, IntType};
 use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder, TransposeColumnIndex, TransposeColumnIndexHolder};
+use crate::Error::CustomError;
 use crate::templates::test_utils::MockIndexHolder;
+use crate::templates::utils::{get_value_indirect, set_value_indirect};
 
 pub struct BucketData {
     bucket_range_output_field_name: String,
@@ -27,6 +28,8 @@ impl BucketData {
             no_buckets
         }
     }
+
+
 }
 impl CompiledTransposeCalculationTemplate for BucketData {
 
@@ -50,53 +53,27 @@ impl CompiledTransposeCalculationTemplate for BucketData {
     ) -> Result<(), Error> {
 
         // Maps to hold value-to-bucket and range information
-        let mut transpose_value_to_field_value_map: BTreeMap<Value, Value> = BTreeMap::new();
         let mut value_to_bucket_map: BTreeMap<Value, Vec<usize>> = BTreeMap::new();
         let mut min_values_for_bucket: HashMap<u8, Value> = HashMap::new();
         let mut max_values_for_bucket: HashMap<u8, Value> = HashMap::new();
 
         // Get column indexes
-        let field_to_bucket_index = indexes.get_index_for_column(self.field_name_to_bucket.clone())?;
-        let bucket_range_index = indexes.get_index_for_column(self.bucket_range_output_field_name.clone())?;
-        let bucket_index = indexes.get_index_for_column(self.bucket_output_field_name.clone())?;
+        let field_to_bucket_index = indexes.get_index_vec(self.field_name_to_bucket.clone())?;
+        let bucket_range_index = indexes.get_index_vec(self.bucket_range_output_field_name.clone())?;
+        let bucket_index = indexes.get_index_vec(self.bucket_output_field_name.clone())?;
 
+        let values = &row.get_values()?;
+        let mut output_values = vec![Value::Empty; values.len()];
+        let mut modified_columns = vec![];
         // Populate transpose_value_to_field_value_map
         for (idx, transpose_value) in ordered_transpose_values.iter().enumerate() {
-            let field_to_bucket = row.get_value_for_column(field_to_bucket_index.col_idx(idx)?)?;
-            if  field_to_bucket == Value::Empty {
+            let field_to_bucket = get_value_indirect(values,&field_to_bucket_index, idx)?;
+            if  field_to_bucket == &Value::Empty {
                 continue;
             }
-            value_to_bucket_map.entry(field_to_bucket).or_default().push(idx);
+            value_to_bucket_map.entry(field_to_bucket.clone()).or_default().push(idx);
         }
 
-        // // Calculate buckets and populate value_to_bucket_map
-        // let num_buckets = self.no_buckets;
-        // for (i, (transpose_value, field_value)) in transpose_value_to_field_value_map.iter().enumerate() {
-        //     if field_value == &Value::Empty {
-        //         continue;
-        //     }
-        // 
-        //     // Calculate bucket index
-        //     let bucket = (i * num_buckets as usize) / transpose_value_to_field_value_map.len();
-        //     let bucket_u8 = bucket as u8;
-        // 
-        //     // Assign field_value to a bucket if not already assigned
-        //     value_to_bucket_map.entry(field_value.clone()).or_insert(bucket_u8);
-        // 
-        //     // Update min and max values for each bucket
-        //     min_values_for_bucket
-        //         .entry(bucket_u8)
-        //         .and_modify(|min_value| if field_value < min_value { *min_value = field_value.clone(); })
-        //         .or_insert(field_value.clone());
-        // 
-        //     max_values_for_bucket
-        //         .entry(bucket_u8)
-        //         .and_modify(|max_value| if field_value > max_value { *max_value = field_value.clone(); })
-        //         .or_insert(field_value.clone());
-        // }
-        // 
-        // // Set bucket and range values in the row
-        // let no_buckets = value_to_bucket_map.len();
         let num_buckets = self.no_buckets;
         let no_values_in_value_to_bucket_map = value_to_bucket_map.len();
         for (idx, (bucket_value, transpose_columns_for_value)) in value_to_bucket_map.iter().enumerate() {
@@ -104,8 +81,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
             let bucket = ((idx * num_buckets as usize) / no_values_in_value_to_bucket_map) as u8;
 
             for val in transpose_columns_for_value {
-                let bucket_output_index = bucket_index.col_idx(*val)?;
-                row.set_value_for_column(bucket_output_index, Value::Int((num_buckets - bucket) as IntType))?;
+                set_value_indirect(&mut  output_values, &mut modified_columns, &bucket_index, *val, Value::Int((num_buckets - bucket) as IntType))?;
             }
             min_values_for_bucket
                     .entry(bucket)
@@ -127,10 +103,11 @@ impl CompiledTransposeCalculationTemplate for BucketData {
                 max_values_for_bucket.get(&bucket).unwrap_or(&Value::Empty)
             );
             for val in transpose_columns_for_value {
-                let bucket_range_index = bucket_range_index.col_idx(*val)?;
-                row.set_value_for_column(bucket_range_index, Value::String(bucket_range.clone()))?;
+                set_value_indirect(&mut  output_values, &mut modified_columns, &bucket_range_index, *val, Value::String(bucket_range.clone()))?;
             }
         }
+        
+        row.set_values_for_columns(&modified_columns,&output_values)?;
         Ok(())
     }
 

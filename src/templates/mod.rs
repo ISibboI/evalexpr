@@ -5,6 +5,7 @@ pub mod compiled_transpose_calculation_template;
 pub  mod channel_monitoring_template;
 pub(crate) mod test_utils;
 pub  mod rolling_zscore;
+mod utils;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate

@@ -45,6 +45,16 @@ impl<'a> TransposeColumnIndexHolder for &'a MockIndexHolder{
             }
         }
     }
+
+    fn get_index_vec(&self, column_name: String) -> Result<Vec<usize>, Error> {
+        let option = self.values.get(&column_name);
+        match option {
+            None => { Err(Error::CustomError("Column name not found".to_string()))}
+            Some(val) => {
+                Ok(val.values.values().cloned().collect())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -156,5 +166,25 @@ impl<'a> OperatorRowTrait for MockRow<'a> {
 
     fn get_dirty_flags(&self) -> Result<Vec<usize>,crate::Error> {
         todo!()
+    }
+
+    fn get_values(&self) -> Result<Vec<Value>, Error> {
+        let mut result = vec![];
+        for (nm,val) in  &self.values{
+            result.push(val.clone())
+        }
+        for (idx,value) in &self.mock_index.values {
+            for value in &value.values {
+                result.push(Value::Empty)
+            }
+        }
+        Ok(result)
+    }
+
+    fn set_values_for_columns(&mut self, columns: &Vec<usize>, mut values: &Vec<Value>) -> Result<(), Error> {
+        for column in columns {
+            self.set_value_for_column(*column, values[*column].clone())?;
+        }
+        Ok(())
     }
 }

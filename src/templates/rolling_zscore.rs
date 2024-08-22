@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType, AdaptiveStopLossTradeModel};
 use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder, TransposeColumnIndex, TransposeColumnIndexHolder};
+use crate::templates::utils::{get_value_indirect, set_value_indirect};
 
 pub struct RollingZScore {
     avg_output_field_name: String,
@@ -58,15 +59,18 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
         let mut last_zscore: Option<FloatType> = None;
         let mut last_value: Option<FloatType> = None;
         
-        let zscore_output_index = indexes.get_index_for_column(self.zscore_output_field_name.clone())?;
-        let stdev_index = indexes.get_index_for_column(self.stdev_output_field_name.clone())?;
-        let avg_index = indexes.get_index_for_column(self.avg_output_field_name.clone())?;
-        let has_data_index = indexes.get_index_for_column(self.has_data_output_field_name.clone())?;
-        let field_to_zscore_index = indexes.get_index_for_column(self.field_to_zscore.clone())?;
+        let zscore_output_index = &indexes.get_index_vec(self.zscore_output_field_name.clone())?;
+        let stdev_index = &indexes.get_index_vec(self.stdev_output_field_name.clone())?;
+        let avg_index = &indexes.get_index_vec(self.avg_output_field_name.clone())?;
+        let has_data_index = &indexes.get_index_vec(self.has_data_output_field_name.clone())?;
+        let input_field_index = &indexes.get_index_vec(self.field_to_zscore.clone())?;
+        let row_values = &row.get_values()?;
+        let mut output_values = vec![Value::Empty; row_values.len()];
+        let mut modified_columns = vec![];
 
         for i in cmp::max(cycle_epoch as isize - self.window_size as isize, 0) as usize..ordered_transpose_values.len() {
             let transpose_value = &ordered_transpose_values[i];
-            let value_opt = row.get_value_for_column(field_to_zscore_index.col_idx(i)?)?.as_float_or_none()?;
+            let value_opt = get_value_indirect(row_values, input_field_index, i)?.as_float_or_none()?;
 
             // Process non-null values and update the window
             if let Some(value) = value_opt.or(last_value) {
@@ -97,32 +101,25 @@ impl CompiledTransposeCalculationTemplate for RollingZScore {
                     last_stdev = Some(stdev);
                     last_zscore = Some(zscore);
 
-                    // Set the calculated values
-                    row.set_value_for_column(zscore_output_index.col_idx(i)?, Value::Float(zscore))?;
-                    row.set_value_for_column(stdev_index.col_idx(i)?, Value::Float(stdev))?;
-                    row.set_value_for_column(avg_index.col_idx(i)?, Value::Float(avg))?;
-                    row.set_value_for_column(has_data_index.col_idx(i)?, Value::Boolean(true))?;
+
+                    set_value_indirect(&mut  output_values,&mut  modified_columns,zscore_output_index,i,Value::Float(zscore))?;
+                    set_value_indirect(&mut  output_values,&mut  modified_columns,stdev_index,i,Value::Float(stdev))?;
+                    set_value_indirect(&mut  output_values,&mut  modified_columns,avg_index,i,Value::Float(avg))?;
+                    set_value_indirect(&mut  output_values,&mut  modified_columns,has_data_index,i,Value::Boolean(true))?;
+   
+             
                 }
             } else if score_window.len() == self.window_size as usize {
                 // If the current value is null but the window is full, output the last valid values
-                row.set_value_for_column(
-                zscore_output_index.col_idx(i)?,
-                    last_zscore.map(Value::Float).unwrap_or(Value::Empty),
-                )?;
-                row.set_value_for_column(
-                    stdev_index.col_idx(i)?,
-                    last_stdev.map(Value::Float).unwrap_or(Value::Empty),
-                )?;
-                row.set_value_for_column(
-                    avg_index.col_idx(i)?,
-                    last_avg.map(Value::Float).unwrap_or(Value::Empty),
-                )?;
-                row.set_value_for_column(
-                    has_data_index.col_idx(i)?,
-                    Value::Boolean(true),
-                )?;
+                set_value_indirect(&mut  output_values,&mut  modified_columns,zscore_output_index,i,last_zscore.map(Value::Float).unwrap_or(Value::Empty))?; 
+                set_value_indirect(&mut  output_values,&mut  modified_columns,stdev_index,i,last_stdev.map(Value::Float).unwrap_or(Value::Empty))?;
+                set_value_indirect(&mut  output_values,&mut  modified_columns,avg_index,i,last_avg.map(Value::Float).unwrap_or(Value::Empty))?;
+                set_value_indirect(&mut  output_values,&mut  modified_columns,has_data_index,i, last_zscore.map(|fl| Value::Boolean(true)).unwrap_or(Value::Empty))?;
+      
             }
         }
+
+        row.set_values_for_columns(&modified_columns,&output_values)?;
 
         Ok(())
     }
@@ -175,6 +172,7 @@ mod tests {
         assert!(row.get_value("prefixzscore__date4").unwrap() != Value::Empty); // Second full window
         assert_eq!(row.get_value("prefixhasdata__date3").unwrap(), Value::Boolean(true));
         assert_eq!(row.get_value("prefixhasdata__date4").unwrap(), Value::Boolean(true));
+
 
         // Test for the actual computed values
         // Replace `expected_zscore_date3` with the exact value.

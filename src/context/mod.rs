@@ -242,6 +242,10 @@ impl OperatorRowTrait for &mut IndexMapContext {
         Ok(Context::get_value(self, identifier).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
     }
 
+    fn get_values(&self) -> Result<Vec<Value>, Error> {
+        Ok(self.variables.values().map(|v|v.clone()).collect())
+    }
+
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
         Ok(ContextWithMutableVariables::set_value(self, identifier.to_string(), value, true)?)
     }
@@ -252,6 +256,13 @@ impl OperatorRowTrait for &mut IndexMapContext {
 
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(), Error> {
         todo!()
+    }
+
+    fn set_values_for_columns(&mut self, colums: &Vec<usize>, mut values: &Vec<Value>) -> Result<(), Error> {
+        for column in colums {
+            self.set_value_for_column(*column, values[*column].clone())?;
+        }
+        Ok(())
     }
 
     fn set_row(&mut self, row: usize) {
@@ -276,6 +287,10 @@ impl OperatorRowTrait for IndexMapContext {
         Ok(Context::get_value(self, identifier).map(|v|v.clone().into_owned()).unwrap_or(Value::Empty))
     }
 
+    fn get_values(&self) -> Result<Vec<Value>, Error> {
+        Ok(self.variables.values().map(|v|v.clone()).collect())
+    }
+
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
         Ok(ContextWithMutableVariables::set_value(self, identifier.to_string(), value, true)?)
     }
@@ -286,6 +301,13 @@ impl OperatorRowTrait for IndexMapContext {
 
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(), Error> {
         todo!()
+    }
+
+    fn set_values_for_columns(&mut self, columns: &Vec<usize>, values: &Vec<Value>) -> Result<(), Error> {
+        for column in columns {
+            self.set_value_for_column(*column, values[*column].clone())?;
+        }
+        Ok(())
     }
 
     fn set_row(&mut self, row: usize) {
@@ -325,9 +347,11 @@ pub trait Context {
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
+    fn get_values(&self) -> Result<Vec<Value>,crate::Error>;
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;
+    fn set_values_for_columns(&mut self, columns: &Vec<usize>, values: &Vec<Value>) -> Result<(),crate::Error>;
     fn set_row(&mut self, row: usize);
     fn call_function(&self, idt: &str, argument: Value) -> Result<Value, crate::Error>;
     fn has_changes(&self) -> Result<bool,crate::Error>;
@@ -392,6 +416,7 @@ pub trait TransposeColumnIndex {
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait TransposeColumnIndexHolder {
     fn get_index_for_column(&self, column_name: String) -> Result<BoxedTransposeColumnIndex<'static>,crate::Error>;
+    fn get_index_vec(&self, column_name: String) -> Result<Vec<usize>,crate::Error>;
 }
 
 impl<'a> Debug for BoxedTransposeColumnIndex<'a> {
