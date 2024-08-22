@@ -343,7 +343,7 @@ pub trait Context {
 }
 
 
-#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=true))]
+#[cfg_attr(feature = "serde_json_support", thin_trait_object(generate_dotnet_wrappers=false))]
 #[cfg_attr(not(feature = "serde_json_support"), thin_trait_object(generate_dotnet_wrappers=false))]
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
