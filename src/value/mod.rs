@@ -105,6 +105,8 @@ impl PartialOrd for Value {
             // Implementing tuple comparison would require comparing each element of the tuple, which is beyond this simple example
             (Value::Tuple(_), Value::Tuple(_)) => None,
             (Value::Empty, Value::Empty) => Some(Ordering::Equal),
+            (_, Value::Empty) => Some(Ordering::Greater),
+            (Value::Empty, _) => Some(Ordering::Greater),
             // All other combinations are considered incomparable
             _ => None,
         }
