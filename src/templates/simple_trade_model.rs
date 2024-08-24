@@ -50,7 +50,7 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
     fn dependencies(&self) -> Vec<String> {
-        vec![self.instrument_field_name.to_string(), self.signal_field.to_string(), self.price_value_field.to_string(),  self.conviction_field_name.to_string()]
+        vec![self.instrument_field_name.to_string(), self.signal_field.to_string(), self.price_value_field.to_string(),  self.conviction_field_name.to_string(),  self.initial_stop_loss_field_name.to_string(),  self.initial_take_profit_field_name.to_string()]
     }
     fn commit_row(&self, row: &mut BoxedOperatorRowTrait,indexes: &BoxedTransposeColumnIndexHolder, ordered_transpose_values: &[Value], cycle_epoch: usize) -> Result<(), Error> {
         let mut prev_trade_signal: Option<bool> = None;
