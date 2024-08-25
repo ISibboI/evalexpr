@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::{context, get_string, IntType, TransposeColumnIndexHolder};
 use crate::{BoxedOperatorRowTrait, CompiledTransposeCalculationTemplate, Error, FloatType, generate_column_name, OperatorRowTrait, Value, ValueType};
 use crate::context::{BoxedTransposeColumnIndex, BoxedTransposeColumnIndexHolder};
-use crate::templates::utils::{get_value_indirect, set_value_indirect, set_value_indirect_if_some};
+use crate::templates::utils::{get_value_indirect, get_value_indirect_from_row, set_value_indirect, set_value_indirect_if_some};
 
 pub struct SimpleTradeModel {
     signal_field: String,
@@ -84,24 +84,10 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
 
         let initial_stop_loss_index = indexes.get_index_vec(self.initial_stop_loss_field_name.clone())?;
         let initial_take_profit_index = indexes.get_index_vec(self.initial_take_profit_field_name.clone())?;
+        let mut instrument_name = None;
         
-        
-        let mut all_cols = instrument_index.clone();
-        all_cols.extend(signal_index.clone());
+        let mut all_cols = signal_index.clone();
         all_cols.extend(price_index.clone());
-        all_cols.extend(conviction_index.clone());
-        all_cols.extend(initial_stop_loss_index.clone());
-        all_cols.extend(initial_take_profit_index.clone());
-        all_cols.extend(active_trade_index.clone());
-        all_cols.extend(trade_id_index.clone());
-        all_cols.extend(initiation_price_index.clone());
-        all_cols.extend(trade_age_index.clone());
-        all_cols.extend(initiation_date_index.clone());
-        all_cols.extend(current_stop_loss_index.clone());
-        all_cols.extend(current_take_profit_index.clone());
-        all_cols.extend(reason_index.clone());
-        all_cols.extend(delta_index.clone());
-        all_cols.extend(exit_price_index.clone());
         
         
         let mut all_values = row.get_values_for_columns(all_cols)?;
@@ -110,15 +96,15 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
         if cycle_epoch > 0 {
             let transpose_index_before_epoch = cycle_epoch - 1;
             
-            active_trade = get_value_indirect(&all_values, &active_trade_index,transpose_index_before_epoch)?.as_boolean_or_none()?;
-            trade_id = get_value_indirect(&all_values, &trade_id_index,transpose_index_before_epoch)?.as_string_or_none()?;
-            initiation_price = get_value_indirect(&all_values, &initiation_price_index,transpose_index_before_epoch)?.as_float_or_none()?;
-            trade_age = get_value_indirect(&all_values, &trade_age_index,transpose_index_before_epoch)?.as_int_or_none()?;
-            initiation_date = get_value_indirect(&all_values, &initiation_date_index,transpose_index_before_epoch)?.as_string_or_none()?;
-            stop_loss = get_value_indirect(&all_values, &current_stop_loss_index, transpose_index_before_epoch)?.as_float_or_none()?;
-            take_profit = get_value_indirect(&all_values, &current_take_profit_index, transpose_index_before_epoch)?.as_float_or_none()?;
-            conviction = get_value_indirect(&all_values, &conviction_index, transpose_index_before_epoch)?.as_float_or_none()?;
-            reason = get_value_indirect(&all_values, &reason_index,transpose_index_before_epoch)?.as_string_or_none()?;
+            active_trade = get_value_indirect_from_row(row,&active_trade_index,transpose_index_before_epoch)?.as_boolean_or_none()?;
+            trade_id = get_value_indirect_from_row(row,&trade_id_index,transpose_index_before_epoch)?.as_string_or_none()?;
+            initiation_price =  get_value_indirect_from_row(row,&initiation_price_index,transpose_index_before_epoch)?.as_float_or_none()?;
+            trade_age = get_value_indirect_from_row(row,&trade_age_index,transpose_index_before_epoch)?.as_int_or_none()?;
+            initiation_date = get_value_indirect_from_row(row,&initiation_date_index,transpose_index_before_epoch)?.as_string_or_none()?;
+            stop_loss = get_value_indirect_from_row(row,&current_stop_loss_index,transpose_index_before_epoch)?.as_float_or_none()?;
+            take_profit = get_value_indirect_from_row(row,&current_take_profit_index,transpose_index_before_epoch)?.as_float_or_none()?;
+            conviction = get_value_indirect_from_row(row,&conviction_index,transpose_index_before_epoch)?.as_float_or_none()?;
+            reason = get_value_indirect_from_row(row,&reason_index,transpose_index_before_epoch)?.as_string_or_none()?;            
         }
 
         if cycle_epoch > 1 {
@@ -126,12 +112,15 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
         }
 
         for i in cycle_epoch ..ordered_transpose_values.len() {
+            if !instrument_name.is_some(){
+                instrument_name = get_value_indirect_from_row(row,&instrument_index,i)?.as_string_or_none()?;
+            }
             let transpose_value = &ordered_transpose_values[i];
             let current_signal = get_value_indirect(&all_values, &signal_index,i)?.as_boolean_or_none()?.unwrap_or_default();
             
             if let (Some(instrument_name),Some(current_close_value)) =
                 (
-                    get_value_indirect(&all_values, &instrument_index,i)?.as_string_or_none()?,
+                    instrument_name.as_ref(),
                     get_value_indirect(&all_values, &price_index,i)?.as_float_or_none()?
                 )
             {
@@ -169,8 +158,8 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                             initiation_price = Some(current_close_value);
                             initiation_date = Some(get_string(&transpose_value));
                             trade_id = Some(get_string(&transpose_value) + &instrument_name);
-                            stop_loss = get_value_indirect(&all_values, &initial_stop_loss_index,i)?.as_float_or_none()?;
-                            take_profit = get_value_indirect(&all_values, &initial_take_profit_index,i)?.as_float_or_none()?;
+                            stop_loss = get_value_indirect_from_row(&row, &initial_stop_loss_index,i)?.as_float_or_none()?;
+                            take_profit = get_value_indirect_from_row(&row,  &initial_take_profit_index,i)?.as_float_or_none()?;
                             active_trade = Some(true);
                             trade_age = Some(0);
                         }
