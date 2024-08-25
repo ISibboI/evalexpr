@@ -151,6 +151,13 @@ impl CowData {
             }
         }
     }
+    
+    pub fn len(&self) -> usize {
+        match self {
+            CowData::Owned(ref data) => data.len(),
+            CowData::Borrowed{length, ..} => *length,
+        }
+    }
 
     /// Convert to an owned version, cloning the data if it was borrowed.
     pub fn into_owned(self) -> String
