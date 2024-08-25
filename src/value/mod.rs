@@ -75,6 +75,22 @@ pub enum CowData{
     },
 }
 
+
+impl From<CowData> for String {
+    fn from(cow_data: CowData) -> String {
+        match cow_data {
+            CowData::Owned(s) => s,
+            CowData::Borrowed { data, length, .. } => {
+                // Safely convert the borrowed data to a String
+                unsafe {
+                    let slice = std::slice::from_raw_parts(data, length);
+                    std::str::from_utf8(slice).unwrap().to_string()
+                }
+            }
+        }
+    }
+}
+
 impl DeepSizeOf for CowData{
     fn deep_size_of_children(&self, context: &mut Context) -> usize {
         return match self {
