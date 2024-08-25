@@ -272,6 +272,12 @@ impl Ord for Value {
 }
 
 
+impl Ord for CowData {
+    fn cmp(&self, other: &Self) -> Ordering {
+        unsafe { self.as_ref().cmp(other.as_ref()) }
+    } 
+}
+
 impl PartialOrd for CowData
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
