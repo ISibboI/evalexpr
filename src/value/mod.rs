@@ -42,6 +42,21 @@ pub enum Value {
 }
 
 
+// Implement PartialEq for CowData<String> and &str
+impl PartialEq<str> for CowData<String> {
+    fn eq(&self, other: &str) -> bool {
+        unsafe { self.as_ref() == other }
+    }
+}
+
+// Implement PartialEq for &str and CowData<String>
+impl PartialEq<CowData<String>> for str {
+    fn eq(&self, other: &CowData<String>) -> bool {
+        other == self
+    }
+}
+
+
 
 /// A helper enum for handling owned data or references with raw pointers.
 #[derive(Clone)]
