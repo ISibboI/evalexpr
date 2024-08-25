@@ -6,6 +6,8 @@ pub mod back;
 pub  mod simple_cumilative_returns;
 mod rolling_stdev;
 mod rolling_min;
+pub  mod pow;
+mod sqrt;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -13,6 +15,8 @@ pub use triangular_moving_average::triangular_moving_average;
 pub use triangular_moving_average::columns_len;
 pub use expression_functions::*;
 pub use back::*;
+pub use pow::*;
+pub use sqrt::*;
 pub use simple_moving_average::simple_moving_average;
 pub use simple_cumulative_sum::simple_cumulative_sum;
 pub use simple_cumilative_returns::simple_cumulative_returns;
