@@ -142,23 +142,26 @@ pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, 
         // Ensure start is within bounds and len does not exceed the message length
         let start_int = Into::<Value>::into(start).as_int()? as usize;
         let len_int = Into::<Value>::into(len).as_int()? as usize;
+        let message = message.into_owned();
         if start_int < message.len()  {
             let end = if start_int + len_int > message.len() { message.len() } else { start_int + len_int };
             let substring = &message[start_int..end];
-            return Ok(Value::String(substring.to_string()));
+            return Ok(substring.to_string().into());
         }
     }
-    return Ok(Value::String("".to_string()));
+    Ok("".to_string().into())
 }
 
 
 pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     if let (Value::String(message), Value::String(prefix)) = (message, prefix) {
-        if message.starts_with(prefix) {
+        let message = message.ref_into_owned();
+        let prefix = prefix.ref_into_owned();
+        if message.starts_with(&prefix) {
             return Ok(Value::Boolean(true));
         }
     }
-    return Ok(Value::Boolean(false));
+    Ok(Value::Boolean(false))
 }
 
 pub fn ternary<TC: Into<Value>,TL: Into<Value>,TR: Into<Value>>(condition: TC, true_value: TL, false_value: TR) -> Result<Value, Error> {
@@ -193,6 +196,8 @@ fn round_datetime_to_precision(datetime: DateTime<Utc>, precision: &str) -> Resu
 pub fn round_date_to_precision<TL: Into<Value>,TR: Into<Value>>(string: TL, precision: TR) -> Result<Value, crate::Error> {
     if let (Value::String(string), Value::String(precision)) = (string.into(), precision.into()) {
         // Extract the date-time part from the input string
+        let string = string.into_owned();
+        let precision = precision.into_owned();
         let parts: Vec<&str> = string.split('_').collect();
         let datetime_str = parts.last().ok_or_else(|| Error::InvalidInputString)?;
 
@@ -205,7 +210,7 @@ pub fn round_date_to_precision<TL: Into<Value>,TR: Into<Value>>(string: TL, prec
             string1.push_str("_");
         }
         let result = format!("{}{}", string1, rounded_datetime.format("%Y.%m.%d %H:%M:%S").to_string());
-        Ok(Value::String(result))
+        Ok(result.into())
     } else {
         // If arguments are not strings, return an error
         Err(Error::InvalidArgumentType)
@@ -244,7 +249,7 @@ mod test{
         );
         let expected = Utc.ymd(2024, 2, 13).and_hms(10, 5, 0).format("%Y.%m.%d %H:%M:%S").to_string();
         let result = round_date_to_precision(&input.0, &input.1).unwrap();
-        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+        assert_eq!(result, format!("BTCUSD_{}", expected).into());
     }
 
     #[test]
@@ -255,7 +260,7 @@ mod test{
         );
         let expected = Utc.ymd(2024, 2, 13).and_hms(10, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
         let result = round_date_to_precision(&input.0, &input.1).unwrap();
-        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+        assert_eq!(result, format!("BTCUSD_{}", expected).into());
     }
 
     #[test]
@@ -267,7 +272,7 @@ mod test{
         // Assuming 2024-02-13 is a Wednesday, rounding to the start of the week (Sunday)
         let expected = Utc.ymd(2024, 2, 11).and_hms(0, 0, 0).format("%Y.%m.%d %H:%M:%S").to_string();
         let result = round_date_to_precision(&input.0, &input.1).unwrap();
-        assert_eq!(result, Value::String(format!("BTCUSD_{}", expected)));
+        assert_eq!(result, format!("BTCUSD_{}", expected).into());
     }
 
     #[test]

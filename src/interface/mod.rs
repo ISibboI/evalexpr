@@ -142,7 +142,7 @@ pub fn eval_empty(string: &str) -> EvalexprResult<EmptyType> {
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
 pub fn eval_string_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<String> {
     match eval_with_context(string, context) {
-        Ok(Value::String(string)) => Ok(string),
+        Ok(Value::String(string)) => Ok(string.into_owned()),
         Ok(value) => Err(EvalexprError::expected_string(value)),
         Err(error) => Err(error),
     }
@@ -227,7 +227,7 @@ pub fn eval_string_with_context_mut<C: ContextWithMutableVariables>(
     context: &mut C,
 ) -> EvalexprResult<String> {
     match eval_with_context_mut(string, context) {
-        Ok(Value::String(string)) => Ok(string),
+        Ok(Value::String(string)) => Ok(string.into_owned()),
         Ok(value) => Err(EvalexprError::expected_string(value)),
         Err(error) => Err(error),
     }

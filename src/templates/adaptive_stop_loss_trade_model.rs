@@ -138,10 +138,10 @@ impl CompiledTransposeCalculationTemplate for AdaptiveStopLossTradeModel {
                 }
 
                 row.set_value(&generate_column_name("active_trade", transpose_value), Value::Boolean(active_trade.unwrap_or_default()))?;
-                row.set_value(&generate_column_name("reason", transpose_value), reason.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("reason", transpose_value), reason.clone().map(|rs| Value::String(rs.into())).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("initiation_price", transpose_value), initiation_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
-                row.set_value(&generate_column_name("initiation_date", transpose_value), initiation_date.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
-                row.set_value(&generate_column_name("trade_id", transpose_value), trade_id.clone().map(|rs| Value::String(rs)).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("initiation_date", transpose_value), initiation_date.clone().map(|rs| Value::String(rs.into())).unwrap_or(Value::Empty))?;
+                row.set_value(&generate_column_name("trade_id", transpose_value), trade_id.clone().map(|rs| Value::String(rs.into())).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("delta", transpose_value), delta.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("exit_price", transpose_value), exit_price.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;
                 row.set_value(&generate_column_name("stop_loss", transpose_value), stop_loss.clone().map(|rs| Value::Float(rs)).unwrap_or(Value::Empty))?;

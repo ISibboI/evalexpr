@@ -104,7 +104,7 @@ impl CompiledTransposeCalculationTemplate for BucketData {
                     max_values_for_bucket.get(&bucket).unwrap_or(&Value::Empty)
                 );
                 for val in transpose_columns_for_value {
-                    set_value_indirect(&mut output_values, &mut modified_columns, &bucket_range_index, *val, Value::String(bucket_range.clone()))?;
+                    set_value_indirect(&mut output_values, &mut modified_columns, &bucket_range_index, *val, Value::String(bucket_range.clone().into()))?;
                 }
             }
         }
@@ -129,9 +129,9 @@ mod tests {
         let field_to_bucket = "price";
 
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
         // Instantiate BucketData with dummy values
         let bucket_data = BucketData {
@@ -141,9 +141,9 @@ mod tests {
 
         let mock_index = create_mock_index(&ordered_transpose_values, &bucket_data);
         let mut row = MockRow::new(&mock_index);
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date1".into()), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date2".into()), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date3".into()), Value::Float(2.0)).unwrap();
 
 
         // Ordered transpose values (these should correspond to the field names)
@@ -155,11 +155,11 @@ mod tests {
 
         // Check that the correct bucket values have been set
         assert_eq!(operator_row.get_value("pricebucket__date1").unwrap(), Value::Int(3));
-        assert_eq!(operator_row.get_value("pricebucketRange__date1").unwrap(), Value::String("1 to 1".to_string()));
+        assert_eq!(operator_row.get_value("pricebucketRange__date1").unwrap(), "1 to 1".into());
         assert_eq!(operator_row.get_value("pricebucket__date2").unwrap(), Value::Int(1));
-        assert_eq!(operator_row.get_value("pricebucketRange__date2").unwrap(), Value::String("3 to 3".to_string()));
+        assert_eq!(operator_row.get_value("pricebucketRange__date2").unwrap(), "3 to 3".into());
         assert_eq!(operator_row.get_value("pricebucket__date3").unwrap(), Value::Int(2));
-        assert_eq!(operator_row.get_value("pricebucketRange__date3").unwrap(), Value::String("2 to 2".to_string()));
+        assert_eq!(operator_row.get_value("pricebucketRange__date3").unwrap(), "2 to 2".into());
     }
 
     fn create_mock_index(ordered_transpose_values: &Vec<Value>, bucket_data: &BucketData) -> MockIndexHolder {
@@ -176,9 +176,9 @@ mod tests {
     fn test_commit_row_with_equal_values() {
         // Create a mock row with identical values
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
         let field_to_bucket = "price";
         // Instantiate BucketData with dummy values
@@ -188,9 +188,9 @@ mod tests {
         };
         let mock_index = create_mock_index(&ordered_transpose_values, &bucket_data);
         let mut row = MockRow::new(&mock_index);
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date1".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date2".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date1".to_owned().into()), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date2".to_owned().into()), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date3".to_owned().into()), Value::Float(2.0)).unwrap();
         // Call commit_row and check the results
         let mut row = BoxedOperatorRowTrait::new(row);
         let mut mock_index = BoxedTransposeColumnIndexHolder::new(&mock_index);
@@ -207,9 +207,9 @@ mod tests {
         // Create a mock row with varied values
         let field_to_bucket = "price";
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
 
         // Instantiate BucketData with dummy values
@@ -223,9 +223,9 @@ mod tests {
 
         // Call commit_row and check the results
         let mut row = BoxedOperatorRowTrait::new(row);
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_bucket, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date1".to_owned().into()), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date2".to_owned().into()), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_bucket, &"date3".to_owned().into()), Value::Float(2.0)).unwrap();
 
         let mut index = BoxedTransposeColumnIndexHolder::new(&mock_index);
         bucket_data.commit_row(&mut row, &index, &ordered_transpose_values, 0).unwrap();

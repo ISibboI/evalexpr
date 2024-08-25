@@ -382,7 +382,7 @@ mod tests {
             }
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::String("abc".to_string()), Value::Empty),
+            EvalexprError::expected_type(&"abc".to_string().into(), Value::Empty),
             EvalexprError::expected_string(Value::Empty)
         );
         assert_eq!(
@@ -394,8 +394,8 @@ mod tests {
             EvalexprError::expected_tuple(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),
-            EvalexprError::expected_empty(Value::String("abc".to_string()))
+            EvalexprError::expected_type(&Value::Empty, "abc".to_string().into()),
+            EvalexprError::expected_empty("abc".to_string().into())
         );
     }
 }

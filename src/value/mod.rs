@@ -28,7 +28,7 @@ pub const EMPTY_VALUE: () = ();
 #[repr(C)]
 pub enum Value {
     /// A string value.
-    String(String),
+    String(CowData<String>),
     /// A float value.
     Float(FloatType),
     /// An integer value.
@@ -39,6 +39,124 @@ pub enum Value {
     Tuple(TupleType),
     /// An empty value.
     Empty,
+}
+
+
+
+/// A helper enum for handling owned data or references with raw pointers.
+#[derive(Clone)]
+pub enum CowData<T> {
+    /// Owned data.
+    Owned(T),
+    /// Borrowed data as a raw pointer.
+    Borrowed(*const T),
+}
+
+impl<T> Hash for CowData<T>
+where
+    T: Hash,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            CowData::Owned(ref data) => data.hash(state),
+            CowData::Borrowed(ptr) => unsafe { (**ptr).hash(state) },
+        }
+    }
+}
+
+
+
+impl<T> fmt::Display for CowData<T>
+where
+    T: fmt::Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CowData::Owned(ref data) => write!(f, "{}", data),
+            CowData::Borrowed(ptr) => unsafe { write!(f, "{:?}", &*ptr) },
+        }
+    }
+}
+
+impl<T> CowData<T> {
+    /// Access the data, either as a reference or as a mutable reference if it's owned.
+    pub unsafe fn as_ref(&self) -> &T {
+        match self {
+            CowData::Owned(ref data) => data,
+            CowData::Borrowed(ptr) => &**ptr,
+        }
+    }
+
+    /// Convert to an owned version, cloning the data if it was borrowed.
+    pub fn into_owned(self) -> T
+    where
+        T: Clone,
+    {
+        match self {
+            CowData::Owned(data) => data,
+            CowData::Borrowed(ptr) => unsafe { (*ptr).clone() },
+        }
+    }    pub fn ref_into_owned(&self) -> T
+    where
+        T: Clone,
+    {
+        match self {
+            CowData::Owned(data) => data.clone(),
+            CowData::Borrowed(ptr) => unsafe { (**ptr).clone() },
+        }
+    }
+}
+
+
+impl<T> fmt::Debug for CowData<T>
+where
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CowData::Owned(ref data) => {
+                f.debug_tuple("Owned")
+                    .field(data)
+                    .finish()
+            },
+            CowData::Borrowed(ptr) => {
+                // Attempt to safely print the borrowed data
+                unsafe {
+                    f.debug_tuple("Borrowed")
+                        .field(&*ptr)
+                        .finish()
+                }
+            },
+        }
+    }
+}
+
+impl<T> Serialize for CowData<T>
+where
+    T: Serialize + Clone,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            CowData::Owned(ref data) => data.serialize(serializer),
+            CowData::Borrowed(ptr) => unsafe { (**ptr).serialize(serializer) },
+        }
+    }
+}
+
+impl<'de, T> Deserialize<'de> for CowData<T>
+where
+    T: Deserialize<'de> + Clone,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let owned_data = T::deserialize(deserializer)?;
+        Ok(CowData::Owned(owned_data))
+    }
 }
 
 
@@ -72,6 +190,19 @@ impl Hash for Value {
 }
 
 
+impl From<String> for CowData<String> {
+    fn from(s: String) -> Self {
+        CowData::Owned(s)
+    }
+}
+
+impl From<&str> for CowData<String> {
+    fn from(s: &str) -> Self {
+        CowData::Owned(s.to_string())
+    }
+}
+
+
 impl From<&Value> for Value {
     fn from(value: &Value) -> Self {
         match value {
@@ -89,6 +220,25 @@ impl Ord for Value {
     fn cmp(&self, other: &Self) -> Ordering {
         // Assuming that `partial_cmp` should never return `None` for `Ord` types
         self.partial_cmp(other).expect(format!("Cannot compare {:?} and {:?}", self, other).as_str())
+    }
+}
+
+
+impl<T> PartialOrd for CowData<T>
+where
+    T: PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        unsafe { self.as_ref().partial_cmp(other.as_ref()) }
+    }
+}
+
+impl<T> PartialEq for CowData<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { self.as_ref() == other.as_ref() }
     }
 }
 
@@ -187,14 +337,14 @@ impl Value {
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
     pub fn as_string(&self) -> EvalexprResult<String> {
         match self {
-            Value::String(string) => Ok(string.clone()),
+            Value::String(string) => Ok(string.ref_into_owned()),
             value => Err(EvalexprError::expected_string(value.clone())),
         }
     }
  /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
     pub fn as_string_or_none(&self) -> EvalexprResult<Option<String>> {
         match self {
-            Value::String(string) => Ok(Some(string.clone())),
+            Value::String(string) => Ok(Some(string.ref_into_owned())),
             Value::Empty => Ok(None),
             value => Err(EvalexprError::expected_string(value.clone())),
         }
@@ -305,13 +455,13 @@ impl Value {
 
 impl From<String> for Value {
     fn from(string: String) -> Self {
-        Value::String(string)
+        Value::String(CowData::Owned(string))
     }
 }
 
 impl From<&str> for Value {
     fn from(string: &str) -> Self {
-        Value::String(string.to_string())
+        Value::String(CowData::Owned(string.to_string()))
     }
 }
 
@@ -442,6 +592,7 @@ use std::ops::Sub;
 use std::ops::Add;
 
 use std::ops::Neg;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::ordered_float::OrderedFloat;
 
 impl Neg for Value {
@@ -489,10 +640,10 @@ impl Add for &Value {
             (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a + *b as f64)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
             (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as FloatType + b)),
-            (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b))),
+            (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b).into())),
             // Handle combinations with strings and numeric types if desired
-            (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b))),
-            (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b))),
+            (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b).into())),
+            (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b).into())),
             // Add cases for other Value variants as necessary
             _ => Err(Error::UnsupportedArithmeticBetweenTypes),
         }

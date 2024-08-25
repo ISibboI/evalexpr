@@ -160,10 +160,10 @@ mod tests {
         // Create a mock row with initial values
 
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
-            Value::String("date4".to_string()),
+            Value::String("date1".into()),
+            Value::String("date2".into()),
+            Value::String("date3".into()),
+            Value::String("date4".into()),
         ];
 
         let field_to_zscore = "price";
@@ -172,10 +172,10 @@ mod tests {
         let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
         let mut row = MockRow::new(&mock_index_column_holder);
         
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(4.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".into())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".into())), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".into())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".into())), Value::Float(4.0)).unwrap();
 
         // Instantiate RollingZScore with dummy values
   
@@ -224,17 +224,17 @@ mod tests {
         
         let rolling_zscore = RollingZScore::new(vec![field_to_zscore],   3);
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
-            Value::String("date4".to_string()),
+            Value::String("date1".into()),
+            Value::String("date2".into()),
+            Value::String("date3".into()),
+            Value::String("date4".into()),
         ];
         let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
         let mut row = MockRow::new(&mock_index_column_holder);
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Empty).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".to_owned())), Value::Float(2.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".to_owned())), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".into())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".into())), Value::Empty).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date3".into())), Value::Float(2.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date4".into())), Value::Float(3.0)).unwrap();
 
         // Instantiate RollingZScore with dummy values
 
@@ -267,14 +267,14 @@ mod tests {
         let field_to_zscore = "price";
         let rolling_zscore = RollingZScore::new(vec![field_to_zscore],   3);
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
+            Value::String("date1".into()),
+            Value::String("date2".into()),
         ];
 
         let mock_index_column_holder  = create_index_holder(&ordered_transpose_values, &rolling_zscore);
         let mut row = MockRow::new(&mock_index_column_holder);
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".to_owned())), Value::Float(1.0)).unwrap();
-        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".to_owned())), Value::Float(3.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date1".into())), Value::Float(1.0)).unwrap();
+        row.set_value(&generate_column_name(field_to_zscore, &Value::String("date2".into())), Value::Float(3.0)).unwrap();
 
         // Instantiate RollingZScore with dummy values
 
@@ -296,7 +296,7 @@ mod tests {
         // Create a mock row with initial values
 
         let ordered_transpose_values: Vec<Value> = (1..=15000)
-            .map(|i| Value::String(format!("date{}", i)))
+            .map(|i| Value::String(format!("date{}", i).into()))
             .collect();
 
 
@@ -308,7 +308,7 @@ mod tests {
         // Fill the row with 15,000 values
         for i in 1..=15000 {
             row.set_value(
-                &generate_column_name(field_to_zscore, &Value::String(format!("date{}", i))),
+                &generate_column_name(field_to_zscore, &Value::String(format!("date{}", i).into())),
                 Value::Float((i % 10) as f64 + 1.0),
             ).unwrap();
         }

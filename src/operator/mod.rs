@@ -188,7 +188,7 @@ impl Operator {
                     let mut result = String::with_capacity(a.len() + b.len());
                     result.push_str(&a);
                     result.push_str(&b);
-                    Ok(Value::String(result))
+                    Ok(result.into())
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
                     let result = a.checked_add(b);
                     if let Some(result) = result {

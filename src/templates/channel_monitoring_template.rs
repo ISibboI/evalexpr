@@ -118,7 +118,7 @@ mod commit_row_tests {
         let holder = MockIndexHolder::new();
         let mut row = MockRow::new(&holder);
         let cycle_epoch = 0;
-        let transpose_value = Value::String("02_01_2024".to_owned());
+        let transpose_value = Value::String("02_01_2024".into());
         let ordered_transpose_values = vec![transpose_value.clone()];
 
         row.insert_value(generate_column_name("lower_band", &transpose_value), Value::Float(10.0));
@@ -147,8 +147,8 @@ mod commit_row_tests {
 
         let mock_index_column_holder = MockIndexHolder::new();
         let mut row = MockRow::new(&mock_index_column_holder);
-        let prev_transpose_value = Value::String("01_01_2024".to_owned());
-        let current_transpose_value = Value::String("02_01_2024".to_owned());
+        let prev_transpose_value = Value::String("01_01_2024".into());
+        let current_transpose_value = Value::String("02_01_2024".into());
         let ordered_transpose_values = vec![prev_transpose_value.clone(), current_transpose_value.clone()];
 
         // Previous epoch - below lower band
@@ -191,8 +191,8 @@ mod commit_row_tests {
 
         let mut mock_index_column_holder = MockIndexHolder::new();
         let mut row = MockRow::new(&mock_index_column_holder);
-        let prev_transpose_value = Value::String("01_01_2024".to_owned());
-        let current_transpose_value = Value::String("02_01_2024".to_owned());
+        let prev_transpose_value = Value::String("01_01_2024".into());
+        let current_transpose_value = Value::String("02_01_2024".into());
         let ordered_transpose_values = vec![prev_transpose_value.clone(), current_transpose_value.clone()];
 
         // Previous epoch - above upper band

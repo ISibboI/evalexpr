@@ -154,7 +154,7 @@ impl Node {
     /// Fails, if one of the operators in the expression tree fails.
     pub fn eval_string_with_context<C: Context>(&self, context: &C) -> EvalexprResult<String> {
         match self.eval_with_context(context) {
-            Ok(Value::String(string)) => Ok(string),
+            Ok(Value::String(string)) => Ok(string.into_owned()),
             Ok(value) => Err(EvalexprError::expected_string(value)),
             Err(error) => Err(error),
         }
@@ -236,7 +236,7 @@ impl Node {
         context: &mut C,
     ) -> EvalexprResult<String> {
         match self.eval_with_context_mut(context) {
-            Ok(Value::String(string)) => Ok(string),
+            Ok(Value::String(string)) => Ok(string.into_owned()),
             Ok(value) => Err(EvalexprError::expected_string(value)),
             Err(error) => Err(error),
         }
@@ -629,7 +629,7 @@ pub fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node> {
             Token::Float(float) => Some(Node::new(Operator::value(Value::Float(float)))),
             Token::Int(int) => Some(Node::new(Operator::value(Value::Int(int)))),
             Token::Boolean(boolean) => Some(Node::new(Operator::value(Value::Boolean(boolean)))),
-            Token::String(string) => Some(Node::new(Operator::value(Value::String(string)))),
+            Token::String(string) => Some(Node::new(Operator::value(string.into()))),
         };
 
         if let Some(mut node) = node {

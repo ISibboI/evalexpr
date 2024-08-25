@@ -184,7 +184,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             let repl = arguments[2].as_string()?;
             match Regex::new(&re_str) {
                 Ok(re) => Ok(Value::String(
-                    re.replace_all(&subject, repl.as_str()).to_string(),
+                    re.replace_all(&subject, repl.as_str()).to_string().into(),
                 )),
                 Err(err) => Err(EvalexprError::invalid_regex(
                     re_str.to_string(),
@@ -205,7 +205,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             Ok(Value::from(subject.trim()))
         })),
         "str::from" => Some(Function::new(|argument| {
-            Ok(Value::String(argument.to_string()))
+            Ok(argument.to_string().into())
         })),
         // Bitwise operators
         "bitand" => int_function!(bitand, 2),

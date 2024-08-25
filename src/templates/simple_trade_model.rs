@@ -178,10 +178,10 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                 }
 
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &active_trade_index, i, active_trade.map(Value::Boolean))?;
-                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &reason_index, i, reason.map(Value::String))?;
+                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &reason_index, i, reason.map(|r|r.into()))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &initiation_price_index, i, initiation_price.map(Value::Float))?;
-                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &initiation_date_index, i, initiation_date.clone().map(Value::String))?;
-                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &trade_id_index, i, trade_id.clone().map(Value::String))?;
+                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &initiation_date_index, i, initiation_date.clone().map(|r|r.into()))?;
+                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &trade_id_index, i, trade_id.clone().map(|r|r.into()))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &delta_index, i, delta.clone().map(Value::Float))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &current_stop_loss_index, i, stop_loss.clone().map(Value::Float))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &exit_price_index, i, exit_price.clone().map(Value::Float))?;
@@ -229,9 +229,9 @@ mod tests {
     fn test_commit_row_initial_trade() -> Result<(), Error> {
         // Set up initial values for a new trade
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
 
         let model = SimpleTradeModel::new(
@@ -248,7 +248,7 @@ mod tests {
         let mock_index = create_mock_index(&ordered_transpose_values, &model);
         let mut row = MockRow::new(&mock_index);
         
-        row.set_value_for_transpose_index("instrument",0, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",0, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("signal",0, Value::Boolean(true))?;
         row.set_value_for_transpose_index("price",0, Value::Float(100.0))?;
         row.set_value_for_transpose_index("stop_loss",0, Value::Float(95.0))?;
@@ -263,8 +263,8 @@ mod tests {
 
         // Verify that a new trade has been initiated correctly
         assert_eq!(row.get_value_for_transpose_index("active_trade",0)?, Value::Boolean(true));
-        assert_eq!(row.get_value_for_transpose_index("initiation_date",0)?, Value::String("date1".to_owned()));
-        assert_eq!(row.get_value_for_transpose_index("trade_id",0)?, Value::String("date1instrument1".to_owned()));
+        assert_eq!(row.get_value_for_transpose_index("initiation_date",0)?, "date1".to_owned().into());
+        assert_eq!(row.get_value_for_transpose_index("trade_id",0)?, "date1instrument1".to_owned().into());
         assert_eq!(row.get_value_for_transpose_index("initiation_price",0)?, Value::Float(100.0));
         assert_eq!(row.get_value_for_transpose_index("stop_loss",0)?, Value::Float(95.0));
         assert_eq!(row.get_value_for_transpose_index("take_profit",0)?, Value::Float(110.0));
@@ -280,9 +280,9 @@ mod tests {
     fn test_commit_row_trade_closure_on_stop_loss() -> Result<(), Error> {
         // Set up a scenario where the stop loss is hit, and the trade should be closed
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
 
         let model = SimpleTradeModel::new(
@@ -300,7 +300,7 @@ mod tests {
         let mut row = MockRow::new(&mock_index);
 
         // Set initial values to initiate the trade
-        row.set_value_for_transpose_index("instrument",0, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",0, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("signal",0, Value::Boolean(true))?;
         row.set_value_for_transpose_index("price",0, Value::Float(100.0))?;
         row.set_value_for_transpose_index("initial_stop_loss",0, Value::Float(95.0))?;
@@ -314,10 +314,10 @@ mod tests {
             model.commit_row(&mut operator_row, &mock_index_holder, &ordered_transpose_values, 0).unwrap();
         }
 
-        row.set_value_for_transpose_index("instrument",1, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",1, "instrument1".to_owned().into())?;
         // Simulate a price drop to hit the stop loss
         row.set_value_for_transpose_index("price",1, Value::Float(94.0))?;
-        row.set_value_for_transpose_index("instrument",2, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",2, "instrument1".to_owned().into())?;
         // Simulate a price drop to hit the stop loss
         row.set_value_for_transpose_index("price",2, Value::Float(94.0))?;
 
@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(row.get_value_for_transpose_index("active_trade",1)?, Value::Boolean(true));
         assert_eq!(row.get_value_for_transpose_index("active_trade",2)?, Value::Boolean(false));
         assert_eq!(row.get_value_for_transpose_index("exit_price",1)?, Value::Float(94.0));
-        assert!(matches!(row.get_value_for_transpose_index("reason",1)?, Value::String(reason) if reason.contains("stop loss")));
+        assert!(matches!(row.get_value_for_transpose_index("reason",1)?, Value::String(ref reason) if reason.ref_into_owned().contains("stop loss")));
 
         Ok(())
     }
@@ -341,9 +341,9 @@ mod tests {
     fn test_commit_row_trade_closure_on_take_profit() -> Result<(), Error> {
         // Set up a scenario where the take profit is hit, and the trade should be closed
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
         ];
 
         let model = SimpleTradeModel::new(
@@ -361,7 +361,7 @@ mod tests {
         let mut row = MockRow::new(&mock_index);
 
         // Set initial values to initiate the trade
-        row.set_value_for_transpose_index("instrument",0, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",0, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("signal",0, Value::Boolean(true))?;
         row.set_value_for_transpose_index("price",0, Value::Float(100.0))?;
         row.set_value_for_transpose_index("stop_loss",0, Value::Float(95.0))?;
@@ -375,10 +375,10 @@ mod tests {
         }
 
         // Simulate a price rise to hit the take profit
-        row.set_value_for_transpose_index("instrument",1, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",1, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("price",1, Value::Float(111.0))?;
         // Simulate a price rise to hit the take profit
-        row.set_value_for_transpose_index("instrument",2, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",2, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("price",2, Value::Float(111.0))?;
 
         {
@@ -391,7 +391,7 @@ mod tests {
         assert_eq!(row.get_value_for_transpose_index("active_trade",1)?, Value::Boolean(true));
         assert_eq!(row.get_value_for_transpose_index("active_trade",2)?, Value::Boolean(false));
         assert_eq!(row.get_value_for_transpose_index("exit_price",1)?, Value::Float(111.0));
-        assert!(matches!(row.get_value_for_transpose_index("reason",1)?, Value::String(reason) if reason.contains("take profit")));
+        assert!(matches!(row.get_value_for_transpose_index("reason",1)?, Value::String(ref reason) if reason.ref_into_owned().contains("take profit")));
 
         Ok(())
     }
@@ -400,10 +400,10 @@ mod tests {
     fn test_commit_row_trade_holding_period_expiry() -> Result<(), Error> {
         // Set up a scenario where the trade is closed due to holding period expiry
         let ordered_transpose_values = vec![
-            Value::String("date1".to_string()),
-            Value::String("date2".to_string()),
-            Value::String("date3".to_string()),
-            Value::String("date4".to_string()),
+            "date1".to_string().into(),
+            "date2".to_string().into(),
+            "date3".to_string().into(),
+            "date4".to_string().into(),
         ];
 
         let model = SimpleTradeModel::new(
@@ -421,7 +421,7 @@ mod tests {
         let mut row = MockRow::new(&mock_index);
 
         // Set initial values to initiate the trade
-        row.set_value_for_transpose_index("instrument",0, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",0, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("signal",0, Value::Boolean(true))?;
         row.set_value_for_transpose_index("price",0, Value::Float(100.0))?;
         row.set_value_for_transpose_index("initial_stop_loss",0, Value::Float(95.0))?;
@@ -435,7 +435,7 @@ mod tests {
         }
 
         // Simulate the passing of time beyond the holding period
-        row.set_value_for_transpose_index("instrument",1, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",1, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("price",1, Value::Float(102.0))?;
         {
             let mut operator_row = BoxedOperatorRowTrait::new(&mut row);
@@ -443,10 +443,10 @@ mod tests {
             model.commit_row(&mut operator_row, &mock_index_holder, &ordered_transpose_values, 1).unwrap();
         }
 
-        row.set_value_for_transpose_index("instrument",2, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",2, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("price",2, Value::Float(103.0))?;
 
-        row.set_value_for_transpose_index("instrument",3, Value::String("instrument1".to_owned()))?;
+        row.set_value_for_transpose_index("instrument",3, "instrument1".to_owned().into())?;
         row.set_value_for_transpose_index("price",3, Value::Float(103.0))?;
         {
             let mut operator_row = BoxedOperatorRowTrait::new(&mut row);
@@ -457,7 +457,7 @@ mod tests {
         // Verify that the trade has been closed due to holding period expiry
         assert_eq!(row.get_value_for_transpose_index("active_trade",2)?, Value::Boolean(true));
         assert_eq!(row.get_value_for_transpose_index("exit_price",2)?, Value::Float(103.0));
-        assert!(matches!(row.get_value_for_transpose_index("reason",2)?, Value::String(reason) if reason.contains("holding period")));
+        assert!(matches!(row.get_value_for_transpose_index("reason",2)?, Value::String(ref reason) if reason.ref_into_owned().contains("holding period")));
         assert_eq!(row.get_value_for_transpose_index("active_trade",3)?, Value::Boolean(false));
 
         Ok(())
