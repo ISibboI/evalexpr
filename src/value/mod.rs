@@ -28,7 +28,7 @@ pub const EMPTY_VALUE: () = ();
 #[repr(C)]
 pub enum Value {
     /// A string value.
-    String(CowData<String>),
+    String(CowData),
     /// A float value.
     Float(FloatType),
     /// An integer value.
@@ -43,15 +43,15 @@ pub enum Value {
 
 
 // Implement PartialEq for CowData<String> and &str
-impl PartialEq<str> for CowData<String> {
+impl PartialEq<str> for CowData {
     fn eq(&self, other: &str) -> bool {
         unsafe { self.as_ref() == other }
     }
 }
 
 // Implement PartialEq for &str and CowData<String>
-impl PartialEq<CowData<String>> for str {
-    fn eq(&self, other: &CowData<String>) -> bool {
+impl PartialEq<CowData> for str {
+    fn eq(&self, other: &CowData) -> bool {
         other == self
     }
 }
@@ -60,75 +60,84 @@ impl PartialEq<CowData<String>> for str {
 
 /// A helper enum for handling owned data or references with raw pointers.
 #[derive(Clone)]
-pub enum CowData<T> {
-    /// Owned data.
-    Owned(T),
-    /// Borrowed data as a raw pointer.
-    Borrowed(*const T),
+pub enum CowData{
+    Owned(String),
+    Borrowed {
+        data: *const u8,
+        length: usize,
+    },
 }
+unsafe impl Send for CowData{}
+unsafe impl Sync for CowData{}
 
-unsafe impl<T> Send for CowData<T> where T: Send {}
-unsafe impl<T> Sync for CowData<T> where T: Sync {}
-
-impl<T> Hash for CowData<T>
-where
-    T: Hash,
+impl Hash for CowData
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match self {
             CowData::Owned(ref data) => data.hash(state),
-            CowData::Borrowed(ptr) => unsafe { (**ptr).hash(state) },
+            CowData::Borrowed{data,length} => unsafe {
+                let slice = std::slice::from_raw_parts(*data, *length);
+                std::str::from_utf8_unchecked(slice).hash(state)
+            },
         }
     }
 }
 
 
 
-impl<T> fmt::Display for CowData<T>
-where
-    T: fmt::Display,
+impl fmt::Display for CowData
+
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CowData::Owned(ref data) => write!(f, "{}", data),
-            CowData::Borrowed(ptr) => unsafe { write!(f, "{:?}", &*ptr) },
+            CowData::Borrowed{data,length} => unsafe {
+                let slice = std::slice::from_raw_parts(*data, *length);
+                write!(f, "{:?}", std::str::from_utf8_unchecked(slice)) 
+            
+            },
         }
     }
 }
 
-impl<T> CowData<T> {
+impl CowData {
     /// Access the data, either as a reference or as a mutable reference if it's owned.
-    pub unsafe fn as_ref(&self) -> &T {
+    pub unsafe fn as_ref(&self) -> &str {
         match self {
             CowData::Owned(ref data) => data,
-            CowData::Borrowed(ptr) => &**ptr,
+            CowData::Borrowed{data,length} => {
+                let slice = std::slice::from_raw_parts(*data, *length);
+                std::str::from_utf8_unchecked(slice)
+            }
         }
     }
 
     /// Convert to an owned version, cloning the data if it was borrowed.
-    pub fn into_owned(self) -> T
-    where
-        T: Clone,
+    pub fn into_owned(self) -> String
     {
         match self {
             CowData::Owned(data) => data,
-            CowData::Borrowed(ptr) => unsafe { (*ptr).clone() },
+            CowData::Borrowed{data,length} => unsafe {
+                let slice = std::slice::from_raw_parts(data, length);
+                std::str::from_utf8_unchecked(slice).to_string()
+            },
         }
-    }    pub fn ref_into_owned(&self) -> T
-    where
-        T: Clone,
+    }    pub fn ref_into_owned(&self) -> String
+    
     {
         match self {
             CowData::Owned(data) => data.clone(),
-            CowData::Borrowed(ptr) => unsafe { (**ptr).clone() },
+            CowData::Borrowed{data,length} => unsafe {
+                let slice = std::slice::from_raw_parts(*data, *length);
+                std::str::from_utf8_unchecked(slice).to_string()
+            },
         }
     }
 }
 
 
-impl<T> fmt::Debug for CowData<T>
-where
-    T: fmt::Debug,
+impl fmt::Debug for CowData
+
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -137,11 +146,14 @@ where
                     .field(data)
                     .finish()
             },
-            CowData::Borrowed(ptr) => {
+            CowData::Borrowed{data,length} => {
                 // Attempt to safely print the borrowed data
+              
                 unsafe {
+                    let slice = std::slice::from_raw_parts(*data, *length);
+                    let value = std::str::from_utf8_unchecked(slice).to_string();
                     f.debug_tuple("Borrowed")
-                        .field(&*ptr)
+                        .field(&value)
                         .finish()
                 }
             },
@@ -149,9 +161,7 @@ where
     }
 }
 
-impl<T> Serialize for CowData<T>
-where
-    T: Serialize + Clone,
+impl Serialize for CowData
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -159,20 +169,23 @@ where
     {
         match self {
             CowData::Owned(ref data) => data.serialize(serializer),
-            CowData::Borrowed(ptr) => unsafe { (**ptr).serialize(serializer) },
+            CowData::Borrowed { data,length}=> unsafe {
+                let slice = std::slice::from_raw_parts(*data, *length);
+                let value = std::str::from_utf8_unchecked(slice).to_string();
+                value.serialize(serializer) 
+            
+            },
         }
     }
 }
 
-impl<'de, T> Deserialize<'de> for CowData<T>
-where
-    T: Deserialize<'de> + Clone,
+impl<'de> Deserialize<'de> for CowData
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        let owned_data = T::deserialize(deserializer)?;
+        let owned_data = String::deserialize(deserializer)?;
         Ok(CowData::Owned(owned_data))
     }
 }
@@ -208,13 +221,13 @@ impl Hash for Value {
 }
 
 
-impl From<String> for CowData<String> {
+impl From<String> for CowData {
     fn from(s: String) -> Self {
         CowData::Owned(s)
     }
 }
 
-impl From<&str> for CowData<String> {
+impl From<&str> for CowData {
     fn from(s: &str) -> Self {
         CowData::Owned(s.to_string())
     }
@@ -242,18 +255,14 @@ impl Ord for Value {
 }
 
 
-impl<T> PartialOrd for CowData<T>
-where
-    T: PartialOrd,
+impl PartialOrd for CowData
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         unsafe { self.as_ref().partial_cmp(other.as_ref()) }
     }
 }
 
-impl<T> PartialEq for CowData<T>
-where
-    T: PartialEq,
+impl PartialEq for CowData
 {
     fn eq(&self, other: &Self) -> bool {
         unsafe { self.as_ref() == other.as_ref() }
@@ -612,6 +621,7 @@ use std::ops::Add;
 use std::ops::Neg;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::ordered_float::OrderedFloat;
+use crate::value;
 
 impl Neg for Value {
     type Output = Result<Self, Error>;
