@@ -246,6 +246,14 @@ impl OperatorRowTrait for &mut IndexMapContext {
         Ok(self.variables.values().map(|v|v.clone()).collect())
     }
 
+    fn get_values_for_columns(&self, columns: Vec<usize>) -> Result<Vec<Value>, Error> {
+        let mut values = vec![Value::Empty; self.variables.len()];
+        for column in columns {
+            values[column] = self.get_value_for_column(column)?;
+        }
+        Ok(values)
+    }
+
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
         Ok(ContextWithMutableVariables::set_value(self, identifier.to_string(), value, true)?)
     }
@@ -289,6 +297,14 @@ impl OperatorRowTrait for IndexMapContext {
 
     fn get_values(&self) -> Result<Vec<Value>, Error> {
         Ok(self.variables.values().map(|v|v.clone()).collect())
+    }
+
+    fn get_values_for_columns(&self, columns: Vec<usize>) -> Result<Vec<Value>, Error> {
+        let mut values = vec![Value::Empty; self.variables.len()];
+        for column in columns {
+            values[column] = self.get_value_for_column(column)?;
+        }
+        Ok(values)
     }
 
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(), Error> {
@@ -348,6 +364,7 @@ pub trait Context {
 pub trait OperatorRowTrait {
     fn get_value(&self, identifier: &str) -> Result<Value,crate::Error>;
     fn get_values(&self) -> Result<Vec<Value>,crate::Error>;
+    fn get_values_for_columns(&self, columns: Vec<usize>) -> Result<Vec<Value>,crate::Error>;
     fn set_value(&mut self, identifier: &str, value: Value) -> Result<(),crate::Error>;
     fn get_value_for_column(&self, col: usize) -> Result<Value,crate::Error>;
     fn set_value_for_column(&mut self, col: usize, value: Value) -> Result<(),crate::Error>;

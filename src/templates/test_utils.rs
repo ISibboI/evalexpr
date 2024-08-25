@@ -214,6 +214,17 @@ impl<'a> OperatorRowTrait for MockRow<'a> {
         }
         Ok(())
     }
+
+    fn get_values_for_columns(&self, columns: Vec<usize>) -> Result<Vec<Value>, Error> {
+        let mut result = vec![Value::Empty;self.mock_index.output_column_indexes.len()];
+        println!("Getting values for columns {:?}", columns);
+        for column in columns {
+            let value = self.get_value_for_column(column)?;
+            println!("Value for column {} is {:?}", column, value);
+            result[column] = value;
+        }
+        Ok(result)
+    }
 }
 
 
@@ -246,6 +257,17 @@ impl<'a> OperatorRowTrait for &mut MockRow<'a> {
         let index_for_column = self.mock_index.get_index_for_column_full(column_name.to_string())?;
         self.values.insert(index_for_column, value);
         Ok(())
+    }
+
+    fn get_values_for_columns(&self, columns: Vec<usize>) -> Result<Vec<Value>, Error> {
+        let mut result = vec![Value::Empty;self.mock_index.output_column_indexes.len()];
+        println!("Getting values for columns {:?}", columns);
+        for column in columns {
+            let value = self.get_value_for_column(column)?;
+            println!("Value for column {} is {:?}", column, value);
+            result[column] = value;
+        }
+        Ok(result)
     }
 
 

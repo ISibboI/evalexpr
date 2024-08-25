@@ -85,7 +85,26 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
         let initial_stop_loss_index = indexes.get_index_vec(self.initial_stop_loss_field_name.clone())?;
         let initial_take_profit_index = indexes.get_index_vec(self.initial_take_profit_field_name.clone())?;
         
-        let mut all_values = row.get_values()?;
+        
+        let mut all_cols = instrument_index.clone();
+        all_cols.extend(signal_index.clone());
+        all_cols.extend(price_index.clone());
+        all_cols.extend(conviction_index.clone());
+        all_cols.extend(initial_stop_loss_index.clone());
+        all_cols.extend(initial_take_profit_index.clone());
+        all_cols.extend(active_trade_index.clone());
+        all_cols.extend(trade_id_index.clone());
+        all_cols.extend(initiation_price_index.clone());
+        all_cols.extend(trade_age_index.clone());
+        all_cols.extend(initiation_date_index.clone());
+        all_cols.extend(current_stop_loss_index.clone());
+        all_cols.extend(current_take_profit_index.clone());
+        all_cols.extend(reason_index.clone());
+        all_cols.extend(delta_index.clone());
+        all_cols.extend(exit_price_index.clone());
+        
+        
+        let mut all_values = row.get_values_for_columns(all_cols)?;
         let mut dirty_columns = vec![];
 
         if cycle_epoch > 0 {
