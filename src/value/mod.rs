@@ -53,6 +53,7 @@ pub enum CowData<T> {
 }
 
 unsafe impl<T> Send for CowData<T> where T: Send {}
+unsafe impl<T> Sync for CowData<T> where T: Sync {}
 
 impl<T> Hash for CowData<T>
 where
