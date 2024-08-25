@@ -76,6 +76,14 @@ impl DeepSizeOf for CowData{
         }
     }
 }
+
+impl FromStr for CowData{
+    type Err = EvalexprError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(CowData::Owned(s.to_string()))
+    }
+}
 unsafe impl Send for CowData{}
 unsafe impl Sync for CowData{}
 
@@ -630,6 +638,7 @@ use std::ops::Sub;
 use std::ops::Add;
 
 use std::ops::Neg;
+use std::str::FromStr;
 use deepsize::{Context, DeepSizeOf};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::ordered_float::OrderedFloat;
