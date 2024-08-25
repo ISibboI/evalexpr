@@ -52,6 +52,8 @@ pub enum CowData<T> {
     Borrowed(*const T),
 }
 
+unsafe impl<T> Send for CowData<T> where T: Send {}
+
 impl<T> Hash for CowData<T>
 where
     T: Hash,
