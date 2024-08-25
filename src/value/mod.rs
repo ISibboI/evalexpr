@@ -56,6 +56,13 @@ impl PartialEq<CowData> for str {
     }
 }
 
+#[cfg(feature = "serde_json_support")]
+impl From<CowData> for serde_json::Value {
+    fn from(value: CowData) -> Self {
+        Self::String(value.into_owned())
+    }
+}
+
 
 
 /// A helper enum for handling owned data or references with raw pointers.
