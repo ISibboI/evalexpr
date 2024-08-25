@@ -67,6 +67,15 @@ pub enum CowData{
         length: usize,
     },
 }
+
+impl DeepSizeOf for CowData{
+    fn deep_size_of_children(&self, context: &mut Context) -> usize {
+        return match self {
+            CowData::Owned(data) => data.deep_size_of_children(context),
+            CowData::Borrowed{data,length} => 0,
+        }
+    }
+}
 unsafe impl Send for CowData{}
 unsafe impl Sync for CowData{}
 
@@ -621,6 +630,7 @@ use std::ops::Sub;
 use std::ops::Add;
 
 use std::ops::Neg;
+use deepsize::{Context, DeepSizeOf};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::ordered_float::OrderedFloat;
 use crate::value;
