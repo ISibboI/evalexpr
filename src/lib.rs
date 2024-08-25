@@ -608,6 +608,6 @@ mod token;
 mod tree;
 mod custom_functions;
 mod templates;
-mod value;
+pub  mod value;
 
 // Exports
