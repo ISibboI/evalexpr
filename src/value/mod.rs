@@ -262,6 +262,8 @@ impl PartialOrd for CowData
     }
 }
 
+impl Eq for CowData {}
+    
 impl PartialEq for CowData
 {
     fn eq(&self, other: &Self) -> bool {
