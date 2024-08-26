@@ -164,6 +164,17 @@ pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     Ok(Value::Boolean(false))
 }
 
+pub fn ends_with(message: &Value, suffix: &Value) ->  Result<Value, Error>  {
+    if let (Value::String(message), Value::String(prefix)) = (message, suffix) {
+        let message = message.ref_into_owned();
+        let prefix = prefix.ref_into_owned();
+        if message.ends_with(&prefix) {
+            return Ok(Value::Boolean(true));
+        }
+    }
+    Ok(Value::Boolean(false))
+}
+
 pub fn ternary<TC: Into<Value>,TL: Into<Value>,TR: Into<Value>>(condition: TC, true_value: TL, false_value: TR) -> Result<Value, Error> {
     if let Value::Boolean(cond) = condition.into() {
         if cond {
