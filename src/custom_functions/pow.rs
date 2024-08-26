@@ -26,7 +26,7 @@ where
         (Value::Int(bi), Value::Float(ef)) => {
             Ok(Value::Float((bi as f64).powf(ef)))
         }
-        _ => Err(Error::InvalidArgumentType),
+        _ => Err(Error::CustomError("Invalidat artument type passed to pow function".to_string())),
     }
 }
 

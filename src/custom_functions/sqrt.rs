@@ -11,20 +11,20 @@ where
     match value.try_into().map_err(|err| CustomError(format!("{err:?}")))? {
         Value::Float(fl) => {
             if fl < 0.0 {
-                Err(Error::InvalidArgumentType)
+                Err(Error::CustomError("Negative fl value passed to sqrt function".to_string()))
             } else {
                 Ok(Value::Float(fl.sqrt()))
             }
         }
         Value::Int(nn) => {
             if nn < 0 {
-                Err(Error::InvalidArgumentType)
+                Err(Error::CustomError("Negative int value passed to sqrt function".to_string()))
             } else {
                 Ok(Value::Float((nn as f64).sqrt())) // Convert to float for square root
             }
         }
         Value::Empty => Ok(Value::Empty),
-        _ => Err(Error::InvalidArgumentType),
+        _ => Err(Error::CustomError("Invalid argument type passed to sqrt function".to_string())),
     }
 }
 
