@@ -147,11 +147,13 @@ impl TryFrom<Value> for bool {
     }
 }
 
-pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, start: TR, len: TC) -> Result<Value, Error> {
-    if let Value::String(message) = message.into() {
+pub fn substring<TL: TryInto<Value>,TR: TryInto<Value>, TC: TryInto<Value>>(message: TL, start: TR, len: TC) -> Result<Value, Error>
+where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug,<TC as TryInto<Value>>::Error: Debug
+{
+    if let Value::String(message) = message.try_into().map_err(|err| CustomError(format!("{err:?}"))) ?{
         // Ensure start is within bounds and len does not exceed the message length
-        let start_int = Into::<Value>::into(start).as_int()? as usize;
-        let len_int = Into::<Value>::into(len).as_int()? as usize;
+        let start_int = TryInto::<Value>::try_into(start).map_err(|err| CustomError(format!("{err:?}")))?.as_int()? as usize;
+        let len_int = TryInto::<Value>::try_into(len).map_err(|err| CustomError(format!("{err:?}")))?.as_int()? as usize;
         let message = message.into_owned();
         if start_int < message.len()  {
             let end = if start_int + len_int > message.len() { message.len() } else { start_int + len_int };
@@ -163,8 +165,10 @@ pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, 
 }
 
 
-pub fn starts_with<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, prefix: TR) ->  Result<Value, Error>  {
-    if let (Value::String(message), Value::String(prefix)) = (message.into(), prefix.into()) {
+pub fn starts_with<TL: TryInto<Value>,TR: TryInto<Value>>(message: TL, prefix: TR) ->  Result<Value, Error>
+where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug
+{
+    if let (Value::String(message), Value::String(prefix)) = (message.try_into().map_err(|err| CustomError(format!("{err:?}")))?, prefix.try_into().map_err(|err| CustomError(format!("{err:?}")))?) {
         let message = message.ref_into_owned();
         let prefix = prefix.ref_into_owned();
         if message.starts_with(&prefix) {
@@ -174,8 +178,10 @@ pub fn starts_with<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL
     Ok(Value::Boolean(false))
 }
 
-pub fn ends_with<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, suffix: TR) ->  Result<Value, Error>  {
-    if let (Value::String(message), Value::String(prefix)) = (message.into(), suffix.into()) {
+pub fn ends_with<TL: TryInto<Value>,TR: TryInto<Value>>(message: TL, suffix: TR) ->  Result<Value, Error>
+where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug
+{
+    if let (Value::String(message), Value::String(prefix)) = (message.try_into().map_err(|err| CustomError(format!("{err:?}")))?, suffix.try_into().map_err(|err| CustomError(format!("{err:?}")))?) {
         let message = message.ref_into_owned();
         let prefix = prefix.ref_into_owned();
         if message.ends_with(&prefix) {
