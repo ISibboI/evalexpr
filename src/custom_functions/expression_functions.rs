@@ -136,6 +136,16 @@ impl TryFrom<Result<Value, String>> for Value {
     }
 }
 
+impl TryFrom<Value> for bool {
+    type Error = Error;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Boolean(b) => Ok(b),
+            _ => Err(Error::CustomError("Value is not a boolean".into())),
+        }
+    }
+}
 
 pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, start: TR, len: TC) -> Result<Value, Error> {
     if let Value::String(message) = message.into() {
