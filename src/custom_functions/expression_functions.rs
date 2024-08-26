@@ -153,8 +153,8 @@ pub fn substring<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, 
 }
 
 
-pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
-    if let (Value::String(message), Value::String(prefix)) = (message, prefix) {
+pub fn starts_with<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, prefix: TR) ->  Result<Value, Error>  {
+    if let (Value::String(message), Value::String(prefix)) = (message.into(), prefix.into()) {
         let message = message.ref_into_owned();
         let prefix = prefix.ref_into_owned();
         if message.starts_with(&prefix) {
@@ -164,8 +164,8 @@ pub fn starts_with(message: &Value, prefix: &Value) ->  Result<Value, Error>  {
     Ok(Value::Boolean(false))
 }
 
-pub fn ends_with(message: &Value, suffix: &Value) ->  Result<Value, Error>  {
-    if let (Value::String(message), Value::String(prefix)) = (message, suffix) {
+pub fn ends_with<TL: Into<Value>,TR: Into<Value>, TC: Into<Value>>(message: TL, suffix: TR) ->  Result<Value, Error>  {
+    if let (Value::String(message), Value::String(prefix)) = (message.into(), suffix.into()) {
         let message = message.ref_into_owned();
         let prefix = prefix.ref_into_owned();
         if message.ends_with(&prefix) {
