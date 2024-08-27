@@ -45,6 +45,7 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
             ("exit_price", ValueType::Float),
             ("stop_loss", ValueType::Float),
             ("trade_age", ValueType::Int),
+            ("days_since_last_trade", ValueType::Int),
             ("delta", ValueType::Float),
             ("take_profit", ValueType::Float)
         ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
@@ -65,11 +66,13 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
         let mut conviction: Option<FloatType> = None;
         let mut reason: Option<String> = None;
         let mut trade_age: Option<IntType> = None;
+        let mut days_since_last_trade: Option<IntType> = None;
         
         let active_trade_index = indexes.get_index_vec("active_trade".to_owned())?;
         let trade_id_index = indexes.get_index_vec("trade_id".to_owned())?;
         let initiation_price_index = indexes.get_index_vec("initiation_price".to_owned())?;
         let trade_age_index = indexes.get_index_vec("trade_age".to_owned())?;
+        let days_since_last_trade_index = indexes.get_index_vec("days_since_last_trade".to_owned())?;
         let initiation_date_index = indexes.get_index_vec("initiation_date".to_owned())?;
         let current_stop_loss_index = indexes.get_index_vec("stop_loss".to_owned())?;
         let current_take_profit_index = indexes.get_index_vec("take_profit".to_owned())?;
@@ -104,7 +107,8 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
             stop_loss = get_value_indirect_from_row(row,&current_stop_loss_index,transpose_index_before_epoch)?.as_float_or_none()?;
             take_profit = get_value_indirect_from_row(row,&current_take_profit_index,transpose_index_before_epoch)?.as_float_or_none()?;
             conviction = get_value_indirect_from_row(row,&conviction_index,transpose_index_before_epoch)?.as_float_or_none()?;
-            reason = get_value_indirect_from_row(row,&reason_index,transpose_index_before_epoch)?.as_string_or_none()?;            
+            reason = get_value_indirect_from_row(row,&reason_index,transpose_index_before_epoch)?.as_string_or_none()?;
+            days_since_last_trade = get_value_indirect_from_row(row,&days_since_last_trade_index,transpose_index_before_epoch)?.as_int_or_none()?;            
         }
 
         if cycle_epoch > 1 {
@@ -154,7 +158,7 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                     }
                 } else {
                     if current_signal {
-                        if !prev_trade_signal.unwrap_or_default() {
+                        if !prev_trade_signal.unwrap_or_default() && (days_since_last_trade.is_none() || days_since_last_trade.unwrap() >= self.re_entry_time) {
                             initiation_price = Some(current_close_value);
                             initiation_date = Some(get_string(&transpose_value));
                             trade_id = Some(get_string(&transpose_value) + &instrument_name);
@@ -162,7 +166,10 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                             take_profit = get_value_indirect_from_row(&row,  &initial_take_profit_index,i)?.as_float_or_none()?;
                             active_trade = Some(true);
                             trade_age = Some(0);
+                            days_since_last_trade = Some(0)
                         }
+                    }else{
+                        days_since_last_trade = Some(days_since_last_trade.unwrap_or_default() + 1);
                     }
                 }
 
@@ -176,12 +183,14 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &exit_price_index, i, exit_price.clone().map(Value::Float))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &trade_age_index, i, trade_age.clone().map(Value::Int))?;
                 set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &current_take_profit_index, i, take_profit.clone().map(Value::Float))?;
+                set_value_indirect_if_some(&mut all_values, &mut  dirty_columns, &days_since_last_trade_index, i, days_since_last_trade.clone().map(Value::Int))?;
                 prev_trade_signal = Some(current_signal);
                 reason = None;
                 delta = None;
                 exit_price = None;
                 if loop_trade_closed {
                     active_trade = Some(false);
+                    days_since_last_trade = Some(0);
                     initiation_price = None;
                     initiation_date = None;
                     trade_id = None;
@@ -464,6 +473,7 @@ mod tests {
             &model.initial_take_profit_field_name,
             "active_trade",
             "initiation_price",
+            "days_since_last_trade",
             "exit_price",
             "initiation_date",
             "trade_id",
