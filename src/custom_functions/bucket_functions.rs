@@ -5,13 +5,20 @@ use crate::Error::CustomError;
 macro_rules! generate_bucket_functions {
     ($($name:ident($($stop:ident),+)),+) => {
         $(
-            pub fn $name(value_to_bucket: Value, $($stop: Value),+) -> Result<Value, Error> {
-                let stops = vec![$($stop),+];
+            pub fn $name<T, E>(value_to_bucket: T, $($stop: E),+) -> Result<Value, Error>
+            where
+                T: std::convert::TryInto<Value>,
+                E: std::convert::TryInto<Value>,
+                <T as std::convert::TryInto<Value>>::Error: core::fmt::Debug,
+                <E as std::convert::TryInto<Value>>::Error: core::fmt::Debug
+            {
+                let value_to_bucket: Value = value_to_bucket.try_into().map_err(|_| Error::CustomError("Failed to convert value_to_bucket".to_string()))?;
+                let stops = vec![$($stop.try_into().map_err(|_| Error::CustomError("Failed to convert stop".to_string()))?),+];
 
                 // Ensure stops are in ascending order
                 for i in 0..stops.len() - 1 {
                     if stops[i] > stops[i + 1] {
-                        return Err(CustomError("Stops must be in ascending order".to_string()));
+                        return Err(Error::CustomError("Stops must be in ascending order".to_string()));
                     }
                 }
 
@@ -25,14 +32,21 @@ macro_rules! generate_bucket_functions {
                 Ok(Value::Int(stops.len() as IntType))
             }
 
-             paste::paste! {
-                pub fn [<$name _desc>](value_to_bucket: Value, $($stop: Value),+) -> Result<Value, Error> {
-                    let stops = vec![$($stop),+];
+            paste::paste! {
+                pub fn [<$name _desc>] <T, E>(value_to_bucket: T, $($stop: E),+) -> Result<Value, Error>
+                where
+                    T: std::convert::TryInto<Value>,
+                    E: std::convert::TryInto<Value>,
+                    <T as std::convert::TryInto<Value>>::Error: core::fmt::Debug,
+                    <E as std::convert::TryInto<Value>>::Error: core::fmt::Debug
+                {
+                    let value_to_bucket: Value = value_to_bucket.try_into().map_err(|_| Error::CustomError("Failed to convert value_to_bucket".to_string()))?;
+                    let stops = vec![$($stop.try_into().map_err(|_| Error::CustomError("Failed to convert stop".to_string()))?),+];
 
                     // Ensure stops are in ascending order
                     for i in 0..stops.len() - 1 {
                         if stops[i] > stops[i + 1] {
-                            return Err(CustomError("Stops must be in ascending order".to_string()));
+                            return Err(Error::CustomError("Stops must be in ascending order".to_string()));
                         }
                     }
 
