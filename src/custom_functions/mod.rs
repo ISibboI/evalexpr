@@ -8,6 +8,7 @@ mod rolling_stdev;
 mod rolling_min;
 pub  mod pow;
 mod sqrt;
+mod bucket_functions;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate

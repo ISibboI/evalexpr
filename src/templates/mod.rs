@@ -7,6 +7,7 @@ pub  mod simple_trade_model;
 pub(crate) mod test_utils;
 pub  mod rolling_zscore;
 mod utils;
+pub  mod bucket_data_discrete;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -14,6 +15,7 @@ pub use channel_monitoring_template::*;
 pub use adaptive_stop_loss_trade_model::*;
 pub use simple_trade_model::*;
 pub use bucket_data_template::*;
+pub use bucket_data_discrete::*;
 pub use rolling_zscore::*;
 pub use compiled_transpose_calculation_template::*;
 use crate::Value;
