@@ -8,7 +8,7 @@ mod rolling_stdev;
 mod rolling_min;
 pub  mod pow;
 mod sqrt;
-mod bucket_functions;
+pub  mod bucket_functions;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -18,6 +18,7 @@ pub use expression_functions::*;
 pub use back::*;
 pub use pow::*;
 pub use sqrt::*;
+pub use bucket_functions::*;
 pub use simple_moving_average::simple_moving_average;
 pub use simple_cumulative_sum::simple_cumulative_sum;
 pub use simple_cumilative_returns::simple_cumulative_returns;
