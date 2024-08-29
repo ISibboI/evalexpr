@@ -8,7 +8,7 @@ use crate::templates::test_utils::MockIndexHolder;
 use crate::templates::utils::{get_value_indirect, set_value_indirect};
 
 
-struct CorrelationAnalysis{
+pub  struct CorrelationAnalysis{
     independent_variables: Vec<String>,
     dependent_variable: String,
 }
