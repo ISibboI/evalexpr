@@ -8,6 +8,7 @@ pub(crate) mod test_utils;
 pub  mod rolling_zscore;
 mod utils;
 pub  mod bucket_data_discrete;
+pub  mod correnlation_analysis_template;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -16,6 +17,7 @@ pub use adaptive_stop_loss_trade_model::*;
 pub use simple_trade_model::*;
 pub use bucket_data_template::*;
 pub use bucket_data_discrete::*;
+pub use correnlation_analysis_template::*;
 pub use rolling_zscore::*;
 pub use compiled_transpose_calculation_template::*;
 use crate::Value;
