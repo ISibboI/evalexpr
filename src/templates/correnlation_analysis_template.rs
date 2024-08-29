@@ -13,6 +13,19 @@ pub  struct CorrelationAnalysis{
     dependent_variable: String,
 }
 
+fn to_coeficient(field_name: &str) -> String {
+    format!("{}coefficient", field_name)
+}
+fn to_pvalue(field_name: &str) -> String {
+    format!("{}pvalue", field_name)
+}
+fn to_rsquared(field_name: &str) -> String {
+    format!("{}rsquared", field_name)
+}
+fn to_adjusted_rsquared(field_name: &str) -> String {
+    format!("{}adjustedrsquared", field_name)
+}
+
 impl CorrelationAnalysis {
     pub fn new(dependent_variable: &str, independent_variables: Vec<&str>) -> CorrelationAnalysis {
         CorrelationAnalysis {
@@ -23,13 +36,14 @@ impl CorrelationAnalysis {
 }
 impl CompiledTransposeCalculationTemplate for CorrelationAnalysis {
     fn schema(&self) -> HashMap<String, ValueType> {
-        vec![
-
-            ("coefficient", ValueType::Float),
-            ("pvalue", ValueType::Float),
-            ("rsquared", ValueType::Float),
-            ("advjustedrsquared", ValueType::Float)
-        ].iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
+        let mut result = vec![];
+        for fld in self.independent_variables.iter() {
+            result.push((to_coeficient(fld), ValueType::Float));
+            result.push((to_pvalue(fld), ValueType::Float));
+            result.push((to_rsquared(fld), ValueType::Float));
+            result.push((to_adjusted_rsquared(fld), ValueType::Float));
+        }
+        result.iter().map(|(nm, val)|(nm.to_string(),*val)).collect()
     }
     fn dependencies(&self) -> Vec<String> {
         let mut vec1 = self.independent_variables.clone();
