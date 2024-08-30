@@ -52,7 +52,7 @@ macro_rules! generate_bucket_functions {
                     for (i, stop) in stops.iter().enumerate() {
                         if value_to_bucket <= *stop {
                             if i == 0 {
-                                return Ok(Value::String(format!("<= {}", stop).into()));
+                                return Ok(Value::String(format!(".<= {}", stop).into()));
                             } else {
                                 return Ok(Value::String(format!("{} - {}", stops[i - 1], stop).into()));
                             }
