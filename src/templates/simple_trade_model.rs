@@ -142,19 +142,19 @@ impl CompiledTransposeCalculationTemplate for SimpleTradeModel {
                         exit_price = Some(current_close_value);
                         let delta_value = (current_close_value - loop_initiation_price) * loop_conviction;
                         delta = Some(delta_value);
-                        reason = Some(format!("{} {} Closing trade. Current price ({:.2}) has fallen to or below stop loss {:.2} from entry price ({:.2}).", get_delta_label(delta_value), delta_value, current_close_value, loop_stop_loss.as_ref().unwrap(), loop_initiation_price));
+                        reason = Some(format!("{} {:.2} Closing trade. Current price ({:.2}) has fallen to or below stop loss {:.2} from entry price ({:.2}).", get_delta_label(delta_value), delta_value, current_close_value, loop_stop_loss.as_ref().unwrap(), loop_initiation_price));
                     } else if  loop_take_profit.is_some_and(|tp| current_close_value >= tp) {
                         loop_trade_closed = true;
                         exit_price = Some(current_close_value);
                         let delta_value = (current_close_value - loop_initiation_price) * loop_conviction;
                         delta = Some(delta_value);
-                        reason = Some(format!("{} {} Closing trade. Current price ({:.2}) has reached or exceeded take profit level {:.2} from entry price ({:.2}).",get_delta_label(delta_value),delta.unwrap(), current_close_value,loop_take_profit.as_ref().unwrap(), loop_initiation_price));
+                        reason = Some(format!("{} {:.2} Closing trade. Current price ({:.2}) has reached or exceeded take profit level {:.2} from entry price ({:.2}).",get_delta_label(delta_value),delta.unwrap(), current_close_value,loop_take_profit.as_ref().unwrap(), loop_initiation_price));
                     } else if trade_age.is_some_and(|age| age >= self.holding_period) {
                         loop_trade_closed = true;
                         exit_price = Some(current_close_value);
                         let delta_value = (current_close_value - loop_initiation_price) * loop_conviction;
                         delta = Some(delta_value);
-                        reason = Some(format!("{} {} Closing trade. Trade has reached holding period of ({}).",get_delta_label(delta_value),delta.unwrap(),trade_age.as_ref().unwrap()));
+                        reason = Some(format!("{} {:.2} Closing trade. Trade has reached holding period of ({}).",get_delta_label(delta_value),delta.unwrap(),trade_age.as_ref().unwrap()));
                     }
                 } else {
                     if current_signal {
