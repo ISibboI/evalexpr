@@ -25,7 +25,7 @@ where <TL as TryInto<crate::Value>>::Error: std::fmt::Display,<TR as TryInto<cra
     }]);
     Ok(Value::String(serde_json::to_string(&result).map_err(|err| CustomError(format!("{err}")))?.into()))
 }
-pub fn extract_report_key_from_operator_uri<TL: TryInto<Value>,TR: TryInto<Value>>(uri: TL) ->  Result<Value, Error>
+pub fn extract_report_key_from_operator_uri<TL: TryInto<Value>>(uri: TL) ->  Result<Value, Error>
 where <TL as TryInto<crate::Value>>::Error: std::fmt::Display
 {
     let operator_uri = uri.try_into().map_err(|err| CustomError(format!("{}",err)))?.as_string()?;
