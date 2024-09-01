@@ -8,11 +8,12 @@ use serde_json::json;
 //#[cfg(feature = "serde_json_support")]
 
 #[cfg(feature = "serde_json_support")]
-pub fn create_report_reference_nodes_from_operator_uri<TL: TryInto<Value>,TR: TryInto<Value>>(uri: TL, output_property_name: TR) ->  Result<Value, Error>
-where <TL as TryInto<crate::Value>>::Error: std::fmt::Display,<TR as TryInto<crate::Value>>::Error: std::fmt::Display
+pub fn create_report_reference_nodes_from_operator_uri<TL: TryInto<Value>,TR: TryInto<Value>,TRS: TryInto<Value>>(uri: TL, output_property_name: TR, report_key_suffix: TRS) ->  Result<Value, Error>
+where <TL as TryInto<crate::Value>>::Error: std::fmt::Display,<TR as TryInto<crate::Value>>::Error: std::fmt::Display,<TRS as TryInto<crate::Value>>::Error: std::fmt::Display
 {
     let operator_uri = uri.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
     let output_property_name = output_property_name.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
+    let report_key_suffix = report_key_suffix.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
     let params = extract_parameters(&operator_uri);
     let report_key = extract_report_key(&operator_uri);
     let result = json!([{
@@ -21,7 +22,7 @@ where <TL as TryInto<crate::Value>>::Error: std::fmt::Display,<TR as TryInto<cra
         "nodeType": "Persistent",
         "parameterValues": params,
         "outputOperatorName": output_property_name,
-        "reportKey": report_key,
+        "reportKey": format!("{}{}",report_key,report_key_suffix),
     }]);
     Ok(Value::String(serde_json::to_string(&result).map_err(|err| CustomError(format!("{err}")))?.into()))
 }
