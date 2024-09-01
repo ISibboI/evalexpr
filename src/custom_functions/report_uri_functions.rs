@@ -29,7 +29,7 @@ pub fn extract_report_key_from_operator_uri<TL: TryInto<Value>>(uri: TL) ->  Res
 where <TL as TryInto<crate::Value>>::Error: std::fmt::Display
 {
     let operator_uri = uri.try_into().map_err(|err| CustomError(format!("{}",err)))?.as_string()?;
-    Ok(Value::String(operator_uri.into()))
+    Ok(Value::String(extract_report_key(&operator_uri).into()))
 }
 
 fn extract_parameters(input_string: &str) -> HashMap<String, String> {
