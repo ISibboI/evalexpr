@@ -44,7 +44,7 @@ impl fmt::Display for EvalexprError {
                 expected_len, actual
             ),
             ExpectedEmpty { actual } => write!(f, "Expected a Value::Empty, but got {:?}.", actual),
-            AppendedToLeafNode => write!(f, "Tried to append a node to a leaf node."),
+            AppendedToLeafNode(identifier) => write!(f, "Tried to append a node to a leaf node. {:?}", identifier),
             PrecedenceViolation => write!(
                 f,
                 "Tried to append a node to another node with higher precedence."

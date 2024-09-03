@@ -93,7 +93,7 @@ pub enum EvalexprError {
 
     /// Tried to append a child to a leaf node.
     /// Leaf nodes cannot have children.
-    AppendedToLeafNode,
+    AppendedToLeafNode(String),
 
     /// Tried to append a child to a node such that the precedence of the child is not higher.
     /// This error should never occur.

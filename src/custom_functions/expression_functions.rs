@@ -191,6 +191,40 @@ where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug
     Ok(Value::Boolean(false))
 }
 
+pub fn or<TL, TR>(left: TL, right: TR) -> Result<Value, Error>
+where
+    TL: TryInto<Value>,
+    TR: TryInto<Value>,
+    <TL as TryInto<Value>>::Error: Debug,
+    <TR as TryInto<Value>>::Error: Debug,
+{
+    let left: Value = left.try_into().map_err(|err| Error::CustomError(format!("{err:?}")))?;
+    let right: Value = right.try_into().map_err(|err| Error::CustomError(format!("{err:?}")))?;
+
+    match (left, right) {
+        (Value::Boolean(l), Value::Boolean(r)) => {
+            Ok(Value::Boolean(l || r))
+        }
+        _ => Err(Error::CustomError("Both operands must be booleans".to_owned())),
+    }
+}
+pub fn and<TL, TR>(left: TL, right: TR) -> Result<Value, Error>
+where
+    TL: TryInto<Value>,
+    TR: TryInto<Value>,
+    <TL as TryInto<Value>>::Error: Debug,
+    <TR as TryInto<Value>>::Error: Debug,
+{
+    let left: Value = left.try_into().map_err(|err| Error::CustomError(format!("{err:?}")))?;
+    let right: Value = right.try_into().map_err(|err| Error::CustomError(format!("{err:?}")))?;
+
+    match (left, right) {
+        (Value::Boolean(l), Value::Boolean(r)) => {
+            Ok(Value::Boolean(l && r))
+        }
+        _ => Err(Error::CustomError("Both operands must be booleans".to_owned())),
+    }
+}
 pub fn ternary<TC: Into<Value>,TL: Into<Value>,TR: Into<Value>>(condition: TC, true_value: TL, false_value: TR) -> Result<Value, Error> {
     if let Value::Boolean(cond) = condition.into() {
         if cond {

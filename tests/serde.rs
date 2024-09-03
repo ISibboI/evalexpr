@@ -16,7 +16,7 @@ fn test_serde() {
 
 #[test]
 fn test_string_serialization() {
-    let string = Value::String("Item1".to_owned());
+    let string = Value::String("Item1".to_owned().into());
 
     println!("{:?}", ron::ser::to_string(&string).unwrap());
 }

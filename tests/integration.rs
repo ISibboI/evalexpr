@@ -2,6 +2,14 @@
 
 use evalexpr::{error::*, *};
 
+
+#[test]
+fn test_ternary() {
+    assert_eq!(
+        eval("1 == 1 ? 2 : 3"),
+        Ok(Value::Int(2))
+    );
+}
 #[test]
 fn test_unary_examples() {
     assert_eq!(eval("3"), Ok(Value::Int(3)));
@@ -400,19 +408,19 @@ fn test_builtin_functions() {
     );
     assert_eq!(
         eval("str::from(\"a\")"),
-        Ok(Value::String(String::from("\"a\"")))
+        Ok(Value::String(String::from("\"a\"").into()))
     );
-    assert_eq!(eval("str::from(1.0)"), Ok(Value::String(String::from("1"))));
-    assert_eq!(eval("str::from(1)"), Ok(Value::String(String::from("1"))));
+    assert_eq!(eval("str::from(1.0)"), Ok(Value::String(String::from("1").into())));
+    assert_eq!(eval("str::from(1)"), Ok(Value::String(String::from("1").into())));
     assert_eq!(
         eval("str::from(true)"),
-        Ok(Value::String(String::from("true")))
+        Ok(Value::String(String::from("true").into()))
     );
     assert_eq!(
         eval("str::from(1, 2, 3)"),
-        Ok(Value::String(String::from("(1, 2, 3)")))
+        Ok(Value::String(String::from("(1, 2, 3)").into()))
     );
-    assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()"))));
+    assert_eq!(eval("str::from()"), Ok(Value::String(String::from("()").into())));
     // Bitwise
     assert_eq!(eval("bitand(5, -1)"), Ok(Value::Int(5)));
     assert_eq!(eval("bitand(6, 5)"), Ok(Value::Int(4)));
@@ -430,7 +438,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("if(false, -6, 5)"), Ok(Value::Int(5)));
     assert_eq!(
         eval("if(2-1==1, \"good\", 0)"),
-        Ok(Value::String(String::from("good")))
+        Ok(Value::String(String::from("good").into()))
     );
 }
 
@@ -451,11 +459,11 @@ fn test_errors() {
             expected: 2,
         })
     );
-    assert_eq!(eval("!(()true)"), Err(EvalexprError::AppendedToLeafNode));
+    assert_eq!(eval("!(()true)"), Err(EvalexprError::AppendedToLeafNode(format!("()"))));
     assert_eq!(
         eval("math::is_nan(\"xxx\")"),
         Err(EvalexprError::ExpectedNumber {
-            actual: Value::String("xxx".to_string())
+            actual: Value::String("xxx".to_string().into())
         })
     );
 }
@@ -1676,7 +1684,7 @@ fn test_long_expression_i89() {
 #[test]
 fn test_value_type() {
     assert_eq!(
-        ValueType::from(&Value::String(String::new())),
+        ValueType::from(&Value::String(String::new().into())),
         ValueType::String
     );
     assert_eq!(ValueType::from(&Value::Float(0.0)), ValueType::Float);
@@ -1686,7 +1694,7 @@ fn test_value_type() {
     assert_eq!(ValueType::from(&Value::Empty), ValueType::Empty);
 
     assert_eq!(
-        ValueType::from(&mut Value::String(String::new())),
+        ValueType::from(&mut Value::String(String::new().into())),
         ValueType::String
     );
     assert_eq!(ValueType::from(&mut Value::Float(0.0)), ValueType::Float);
@@ -1701,14 +1709,14 @@ fn test_value_type() {
     );
     assert_eq!(ValueType::from(&mut Value::Empty), ValueType::Empty);
 
-    assert!(!Value::String(String::new()).is_number());
+    assert!(!Value::String(String::new().into()).is_number());
     assert!(Value::Float(0.0).is_number());
     assert!(Value::Int(0).is_number());
     assert!(!Value::Boolean(true).is_number());
     assert!(!Value::Tuple(Vec::new()).is_number());
     assert!(!Value::Empty.is_number());
 
-    assert!(!Value::String(String::new()).is_empty());
+    assert!(!Value::String(String::new().into()).is_empty());
     assert!(!Value::Float(0.0).is_empty());
     assert!(!Value::Int(0).is_empty());
     assert!(!Value::Boolean(true).is_empty());
@@ -1716,9 +1724,9 @@ fn test_value_type() {
     assert!(Value::Empty.is_empty());
 
     assert_eq!(
-        Value::String(String::new()).as_float(),
+        Value::String(String::new().into()).as_float(),
         Err(EvalexprError::ExpectedFloat {
-            actual: Value::String(String::new())
+            actual: Value::String(String::new().into())
         })
     );
     assert_eq!(Value::Float(0.0).as_float(), Ok(0.0));
@@ -1748,9 +1756,9 @@ fn test_value_type() {
     );
 
     assert_eq!(
-        Value::String(String::new()).as_tuple(),
+        Value::String(String::new().into()).as_tuple(),
         Err(EvalexprError::ExpectedTuple {
-            actual: Value::String(String::new())
+            actual: Value::String(String::new().into())
         })
     );
     assert_eq!(
@@ -1780,9 +1788,9 @@ fn test_value_type() {
     );
 
     assert_eq!(
-        Value::String(String::new()).as_fixed_len_tuple(0),
+        Value::String(String::new().into()).as_fixed_len_tuple(0),
         Err(EvalexprError::ExpectedTuple {
-            actual: Value::String(String::new())
+            actual: Value::String(String::new().into())
         })
     );
     assert_eq!(
@@ -1815,9 +1823,9 @@ fn test_value_type() {
     );
 
     assert_eq!(
-        Value::String(String::new()).as_empty(),
+        Value::String(String::new().into()).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
-            actual: Value::String(String::new())
+            actual: Value::String(String::new().into())
         })
     );
     assert_eq!(
@@ -1847,8 +1855,8 @@ fn test_value_type() {
     assert_eq!(Value::Empty.as_empty(), Ok(()));
 
     assert_eq!(
-        Result::from(Value::String(String::new())),
-        Ok(Value::String(String::new()))
+        Result::from(Value::String(String::new().into())),
+        Ok(Value::String(String::new().into()))
     );
 }
 

@@ -421,7 +421,7 @@ impl Node {
             || (self.operator().precedence() == node.operator().precedence() && !self.operator().is_left_to_right() && !node.operator().is_left_to_right())
         {
             if self.operator().is_leaf() {
-                Err(EvalexprError::AppendedToLeafNode)
+                Err(EvalexprError::AppendedToLeafNode(format!("{:?}", self.operator())))
             } else if self.has_enough_children() {
                 // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child
                 let last_child_operator = self.children.last().unwrap().operator();
@@ -441,7 +441,7 @@ impl Node {
                 } else {
                     // println!("Rotating");
                     if node.operator().is_leaf() {
-                        return Err(EvalexprError::AppendedToLeafNode);
+                        return Err(EvalexprError::AppendedToLeafNode(format!("{:?}", node.operator())));
                     }
 
                     // Unwrap cannot fail because is_leaf being false and has_enough_children being true implies that the operator wants and has at least one child

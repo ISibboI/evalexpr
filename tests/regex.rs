@@ -4,6 +4,13 @@
 use evalexpr::*;
 
 #[test]
+fn test_ternary() {
+    assert_eq!(
+        eval("1 == 1 ? 2 : 3"),
+        Ok(Value::Int(2))
+    );
+}
+#[test]
 fn test_regex_functions() {
     assert_eq!(
         eval("str::regex_matches(\"foobar\", \"[ob]{3}\")"),
@@ -22,10 +29,10 @@ fn test_regex_functions() {
     };
     assert_eq!(
         eval("str::regex_replace(\"foobar\", \".*?(o+)\", \"b$1\")"),
-        Ok(Value::String("boobar".to_owned()))
+        Ok(Value::String("boobar".to_owned().into()))
     );
     assert_eq!(
-        eval("str::regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"),
-        Ok(Value::String("foobar".to_owned()))
+        eval("str::regex_replace(\"foobar\", \".*?(i+)\", \"b$1\")"), 
+        Ok(Value::String("foobar".to_owned().into()))
     );
 }
