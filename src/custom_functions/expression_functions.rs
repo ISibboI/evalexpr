@@ -288,15 +288,16 @@ pub fn max<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) ->  Result<V
         x1
     })
 }
-
-pub fn atan<T: Into<Value>>(value: T) -> Result<Value, Error> {
-    let x = value.into();
-
-    // Apply atan to the value
-    let atan_x = x.     atan();
-
-    Ok(atan_x)
-}
+// pub fn atan<T: TryInto<Value>>(value: T) -> Result<Value, Error>
+// where <T as TryInto<Value>>::Error: Debug
+// {
+//     let x = value.try_into()?;
+// 
+//     // Apply atan to the value
+//     let atan_x = x.     atan();
+// 
+//     Ok(atan_x)
+// }
 
 pub fn min<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) -> Result<Value, Error>  {
     let x = value1.into();
