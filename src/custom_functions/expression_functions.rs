@@ -2,6 +2,7 @@ use std::convert::{TryFrom, TryInto};
 use std::fmt::Debug;
 use crate::{Error, FloatType, Value};
 use chrono::{NaiveDateTime,Timelike,Utc, DateTime, Duration, Datelike, TimeZone};
+use num_traits::real::Real;
 use crate::Error::CustomError;
 
 pub fn is_null<T: Into<Value>>(value: T) ->  Result<Value, Error>  {
@@ -286,6 +287,15 @@ pub fn max<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) ->  Result<V
     } else {
         x1
     })
+}
+
+pub fn atan<T: Into<Value>>(value: T) -> Result<Value, Error> {
+    let x = value.into();
+
+    // Apply atan to the value
+    let atan_x = x.     atan();
+
+    Ok(atan_x)
 }
 
 pub fn min<TL: Into<Value>,TR: Into<Value>>(value1: TL, value2: TR) -> Result<Value, Error>  {
