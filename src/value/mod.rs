@@ -68,7 +68,7 @@ impl From<CowData> for serde_json::Value {
 /// A helper enum for handling owned data or references with raw pointers.
 #[derive(Clone)]
 pub enum CowData{
-    Owned(String),
+    Owned(Box<Pin<String>>),
     Borrowed {
         data: *const u8,
         length: usize,
@@ -79,7 +79,7 @@ pub enum CowData{
 impl From<CowData> for String {
     fn from(cow_data: CowData) -> String {
         match cow_data {
-            CowData::Owned(s) => s,
+            CowData::Owned(s) => Pin::into_inner(*s),
             CowData::Borrowed { data, length, .. } => {
                 // Safely convert the borrowed data to a String
                 unsafe {
@@ -104,7 +104,7 @@ impl FromStr for CowData{
     type Err = EvalexprError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(CowData::Owned(s.to_string()))
+        Ok(CowData::Owned(Box::new(Pin::new(s.to_string()))))
     }
 }
 unsafe impl Send for CowData{}
@@ -163,7 +163,7 @@ impl CowData {
     pub fn into_owned(self) -> String
     {
         match self {
-            CowData::Owned(data) => data,
+            CowData::Owned(data) => Pin::into_inner(*data),
             CowData::Borrowed{data,length} => unsafe {
                 let slice = std::slice::from_raw_parts(data, length);
                 std::str::from_utf8_unchecked(slice).to_string()
@@ -173,7 +173,7 @@ impl CowData {
     
     {
         match self {
-            CowData::Owned(data) => data.clone(),
+            CowData::Owned(data) => data.to_string(),
             CowData::Borrowed{data,length} => unsafe {
                 let slice = std::slice::from_raw_parts(*data, *length);
                 std::str::from_utf8_unchecked(slice).to_string()
@@ -233,7 +233,7 @@ impl<'de> Deserialize<'de> for CowData
         D: Deserializer<'de>,
     {
         let owned_data = String::deserialize(deserializer)?;
-        Ok(CowData::Owned(owned_data))
+        Ok(CowData::Owned(Box::new(Pin::new(owned_data))))
     }
 }
 
@@ -270,13 +270,13 @@ impl Hash for Value {
 
 impl From<String> for CowData {
     fn from(s: String) -> Self {
-        CowData::Owned(s)
+        CowData::Owned(Box::new(Pin::new(s)))
     }
 }
 
 impl From<&str> for CowData {
     fn from(s: &str) -> Self {
-        CowData::Owned(s.to_string())
+        CowData::Owned(Box::new(Pin::new(s.to_string())))
     }
 }
 
@@ -537,13 +537,13 @@ impl Value {
 
 impl From<String> for Value {
     fn from(string: String) -> Self {
-        Value::String(CowData::Owned(string))
+        Value::String(CowData::Owned(Box::new(Pin::new(string))))
     }
 }
 
 impl From<&str> for Value {
     fn from(string: &str) -> Self {
-        Value::String(CowData::Owned(string.to_string()))
+        Value::String(CowData::Owned(Box::new(Pin::new(string.to_string()))))
     }
 }
 
@@ -674,6 +674,7 @@ use std::ops::Sub;
 use std::ops::Add;
 
 use std::ops::Neg;
+use std::pin::Pin;
 use std::str::FromStr;
 use deepsize::{Context, DeepSizeOf};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
