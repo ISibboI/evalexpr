@@ -165,6 +165,21 @@ where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug,
     Ok("".to_string().into())
 }
 
+pub fn concat<TL: TryInto<Value>, TR: TryInto<Value>>(left: TL, right: TR) -> Result<Value, Error>
+where
+    <TL as TryInto<Value>>::Error: Debug,
+    <TR as TryInto<Value>>::Error: Debug,
+{
+    if let Value::String(left_string) = left.try_into().map_err(|err| CustomError(format!("{err:?}")))? {
+        if let Value::String(right_string) = right.try_into().map_err(|err| CustomError(format!("{err:?}")))? {
+            // Concatenate the two strings
+            let concatenated = format!("{}{}", left_string, right_string);
+            return Ok(concatenated.into());
+        }
+    }
+    Ok("".to_string().into())
+}
+
 
 pub fn starts_with<TL: TryInto<Value>,TR: TryInto<Value>>(message: TL, prefix: TR) ->  Result<Value, Error>
 where <TL as TryInto<Value>>::Error: Debug,<TR as TryInto<Value>>::Error: Debug
