@@ -21,7 +21,7 @@ pub  fn set_value_indirect<'a>(values: &'a mut  Vec<Value>,dirty_columns: &'a mu
     if let Some(value) = value {
         let column = column_index.get(idx).ok_or_else(|| Error::CustomError(format!("Column not found in index{}", idx)))?;
         let mut result = values.get_mut(*column).ok_or_else(|| Error::CustomError(format!("Column {column} not found in row")))?;
-        *result = value;
+        *result = value.into_owned();
         dirty_columns.push(*column);
     }
     Ok(())

@@ -63,6 +63,14 @@ impl From<CowData> for serde_json::Value {
     }
 }
 
+impl Value{
+    pub fn into_owned(self) -> Value {
+        match self {
+            Value::String(s) => Value::String(s.into_owned().into()),
+            v => v
+        }
+    }
+}
 
 
 /// A helper enum for handling owned data or references with raw pointers.
