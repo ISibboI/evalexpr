@@ -14,7 +14,7 @@ where <TL as TryInto<crate::Value>>::Error: std::fmt::Display,<TR as TryInto<cra
     let operator_uri = uri.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
     let output_property_name = output_property_name.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
     let report_key_suffix = report_key_suffix.try_into().map_err(|err| CustomError(format!("{err}")))?.as_string()?;
-    let params = extract_parameters(&operator_uri);
+    let params = extract_parameters(&operator_uri)? ;
     let report_key = extract_report_key(&operator_uri);
     let result = json!([{
         "name": "report_reference_node",
