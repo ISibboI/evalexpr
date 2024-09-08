@@ -728,13 +728,15 @@ impl Add for &Value {
     fn add(self, other: Self) -> Self::Output {
         match (self, other) {
             (Value::Empty, Value::Empty) => Ok(Value::Empty),
+            (Value::Empty, Value::String(b)) => Ok(Value::String(b.to_owned())),
+            (Value::String(b),Value::Empty) => Ok(Value::String(b.to_owned())),
             (Value::Empty, _) => Ok(Value::Empty),
             (_, Value::Empty) => Ok(Value::Empty),
             (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
             (Value::Float(a), Value::Int(b)) => Ok(Value::Float(*a + *b as f64)),
             (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
             (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float(*a as FloatType + b)),
-            (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a, b).into())),
+            (Value::String(a), Value::String(b)) => Ok(Value::String(format!("{}{}", a.to_owned(), b.to_owned()).into())),
             // Handle combinations with strings and numeric types if desired
             (Value::Int(a), Value::String(b)) | (Value::String(b), Value::Int(a)) => Ok(Value::String(format!("{}{}", a, b).into())),
             (Value::Float(a), Value::String(b)) | (Value::String(b), Value::Float(a)) => Ok(Value::String(format!("{}{}", a, b).into())),
