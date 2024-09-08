@@ -1,6 +1,6 @@
 ﻿use std::collections::HashMap;
 use std::convert::TryInto;
-
+use std::fmt::{Display};
 use crate::{Error, Value};
 use crate::Error::CustomError;
 #[cfg(feature = "serde_json_support")]
@@ -33,7 +33,25 @@ where <TL as TryInto<crate::Value>>::Error: std::fmt::Display
     Ok(Value::String(extract_report_key(&operator_uri).into()))
 }
 
-fn extract_parameters(input_string: &str) -> HashMap<String, String> {
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
+
+pub fn url_encode<T: Display>(value: &T) -> String {
+    let encoded = utf8_percent_encode(&format!("{}", value), NON_ALPHANUMERIC).to_string();
+    encoded
+}
+
+use percent_encoding::percent_decode_str;
+
+pub fn url_decode<T: AsRef<str>>(value: T) -> Result<String, Error> {
+    match percent_decode_str(value.as_ref()).decode_utf8() {
+        Ok(decoded) => Ok(decoded.to_string()),
+        Err(err) => Err(CustomError(format!("Decoding error: {:?}", err))),
+    }
+}
+
+
+
+fn extract_parameters(input_string: &str) -> Result<HashMap<String, String>,Error> {
     // Find the index of the word 'params' in the string
     if let Some(params_index) = input_string.find("params") {
         // Strip everything before 'params'
@@ -52,15 +70,15 @@ fn extract_parameters(input_string: &str) -> HashMap<String, String> {
                 let key = parts[0].trim().to_string();
                 let value = parts[1].trim().to_string();
                 // Add them to the dictionary if both key and value exist
-                params_dict.insert(key, value);
+                params_dict.insert(key, url_decode(value)?);
             }
         }
 
-        return params_dict;
+        return Ok(params_dict);
     }
 
     // Return an empty HashMap if 'params' is not found
-    HashMap::new()
+    Ok(HashMap::new())
 }
 
 

@@ -37,6 +37,7 @@ linregress = "0.5"
 thin_trait_object = { git = "https://github.com/gbemiga-viewserver/thin_trait_object", branch = "main" }
 chrono = { version = "0.4.19", default-features = false, features = ["clock", "std"] }
 paste = "1.0.14"
+percent-encoding = "2.3.1"
 
 
 [features]
