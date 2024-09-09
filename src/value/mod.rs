@@ -834,6 +834,21 @@ pub struct FfiResult<T> {
     pub error_message: String,
 }
 
+pub fn to_ffi_result_func<T: Default, E: ToErrorType, F: FnOnce() -> Result<T, E>>(f: F) -> FfiResult<T> {
+    match f() {
+        Ok(value) => FfiResult {
+            value,
+            error_code: 0, // Indicate success
+            error_message: "".to_string(),
+        },
+        Err(e) => FfiResult {
+            value: T::default(),
+            error_code: e.to_error_code(), // Use the provided error code
+            error_message: format!("{}", e.to_error_message().unwrap_or_else(|| "".to_string())),
+        },
+    }
+}
+
 /// Converts a Rust `Result<T, i32>` to an `FfiResult<T>`, where `T: Default`.
 pub fn to_ffi_result<T: Default, E: ToErrorType>(result: Result<T, E>) -> FfiResult<T> {
     match result {
