@@ -161,6 +161,19 @@ impl Value {
             value => Err(EvalexprError::expected_empty(value.clone())),
         }
     }
+
+    /// Returns a string for the `str::from` built-in function.
+    pub fn str_from(&self) -> String {
+        match self {
+            Value::String(v) => v.to_string(),
+            Value::Float(v) => v.to_string(),
+            Value::Int(v) => v.to_string(),
+            Value::Boolean(v) => v.to_string(),
+            Value::Tuple(_) => self.to_string(),
+            Value::Empty => String::from("()"),
+        }
+    }
+
 }
 
 impl From<String> for Value {
@@ -309,5 +322,25 @@ mod tests {
         assert!(Value::from(3.3).is_float());
         assert!(Value::from(true).is_boolean());
         assert!(Value::from(TupleType::new()).is_tuple());
+    }
+
+    #[test]
+    fn test_value_str_from() {
+        assert_eq!(Value::from("string").str_from(), "string");
+        assert_eq!(Value::from(3.3).str_from(), "3.3");
+        assert_eq!(Value::from(3).str_from(), "3");
+        assert_eq!(Value::from(true).str_from(), "true");
+        assert_eq!(Value::from(()).str_from(), "()");
+        assert_eq!(Value::from(TupleType::from([
+            Value::from("string"),
+            Value::from(3.3),
+            Value::from(3),
+            Value::from(TupleType::from([
+                    Value::from(42),
+                    Value::from(3.14),
+            ])),
+            Value::from(()),
+            Value::from(true),
+        ])).str_from(), r#"("string", 3.3, 3, (42, 3.14), (), true)"#);
     }
 }

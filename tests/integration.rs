@@ -502,10 +502,13 @@ fn test_builtin_functions() {
     );
     assert_eq!(
         eval("str::from(\"a\")"),
-        Ok(Value::String(String::from("\"a\"")))
+        Ok(Value::String(String::from("a")))
     );
     assert_eq!(eval("str::from(1.0)"), Ok(Value::String(String::from("1"))));
+    assert_eq!(eval("str::from(3.14)"), Ok(Value::String(String::from("3.14"))));
     assert_eq!(eval("str::from(1)"), Ok(Value::String(String::from("1"))));
+    assert_eq!(eval("str::from(true)"), Ok(Value::String(String::from("true"))));
+    assert_eq!(eval(r#"str::from((1, "foo", , false))"#), Ok(Value::String(String::from(r#"(1, "foo", (), false)"#))));
     assert_eq!(
         eval("str::from(true)"),
         Ok(Value::String(String::from("true")))
