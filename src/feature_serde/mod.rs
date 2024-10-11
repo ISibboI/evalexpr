@@ -13,7 +13,7 @@ impl<'de> Deserialize<'de> for Node {
 
 struct NodeVisitor;
 
-impl<'de> de::Visitor<'de> for NodeVisitor {
+impl de::Visitor<'_> for NodeVisitor {
     type Value = Node;
 
     fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {

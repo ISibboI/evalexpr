@@ -583,33 +583,13 @@ fn test_errors() {
 
 #[test]
 fn test_no_panic() {
-    assert!(eval(&format!(
-        "{} + {}",
-        IntType::max_value(),
-        IntType::max_value()
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "-{} - {}",
-        IntType::max_value(),
-        IntType::max_value()
-    ))
-    .is_err());
-    assert!(eval(&format!("-(-{} - 1)", IntType::max_value())).is_err());
-    assert!(eval(&format!(
-        "{} * {}",
-        IntType::max_value(),
-        IntType::max_value()
-    ))
-    .is_err());
-    assert!(eval(&format!("{} / {}", IntType::max_value(), 0)).is_err());
-    assert!(eval(&format!("{} % {}", IntType::max_value(), 0)).is_err());
-    assert!(eval(&format!(
-        "{} ^ {}",
-        IntType::max_value(),
-        IntType::max_value()
-    ))
-    .is_ok());
+    assert!(eval(&format!("{} + {}", IntType::MAX, IntType::MAX)).is_err());
+    assert!(eval(&format!("-{} - {}", IntType::MAX, IntType::MAX)).is_err());
+    assert!(eval(&format!("-(-{} - 1)", IntType::MAX)).is_err());
+    assert!(eval(&format!("{} * {}", IntType::MAX, IntType::MAX)).is_err());
+    assert!(eval(&format!("{} / {}", IntType::MAX, 0)).is_err());
+    assert!(eval(&format!("{} % {}", IntType::MAX, 0)).is_err());
+    assert!(eval(&format!("{} ^ {}", IntType::MAX, IntType::MAX)).is_ok());
     assert!(eval("if").is_err());
     assert!(eval("if()").is_err());
     assert!(eval("if(true, 1)").is_err());

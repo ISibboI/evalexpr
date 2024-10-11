@@ -16,8 +16,8 @@ const EXPONENTIAL_TUPLE_ITERATIONS: usize = 12;
 
 fn generate_expression<Gen: Rng>(len: usize, gen: &mut Gen) -> String {
     let int_distribution = Uniform::new_inclusive(1, 100);
-    let whitespaces = vec![" ", "", "", "  ", " \n", "       "];
-    let operators = vec!["+", "-", "*", "/", "%", "^"];
+    let whitespaces = [" ", "", "", "  ", " \n", "       "];
+    let operators = ["+", "-", "*", "/", "%", "^"];
     let mut result = String::new();
     write!(result, "{}", gen.sample(int_distribution)).unwrap();
 

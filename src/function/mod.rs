@@ -78,6 +78,8 @@ impl fmt::Debug for Function {
 
 /// A trait to ensure a type is `Send` and `Sync`.
 /// If implemented for a type, the crate will not compile if the type is not `Send` and `Sync`.
+#[allow(dead_code)]
+#[doc(hidden)]
 trait IsSendAndSync: Send + Sync {}
 
 impl IsSendAndSync for Function {}
