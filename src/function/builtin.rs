@@ -268,7 +268,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
             Ok(Value::from(subject.trim()))
         })),
         "str::from" => Some(Function::new(|argument| {
-            Ok(Value::String(argument.to_string()))
+            Ok(Value::String(argument.str_from()))
         })),
         "str::substring" => Some(Function::new(|argument| {
             let args = argument.as_ranged_len_tuple(2..=3)?;
