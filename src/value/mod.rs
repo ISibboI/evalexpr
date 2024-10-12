@@ -173,7 +173,6 @@ impl Value {
             Value::Empty => String::from("()"),
         }
     }
-
 }
 
 impl From<String> for Value {
@@ -331,16 +330,17 @@ mod tests {
         assert_eq!(Value::from(3).str_from(), "3");
         assert_eq!(Value::from(true).str_from(), "true");
         assert_eq!(Value::from(()).str_from(), "()");
-        assert_eq!(Value::from(TupleType::from([
-            Value::from("string"),
-            Value::from(3.3),
-            Value::from(3),
+        assert_eq!(
             Value::from(TupleType::from([
-                    Value::from(42),
-                    Value::from(3.14),
-            ])),
-            Value::from(()),
-            Value::from(true),
-        ])).str_from(), r#"("string", 3.3, 3, (42, 3.14), (), true)"#);
+                Value::from("string"),
+                Value::from(3.3),
+                Value::from(3),
+                Value::from(TupleType::from([Value::from(42), Value::from(3.14),])),
+                Value::from(()),
+                Value::from(true),
+            ]))
+            .str_from(),
+            r#"("string", 3.3, 3, (42, 3.14), (), true)"#
+        );
     }
 }
