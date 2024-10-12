@@ -506,8 +506,8 @@ fn test_builtin_functions() {
     );
     assert_eq!(eval("str::from(1.0)"), Ok(Value::String(String::from("1"))));
     assert_eq!(
-        eval("str::from(3.14)"),
-        Ok(Value::String(String::from("3.14")))
+        eval("str::from(4.2)"),
+        Ok(Value::String(String::from("4.2")))
     );
     assert_eq!(eval("str::from(1)"), Ok(Value::String(String::from("1"))));
     assert_eq!(

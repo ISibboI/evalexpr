@@ -335,12 +335,12 @@ mod tests {
                 Value::from("string"),
                 Value::from(3.3),
                 Value::from(3),
-                Value::from(TupleType::from([Value::from(42), Value::from(3.14),])),
+                Value::from(TupleType::from([Value::from(42), Value::from(4.2),])),
                 Value::from(()),
                 Value::from(true),
             ]))
             .str_from(),
-            r#"("string", 3.3, 3, (42, 3.14), (), true)"#
+            r#"("string", 3.3, 3, (42, 4.2), (), true)"#
         );
     }
 }
