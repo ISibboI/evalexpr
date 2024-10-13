@@ -58,6 +58,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with: 
+          toolchain: stable
           components: rustfmt
 
       - name: cargo format
@@ -138,6 +139,8 @@ jobs:
 
       - name: Install toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
 
       - name: cargo doc
         run: cargo doc --all-features
