@@ -1,5 +1,17 @@
 # Change Log
 
+## [11.3.1](https://github.com/ISibboI/evalexpr/compare/11.3.0...11.3.1) - 2024-10-13
+
+### Fixed
+
+ * `str::from` does not add double quotes around strings anymore, except if those are inside a tuple (#169)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [VianneyRousset](https://github.com/VianneyRousset)
+
 ## [11.3.0](https://github.com/ISibboI/evalexpr/compare/11.2.0...11.3.0) - 2023-12-09
 
 ### Added
