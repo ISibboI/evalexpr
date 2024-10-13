@@ -2308,6 +2308,9 @@ fn test_hex() {
     assert_eq!(eval("0x3"), Ok(Value::Int(3)));
     assert_eq!(eval("0xFF"), Ok(Value::Int(255)));
     assert_eq!(eval("-0xFF"), Ok(Value::Int(-255)));
+    assert_eq!(eval("0XFF"), Ok(Value::Int(255)));
+    assert_eq!(eval("$fe"), Ok(Value::Int(254)));
+    assert!(eval("$xy").is_err());
     assert_eq!(
         eval("0x"),
         // The "VariableIdentifierNotFound" error is what evalexpr currently returns,

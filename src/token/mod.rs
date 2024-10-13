@@ -480,7 +480,11 @@ pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
 }
 
 fn parse_dec_or_hex(literal: &str) -> Result<IntType, std::num::ParseIntError> {
-    if let Some(literal) = literal.strip_prefix("0x") {
+    if let Some(literal) = literal.strip_prefix("0x").or_else(|| {
+        literal
+            .strip_prefix("0X")
+            .or_else(|| literal.strip_prefix('$'))
+    }) {
         IntType::from_str_radix(literal, 16)
     } else {
         IntType::from_str_radix(literal, 10)
