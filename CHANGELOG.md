@@ -1,5 +1,11 @@
 # Change Log
 
+## [11.3.1](https://github.com/ISibboI/evalexpr/compare/11.3.1...12.0.0) - ???
+
+### Changed
+
+ * `evalexpr` is now licensed under the GNU Affero General Public License Version 3
+
 ## [11.3.1](https://github.com/ISibboI/evalexpr/compare/11.3.0...11.3.1) - 2024-10-13
 
 ### Fixed

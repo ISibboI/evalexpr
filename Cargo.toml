@@ -9,7 +9,7 @@ repository = "https://github.com/ISibboI/evalexpr.git"
 homepage = "https://github.com/ISibboI/evalexpr"
 documentation = "https://docs.rs/evalexpr"
 readme = "README.md"
-license = "MIT"
+license = "AGPL-3.0-only"
 edition = "2018"
 rust-version = "1.65.0"
 
