@@ -7,6 +7,7 @@
 
 use std::ops::RangeInclusive;
 
+use crate::value::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes};
 use crate::{token::PartialToken, value::value_type::ValueType};
 
 use crate::{operator::Operator, value::Value};
@@ -18,7 +19,7 @@ mod display;
 /// Errors used in this crate.
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
-pub enum EvalexprError {
+pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// An operator was called with a wrong amount of arguments.
     WrongOperatorArgumentAmount {
         /// The expected amount of arguments.
@@ -38,45 +39,45 @@ pub enum EvalexprError {
     /// A string value was expected.
     ExpectedString {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// An integer value was expected.
     ExpectedInt {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A float value was expected.
     ExpectedFloat {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A numeric value was expected.
     /// Numeric values are the variants `Value::Int` and `Value::Float`.
     ExpectedNumber {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A numeric or string value was expected.
     /// Numeric values are the variants `Value::Int` and `Value::Float`.
     ExpectedNumberOrString {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A boolean value was expected.
     ExpectedBoolean {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A tuple value was expected.
     ExpectedTuple {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A tuple value of a certain length was expected.
@@ -84,7 +85,7 @@ pub enum EvalexprError {
         /// The expected length.
         expected_length: usize,
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// A tuple value of a certain length range was expected.
@@ -92,13 +93,13 @@ pub enum EvalexprError {
         /// The expected length range.
         expected_length: RangeInclusive<usize>,
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// An empty value was expected.
     ExpectedEmpty {
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// Tried to append a child to a leaf node.
@@ -122,7 +123,7 @@ pub enum EvalexprError {
         /// The expected types.
         expected: Vec<ValueType>,
         /// The actual value.
-        actual: Value,
+        actual: Value<NumericTypes>,
     },
 
     /// An operator is used with a wrong combination of types.
@@ -159,47 +160,47 @@ pub enum EvalexprError {
     /// An addition operation performed by Rust failed.
     AdditionError {
         /// The first argument of the addition.
-        augend: Value,
+        augend: Value<NumericTypes>,
         /// The second argument of the addition.
-        addend: Value,
+        addend: Value<NumericTypes>,
     },
 
     /// A subtraction operation performed by Rust failed.
     SubtractionError {
         /// The first argument of the subtraction.
-        minuend: Value,
+        minuend: Value<NumericTypes>,
         /// The second argument of the subtraction.
-        subtrahend: Value,
+        subtrahend: Value<NumericTypes>,
     },
 
     /// A negation operation performed by Rust failed.
     NegationError {
         /// The argument of the negation.
-        argument: Value,
+        argument: Value<NumericTypes>,
     },
 
     /// A multiplication operation performed by Rust failed.
     MultiplicationError {
         /// The first argument of the multiplication.
-        multiplicand: Value,
+        multiplicand: Value<NumericTypes>,
         /// The second argument of the multiplication.
-        multiplier: Value,
+        multiplier: Value<NumericTypes>,
     },
 
     /// A division operation performed by Rust failed.
     DivisionError {
         /// The first argument of the division.
-        dividend: Value,
+        dividend: Value<NumericTypes>,
         /// The second argument of the division.
-        divisor: Value,
+        divisor: Value<NumericTypes>,
     },
 
     /// A modulation operation performed by Rust failed.
     ModulationError {
         /// The first argument of the modulation.
-        dividend: Value,
+        dividend: Value<NumericTypes>,
         /// The second argument of the modulation.
-        divisor: Value,
+        divisor: Value<NumericTypes>,
     },
 
     /// A regular expression could not be parsed
@@ -229,7 +230,7 @@ pub enum EvalexprError {
     CustomMessage(String),
 }
 
-impl EvalexprError {
+impl<NumericTypes> EvalexprError<NumericTypes> {
     /// Construct a `WrongOperatorArgumentAmount` error.
     pub fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
         EvalexprError::WrongOperatorArgumentAmount { actual, expected }
@@ -252,7 +253,7 @@ impl EvalexprError {
     }
 
     /// Constructs `EvalexprError::TypeError{actual, expected}`.
-    pub fn type_error(actual: Value, expected: Vec<ValueType>) -> Self {
+    pub fn type_error(actual: Value<NumericTypes>, expected: Vec<ValueType>) -> Self {
         EvalexprError::TypeError { actual, expected }
     }
 
@@ -262,42 +263,42 @@ impl EvalexprError {
     }
 
     /// Constructs `EvalexprError::ExpectedString{actual}`.
-    pub fn expected_string(actual: Value) -> Self {
+    pub fn expected_string(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedString { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedInt{actual}`.
-    pub fn expected_int(actual: Value) -> Self {
+    pub fn expected_int(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedInt { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedFloat{actual}`.
-    pub fn expected_float(actual: Value) -> Self {
+    pub fn expected_float(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedFloat { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedNumber{actual}`.
-    pub fn expected_number(actual: Value) -> Self {
+    pub fn expected_number(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedNumber { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedNumberOrString{actual}`.
-    pub fn expected_number_or_string(actual: Value) -> Self {
+    pub fn expected_number_or_string(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedNumberOrString { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedBoolean{actual}`.
-    pub fn expected_boolean(actual: Value) -> Self {
+    pub fn expected_boolean(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedBoolean { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedTuple{actual}`.
-    pub fn expected_tuple(actual: Value) -> Self {
+    pub fn expected_tuple(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedTuple { actual }
     }
 
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
-    pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
+    pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedFixedLengthTuple {
             expected_length: expected_len,
             actual,
@@ -305,7 +306,10 @@ impl EvalexprError {
     }
 
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
-    pub fn expected_ranged_len_tuple(expected_len: RangeInclusive<usize>, actual: Value) -> Self {
+    pub fn expected_ranged_len_tuple(
+        expected_len: RangeInclusive<usize>,
+        actual: Value<NumericTypes>,
+    ) -> Self {
         EvalexprError::ExpectedRangedLengthTuple {
             expected_length: expected_len,
             actual,
@@ -313,12 +317,15 @@ impl EvalexprError {
     }
 
     /// Constructs `EvalexprError::ExpectedEmpty{actual}`.
-    pub fn expected_empty(actual: Value) -> Self {
+    pub fn expected_empty(actual: Value<NumericTypes>) -> Self {
         EvalexprError::ExpectedEmpty { actual }
     }
 
     /// Constructs an error that expresses that the type of `expected` was expected, but `actual` was found.
-    pub(crate) fn expected_type(expected: &Value, actual: Value) -> Self {
+    pub(crate) fn expected_type(
+        expected: &Value<NumericTypes>,
+        actual: Value<NumericTypes>,
+    ) -> Self {
         match ValueType::from(expected) {
             ValueType::String => Self::expected_string(actual),
             ValueType::Int => Self::expected_int(actual),
@@ -336,33 +343,45 @@ impl EvalexprError {
         EvalexprError::UnmatchedPartialToken { first, second }
     }
 
-    pub(crate) fn addition_error(augend: Value, addend: Value) -> Self {
+    pub(crate) fn addition_error(augend: Value<NumericTypes>, addend: Value<NumericTypes>) -> Self {
         EvalexprError::AdditionError { augend, addend }
     }
 
-    pub(crate) fn subtraction_error(minuend: Value, subtrahend: Value) -> Self {
+    pub(crate) fn subtraction_error(
+        minuend: Value<NumericTypes>,
+        subtrahend: Value<NumericTypes>,
+    ) -> Self {
         EvalexprError::SubtractionError {
             minuend,
             subtrahend,
         }
     }
 
-    pub(crate) fn negation_error(argument: Value) -> Self {
+    pub(crate) fn negation_error(argument: Value<NumericTypes>) -> Self {
         EvalexprError::NegationError { argument }
     }
 
-    pub(crate) fn multiplication_error(multiplicand: Value, multiplier: Value) -> Self {
+    pub(crate) fn multiplication_error(
+        multiplicand: Value<NumericTypes>,
+        multiplier: Value<NumericTypes>,
+    ) -> Self {
         EvalexprError::MultiplicationError {
             multiplicand,
             multiplier,
         }
     }
 
-    pub(crate) fn division_error(dividend: Value, divisor: Value) -> Self {
+    pub(crate) fn division_error(
+        dividend: Value<NumericTypes>,
+        divisor: Value<NumericTypes>,
+    ) -> Self {
         EvalexprError::DivisionError { dividend, divisor }
     }
 
-    pub(crate) fn modulation_error(dividend: Value, divisor: Value) -> Self {
+    pub(crate) fn modulation_error(
+        dividend: Value<NumericTypes>,
+        divisor: Value<NumericTypes>,
+    ) -> Self {
         EvalexprError::ModulationError { dividend, divisor }
     }
 
@@ -373,10 +392,10 @@ impl EvalexprError {
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongOperatorArgumentAmount)` otherwise.
-pub(crate) fn expect_operator_argument_amount(
+pub(crate) fn expect_operator_argument_amount<NumericTypes>(
     actual: usize,
     expected: usize,
-) -> EvalexprResult<()> {
+) -> EvalexprResult<(), NumericTypes> {
     if actual == expected {
         Ok(())
     } else {
@@ -387,7 +406,10 @@ pub(crate) fn expect_operator_argument_amount(
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_amount(actual: usize, expected: usize) -> EvalexprResult<()> {
+pub fn expect_function_argument_amount<NumericTypes>(
+    actual: usize,
+    expected: usize,
+) -> EvalexprResult<(), NumericTypes> {
     if actual == expected {
         Ok(())
     } else {
@@ -398,7 +420,9 @@ pub fn expect_function_argument_amount(actual: usize, expected: usize) -> Evalex
 }
 
 /// Returns `Ok(())` if the given value is a string or a numeric
-pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
+pub fn expect_number_or_string<NumericTypes: EvalexprNumericTypes>(
+    actual: &Value<NumericTypes>,
+) -> EvalexprResult<(), NumericTypes> {
     match actual {
         Value::String(_) | Value::Float(_) | Value::Int(_) => Ok(()),
         _ => Err(EvalexprError::expected_number_or_string(actual.clone())),
@@ -408,7 +432,12 @@ pub fn expect_number_or_string(actual: &Value) -> EvalexprResult<()> {
 impl std::error::Error for EvalexprError {}
 
 /// Standard result type used by this crate.
-pub type EvalexprResult<T> = Result<T, EvalexprError>;
+pub type EvalexprResult<T, NumericTypes = DefaultNumericTypes> =
+    Result<T, EvalexprError<NumericTypes>>;
+
+/// Standard result type for [`Value`]s used by this crate.
+pub type EvalexprResultValue<NumericTypes = DefaultNumericTypes> =
+    EvalexprResult<Value<NumericTypes>, NumericTypes>;
 
 #[cfg(test)]
 mod tests {
@@ -418,26 +447,32 @@ mod tests {
     #[test]
     fn trivial_coverage_tests() {
         assert_eq!(
-            EvalexprError::type_error(Value::Int(3), vec![ValueType::String]),
+            EvalexprError::type_error(Value::<i64, f64>::Int(3), vec![ValueType::String]),
             EvalexprError::TypeError {
                 actual: Value::Int(3),
                 expected: vec![ValueType::String]
             }
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::String("abc".to_string()), Value::Empty),
+            EvalexprError::expected_type(
+                &Value::<i64, f64>::String("abc".to_string()),
+                Value::Empty
+            ),
             EvalexprError::expected_string(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::Boolean(false), Value::Empty),
+            EvalexprError::expected_type(&Value::<i64, f64>::Boolean(false), Value::Empty),
             EvalexprError::expected_boolean(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::Tuple(vec![]), Value::Empty),
+            EvalexprError::expected_type(&Value::<i64, f64>::Tuple(vec![]), Value::Empty),
             EvalexprError::expected_tuple(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::Empty, Value::String("abc".to_string())),
+            EvalexprError::expected_type(
+                &Value::<i64, f64>::Empty,
+                Value::String("abc".to_string())
+            ),
             EvalexprError::expected_empty(Value::String("abc".to_string()))
         );
     }

@@ -1,12 +1,13 @@
 use crate::function::builtin::builtin_function;
 
+use crate::value::{DefaultFloatType, DefaultIntType};
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
 mod display;
 
 /// An enum that represents operators in the operator tree.
 #[derive(Debug, PartialEq, Clone)]
-pub enum Operator {
+pub enum Operator<IntType = DefaultIntType, FloatType = DefaultFloatType> {
     /// A root node in the operator tree.
     /// The whole expression is stored under a root node, as well as each subexpression surrounded by parentheses.
     RootNode,
@@ -72,7 +73,7 @@ pub enum Operator {
     /// A constant value.
     Const {
         /** The value of the constant. */
-        value: Value,
+        value: Value<IntType, FloatType>,
     },
     /// A write to a variable identifier.
     VariableIdentifierWrite {
@@ -91,8 +92,8 @@ pub enum Operator {
     },
 }
 
-impl Operator {
-    pub(crate) fn value(value: Value) -> Self {
+impl<IntType, FloatType> Operator<IntType, FloatType> {
+    pub(crate) fn value(value: Value<IntType, FloatType>) -> Self {
         Operator::Const { value }
     }
 
@@ -182,7 +183,7 @@ impl Operator {
         &self,
         arguments: &[Value],
         context: &C,
-    ) -> EvalexprResult<Value> {
+    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
         use crate::operator::Operator::*;
         match self {
             RootNode => {
@@ -481,7 +482,7 @@ impl Operator {
         &self,
         arguments: &[Value],
         context: &mut C,
-    ) -> EvalexprResult<Value> {
+    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
         use crate::operator::Operator::*;
         match self {
             Assign => {

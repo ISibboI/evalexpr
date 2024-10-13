@@ -17,8 +17,8 @@ pub enum ValueType {
     Empty,
 }
 
-impl From<&Value> for ValueType {
-    fn from(value: &Value) -> Self {
+impl<IntType, FloatType> From<&Value<IntType, FloatType>> for ValueType {
+    fn from(value: &Value<IntType, FloatType>) -> Self {
         match value {
             Value::String(_) => ValueType::String,
             Value::Float(_) => ValueType::Float,
@@ -30,14 +30,14 @@ impl From<&Value> for ValueType {
     }
 }
 
-impl From<&mut Value> for ValueType {
-    fn from(value: &mut Value) -> Self {
-        From::<&Value>::from(value)
+impl<IntType, FloatType> From<&mut Value<IntType, FloatType>> for ValueType {
+    fn from(value: &mut Value<IntType, FloatType>) -> Self {
+        From::<&Value<IntType, FloatType>>::from(value)
     }
 }
 
-impl From<&&mut Value> for ValueType {
-    fn from(value: &&mut Value) -> Self {
-        From::<&Value>::from(*value)
+impl<IntType, FloatType> From<&&mut Value<IntType, FloatType>> for ValueType {
+    fn from(value: &&mut Value<IntType, FloatType>) -> Self {
+        From::<&Value<IntType, FloatType>>::from(*value)
     }
 }

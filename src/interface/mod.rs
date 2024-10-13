@@ -1,6 +1,9 @@
 use crate::{
-    token, tree, value::TupleType, Context, ContextWithMutableVariables, EmptyType, EvalexprError,
-    EvalexprResult, FloatType, HashMapContext, IntType, Node, Value, EMPTY_VALUE,
+    error::EvalexprResultValue,
+    token, tree,
+    value::{DefaultFloatType, DefaultIntType, TupleType},
+    Context, ContextWithMutableVariables, EmptyType, EvalexprError, EvalexprResult, HashMapContext,
+    Node, Value, EMPTY_VALUE,
 };
 
 /// Evaluate the given expression string.
@@ -14,7 +17,7 @@ use crate::{
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval(string: &str) -> EvalexprResult<Value> {
+pub fn eval(string: &str) -> EvalexprResultValue {
     eval_with_context_mut(string, &mut HashMapContext::new())
 }
 
@@ -97,14 +100,14 @@ pub fn eval_string(string: &str) -> EvalexprResult<String> {
 /// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int(string: &str) -> EvalexprResult<IntType> {
+pub fn eval_int(string: &str) -> EvalexprResult<DefaultIntType> {
     eval_int_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float(string: &str) -> EvalexprResult<FloatType> {
+pub fn eval_float(string: &str) -> EvalexprResult<DefaultFloatType> {
     eval_float_with_context_mut(string, &mut HashMapContext::new())
 }
 
@@ -112,7 +115,7 @@ pub fn eval_float(string: &str) -> EvalexprResult<FloatType> {
 /// If the result of the expression is an integer, it is silently converted into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_number(string: &str) -> EvalexprResult<FloatType> {
+pub fn eval_number(string: &str) -> EvalexprResult<DefaultFloatType> {
     eval_number_with_context_mut(string, &mut HashMapContext::new())
 }
 
@@ -151,7 +154,7 @@ pub fn eval_string_with_context<C: Context>(string: &str, context: &C) -> Evalex
 /// Evaluate the given expression string into an integer with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<IntType> {
+pub fn eval_int_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<C::IntType> {
     match eval_with_context(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -162,7 +165,10 @@ pub fn eval_int_with_context<C: Context>(string: &str, context: &C) -> EvalexprR
 /// Evaluate the given expression string into a float with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<FloatType> {
+pub fn eval_float_with_context<C: Context>(
+    string: &str,
+    context: &C,
+) -> EvalexprResult<C::FloatType> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(value) => Err(EvalexprError::expected_float(value)),

@@ -1,25 +1,25 @@
 use std::fmt;
 
-use crate::{error::EvalexprResult, value::Value};
+use crate::{error::EvalexprResultValue, value::Value};
 
 pub(crate) mod builtin;
 
 /// A helper trait to enable cloning through `Fn` trait objects.
-trait ClonableFn
+trait ClonableFn<NumericTypes>
 where
-    Self: Fn(&Value) -> EvalexprResult<Value>,
+    Self: Fn(&Value<NumericTypes>) -> EvalexprResultValue<NumericTypes>,
     Self: Send + Sync + 'static,
 {
-    fn dyn_clone(&self) -> Box<dyn ClonableFn>;
+    fn dyn_clone(&self) -> Box<dyn ClonableFn<NumericTypes>>;
 }
 
-impl<F> ClonableFn for F
+impl<F, NumericTypes> ClonableFn<NumericTypes> for F
 where
-    F: Fn(&Value) -> EvalexprResult<Value>,
+    F: Fn(&Value<NumericTypes>) -> EvalexprResultValue<NumericTypes>,
     F: Send + Sync + 'static,
     F: Clone,
 {
-    fn dyn_clone(&self) -> Box<dyn ClonableFn> {
+    fn dyn_clone(&self) -> Box<dyn ClonableFn<NumericTypes>> {
         Box::new(self.clone()) as _
     }
 }
@@ -38,11 +38,11 @@ where
 /// })).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
 /// ```
-pub struct Function {
-    function: Box<dyn ClonableFn>,
+pub struct Function<NumericTypes> {
+    function: Box<dyn ClonableFn<NumericTypes>>,
 }
 
-impl Clone for Function {
+impl<NumericTypes> Clone for Function<NumericTypes> {
     fn clone(&self) -> Self {
         Self {
             function: self.function.dyn_clone(),
@@ -50,13 +50,13 @@ impl Clone for Function {
     }
 }
 
-impl Function {
+impl<NumericTypes> Function<NumericTypes> {
     /// Creates a user-defined function.
     ///
     /// The `function` is boxed for storage.
     pub fn new<F>(function: F) -> Self
     where
-        F: Fn(&Value) -> EvalexprResult<Value>,
+        F: Fn(&Value<NumericTypes>) -> EvalexprResultValue<NumericTypes>,
         F: Send + Sync + 'static,
         F: Clone,
     {
@@ -65,12 +65,12 @@ impl Function {
         }
     }
 
-    pub(crate) fn call(&self, argument: &Value) -> EvalexprResult<Value> {
+    pub(crate) fn call(&self, argument: &Value<NumericTypes>) -> EvalexprResultValue<NumericTypes> {
         (self.function)(argument)
     }
 }
 
-impl fmt::Debug for Function {
+impl<NumericTypes> fmt::Debug for Function<NumericTypes> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "Function {{ [...] }}")
     }
@@ -82,4 +82,4 @@ impl fmt::Debug for Function {
 #[doc(hidden)]
 trait IsSendAndSync: Send + Sync {}
 
-impl IsSendAndSync for Function {}
+impl<NumericTypes> IsSendAndSync for Function<NumericTypes> {}

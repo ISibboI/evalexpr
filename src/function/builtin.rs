@@ -2,8 +2,7 @@
 use regex::Regex;
 
 use crate::{
-    value::{FloatType, IntType},
-    EvalexprError, Function, Value, ValueType,
+    value::numeric_types::EvalexprNumericTypes, EvalexprError, Function, Value, ValueType,
 };
 use std::{
     convert::TryFrom,
@@ -26,7 +25,9 @@ macro_rules! simple_math {
     };
 }
 
-fn float_is(func: fn(FloatType) -> bool) -> Option<Function> {
+fn float_is<NumericTypes: EvalexprNumericTypes>(
+    func: fn(NumericTypes::Float) -> bool,
+) -> Option<Function<NumericTypes>> {
     Some(Function::new(move |argument| {
         Ok(func(argument.as_number()?).into())
     }))
@@ -48,7 +49,9 @@ macro_rules! int_function {
     };
 }
 
-pub fn builtin_function(identifier: &str) -> Option<Function> {
+pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
+    identifier: &str,
+) -> Option<Function<NumericTypes>> {
     match identifier {
         // Log
         "math::ln" => simple_math!(ln),

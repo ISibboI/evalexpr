@@ -1,12 +1,12 @@
 use crate::{
     error::{EvalexprError, EvalexprResult},
-    value::{FloatType, IntType},
+    value::{DefaultFloatType, DefaultIntType},
 };
 
 mod display;
 
 #[derive(Clone, PartialEq, Debug)]
-pub enum Token {
+pub enum Token<IntType = DefaultIntType, FloatType = DefaultFloatType> {
     // Arithmetic
     Plus,
     Minus,
@@ -55,9 +55,9 @@ pub enum Token {
 
 /// A partial token is an input character whose meaning depends on the characters around it.
 #[derive(Clone, Debug, PartialEq)]
-pub enum PartialToken {
+pub enum PartialToken<IntType = DefaultIntType, FloatType = DefaultFloatType> {
     /// A partial token that unambiguously maps to a single token.
-    Token(Token),
+    Token(Token<IntType, FloatType>),
     /// A partial token that is a literal.
     Literal(String),
     /// A plus character '+'.
@@ -89,7 +89,7 @@ pub enum PartialToken {
 }
 
 // Make this a const fn as soon as is_whitespace and to_string get stable (issue #57563)
-fn char_to_partial_token(c: char) -> PartialToken {
+fn char_to_partial_token<IntType, FloatType>(c: char) -> PartialToken<IntType, FloatType> {
     match c {
         '+' => PartialToken::Plus,
         '-' => PartialToken::Minus,
@@ -121,7 +121,7 @@ fn char_to_partial_token(c: char) -> PartialToken {
     }
 }
 
-impl Token {
+impl<IntType, FloatType> Token<IntType, FloatType> {
     #[cfg(not(tarpaulin_include))]
     pub(crate) const fn is_leftsided_value(&self) -> bool {
         match self {
@@ -229,7 +229,9 @@ impl Token {
 }
 
 /// Parses an escape sequence within a string literal.
-fn parse_escape_sequence<Iter: Iterator<Item = char>>(iter: &mut Iter) -> EvalexprResult<char> {
+fn parse_escape_sequence<Iter: Iterator<Item = char>, IntType, FloatType>(
+    iter: &mut Iter,
+) -> EvalexprResult<char, IntType, FloatType> {
     match iter.next() {
         Some('"') => Ok('"'),
         Some('\\') => Ok('\\'),
@@ -244,9 +246,9 @@ fn parse_escape_sequence<Iter: Iterator<Item = char>>(iter: &mut Iter) -> Evalex
 /// The string is terminated by a double quote `"`.
 /// Occurrences of `"` within the string can be escaped with `\`.
 /// The backslash needs to be escaped with another backslash `\`.
-fn parse_string_literal<Iter: Iterator<Item = char>>(
+fn parse_string_literal<Iter: Iterator<Item = char>, IntType, FloatType>(
     mut iter: &mut Iter,
-) -> EvalexprResult<PartialToken> {
+) -> EvalexprResult<PartialToken<IntType, FloatType>, IntType, FloatType> {
     let mut result = String::new();
 
     while let Some(c) = iter.next() {
@@ -260,7 +262,9 @@ fn parse_string_literal<Iter: Iterator<Item = char>>(
     Err(EvalexprError::UnmatchedDoubleQuote)
 }
 
-fn try_skip_comment(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> EvalexprResult<bool> {
+fn try_skip_comment<IntType, FloatType>(
+    iter: &mut std::iter::Peekable<std::str::Chars<'_>>,
+) -> EvalexprResult<bool, IntType, FloatType> {
     let mut matched = false;
     if let Some(lookahead) = iter.peek() {
         if *lookahead == '/' {
@@ -296,7 +300,9 @@ fn try_skip_comment(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Eval
 }
 
 /// Converts a string to a vector of partial tokens.
-fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
+fn str_to_partial_tokens<IntType, FloatType>(
+    string: &str,
+) -> EvalexprResult<Vec<PartialToken>, IntType, FloatType> {
     let mut result = Vec::new();
     let mut iter = string.chars().peekable();
 
@@ -331,7 +337,9 @@ fn str_to_partial_tokens(string: &str) -> EvalexprResult<Vec<PartialToken>> {
 }
 
 /// Resolves all partial tokens by converting them to complex tokens.
-fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<Token>> {
+fn partial_tokens_to_tokens<IntType, FloatType>(
+    mut tokens: &[PartialToken<IntType, FloatType>],
+) -> EvalexprResult<Vec<Token<IntType, FloatType>>, IntType, FloatType> {
     let mut result = Vec::new();
     while !tokens.is_empty() {
         let first = tokens[0].clone();
@@ -475,11 +483,13 @@ fn partial_tokens_to_tokens(mut tokens: &[PartialToken]) -> EvalexprResult<Vec<T
     Ok(result)
 }
 
-pub(crate) fn tokenize(string: &str) -> EvalexprResult<Vec<Token>> {
+pub(crate) fn tokenize<IntType, FloatType>(
+    string: &str,
+) -> EvalexprResult<Vec<Token<IntType, FloatType>>, IntType, FloatType> {
     partial_tokens_to_tokens(&str_to_partial_tokens(string)?)
 }
 
-fn parse_dec_or_hex(literal: &str) -> Result<IntType, std::num::ParseIntError> {
+fn parse_dec_or_hex<IntType>(literal: &str) -> Result<IntType, std::num::ParseIntError> {
     if let Some(literal) = literal.strip_prefix("0x") {
         IntType::from_str_radix(literal, 16)
     } else {

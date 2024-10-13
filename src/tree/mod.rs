@@ -1,7 +1,8 @@
 use crate::{
+    error::EvalexprResultValue,
     token::Token,
-    value::{TupleType, EMPTY_VALUE},
-    Context, ContextWithMutableVariables, EmptyType, FloatType, HashMapContext, IntType,
+    value::{DefaultFloatType, DefaultIntType, TupleType, EMPTY_VALUE},
+    Context, ContextWithMutableVariables, EmptyType, HashMapContext,
 };
 
 use crate::{
@@ -34,13 +35,13 @@ mod iter;
 /// ```
 ///
 #[derive(Debug, PartialEq, Clone)]
-pub struct Node {
-    operator: Operator,
-    children: Vec<Node>,
+pub struct Node<IntType = DefaultIntType, FloatType = DefaultFloatType> {
+    operator: Operator<IntType, FloatType>,
+    children: Vec<Node<IntType, FloatType>>,
 }
 
-impl Node {
-    fn new(operator: Operator) -> Self {
+impl<IntType, FloatType> Node<IntType, FloatType> {
+    fn new(operator: Operator<IntType, FloatType>) -> Self {
         Self {
             children: Vec::new(),
             operator,
@@ -320,7 +321,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node with the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_with_context<C: Context>(&self, context: &C) -> EvalexprResult<Value> {
+    pub fn eval_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_context(context)?);
@@ -334,7 +338,7 @@ impl Node {
     pub fn eval_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<Value> {
+    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
         let mut arguments = Vec::new();
         for child in self.children() {
             arguments.push(child.eval_with_context_mut(context)?);
@@ -345,14 +349,17 @@ impl Node {
     /// Evaluates the operator tree rooted at this node.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval(&self) -> EvalexprResult<Value> {
+    pub fn eval(&self) -> EvalexprResultValue<IntType, FloatType> {
         self.eval_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a string with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string_with_context<C: Context>(&self, context: &C) -> EvalexprResult<String> {
+    pub fn eval_string_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<String, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::String(string)) => Ok(string),
             Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -363,7 +370,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a float with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float_with_context<C: Context>(&self, context: &C) -> EvalexprResult<FloatType> {
+    pub fn eval_float_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<FloatType, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -374,7 +384,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an integer with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int_with_context<C: Context>(&self, context: &C) -> EvalexprResult<IntType> {
+    pub fn eval_int_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<IntType, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -386,7 +399,10 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number_with_context<C: Context>(&self, context: &C) -> EvalexprResult<FloatType> {
+    pub fn eval_number_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<FloatType, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
@@ -398,7 +414,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a boolean with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_boolean_with_context<C: Context>(&self, context: &C) -> EvalexprResult<bool> {
+    pub fn eval_boolean_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<bool, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Boolean(boolean)) => Ok(boolean),
             Ok(value) => Err(EvalexprError::expected_boolean(value)),
@@ -409,7 +428,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a tuple with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple_with_context<C: Context>(&self, context: &C) -> EvalexprResult<TupleType> {
+    pub fn eval_tuple_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<TupleType, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),
@@ -420,7 +442,10 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into an empty value with an the given context.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty_with_context<C: Context>(&self, context: &C) -> EvalexprResult<EmptyType> {
+    pub fn eval_empty_with_context<C: Context>(
+        &self,
+        context: &C,
+    ) -> EvalexprResult<EmptyType, C::IntType, C::FloatType> {
         match self.eval_with_context(context) {
             Ok(Value::Empty) => Ok(EMPTY_VALUE),
             Ok(value) => Err(EvalexprError::expected_empty(value)),
@@ -434,7 +459,7 @@ impl Node {
     pub fn eval_string_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<String> {
+    ) -> EvalexprResult<String, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::String(string)) => Ok(string),
             Ok(value) => Err(EvalexprError::expected_string(value)),
@@ -448,7 +473,7 @@ impl Node {
     pub fn eval_float_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<FloatType> {
+    ) -> EvalexprResult<FloatType, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Float(float)) => Ok(float),
             Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -462,7 +487,7 @@ impl Node {
     pub fn eval_int_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<IntType> {
+    ) -> EvalexprResult<IntType, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Int(int)) => Ok(int),
             Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -477,7 +502,7 @@ impl Node {
     pub fn eval_number_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<FloatType> {
+    ) -> EvalexprResult<FloatType, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Int(int)) => Ok(int as FloatType),
             Ok(Value::Float(float)) => Ok(float),
@@ -492,7 +517,7 @@ impl Node {
     pub fn eval_boolean_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<bool> {
+    ) -> EvalexprResult<bool, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Boolean(boolean)) => Ok(boolean),
             Ok(value) => Err(EvalexprError::expected_boolean(value)),
@@ -506,7 +531,7 @@ impl Node {
     pub fn eval_tuple_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<TupleType> {
+    ) -> EvalexprResult<TupleType, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Tuple(tuple)) => Ok(tuple),
             Ok(value) => Err(EvalexprError::expected_tuple(value)),
@@ -520,7 +545,7 @@ impl Node {
     pub fn eval_empty_with_context_mut<C: ContextWithMutableVariables>(
         &self,
         context: &mut C,
-    ) -> EvalexprResult<EmptyType> {
+    ) -> EvalexprResult<EmptyType, C::IntType, C::FloatType> {
         match self.eval_with_context_mut(context) {
             Ok(Value::Empty) => Ok(EMPTY_VALUE),
             Ok(value) => Err(EvalexprError::expected_empty(value)),
@@ -531,21 +556,21 @@ impl Node {
     /// Evaluates the operator tree rooted at this node into a string.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_string(&self) -> EvalexprResult<String> {
+    pub fn eval_string(&self) -> EvalexprResult<String, IntType, FloatType> {
         self.eval_string_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_float(&self) -> EvalexprResult<FloatType> {
+    pub fn eval_float(&self) -> EvalexprResult<FloatType, IntType, FloatType> {
         self.eval_float_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into an integer.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_int(&self) -> EvalexprResult<IntType> {
+    pub fn eval_int(&self) -> EvalexprResult<IntType, IntType, FloatType> {
         self.eval_int_with_context_mut(&mut HashMapContext::new())
     }
 
@@ -553,28 +578,28 @@ impl Node {
     /// If the result of the expression is an integer, it is silently converted into a float.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_number(&self) -> EvalexprResult<FloatType> {
+    pub fn eval_number(&self) -> EvalexprResult<FloatType, IntType, FloatType> {
         self.eval_number_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a boolean.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_boolean(&self) -> EvalexprResult<bool> {
+    pub fn eval_boolean(&self) -> EvalexprResult<bool, IntType, FloatType> {
         self.eval_boolean_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into a tuple.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_tuple(&self) -> EvalexprResult<TupleType> {
+    pub fn eval_tuple(&self) -> EvalexprResult<TupleType, IntType, FloatType> {
         self.eval_tuple_with_context_mut(&mut HashMapContext::new())
     }
 
     /// Evaluates the operator tree rooted at this node into an empty value.
     ///
     /// Fails, if one of the operators in the expression tree fails.
-    pub fn eval_empty(&self) -> EvalexprResult<EmptyType> {
+    pub fn eval_empty(&self) -> EvalexprResult<EmptyType, IntType, FloatType> {
         self.eval_empty_with_context_mut(&mut HashMapContext::new())
     }
 
@@ -614,7 +639,11 @@ impl Node {
         }
     }
 
-    fn insert_back_prioritized(&mut self, node: Node, is_root_node: bool) -> EvalexprResult<()> {
+    fn insert_back_prioritized(
+        &mut self,
+        node: Node,
+        is_root_node: bool,
+    ) -> EvalexprResult<(), IntType, FloatType> {
         // println!(
         //     "Inserting {:?} into {:?}, is_root_node = {is_root_node}",
         //     node.operator(),
@@ -695,11 +724,11 @@ impl Node {
     }
 }
 
-fn collapse_root_stack_to(
-    root_stack: &mut Vec<Node>,
-    mut root: Node,
-    collapse_goal: &Node,
-) -> EvalexprResult<Node> {
+fn collapse_root_stack_to<IntType, FloatType>(
+    root_stack: &mut Vec<Node<IntType, FloatType>>,
+    mut root: Node<IntType, FloatType>,
+    collapse_goal: &Node<IntType, FloatType>,
+) -> EvalexprResult<Node<IntType, FloatType>, IntType, FloatType> {
     loop {
         if let Some(mut potential_higher_root) = root_stack.pop() {
             // TODO I'm not sure about this >, as I have no example for different sequence operators with the same precedence
@@ -720,7 +749,9 @@ fn collapse_root_stack_to(
     Ok(root)
 }
 
-fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
+fn collapse_all_sequences<IntType, FloatType>(
+    root_stack: &mut Vec<Node<IntType, FloatType>>,
+) -> EvalexprResult<(), IntType, FloatType> {
     // println!("Collapsing all sequences");
     // println!("Initial root stack is: {:?}", root_stack);
     let mut root = if let Some(root) = root_stack.pop() {
@@ -765,7 +796,9 @@ fn collapse_all_sequences(root_stack: &mut Vec<Node>) -> EvalexprResult<()> {
     Ok(())
 }
 
-pub(crate) fn tokens_to_operator_tree(tokens: Vec<Token>) -> EvalexprResult<Node> {
+pub(crate) fn tokens_to_operator_tree<IntType, FloatType>(
+    tokens: Vec<Token<IntType, FloatType>>,
+) -> EvalexprResult<Node, IntType, FloatType> {
     let mut root_stack = vec![Node::root_node()];
     let mut last_token_is_rightsided_value = false;
     let mut token_iter = tokens.iter().peekable();
