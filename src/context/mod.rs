@@ -133,7 +133,7 @@ impl<NumericTypes: EvalexprNumericTypes> Context for EmptyContext<NumericTypes> 
     }
 }
 
-impl<NumericTypes> IterateVariablesContext for EmptyContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext for EmptyContext<NumericTypes> {
     type VariableIterator<'a> = iter::Empty<(String, Value<Self::NumericTypes>)> where Self: 'a;
     type VariableNameIterator<'a> = iter::Empty<String> where Self: 'a;
 
@@ -151,7 +151,9 @@ impl<NumericTypes> IterateVariablesContext for EmptyContext<NumericTypes> {
 #[derive(Debug, Default)]
 pub struct EmptyContextWithBuiltinFunctions<NumericTypes>(PhantomData<NumericTypes>);
 
-impl<NumericTypes> Context for EmptyContextWithBuiltinFunctions<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> Context
+    for EmptyContextWithBuiltinFunctions<NumericTypes>
+{
     type NumericTypes = NumericTypes;
 
     fn get_value(&self, _identifier: &str) -> Option<&Value<Self::NumericTypes>> {
@@ -186,7 +188,9 @@ impl<NumericTypes> Context for EmptyContextWithBuiltinFunctions<NumericTypes> {
     }
 }
 
-impl<NumericTypes> IterateVariablesContext for EmptyContextWithBuiltinFunctions<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext
+    for EmptyContextWithBuiltinFunctions<NumericTypes>
+{
     type VariableIterator<'a> = iter::Empty<(String, Value<Self::NumericTypes>)> where Self: 'a;
     type VariableNameIterator<'a> = iter::Empty<String> where Self:'a;
 
@@ -206,7 +210,7 @@ impl<NumericTypes> IterateVariablesContext for EmptyContextWithBuiltinFunctions<
 /// This context is type-safe, meaning that an identifier that is assigned a value of some type once cannot be assigned a value of another type.
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-pub struct HashMapContext<NumericTypes> {
+pub struct HashMapContext<NumericTypes: EvalexprNumericTypes> {
     variables: HashMap<String, Value<NumericTypes>>,
     #[cfg_attr(feature = "serde_support", serde(skip))]
     functions: HashMap<String, Function<NumericTypes>>,
@@ -215,7 +219,7 @@ pub struct HashMapContext<NumericTypes> {
     without_builtin_functions: bool,
 }
 
-impl<NumericTypes> HashMapContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> HashMapContext<NumericTypes> {
     /// Constructs a `HashMapContext` with no mappings.
     pub fn new() -> Self {
         Default::default()
@@ -265,7 +269,7 @@ impl<NumericTypes> HashMapContext<NumericTypes> {
     }
 }
 
-impl<NumericTypes> Context for HashMapContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> Context for HashMapContext<NumericTypes> {
     type NumericTypes = NumericTypes;
 
     fn get_value(&self, identifier: &str) -> Option<&Value<Self::NumericTypes>> {
@@ -299,7 +303,9 @@ impl<NumericTypes> Context for HashMapContext<NumericTypes> {
     }
 }
 
-impl<NumericTypes> ContextWithMutableVariables for HashMapContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> ContextWithMutableVariables
+    for HashMapContext<NumericTypes>
+{
     fn set_value(
         &mut self,
         identifier: String,
@@ -320,7 +326,9 @@ impl<NumericTypes> ContextWithMutableVariables for HashMapContext<NumericTypes> 
     }
 }
 
-impl<NumericTypes> ContextWithMutableFunctions for HashMapContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> ContextWithMutableFunctions
+    for HashMapContext<NumericTypes>
+{
     fn set_function(
         &mut self,
         identifier: String,
@@ -350,7 +358,7 @@ impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext for HashMapCont
     }
 }
 
-impl<NumericTypes> Default for HashMapContext<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> Default for HashMapContext<NumericTypes> {
     fn default() -> Self {
         Self {
             variables: Default::default(),

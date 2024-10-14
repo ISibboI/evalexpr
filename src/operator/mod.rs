@@ -1,13 +1,13 @@
 use crate::function::builtin::builtin_function;
 
-use crate::value::{DefaultFloatType, DefaultIntType};
+use crate::value::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes};
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
 mod display;
 
 /// An enum that represents operators in the operator tree.
 #[derive(Debug, PartialEq, Clone)]
-pub enum Operator<IntType = DefaultIntType, FloatType = DefaultFloatType> {
+pub enum Operator<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// A root node in the operator tree.
     /// The whole expression is stored under a root node, as well as each subexpression surrounded by parentheses.
     RootNode,
@@ -73,7 +73,7 @@ pub enum Operator<IntType = DefaultIntType, FloatType = DefaultFloatType> {
     /// A constant value.
     Const {
         /** The value of the constant. */
-        value: Value<IntType, FloatType>,
+        value: Value<NumericTypes>,
     },
     /// A write to a variable identifier.
     VariableIdentifierWrite {
@@ -92,8 +92,8 @@ pub enum Operator<IntType = DefaultIntType, FloatType = DefaultFloatType> {
     },
 }
 
-impl<IntType, FloatType> Operator<IntType, FloatType> {
-    pub(crate) fn value(value: Value<IntType, FloatType>) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
+    pub(crate) fn value(value: Value<NumericTypes>) -> Self {
         Operator::Const { value }
     }
 
@@ -179,11 +179,11 @@ impl<IntType, FloatType> Operator<IntType, FloatType> {
     }
 
     /// Evaluates the operator with the given arguments and context.
-    pub(crate) fn eval<C: Context>(
+    pub(crate) fn eval<C: Context<NumericTypes = NumericTypes>>(
         &self,
-        arguments: &[Value],
+        arguments: &[Value<NumericTypes>],
         context: &C,
-    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
+    ) -> EvalexprResultValue<NumericTypes> {
         use crate::operator::Operator::*;
         match self {
             RootNode => {
@@ -268,15 +268,7 @@ impl<IntType, FloatType> Operator<IntType, FloatType> {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_mul(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::multiplication_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    NumericTypes::int_checked_mul(&a, &b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? * arguments[1].as_number()?,
@@ -482,7 +474,7 @@ impl<IntType, FloatType> Operator<IntType, FloatType> {
         &self,
         arguments: &[Value],
         context: &mut C,
-    ) -> EvalexprResultValue<C::IntType, C::FloatType> {
+    ) -> EvalexprResultValue<C::NumericTypes> {
         use crate::operator::Operator::*;
         match self {
             Assign => {

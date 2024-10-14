@@ -1,7 +1,10 @@
 use crate::{
     error::EvalexprResultValue,
     token, tree,
-    value::{DefaultFloatType, DefaultIntType, TupleType},
+    value::{
+        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        TupleType,
+    },
     Context, ContextWithMutableVariables, EmptyType, EvalexprError, EvalexprResult, HashMapContext,
     Node, Value, EMPTY_VALUE,
 };
@@ -100,14 +103,18 @@ pub fn eval_string(string: &str) -> EvalexprResult<String> {
 /// Evaluate the given expression string into an integer.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int(string: &str) -> EvalexprResult<DefaultIntType> {
+pub fn eval_int(
+    string: &str,
+) -> EvalexprResult<<DefaultNumericTypes as EvalexprNumericTypes>::Int> {
     eval_int_with_context_mut(string, &mut HashMapContext::new())
 }
 
 /// Evaluate the given expression string into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_float(string: &str) -> EvalexprResult<DefaultFloatType> {
+pub fn eval_float(
+    string: &str,
+) -> EvalexprResult<<DefaultNumericTypes as EvalexprNumericTypes>::Float> {
     eval_float_with_context_mut(string, &mut HashMapContext::new())
 }
 
@@ -115,7 +122,9 @@ pub fn eval_float(string: &str) -> EvalexprResult<DefaultFloatType> {
 /// If the result of the expression is an integer, it is silently converted into a float.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_number(string: &str) -> EvalexprResult<DefaultFloatType> {
+pub fn eval_number(
+    string: &str,
+) -> EvalexprResult<<DefaultNumericTypes as EvalexprNumericTypes>::Float> {
     eval_number_with_context_mut(string, &mut HashMapContext::new())
 }
 
@@ -154,7 +163,10 @@ pub fn eval_string_with_context<C: Context>(string: &str, context: &C) -> Evalex
 /// Evaluate the given expression string into an integer with the given context.
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
-pub fn eval_int_with_context<C: Context>(string: &str, context: &C) -> EvalexprResult<C::IntType> {
+pub fn eval_int_with_context<C: Context>(
+    string: &str,
+    context: &C,
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Int> {
     match eval_with_context(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -168,7 +180,7 @@ pub fn eval_int_with_context<C: Context>(string: &str, context: &C) -> EvalexprR
 pub fn eval_float_with_context<C: Context>(
     string: &str,
     context: &C,
-) -> EvalexprResult<C::FloatType> {
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Float> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -183,10 +195,10 @@ pub fn eval_float_with_context<C: Context>(
 pub fn eval_number_with_context<C: Context>(
     string: &str,
     context: &C,
-) -> EvalexprResult<FloatType> {
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Float> {
     match eval_with_context(string, context) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(Value::Int(int)) => Ok(int as FloatType),
+        Ok(Value::Int(int)) => Ok(<C::NumericTypes as EvalexprNumericTypes>::int_as_float(int)),
         Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),
     }
@@ -245,7 +257,7 @@ pub fn eval_string_with_context_mut<C: ContextWithMutableVariables>(
 pub fn eval_int_with_context_mut<C: ContextWithMutableVariables>(
     string: &str,
     context: &mut C,
-) -> EvalexprResult<IntType> {
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Int> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Int(int)) => Ok(int),
         Ok(value) => Err(EvalexprError::expected_int(value)),
@@ -259,7 +271,7 @@ pub fn eval_int_with_context_mut<C: ContextWithMutableVariables>(
 pub fn eval_float_with_context_mut<C: ContextWithMutableVariables>(
     string: &str,
     context: &mut C,
-) -> EvalexprResult<FloatType> {
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Float> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Float(float)) => Ok(float),
         Ok(value) => Err(EvalexprError::expected_float(value)),
@@ -274,10 +286,12 @@ pub fn eval_float_with_context_mut<C: ContextWithMutableVariables>(
 pub fn eval_number_with_context_mut<C: ContextWithMutableVariables>(
     string: &str,
     context: &mut C,
-) -> EvalexprResult<FloatType> {
+) -> EvalexprResult<<C::NumericTypes as EvalexprNumericTypes>::Float> {
     match eval_with_context_mut(string, context) {
         Ok(Value::Float(float)) => Ok(float),
-        Ok(Value::Int(int)) => Ok(int as FloatType),
+        Ok(Value::Int(int)) => Ok(<C::NumericTypes as EvalexprNumericTypes>::int_as_float(
+            &int,
+        )),
         Ok(value) => Err(EvalexprError::expected_number(value)),
         Err(error) => Err(error),
     }

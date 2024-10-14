@@ -152,9 +152,9 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     /// It is not a token, but it is part of the string representation of some tokens.
     UnmatchedPartialToken {
         /// The unmatched partial token.
-        first: PartialToken,
+        first: PartialToken<NumericTypes>,
         /// The token that follows the unmatched partial token and that cannot be matched to the partial token, or `None`, if `first` is the last partial token in the stream.
-        second: Option<PartialToken>,
+        second: Option<PartialToken<NumericTypes>>,
     },
 
     /// An addition operation performed by Rust failed.
@@ -226,11 +226,14 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     /// Out of bounds sequence access.
     OutOfBoundsAccess,
 
+    /// A `usize` was attempted to be converted to an `int`, but it was out of range.
+    IntFromUsize { usize_int: usize },
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }
 
-impl<NumericTypes> EvalexprError<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> EvalexprError<NumericTypes> {
     /// Construct a `WrongOperatorArgumentAmount` error.
     pub fn wrong_operator_argument_amount(actual: usize, expected: usize) -> Self {
         EvalexprError::WrongOperatorArgumentAmount { actual, expected }
@@ -337,8 +340,8 @@ impl<NumericTypes> EvalexprError<NumericTypes> {
     }
 
     pub(crate) fn unmatched_partial_token(
-        first: PartialToken,
-        second: Option<PartialToken>,
+        first: PartialToken<NumericTypes>,
+        second: Option<PartialToken<NumericTypes>>,
     ) -> Self {
         EvalexprError::UnmatchedPartialToken { first, second }
     }
@@ -392,7 +395,7 @@ impl<NumericTypes> EvalexprError<NumericTypes> {
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongOperatorArgumentAmount)` otherwise.
-pub(crate) fn expect_operator_argument_amount<NumericTypes>(
+pub(crate) fn expect_operator_argument_amount<NumericTypes: EvalexprNumericTypes>(
     actual: usize,
     expected: usize,
 ) -> EvalexprResult<(), NumericTypes> {
@@ -406,7 +409,7 @@ pub(crate) fn expect_operator_argument_amount<NumericTypes>(
 }
 
 /// Returns `Ok(())` if the actual and expected parameters are equal, and `Err(Error::WrongFunctionArgumentAmount)` otherwise.
-pub fn expect_function_argument_amount<NumericTypes>(
+pub fn expect_function_argument_amount<NumericTypes: EvalexprNumericTypes>(
     actual: usize,
     expected: usize,
 ) -> EvalexprResult<(), NumericTypes> {
@@ -429,7 +432,7 @@ pub fn expect_number_or_string<NumericTypes: EvalexprNumericTypes>(
     }
 }
 
-impl std::error::Error for EvalexprError {}
+impl<NumericTypes: EvalexprNumericTypes> std::error::Error for EvalexprError<NumericTypes> {}
 
 /// Standard result type used by this crate.
 pub type EvalexprResult<T, NumericTypes = DefaultNumericTypes> =
@@ -441,13 +444,16 @@ pub type EvalexprResultValue<NumericTypes = DefaultNumericTypes> =
 
 #[cfg(test)]
 mod tests {
-    use crate::{EvalexprError, Value, ValueType};
+    use crate::{value::numeric_types::DefaultNumericTypes, EvalexprError, Value, ValueType};
 
     /// Tests whose only use is to bring test coverage of trivial lines up, like trivial constructors.
     #[test]
     fn trivial_coverage_tests() {
         assert_eq!(
-            EvalexprError::type_error(Value::<i64, f64>::Int(3), vec![ValueType::String]),
+            EvalexprError::type_error(
+                Value::<DefaultNumericTypes>::Int(3),
+                vec![ValueType::String]
+            ),
             EvalexprError::TypeError {
                 actual: Value::Int(3),
                 expected: vec![ValueType::String]
@@ -455,22 +461,28 @@ mod tests {
         );
         assert_eq!(
             EvalexprError::expected_type(
-                &Value::<i64, f64>::String("abc".to_string()),
+                &Value::<DefaultNumericTypes>::String("abc".to_string()),
                 Value::Empty
             ),
             EvalexprError::expected_string(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::<i64, f64>::Boolean(false), Value::Empty),
+            EvalexprError::expected_type(
+                &Value::<DefaultNumericTypes>::Boolean(false),
+                Value::Empty
+            ),
             EvalexprError::expected_boolean(Value::Empty)
         );
         assert_eq!(
-            EvalexprError::expected_type(&Value::<i64, f64>::Tuple(vec![]), Value::Empty),
+            EvalexprError::expected_type(
+                &Value::<DefaultNumericTypes>::Tuple(vec![]),
+                Value::Empty
+            ),
             EvalexprError::expected_tuple(Value::Empty)
         );
         assert_eq!(
             EvalexprError::expected_type(
-                &Value::<i64, f64>::Empty,
+                &Value::<DefaultNumericTypes>::Empty,
                 Value::String("abc".to_string())
             ),
             EvalexprError::expected_empty(Value::String("abc".to_string()))

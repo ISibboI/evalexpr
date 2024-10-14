@@ -1,5 +1,7 @@
 use crate::Value;
 
+use super::numeric_types::EvalexprNumericTypes;
+
 /// The type of a `Value`.
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ValueType {
@@ -17,8 +19,8 @@ pub enum ValueType {
     Empty,
 }
 
-impl<IntType, FloatType> From<&Value<IntType, FloatType>> for ValueType {
-    fn from(value: &Value<IntType, FloatType>) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> From<&Value<NumericTypes>> for ValueType {
+    fn from(value: &Value<NumericTypes>) -> Self {
         match value {
             Value::String(_) => ValueType::String,
             Value::Float(_) => ValueType::Float,
@@ -30,14 +32,14 @@ impl<IntType, FloatType> From<&Value<IntType, FloatType>> for ValueType {
     }
 }
 
-impl<IntType, FloatType> From<&mut Value<IntType, FloatType>> for ValueType {
-    fn from(value: &mut Value<IntType, FloatType>) -> Self {
-        From::<&Value<IntType, FloatType>>::from(value)
+impl<NumericTypes: EvalexprNumericTypes> From<&mut Value<NumericTypes>> for ValueType {
+    fn from(value: &mut Value<NumericTypes>) -> Self {
+        From::<&Value<NumericTypes>>::from(value)
     }
 }
 
-impl<IntType, FloatType> From<&&mut Value<IntType, FloatType>> for ValueType {
-    fn from(value: &&mut Value<IntType, FloatType>) -> Self {
-        From::<&Value<IntType, FloatType>>::from(*value)
+impl<NumericTypes: EvalexprNumericTypes> From<&&mut Value<NumericTypes>> for ValueType {
+    fn from(value: &&mut Value<NumericTypes>) -> Self {
+        From::<&Value<NumericTypes>>::from(*value)
     }
 }

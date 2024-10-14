@@ -1,8 +1,8 @@
 use std::fmt;
 
-use crate::EvalexprError;
+use crate::{value::numeric_types::EvalexprNumericTypes, EvalexprError};
 
-impl fmt::Display for EvalexprError {
+impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericTypes> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         use crate::EvalexprError::*;
         match self {
@@ -139,6 +139,11 @@ impl fmt::Display for EvalexprError {
             },
             IllegalEscapeSequence(string) => write!(f, "Illegal escape sequence: {}", string),
             OutOfBoundsAccess => write!(f, "Tried to access a tuple or string at an invalid index"),
+            IntFromUsize { usize_int } => write!(
+                f,
+                "The usize {} does not fit into the chosen integer type",
+                usize_int
+            ),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

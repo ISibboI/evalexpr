@@ -89,10 +89,10 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
         // Float special values
-        "math::is_nan" => float_is(FloatType::is_nan),
-        "math::is_finite" => float_is(FloatType::is_finite),
-        "math::is_infinite" => float_is(FloatType::is_infinite),
-        "math::is_normal" => float_is(FloatType::is_normal),
+        "math::is_nan" => float_is(NumericTypes::float_is_nan),
+        "math::is_finite" => float_is(NumericTypes::float_is_finite),
+        "math::is_infinite" => float_is(NumericTypes::float_is_infinite),
+        "math::is_normal" => float_is(NumericTypes::float_is_normal),
         // Absolute
         "math::abs" => Some(Function::new(|argument| match argument {
             Value::Float(num) => Ok(Value::Float(num.abs())),
@@ -113,8 +113,8 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
-            let mut min_int = IntType::MAX;
-            let mut min_float: FloatType = 1.0 / 0.0;
+            let mut min_int = NumericTypes::MAX_INT;
+            let mut min_float = NumericTypes::MAX_FLOAT;
             debug_assert!(min_float.is_infinite());
 
             for argument in arguments {
@@ -127,7 +127,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
                 }
             }
 
-            if (min_int as FloatType) < min_float {
+            if (NumericTypes::int_as_float(&min_int)) < min_float {
                 Ok(Value::Int(min_int))
             } else {
                 Ok(Value::Float(min_float))
@@ -135,8 +135,8 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "max" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
-            let mut max_int = IntType::MIN;
-            let mut max_float: FloatType = -1.0 / 0.0;
+            let mut max_int = NumericTypes::MIN_INT;
+            let mut max_float: NumericTypes::MIN_FLOAT;
             debug_assert!(max_float.is_infinite());
 
             for argument in arguments {
@@ -149,7 +149,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
                 }
             }
 
-            if (max_int as FloatType) > max_float {
+            if (NumericTypes::int_as_float(&max_int)) > max_float {
                 Ok(Value::Int(max_int))
             } else {
                 Ok(Value::Float(max_float))
@@ -216,9 +216,9 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
-                Ok(Value::from(subject.len() as IntType))
+                Ok(Value::from(NumericTypes::int_from_usize(subject.len())))
             } else if let Ok(subject) = argument.as_tuple() {
-                Ok(Value::from(subject.len() as IntType))
+                Ok(Value::from(NumericTypes::int_from_usize(subject.len())))
             } else {
                 Err(EvalexprError::type_error(
                     argument.clone(),

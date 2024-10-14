@@ -2,7 +2,9 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::Value;
 
-impl Display for Value {
+use super::numeric_types::EvalexprNumericTypes;
+
+impl<NumericTypes: EvalexprNumericTypes> Display for Value<NumericTypes> {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
             Value::String(string) => write!(f, "\"{}\"", string),

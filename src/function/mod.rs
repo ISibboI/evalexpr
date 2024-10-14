@@ -1,11 +1,17 @@
 use std::fmt;
 
-use crate::{error::EvalexprResultValue, value::Value};
+use crate::{
+    error::EvalexprResultValue,
+    value::{
+        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        Value,
+    },
+};
 
 pub(crate) mod builtin;
 
 /// A helper trait to enable cloning through `Fn` trait objects.
-trait ClonableFn<NumericTypes>
+trait ClonableFn<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
 where
     Self: Fn(&Value<NumericTypes>) -> EvalexprResultValue<NumericTypes>,
     Self: Send + Sync + 'static,
@@ -13,7 +19,7 @@ where
     fn dyn_clone(&self) -> Box<dyn ClonableFn<NumericTypes>>;
 }
 
-impl<F, NumericTypes> ClonableFn<NumericTypes> for F
+impl<F, NumericTypes: EvalexprNumericTypes> ClonableFn<NumericTypes> for F
 where
     F: Fn(&Value<NumericTypes>) -> EvalexprResultValue<NumericTypes>,
     F: Send + Sync + 'static,
@@ -38,11 +44,11 @@ where
 /// })).unwrap(); // Do proper error handling here
 /// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
 /// ```
-pub struct Function<NumericTypes> {
+pub struct Function<NumericTypes: EvalexprNumericTypes> {
     function: Box<dyn ClonableFn<NumericTypes>>,
 }
 
-impl<NumericTypes> Clone for Function<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> Clone for Function<NumericTypes> {
     fn clone(&self) -> Self {
         Self {
             function: self.function.dyn_clone(),
@@ -50,7 +56,7 @@ impl<NumericTypes> Clone for Function<NumericTypes> {
     }
 }
 
-impl<NumericTypes> Function<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> Function<NumericTypes> {
     /// Creates a user-defined function.
     ///
     /// The `function` is boxed for storage.
@@ -70,7 +76,7 @@ impl<NumericTypes> Function<NumericTypes> {
     }
 }
 
-impl<NumericTypes> fmt::Debug for Function<NumericTypes> {
+impl<NumericTypes: EvalexprNumericTypes> fmt::Debug for Function<NumericTypes> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "Function {{ [...] }}")
     }
@@ -82,4 +88,4 @@ impl<NumericTypes> fmt::Debug for Function<NumericTypes> {
 #[doc(hidden)]
 trait IsSendAndSync: Send + Sync {}
 
-impl<NumericTypes> IsSendAndSync for Function<NumericTypes> {}
+impl<NumericTypes: EvalexprNumericTypes> IsSendAndSync for Function<NumericTypes> {}
