@@ -29,8 +29,9 @@ serde_derive = { version = "1.0.210", optional = true }
 rand = { version = "0.8.5", optional = true }
 
 [features]
-serde_support = ["serde", "serde_derive"]
-regex_support = ["regex"]
+serde = ["dep:serde", "dep:serde_derive"]
+regex = ["dep:regex"]
+rand = ["dep:rand"]
 
 [dev-dependencies]
 ron = "0.8.1"
