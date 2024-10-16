@@ -1,4 +1,4 @@
-#[cfg(feature = "regex_support")]
+#[cfg(feature = "regex")]
 use regex::Regex;
 
 use crate::{
@@ -229,7 +229,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
             }
         })),
         // String functions
-        #[cfg(feature = "regex_support")]
+        #[cfg(feature = "regex")]
         "str::regex_matches" => Some(Function::new(|argument| {
             let arguments = argument.as_fixed_len_tuple(2)?;
 
@@ -243,7 +243,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
                 )),
             }
         })),
-        #[cfg(feature = "regex_support")]
+        #[cfg(feature = "regex")]
         "str::regex_replace" => Some(Function::new(|argument| {
             let arguments = argument.as_fixed_len_tuple(3)?;
 

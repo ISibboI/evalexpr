@@ -12,9 +12,19 @@ use crate::{EvalexprError, EvalexprResult, Value};
 /// See [`EvalexprInt`] and [`EvalexprFloat`] for the requirements on the types.
 pub trait EvalexprNumericTypes: 'static + Sized + Debug + Clone + PartialEq {
     /// The integer type.
+    #[cfg(feature = "serde")]
+    type Int: EvalexprInt<Self> + serde::Serialize + for<'de> serde::Deserialize<'de>;
+
+    /// The integer type.
+    #[cfg(not(feature = "serde"))]
     type Int: EvalexprInt<Self>;
 
     /// The float type.
+    #[cfg(feature = "serde")]
+    type Float: EvalexprFloat<Self> + serde::Serialize + for<'de> serde::Deserialize<'de>;
+
+    /// The float type.
+    #[cfg(not(feature = "serde"))]
     type Float: EvalexprFloat<Self>;
 
     /// Convert an integer to a float using the `as` operator or a similar mechanic.
@@ -38,9 +48,11 @@ pub trait EvalexprInt<NumericTypes: EvalexprNumericTypes<Int = Self>>:
     fn from_usize(int: usize) -> EvalexprResult<Self, NumericTypes>;
 
     /// Convert `self` into [`usize`].
+    #[expect(clippy::wrong_self_convention)]
     fn into_usize(&self) -> EvalexprResult<usize, NumericTypes>;
 
     /// Parse `Self` from a hex string.
+    #[expect(clippy::result_unit_err)]
     fn from_hex_str(literal: &str) -> Result<Self, ()>;
 
     /// Perform an addition operation, returning an error on overflow.
@@ -245,9 +257,9 @@ impl<NumericTypes: EvalexprNumericTypes<Int = Self>> EvalexprInt<NumericTypes> f
         if *self >= 0 {
             (*self as u64)
                 .try_into()
-                .map_err(|_| EvalexprError::IntIntoUsize { int: self.clone() })
+                .map_err(|_| EvalexprError::IntIntoUsize { int: *self })
         } else {
-            Err(EvalexprError::IntIntoUsize { int: self.clone() })
+            Err(EvalexprError::IntIntoUsize { int: *self })
         }
     }
 

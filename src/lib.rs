@@ -573,16 +573,6 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::get_first)]
 
-#[cfg(feature = "regex_support")]
-extern crate regex;
-#[cfg(test)]
-extern crate ron;
-#[cfg(feature = "serde_support")]
-extern crate serde;
-#[cfg(feature = "serde_support")]
-#[macro_use]
-extern crate serde_derive;
-
 pub use crate::{
     context::{
         Context, ContextWithMutableFunctions, ContextWithMutableVariables, EmptyContext,
@@ -603,7 +593,7 @@ pub use crate::{
 
 mod context;
 pub mod error;
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 mod feature_serde;
 mod function;
 mod interface;

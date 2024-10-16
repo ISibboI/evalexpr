@@ -99,7 +99,7 @@ pub trait GetFunctionContext: Context {
 
 /// A context that returns `None` for each identifier.
 /// Builtin functions are disabled and cannot be enabled.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct EmptyContext<NumericTypes>(PhantomData<NumericTypes>);
 
 impl<NumericTypes: EvalexprNumericTypes> Context for EmptyContext<NumericTypes> {
@@ -150,9 +150,15 @@ impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext for EmptyContex
     }
 }
 
+impl<NumericTypes> Default for EmptyContext<NumericTypes> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
+
 /// A context that returns `None` for each identifier.
 /// Builtin functions are enabled and cannot be disabled.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct EmptyContextWithBuiltinFunctions<NumericTypes>(PhantomData<NumericTypes>);
 
 impl<NumericTypes: EvalexprNumericTypes> Context
@@ -207,16 +213,22 @@ impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext
     }
 }
 
+impl<NumericTypes> Default for EmptyContextWithBuiltinFunctions<NumericTypes> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
+
 /// A context that stores its mappings in hash maps.
 ///
 /// *Value and function mappings are stored independently, meaning that there can be a function and a value with the same identifier.*
 ///
 /// This context is type-safe, meaning that an identifier that is assigned a value of some type once cannot be assigned a value of another type.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HashMapContext<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     variables: HashMap<String, Value<NumericTypes>>,
-    #[cfg_attr(feature = "serde_support", serde(skip))]
+    #[cfg_attr(feature = "serde", serde(skip))]
     functions: HashMap<String, Function<NumericTypes>>,
 
     /// True if builtin functions are disabled.
@@ -391,6 +403,10 @@ macro_rules! context_map {
     // Termination (allow missing comma at the end of the argument list)
     ( ($ctx:expr) $k:expr => Function::new($($v:tt)*) ) =>
         { $crate::context_map!(($ctx) $k => Function::new($($v)*),) };
+    ( ($ctx:expr) $k:expr => int $v:expr ) =>
+        { $crate::context_map!(($ctx) $k => int $v,)  };
+    ( ($ctx:expr) $k:expr => float $v:expr ) =>
+        { $crate::context_map!(($ctx) $k => float $v,)  };
     ( ($ctx:expr) $k:expr => $v:expr ) =>
         { $crate::context_map!(($ctx) $k => $v,)  };
     // Termination
@@ -399,6 +415,16 @@ macro_rules! context_map {
     // The user has to specify a literal 'Function::new' in order to create a function
     ( ($ctx:expr) $k:expr => Function::new($($v:tt)*) , $($tt:tt)*) => {{
         $crate::ContextWithMutableFunctions::set_function($ctx, $k.into(), $crate::Function::new($($v)*))
+            .and($crate::context_map!(($ctx) $($tt)*))
+    }};
+    // add an integer value, and chain the eventual error with the ones in the next values
+    ( ($ctx:expr) $k:expr => int $v:expr , $($tt:tt)*) => {{
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), Value::from_int($v.into()))
+            .and($crate::context_map!(($ctx) $($tt)*))
+    }};
+    // add a float value, and chain the eventual error with the ones in the next values
+    ( ($ctx:expr) $k:expr => float $v:expr , $($tt:tt)*) => {{
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), Value::from_float($v.into()))
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
     // add a value, and chain the eventual error with the ones in the next values

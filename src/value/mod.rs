@@ -19,7 +19,7 @@ pub const EMPTY_VALUE: () = ();
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Value<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// A string value.
     String(String),
