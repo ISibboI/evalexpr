@@ -8,7 +8,7 @@ pub mod numeric_types;
 pub mod value_type;
 
 /// The type used to represent tuples in `Value::Tuple`.
-pub type TupleType = Vec<Value>;
+pub type TupleType<NumericTypes = DefaultNumericTypes> = Vec<Value<NumericTypes>>;
 
 /// The type used to represent empty values in `Value::Empty`.
 pub type EmptyType = ();
@@ -30,7 +30,7 @@ pub enum Value<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// A boolean value.
     Boolean(bool),
     /// A tuple value.
-    Tuple(TupleType),
+    Tuple(TupleType<NumericTypes>),
     /// An empty value.
     Empty,
 }
@@ -81,7 +81,7 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
     pub fn as_int(&self) -> EvalexprResult<NumericTypes::Int, NumericTypes> {
         match self {
-            Value::Int(i) => Ok(*i),
+            Value::Int(i) => Ok(i.clone()),
             value => Err(EvalexprError::expected_int(value.clone())),
         }
     }
@@ -89,7 +89,7 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
     pub fn as_float(&self) -> EvalexprResult<NumericTypes::Float, NumericTypes> {
         match self {
-            Value::Float(f) => Ok(*f),
+            Value::Float(f) => Ok(f.clone()),
             value => Err(EvalexprError::expected_float(value.clone())),
         }
     }
@@ -113,7 +113,7 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     }
 
     /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_tuple(&self) -> EvalexprResult<TupleType, NumericTypes> {
+    pub fn as_tuple(&self) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => Ok(tuple.clone()),
             value => Err(EvalexprError::expected_tuple(value.clone())),
@@ -121,7 +121,10 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     }
 
     /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
-    pub fn as_fixed_len_tuple(&self, len: usize) -> EvalexprResult<TupleType, NumericTypes> {
+    pub fn as_fixed_len_tuple(
+        &self,
+        len: usize,
+    ) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => {
                 if tuple.len() == len {
@@ -138,7 +141,7 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     pub fn as_ranged_len_tuple(
         &self,
         range: RangeInclusive<usize>,
-    ) -> EvalexprResult<TupleType, NumericTypes> {
+    ) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => {
                 if range.contains(&tuple.len()) {
@@ -201,8 +204,8 @@ impl<NumericTypes: EvalexprNumericTypes> From<bool> for Value<NumericTypes> {
     }
 }
 
-impl<NumericTypes: EvalexprNumericTypes> From<TupleType> for Value<NumericTypes> {
-    fn from(tuple: TupleType) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> From<TupleType<NumericTypes>> for Value<NumericTypes> {
+    fn from(tuple: TupleType<NumericTypes>) -> Self {
         Value::Tuple(tuple)
     }
 }
@@ -245,7 +248,7 @@ impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for bool {
     }
 }
 
-impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for TupleType {
+impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for TupleType<NumericTypes> {
     type Error = EvalexprError<NumericTypes>;
 
     fn try_from(value: Value<NumericTypes>) -> Result<Self, Self::Error> {

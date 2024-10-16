@@ -1,34 +1,152 @@
 use std::{
     convert::TryInto,
     fmt::{Debug, Display},
-    ops::Mul,
+    ops::{Add, Div, Mul, Neg, Rem, Sub},
     str::FromStr,
 };
 
 use crate::{EvalexprError, EvalexprResult, Value};
 
-pub trait EvalexprNumericTypes: Sized + Debug + Clone + PartialEq {
-    type Int: Clone + Debug + Display + FromStr + Eq;
-    type Float: Clone + Debug + Display + FromStr + PartialEq + Mul;
-
-    const MIN_INT: Self::Int;
-    const MIN_FLOAT: Self::Float;
-    const MAX_INT: Self::Int;
-    const MAX_FLOAT: Self::Float;
+pub trait EvalexprNumericTypes: 'static + Sized + Debug + Clone + PartialEq {
+    type Int: EvalexprInt<Self>;
+    type Float: EvalexprFloat<Self>;
 
     /// Convert an integer to a float using the `as` operator or a similar mechanic.
     fn int_as_float(int: &Self::Int) -> Self::Float;
 
     /// Convert a float to an integer using the `as` operator or a similar mechanic.
     fn float_as_int(float: &Self::Float) -> Self::Int;
+}
 
-    /// Convert a value of type [`usize`] into a [`Self::Int`].
-    fn int_from_usize(int: usize) -> EvalexprResult<Self::Int, Self>;
+pub trait EvalexprInt<NumericTypes: EvalexprNumericTypes<Int = Self>>:
+    Clone + Debug + Display + FromStr + Eq + Ord
+{
+    const MIN: Self;
+    const MAX: Self;
 
-    /// Parse an integer from a hex string.
-    fn int_from_hex_str(literal: &str) -> Result<Self::Int, ()>;
+    /// Convert a value of type [`usize`] into `Self`.
+    fn from_usize(int: usize) -> EvalexprResult<Self, NumericTypes>;
 
-    fn int_checked_mul(a: &Self::Int, b: &Self::Int) -> EvalexprResult<Self::Int, Self>;
+    /// Convert `self` into [`usize`].
+    fn into_usize(&self) -> EvalexprResult<usize, NumericTypes>;
+
+    /// Parse `Self` from a hex string.
+    fn from_hex_str(literal: &str) -> Result<Self, ()>;
+
+    fn checked_add(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn checked_sub(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn checked_neg(&self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn checked_mul(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn checked_div(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn checked_rem(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn abs(&self) -> EvalexprResult<Self, NumericTypes>;
+
+    fn bitand(&self, rhs: &Self) -> Self;
+
+    fn bitor(&self, rhs: &Self) -> Self;
+
+    fn bitxor(&self, rhs: &Self) -> Self;
+
+    fn bitnot(&self) -> Self;
+
+    fn bit_shift_left(&self, rhs: &Self) -> Self;
+
+    fn bit_shift_right(&self, rhs: &Self) -> Self;
+}
+
+pub trait EvalexprFloat<NumericTypes: EvalexprNumericTypes<Float = Self>>:
+    Clone
+    + Debug
+    + Display
+    + FromStr
+    + PartialEq
+    + PartialOrd
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Neg<Output = Self>
+    + Mul<Output = Self>
+    + Div<Output = Self>
+    + Rem<Output = Self>
+{
+    const MIN: Self;
+    const MAX: Self;
+
+    fn pow(&self, exponent: &Self) -> Self;
+
+    fn ln(&self) -> Self;
+
+    fn log(&self, base: &Self) -> Self;
+
+    fn log2(&self) -> Self;
+
+    fn log10(&self) -> Self;
+
+    fn exp(&self) -> Self;
+
+    fn exp2(&self) -> Self;
+
+    fn cos(&self) -> Self;
+
+    fn cosh(&self) -> Self;
+
+    fn acos(&self) -> Self;
+
+    fn acosh(&self) -> Self;
+
+    fn sin(&self) -> Self;
+
+    fn sinh(&self) -> Self;
+
+    fn asin(&self) -> Self;
+
+    fn asinh(&self) -> Self;
+
+    fn tan(&self) -> Self;
+
+    fn tanh(&self) -> Self;
+
+    fn atan(&self) -> Self;
+
+    fn atanh(&self) -> Self;
+
+    fn atan2(&self, s: &Self) -> Self;
+
+    fn sqrt(&self) -> Self;
+
+    fn cbrt(&self) -> Self;
+
+    fn hypot(&self, other: &Self) -> Self;
+
+    fn floor(&self) -> Self;
+
+    fn round(&self) -> Self;
+
+    fn ceil(&self) -> Self;
+
+    fn is_nan(&self) -> bool;
+
+    fn is_finite(&self) -> bool;
+
+    fn is_infinite(&self) -> bool;
+
+    fn is_normal(&self) -> bool;
+
+    fn abs(&self) -> Self;
+
+    fn min(&self, other: &Self) -> Self;
+
+    fn max(&self, other: &Self) -> Self;
+
+    /// Generate a random float value between 0.0 and 1.0.
+    ///
+    /// If the feature `rand` is not enabled, then this method always returns [`EvalexprError::RandNotEnabled`].
+    fn random() -> EvalexprResult<Self, NumericTypes>;
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -38,11 +156,6 @@ impl EvalexprNumericTypes for DefaultNumericTypes {
     type Int = i64;
     type Float = f64;
 
-    const MIN_INT: Self::Int = Self::Int::MIN;
-    const MIN_FLOAT: Self::Float = Self::Float::NEG_INFINITY;
-    const MAX_INT: Self::Int = Self::Int::MAX;
-    const MAX_FLOAT: Self::Float = Self::Float::INFINITY;
-
     fn int_as_float(int: &Self::Int) -> Self::Float {
         *int as Self::Float
     }
@@ -50,25 +163,140 @@ impl EvalexprNumericTypes for DefaultNumericTypes {
     fn float_as_int(float: &Self::Float) -> Self::Int {
         *float as Self::Int
     }
+}
 
-    fn int_from_usize(int: usize) -> EvalexprResult<Self::Int, Self> {
+impl<NumericTypes: EvalexprNumericTypes<Int = Self>> EvalexprInt<NumericTypes> for i64 {
+    const MIN: Self = Self::MIN;
+    const MAX: Self = Self::MAX;
+
+    fn from_usize(int: usize) -> EvalexprResult<Self, NumericTypes> {
         int.try_into()
             .map_err(|_| EvalexprError::IntFromUsize { usize_int: int })
     }
 
-    fn int_from_hex_str(literal: &str) -> Result<Self::Int, ()> {
-        Self::Int::from_str_radix(literal, 16).map_err(|_| ())
+    fn into_usize(&self) -> EvalexprResult<usize, NumericTypes> {
+        if *self >= 0 {
+            (*self as u64)
+                .try_into()
+                .map_err(|_| EvalexprError::IntIntoUsize { int: self.clone() })
+        } else {
+            Err(EvalexprError::IntIntoUsize { int: self.clone() })
+        }
     }
 
-    fn int_checked_mul(a: &Self::Int, b: &Self::Int) -> EvalexprResult<Self::Int, Self> {
-        let result = a.checked_mul(*b);
+    fn from_hex_str(literal: &str) -> Result<Self, ()> {
+        Self::from_str_radix(literal, 16).map_err(|_| ())
+    }
+
+    fn checked_add(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_add(*rhs);
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(EvalexprError::addition_error(
+                Value::<NumericTypes>::from_int(*self),
+                Value::<NumericTypes>::from_int(*rhs),
+            ))
+        }
+    }
+
+    fn checked_sub(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_sub(*rhs);
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(EvalexprError::subtraction_error(
+                Value::<NumericTypes>::from_int(*self),
+                Value::<NumericTypes>::from_int(*rhs),
+            ))
+        }
+    }
+
+    fn checked_neg(&self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_neg();
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(EvalexprError::negation_error(
+                Value::<NumericTypes>::from_int(*self),
+            ))
+        }
+    }
+
+    fn checked_mul(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_mul(*rhs);
         if let Some(result) = result {
             Ok(result)
         } else {
             Err(EvalexprError::multiplication_error(
-                Value::<Self>::from_int(*a),
-                Value::<Self>::from_int(*b),
+                Value::<NumericTypes>::from_int(*self),
+                Value::<NumericTypes>::from_int(*rhs),
             ))
         }
+    }
+
+    fn checked_div(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_div(*rhs);
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(EvalexprError::division_error(
+                Value::<NumericTypes>::from_int(*self),
+                Value::<NumericTypes>::from_int(*rhs),
+            ))
+        }
+    }
+
+    fn checked_rem(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        let result = (*self).checked_rem(*rhs);
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(EvalexprError::modulation_error(
+                Value::<NumericTypes>::from_int(*self),
+                Value::<NumericTypes>::from_int(*rhs),
+            ))
+        }
+    }
+
+    fn abs(&self) -> EvalexprResult<Self, NumericTypes> {
+        todo!()
+    }
+
+    fn bitand(&self, rhs: &Self) -> Self {
+        todo!()
+    }
+
+    fn bitor(&self, rhs: &Self) -> Self {
+        todo!()
+    }
+
+    fn bitxor(&self, rhs: &Self) -> Self {
+        todo!()
+    }
+
+    fn bitnot(&self) -> Self {
+        todo!()
+    }
+
+    fn bit_shift_left(&self, rhs: &Self) -> Self {
+        todo!()
+    }
+
+    fn bit_shift_right(&self, rhs: &Self) -> Self {
+        todo!()
+    }
+}
+
+impl<NumericTypes: EvalexprNumericTypes<Float = Self>> EvalexprFloat<NumericTypes> for f64 {
+    const MIN: Self = Self::NEG_INFINITY;
+    const MAX: Self = Self::INFINITY;
+
+    fn pow(&self, exponent: &Self) -> Self {
+        (*self).powf(*exponent)
+    }
+
+    fn ln(&self) -> Self {
+        (*self).ln()
     }
 }

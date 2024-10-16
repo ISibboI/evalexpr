@@ -2,49 +2,47 @@
 use regex::Regex;
 
 use crate::{
-    value::numeric_types::EvalexprNumericTypes, EvalexprError, Function, Value, ValueType,
-};
-use std::{
-    convert::TryFrom,
-    ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr},
+    value::numeric_types::{EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
+    EvalexprError, Function, Value, ValueType,
 };
 
 macro_rules! simple_math {
     ($func:ident) => {
-        Some(Function::new(|argument| {
+        Some(Function::new(|argument: &Value<NumericTypes>| {
             let num = argument.as_number()?;
             Ok(Value::Float(num.$func()))
         }))
     };
     ($func:ident, 2) => {
-        Some(Function::new(|argument| {
+        Some(Function::new(|argument: &Value<NumericTypes>| {
             let tuple = argument.as_fixed_len_tuple(2)?;
             let (a, b) = (tuple[0].as_number()?, tuple[1].as_number()?);
-            Ok(Value::Float(a.$func(b)))
+            Ok(Value::Float(a.$func(&b)))
         }))
     };
 }
 
 fn float_is<NumericTypes: EvalexprNumericTypes>(
-    func: fn(NumericTypes::Float) -> bool,
+    func: fn(&NumericTypes::Float) -> bool,
 ) -> Option<Function<NumericTypes>> {
-    Some(Function::new(move |argument| {
-        Ok(func(argument.as_number()?).into())
+    Some(Function::new(move |argument: &Value<NumericTypes>| {
+        Ok(func(&argument.as_number()?).into())
     }))
 }
 
 macro_rules! int_function {
     ($func:ident) => {
         Some(Function::new(|argument| {
-            let int = argument.as_int()?;
+            let int: NumericTypes::Int = argument.as_int()?;
             Ok(Value::Int(int.$func()))
         }))
     };
     ($func:ident, 2) => {
         Some(Function::new(|argument| {
             let tuple = argument.as_fixed_len_tuple(2)?;
-            let (a, b) = (tuple[0].as_int()?, tuple[1].as_int()?);
-            Ok(Value::Int(a.$func(b)))
+            let (a, b): (NumericTypes::Int, NumericTypes::Int) =
+                (tuple[0].as_int()?, tuple[1].as_int()?);
+            Ok(Value::Int(a.$func(&b)))
         }))
     };
 }
@@ -62,7 +60,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "math::exp" => simple_math!(exp),
         "math::exp2" => simple_math!(exp2),
         // Pow
-        "math::pow" => simple_math!(powf, 2),
+        "math::pow" => simple_math!(pow, 2),
         // Cos
         "math::cos" => simple_math!(cos),
         "math::acos" => simple_math!(acos),
@@ -89,14 +87,18 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "round" => simple_math!(round),
         "ceil" => simple_math!(ceil),
         // Float special values
-        "math::is_nan" => float_is(NumericTypes::float_is_nan),
-        "math::is_finite" => float_is(NumericTypes::float_is_finite),
-        "math::is_infinite" => float_is(NumericTypes::float_is_infinite),
-        "math::is_normal" => float_is(NumericTypes::float_is_normal),
-        // Absolute
+        "math::is_nan" => float_is(NumericTypes::Float::is_nan),
+        "math::is_finite" => float_is(NumericTypes::Float::is_finite),
+        "math::is_infinite" => float_is(NumericTypes::Float::is_infinite),
+        "math::is_normal" => float_is(NumericTypes::Float::is_normal),
+        // Absolute value
         "math::abs" => Some(Function::new(|argument| match argument {
-            Value::Float(num) => Ok(Value::Float(num.abs())),
-            Value::Int(num) => Ok(Value::Int(num.abs())),
+            Value::Float(num) => Ok(Value::Float(
+                <NumericTypes as EvalexprNumericTypes>::Float::abs(num),
+            )),
+            Value::Int(num) => Ok(Value::Int(
+                <NumericTypes as EvalexprNumericTypes>::Int::abs(num)?,
+            )),
             _ => Err(EvalexprError::expected_number(argument.clone())),
         })),
         // Other
@@ -113,13 +115,13 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "min" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
-            let mut min_int = NumericTypes::MAX_INT;
-            let mut min_float = NumericTypes::MAX_FLOAT;
+            let mut min_int = NumericTypes::Int::MAX;
+            let mut min_float = NumericTypes::Float::MAX;
             debug_assert!(min_float.is_infinite());
 
             for argument in arguments {
                 if let Value::Float(float) = argument {
-                    min_float = min_float.min(float);
+                    min_float = min_float.min(&float);
                 } else if let Value::Int(int) = argument {
                     min_int = min_int.min(int);
                 } else {
@@ -135,13 +137,13 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "max" => Some(Function::new(|argument| {
             let arguments = argument.as_tuple()?;
-            let mut max_int = NumericTypes::MIN_INT;
-            let mut max_float: NumericTypes::MIN_FLOAT;
+            let mut max_int = NumericTypes::Int::MIN;
+            let mut max_float = NumericTypes::Float::MIN;
             debug_assert!(max_float.is_infinite());
 
             for argument in arguments {
                 if let Value::Float(float) = argument {
-                    max_float = max_float.max(float);
+                    max_float = max_float.max(&float);
                 } else if let Value::Int(int) = argument {
                     max_int = max_int.max(int);
                 } else {
@@ -216,9 +218,9 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
-                Ok(Value::from(NumericTypes::int_from_usize(subject.len())))
+                Ok(Value::Int(NumericTypes::Int::from_usize(subject.len())?))
             } else if let Ok(subject) = argument.as_tuple() {
-                Ok(Value::from(NumericTypes::int_from_usize(subject.len())))
+                Ok(Value::Int(NumericTypes::Int::from_usize(subject.len())?))
             } else {
                 Err(EvalexprError::type_error(
                     argument.clone(),
@@ -276,10 +278,14 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "str::substring" => Some(Function::new(|argument| {
             let args = argument.as_ranged_len_tuple(2..=3)?;
             let subject = args[0].as_string()?;
-            let start = args[1].as_int()?;
-            let start = usize::try_from(start).map_err(|_| EvalexprError::OutOfBoundsAccess)?;
+            let start: NumericTypes::Int = args[1].as_int()?;
+            let start = start
+                .into_usize()
+                .map_err(|_| EvalexprError::OutOfBoundsAccess)?;
             let end = if let Some(end) = args.get(2) {
-                usize::try_from(end.as_int()?).map_err(|_| EvalexprError::OutOfBoundsAccess)?
+                let end: NumericTypes::Int = end.as_int()?;
+                end.into_usize()
+                    .map_err(|_| EvalexprError::OutOfBoundsAccess)?
             } else {
                 subject.len()
             };
@@ -291,15 +297,15 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         #[cfg(feature = "rand")]
         "random" => Some(Function::new(|argument| {
             argument.as_empty()?;
-            Ok(Value::Float(rand::random()))
+            Ok(Value::Float(NumericTypes::Float::random()?))
         })),
         // Bitwise operators
         "bitand" => int_function!(bitand, 2),
         "bitor" => int_function!(bitor, 2),
         "bitxor" => int_function!(bitxor, 2),
-        "bitnot" => int_function!(not),
-        "shl" => int_function!(shl, 2),
-        "shr" => int_function!(shr, 2),
+        "bitnot" => int_function!(bitnot),
+        "shl" => int_function!(bit_shift_left, 2),
+        "shr" => int_function!(bit_shift_right, 2),
         _ => None,
     }
 }

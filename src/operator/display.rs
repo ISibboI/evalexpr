@@ -4,7 +4,7 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::operator::*;
 
-impl Display for Operator {
+impl<NumericTypes: EvalexprNumericTypes> Display for Operator<NumericTypes> {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         use crate::operator::Operator::*;
         match self {

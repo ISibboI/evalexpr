@@ -1,6 +1,8 @@
 use crate::function::builtin::builtin_function;
 
-use crate::value::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes};
+use crate::value::numeric_types::{
+    DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes,
+};
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
 mod display;
@@ -204,15 +206,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                     result.push_str(&b);
                     Ok(Value::String(result))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_add(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::addition_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_add(&b).map(Value::Int)
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_number(), arguments[1].as_number())
                 {
                     Ok(Value::Float(a + b))
@@ -232,15 +226,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_sub(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::subtraction_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_sub(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? - arguments[1].as_number()?,
@@ -252,12 +238,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
-                    let result = a.checked_neg();
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::negation_error(arguments[0].clone()))
-                    }
+                    a.checked_neg().map(Value::Int)
                 } else {
                     Ok(Value::Float(-arguments[0].as_number()?))
                 }
@@ -268,7 +249,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    NumericTypes::int_checked_mul(&a, &b).map(Value::Int)
+                    a.checked_mul(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? * arguments[1].as_number()?,
@@ -281,15 +262,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_div(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::division_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_div(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? / arguments[1].as_number()?,
@@ -302,15 +275,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_rem(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::modulation_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_rem(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? % arguments[1].as_number()?,
@@ -323,7 +288,7 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
                 arguments[1].as_number()?;
 
                 Ok(Value::Float(
-                    arguments[0].as_number()?.powf(arguments[1].as_number()?),
+                    arguments[0].as_number()?.pow(&arguments[1].as_number()?),
                 ))
             },
             Eq => {
@@ -470,9 +435,11 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
     }
 
     /// Evaluates the operator with the given arguments and mutable context.
-    pub(crate) fn eval_mut<C: ContextWithMutableVariables>(
+    pub(crate) fn eval_mut<
+        C: ContextWithMutableVariables + Context<NumericTypes = NumericTypes>,
+    >(
         &self,
-        arguments: &[Value],
+        arguments: &[Value<NumericTypes>],
         context: &mut C,
     ) -> EvalexprResultValue<C::NumericTypes> {
         use crate::operator::Operator::*;

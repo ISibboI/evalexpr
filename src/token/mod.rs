@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     error::{EvalexprError, EvalexprResult},
-    value::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+    value::numeric_types::{DefaultNumericTypes, EvalexprInt, EvalexprNumericTypes},
 };
 
 mod display;
@@ -497,7 +497,7 @@ fn parse_dec_or_hex<NumericTypes: EvalexprNumericTypes>(
     literal: &str,
 ) -> Result<NumericTypes::Int, ()> {
     if let Some(literal) = literal.strip_prefix("0x") {
-        NumericTypes::int_from_hex_str(literal)
+        NumericTypes::Int::from_hex_str(literal)
     } else {
         NumericTypes::Int::from_str(literal).map_err(|_| ())
     }

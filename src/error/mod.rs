@@ -129,7 +129,7 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     /// An operator is used with a wrong combination of types.
     WrongTypeCombination {
         /// The operator that whose evaluation caused the error.
-        operator: Operator,
+        operator: Operator<NumericTypes>,
         /// The types that were used in the operator causing it to fail.
         actual: Vec<ValueType>,
     },
@@ -229,6 +229,12 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     /// A `usize` was attempted to be converted to an `int`, but it was out of range.
     IntFromUsize { usize_int: usize },
 
+    /// An `int` was attempted to be converted to a `usize`, but it was out of range.
+    IntIntoUsize { int: NumericTypes::Int },
+
+    /// The feature `rand` is not enabled, but required for the used function.
+    RandNotEnabled,
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }
@@ -261,7 +267,10 @@ impl<NumericTypes: EvalexprNumericTypes> EvalexprError<NumericTypes> {
     }
 
     /// Constructs `EvalexprError::WrongTypeCombination{operator, actual}`.
-    pub fn wrong_type_combination(operator: Operator, actual: Vec<ValueType>) -> Self {
+    pub fn wrong_type_combination(
+        operator: Operator<NumericTypes>,
+        actual: Vec<ValueType>,
+    ) -> Self {
         EvalexprError::WrongTypeCombination { operator, actual }
     }
 

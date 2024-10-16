@@ -144,6 +144,7 @@ impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericT
                 "The usize {} does not fit into the chosen integer type",
                 usize_int
             ),
+            RandNotEnabled => write!(f, "The feature 'rand' must be enabled to use randomness."),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

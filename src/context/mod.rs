@@ -9,7 +9,11 @@ use std::{collections::HashMap, iter, marker::PhantomData};
 use crate::{
     error::EvalexprResultValue,
     function::Function,
-    value::{numeric_types::EvalexprNumericTypes, value_type::ValueType, Value},
+    value::{
+        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        value_type::ValueType,
+        Value,
+    },
     EvalexprError, EvalexprResult,
 };
 
@@ -210,7 +214,7 @@ impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext
 /// This context is type-safe, meaning that an identifier that is assigned a value of some type once cannot be assigned a value of another type.
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-pub struct HashMapContext<NumericTypes: EvalexprNumericTypes> {
+pub struct HashMapContext<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     variables: HashMap<String, Value<NumericTypes>>,
     #[cfg_attr(feature = "serde_support", serde(skip))]
     functions: HashMap<String, Function<NumericTypes>>,
