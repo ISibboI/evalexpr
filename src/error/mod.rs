@@ -227,10 +227,16 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     OutOfBoundsAccess,
 
     /// A `usize` was attempted to be converted to an `int`, but it was out of range.
-    IntFromUsize { usize_int: usize },
+    IntFromUsize {
+        /// The `usize` that was attempted to be converted.
+        usize_int: usize,
+    },
 
     /// An `int` was attempted to be converted to a `usize`, but it was out of range.
-    IntIntoUsize { int: NumericTypes::Int },
+    IntIntoUsize {
+        /// The `int` that was attempted to be converted.
+        int: NumericTypes::Int,
+    },
 
     /// The feature `rand` is not enabled, but required for the used function.
     RandNotEnabled,

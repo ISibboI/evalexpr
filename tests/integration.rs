@@ -91,7 +91,7 @@ fn test_pow_examples() {
     assert_eq!(eval("1 ^ 4"), Ok(Value::Float(1.0)));
     assert_eq!(
         eval("6 ^ 4"),
-        Ok(Value::Float((6.0 as FloatType).powf(4.0)))
+        Ok(Value::Float((6.0 as DefaultFloatType).powf(4.0)))
     );
     assert_eq!(eval("1 ^ 4 + 2"), Ok(Value::Float(3.0)));
     assert_eq!(eval("2 ^ (4 + 2)"), Ok(Value::Float(64.0)));
@@ -292,7 +292,7 @@ fn test_capturing_functions() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as FloatType))
+                    Ok(Value::Float(float * three as DefaultFloatType))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
@@ -326,15 +326,15 @@ fn test_builtin_functions() {
     // Powers
     assert_eq!(
         eval("math::exp(2)"),
-        Ok(Value::Float((2.0 as FloatType).exp()))
+        Ok(Value::Float((2.0 as DefaultFloatType).exp()))
     );
     assert_eq!(
         eval("math::exp2(2)"),
-        Ok(Value::Float((2.0 as FloatType).exp2()))
+        Ok(Value::Float((2.0 as DefaultFloatType).exp2()))
     );
     assert_eq!(
         eval("math::pow(1.5, 1.3)"),
-        Ok(Value::Float((1.5 as FloatType).powf(1.3)))
+        Ok(Value::Float((1.5 as DefaultFloatType).powf(1.3)))
     );
     // Cos
     assert_eq!(eval("math::cos(0)"), Ok(Value::Float(1.0)));
@@ -353,7 +353,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::atanh(0)"), Ok(Value::Float(0.0)));
     assert_eq!(
         eval("math::atan2(1.2, -5.5)"),
-        Ok(Value::Float((1.2 as FloatType).atan2(-5.5)))
+        Ok(Value::Float((1.2 as DefaultFloatType).atan2(-5.5)))
     );
     // Root
     assert_eq!(eval("math::sqrt(25)"), Ok(Value::Float(5.0)));
@@ -361,7 +361,7 @@ fn test_builtin_functions() {
     // Hypotenuse
     assert_eq!(
         eval("math::hypot(8.2, 1.1)"),
-        Ok(Value::Float((8.2 as FloatType).hypot(1.1)))
+        Ok(Value::Float((8.2 as DefaultFloatType).hypot(1.1)))
     );
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
@@ -1664,7 +1664,7 @@ fn test_hashmap_context_clone_debug() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as FloatType))
+                    Ok(Value::Float(float * three as DefaultFloatType))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }

@@ -177,10 +177,12 @@ impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
         }
     }
 
+    /// Create a new `Value` from its corresponding raw float type.
     pub fn from_float(float: NumericTypes::Float) -> Self {
         Self::Float(float)
     }
 
+    /// Create a new `Value` from its corresponding raw int type.
     pub fn from_int(int: NumericTypes::Int) -> Self {
         Self::Int(int)
     }
