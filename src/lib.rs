@@ -568,7 +568,7 @@
 //! This crate is primarily distributed under the terms of the AGPL3 license.
 //! See [LICENSE](/LICENSE) for details.
 //! If you require a different licensing option for your project, contact me at `isibboi at gmail.com`.
-//! 
+//!
 //! Contributions to this crate are assumed to be licensed under the [MIT License](https://opensource.org/license/mit).
 //!
 
