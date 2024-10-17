@@ -1,4 +1,4 @@
-edition = "2018"
+edition = "2021"
 reorder_imports=true
 reorder_modules=true
 format_strings=true

@@ -91,7 +91,9 @@ fn test_pow_examples() {
     assert_eq!(eval("1 ^ 4"), Ok(Value::Float(1.0)));
     assert_eq!(
         eval("6 ^ 4"),
-        Ok(Value::Float((6.0 as FloatType).powf(4.0)))
+        Ok(Value::Float(
+            (6.0 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).powf(4.0)
+        ))
     );
     assert_eq!(eval("1 ^ 4 + 2"), Ok(Value::Float(3.0)));
     assert_eq!(eval("2 ^ (4 + 2)"), Ok(Value::Float(64.0)));
@@ -110,7 +112,7 @@ fn test_boolean_examples() {
 
 #[test]
 fn test_with_context() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context
         .set_value("tr".into(), Value::Boolean(true))
         .unwrap();
@@ -144,7 +146,7 @@ fn test_with_context() {
 
 #[test]
 fn test_functions() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context
         .set_function(
             "sub2".to_string(),
@@ -175,7 +177,7 @@ fn test_functions() {
 
 #[test]
 fn test_n_ary_functions() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context
         .set_function(
             "sub2".into(),
@@ -234,9 +236,11 @@ fn test_n_ary_functions() {
         .set_function(
             "count".into(),
             Function::new(|arguments| match arguments {
-                Value::Tuple(tuple) => Ok(Value::from(tuple.len() as IntType)),
-                Value::Empty => Ok(Value::from(0)),
-                _ => Ok(Value::from(1)),
+                Value::Tuple(tuple) => Ok(Value::from_int(
+                    tuple.len() as <DefaultNumericTypes as EvalexprNumericTypes>::Int
+                )),
+                Value::Empty => Ok(Value::from_int(0)),
+                _ => Ok(Value::from_int(1)),
             }),
         )
         .unwrap();
@@ -282,7 +286,7 @@ fn test_n_ary_functions() {
 
 #[test]
 fn test_capturing_functions() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     // this variable is captured by the function
     let three = 3;
     context
@@ -292,7 +296,9 @@ fn test_capturing_functions() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as FloatType))
+                    Ok(Value::Float(
+                        float * three as <DefaultNumericTypes as EvalexprNumericTypes>::Float,
+                    ))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
@@ -326,15 +332,21 @@ fn test_builtin_functions() {
     // Powers
     assert_eq!(
         eval("math::exp(2)"),
-        Ok(Value::Float((2.0 as FloatType).exp()))
+        Ok(Value::Float(
+            (2.0 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).exp()
+        ))
     );
     assert_eq!(
         eval("math::exp2(2)"),
-        Ok(Value::Float((2.0 as FloatType).exp2()))
+        Ok(Value::Float(
+            (2.0 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).exp2()
+        ))
     );
     assert_eq!(
         eval("math::pow(1.5, 1.3)"),
-        Ok(Value::Float((1.5 as FloatType).powf(1.3)))
+        Ok(Value::Float(
+            (1.5 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).powf(1.3)
+        ))
     );
     // Cos
     assert_eq!(eval("math::cos(0)"), Ok(Value::Float(1.0)));
@@ -353,7 +365,9 @@ fn test_builtin_functions() {
     assert_eq!(eval("math::atanh(0)"), Ok(Value::Float(0.0)));
     assert_eq!(
         eval("math::atan2(1.2, -5.5)"),
-        Ok(Value::Float((1.2 as FloatType).atan2(-5.5)))
+        Ok(Value::Float(
+            (1.2 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).atan2(-5.5)
+        ))
     );
     // Root
     assert_eq!(eval("math::sqrt(25)"), Ok(Value::Float(5.0)));
@@ -361,7 +375,9 @@ fn test_builtin_functions() {
     // Hypotenuse
     assert_eq!(
         eval("math::hypot(8.2, 1.1)"),
-        Ok(Value::Float((8.2 as FloatType).hypot(1.1)))
+        Ok(Value::Float(
+            (8.2 as <DefaultNumericTypes as EvalexprNumericTypes>::Float).hypot(1.1)
+        ))
     );
     // Rounding
     assert_eq!(eval("floor(1.1)"), Ok(Value::Float(1.0)));
@@ -595,13 +611,47 @@ fn test_errors() {
 
 #[test]
 fn test_no_panic() {
-    assert!(eval(&format!("{} + {}", IntType::MAX, IntType::MAX)).is_err());
-    assert!(eval(&format!("-{} - {}", IntType::MAX, IntType::MAX)).is_err());
-    assert!(eval(&format!("-(-{} - 1)", IntType::MAX)).is_err());
-    assert!(eval(&format!("{} * {}", IntType::MAX, IntType::MAX)).is_err());
-    assert!(eval(&format!("{} / {}", IntType::MAX, 0)).is_err());
-    assert!(eval(&format!("{} % {}", IntType::MAX, 0)).is_err());
-    assert!(eval(&format!("{} ^ {}", IntType::MAX, IntType::MAX)).is_ok());
+    assert!(eval(&format!(
+        "{} + {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "-{} - {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "-(-{} - 1)",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "{} * {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "{} / {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        0
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "{} % {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        0
+    ))
+    .is_err());
+    assert!(eval(&format!(
+        "{} ^ {}",
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+    ))
+    .is_ok());
     assert!(eval("if").is_err());
     assert!(eval("if()").is_err());
     assert!(eval("if(true, 1)").is_err());
@@ -612,7 +662,7 @@ fn test_no_panic() {
 
 #[test]
 fn test_shortcut_functions() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context
         .set_value("string".into(), Value::from("a string"))
         .unwrap();
@@ -890,17 +940,23 @@ fn test_shortcut_functions() {
     // With detour via build_operator_tree
 
     assert_eq!(
-        build_operator_tree("\"3.3\"").unwrap().eval_string(),
+        build_operator_tree::<DefaultNumericTypes>("\"3.3\"")
+            .unwrap()
+            .eval_string(),
         Ok("3.3".to_owned())
     );
     assert_eq!(
-        build_operator_tree("3.3").unwrap().eval_string(),
+        build_operator_tree::<DefaultNumericTypes>("3.3")
+            .unwrap()
+            .eval_string(),
         Err(EvalexprError::ExpectedString {
             actual: Value::Float(3.3)
         })
     );
     assert_eq!(
-        build_operator_tree("3..3").unwrap().eval_string(),
+        build_operator_tree::<DefaultNumericTypes>("3..3")
+            .unwrap()
+            .eval_string(),
         Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
     );
     assert_eq!(
@@ -944,15 +1000,24 @@ fn test_shortcut_functions() {
         Err(EvalexprError::VariableIdentifierNotFound("3..3".to_owned()))
     );
 
-    assert_eq!(build_operator_tree("3.3").unwrap().eval_float(), Ok(3.3));
     assert_eq!(
-        build_operator_tree("33").unwrap().eval_float(),
+        build_operator_tree::<DefaultNumericTypes>("3.3")
+            .unwrap()
+            .eval_float(),
+        Ok(3.3)
+    );
+    assert_eq!(
+        build_operator_tree::<DefaultNumericTypes>("33")
+            .unwrap()
+            .eval_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Int(33)
         })
     );
     assert_eq!(
-        build_operator_tree("asd()").unwrap().eval_float(),
+        build_operator_tree::<DefaultNumericTypes>("asd()")
+            .unwrap()
+            .eval_float(),
         Err(EvalexprError::FunctionIdentifierNotFound("asd".to_owned()))
     );
     assert_eq!(
@@ -996,15 +1061,24 @@ fn test_shortcut_functions() {
         Err(EvalexprError::VariableIdentifierNotFound("asd".to_owned()))
     );
 
-    assert_eq!(build_operator_tree("3").unwrap().eval_int(), Ok(3));
     assert_eq!(
-        build_operator_tree("3.3").unwrap().eval_int(),
+        build_operator_tree::<DefaultNumericTypes>("3")
+            .unwrap()
+            .eval_int(),
+        Ok(3)
+    );
+    assert_eq!(
+        build_operator_tree::<DefaultNumericTypes>("3.3")
+            .unwrap()
+            .eval_int(),
         Err(EvalexprError::ExpectedInt {
             actual: Value::Float(3.3)
         })
     );
     assert_eq!(
-        build_operator_tree("(,);.").unwrap().eval_int(),
+        build_operator_tree::<DefaultNumericTypes>("(,);.")
+            .unwrap()
+            .eval_int(),
         Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
     );
     assert_eq!(
@@ -1048,15 +1122,24 @@ fn test_shortcut_functions() {
         Err(EvalexprError::VariableIdentifierNotFound(".".to_owned()))
     );
 
-    assert_eq!(build_operator_tree("3").unwrap().eval_number(), Ok(3.0));
     assert_eq!(
-        build_operator_tree("true").unwrap().eval_number(),
+        build_operator_tree::<DefaultNumericTypes>("3")
+            .unwrap()
+            .eval_number(),
+        Ok(3.0)
+    );
+    assert_eq!(
+        build_operator_tree::<DefaultNumericTypes>("true")
+            .unwrap()
+            .eval_number(),
         Err(EvalexprError::ExpectedNumber {
             actual: Value::Boolean(true)
         })
     );
     assert_eq!(
-        build_operator_tree("abc").unwrap().eval_number(),
+        build_operator_tree::<DefaultNumericTypes>("abc")
+            .unwrap()
+            .eval_number(),
         Err(EvalexprError::VariableIdentifierNotFound("abc".to_owned()))
     );
     assert_eq!(
@@ -1101,17 +1184,23 @@ fn test_shortcut_functions() {
     );
 
     assert_eq!(
-        build_operator_tree("true").unwrap().eval_boolean(),
+        build_operator_tree::<DefaultNumericTypes>("true")
+            .unwrap()
+            .eval_boolean(),
         Ok(true)
     );
     assert_eq!(
-        build_operator_tree("4").unwrap().eval_boolean(),
+        build_operator_tree::<DefaultNumericTypes>("4")
+            .unwrap()
+            .eval_boolean(),
         Err(EvalexprError::ExpectedBoolean {
             actual: Value::Int(4)
         })
     );
     assert_eq!(
-        build_operator_tree("trueee").unwrap().eval_boolean(),
+        build_operator_tree::<DefaultNumericTypes>("trueee")
+            .unwrap()
+            .eval_boolean(),
         Err(EvalexprError::VariableIdentifierNotFound(
             "trueee".to_owned()
         ))
@@ -1162,17 +1251,23 @@ fn test_shortcut_functions() {
     );
 
     assert_eq!(
-        build_operator_tree("3,3").unwrap().eval_tuple(),
+        build_operator_tree::<DefaultNumericTypes>("3,3")
+            .unwrap()
+            .eval_tuple(),
         Ok(vec![Value::Int(3), Value::Int(3)])
     );
     assert_eq!(
-        build_operator_tree("33").unwrap().eval_tuple(),
+        build_operator_tree::<DefaultNumericTypes>("33")
+            .unwrap()
+            .eval_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::Int(33)
         })
     );
     assert_eq!(
-        build_operator_tree("3a3").unwrap().eval_tuple(),
+        build_operator_tree::<DefaultNumericTypes>("3a3")
+            .unwrap()
+            .eval_tuple(),
         Err(EvalexprError::VariableIdentifierNotFound("3a3".to_owned()))
     );
     assert_eq!(
@@ -1217,21 +1312,29 @@ fn test_shortcut_functions() {
     );
 
     assert_eq!(
-        build_operator_tree("").unwrap().eval_empty(),
+        build_operator_tree::<DefaultNumericTypes>("")
+            .unwrap()
+            .eval_empty(),
         Ok(EMPTY_VALUE)
     );
     assert_eq!(
-        build_operator_tree("()").unwrap().eval_empty(),
+        build_operator_tree::<DefaultNumericTypes>("()")
+            .unwrap()
+            .eval_empty(),
         Ok(EMPTY_VALUE)
     );
     assert_eq!(
-        build_operator_tree("(,)").unwrap().eval_empty(),
+        build_operator_tree::<DefaultNumericTypes>("(,)")
+            .unwrap()
+            .eval_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Tuple(vec![Value::Empty, Value::Empty])
         })
     );
     assert_eq!(
-        build_operator_tree("xaq").unwrap().eval_empty(),
+        build_operator_tree::<DefaultNumericTypes>("xaq")
+            .unwrap()
+            .eval_empty(),
         Err(EvalexprError::VariableIdentifierNotFound("xaq".to_owned()))
     );
     assert_eq!(
@@ -1295,7 +1398,7 @@ fn test_whitespace() {
 
 #[test]
 fn test_assignment() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     assert_eq!(
         eval_empty_with_context_mut("int = 3", &mut context),
         Ok(EMPTY_VALUE)
@@ -1321,7 +1424,7 @@ fn test_assignment() {
     assert_eq!(eval_float_with_context("float", &context), Ok(2.0));
     assert_eq!(
         eval_tuple_with_context("tuple", &context),
-        Ok(vec![1.into(), 1.into()])
+        Ok(vec![Value::from_int(1), Value::from_int(1)])
     );
     assert_eq!(eval_empty_with_context("empty", &context), Ok(EMPTY_VALUE));
     assert_eq!(eval_boolean_with_context("boolean", &context), Ok(false));
@@ -1335,7 +1438,7 @@ fn test_assignment() {
 
 #[test]
 fn test_expression_chaining() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     assert_eq!(
         eval_int_with_context_mut("a = 5; a = a + 2; a", &mut context),
         Ok(7)
@@ -1344,7 +1447,7 @@ fn test_expression_chaining() {
 
 #[test]
 fn test_strings() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     assert_eq!(eval("\"string\""), Ok(Value::from("string")));
     assert_eq!(
         eval_with_context_mut("a = \"a string\"", &mut context),
@@ -1381,45 +1484,56 @@ fn test_tuple_definitions() {
     assert_eq!(eval_int("(3)"), Ok(3));
     assert_eq!(
         eval_tuple("(3, 4)"),
-        Ok(vec![Value::from(3), Value::from(4)])
+        Ok(vec![Value::from_int(3), Value::from_int(4)])
     );
     assert_eq!(
         eval_tuple("2, (5, 6)"),
         Ok(vec![
-            Value::from(2),
-            Value::from(vec![Value::from(5), Value::from(6)])
+            Value::from_int(2),
+            Value::from(vec![Value::from_int(5), Value::from_int(6)])
         ])
     );
-    assert_eq!(eval_tuple("1, 2"), Ok(vec![Value::from(1), Value::from(2)]));
+    assert_eq!(
+        eval_tuple("1, 2"),
+        Ok(vec![Value::from_int(1), Value::from_int(2)])
+    );
     assert_eq!(
         eval_tuple("1, 2, 3, 4"),
         Ok(vec![
-            Value::from(1),
-            Value::from(2),
-            Value::from(3),
-            Value::from(4)
+            Value::from_int(1),
+            Value::from_int(2),
+            Value::from_int(3),
+            Value::from_int(4)
         ])
     );
     assert_eq!(
         eval_tuple("(1, 2, 3), 5, 6, (true, false, 0)"),
         Ok(vec![
-            Value::from(vec![Value::from(1), Value::from(2), Value::from(3)]),
-            Value::from(5),
-            Value::from(6),
-            Value::from(vec![Value::from(true), Value::from(false), Value::from(0)])
+            Value::from(vec![
+                Value::from_int(1),
+                Value::from_int(2),
+                Value::from_int(3)
+            ]),
+            Value::from_int(5),
+            Value::from_int(6),
+            Value::from(vec![
+                Value::from(true),
+                Value::from(false),
+                Value::from_int(0)
+            ])
         ])
     );
     assert_eq!(
         eval_tuple("1, (2)"),
-        Ok(vec![Value::from(1), Value::from(2)])
+        Ok(vec![Value::from_int(1), Value::from_int(2)])
     );
     assert_eq!(
         eval_tuple("1, ()"),
-        Ok(vec![Value::from(1), Value::from(())])
+        Ok(vec![Value::from_int(1), Value::from(())])
     );
     assert_eq!(
         eval_tuple("1, ((2))"),
-        Ok(vec![Value::from(1), Value::from(2)])
+        Ok(vec![Value::from_int(1), Value::from_int(2)])
     );
 }
 
@@ -1442,7 +1556,7 @@ fn test_implicit_context() {
     assert_eq!(eval_empty("a = 2 + 4 * 2; b = -5 + 3 * 5;"), Ok(()));
     assert_eq!(
         eval_tuple("a = 2 + 4 * 2; b = -5 + 3 * 5; a, b + 0.5"),
-        Ok(vec![Value::from(10), Value::from(10.5)])
+        Ok(vec![Value::from_int(10), Value::from_float(10.5)])
     );
     assert_eq!(
         eval_string("a = \"xyz\"; b = \"abc\"; c = a + b; c"),
@@ -1452,7 +1566,7 @@ fn test_implicit_context() {
 
 #[test]
 fn test_operator_assignments() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(()));
     assert_eq!(eval_empty_with_context_mut("a += 5", &mut context), Ok(()));
     assert_eq!(eval_empty_with_context_mut("a -= 5", &mut context), Ok(()));
@@ -1474,7 +1588,7 @@ fn test_operator_assignments() {
         Ok(())
     );
 
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     assert_eq!(eval_int_with_context_mut("a = 5; a", &mut context), Ok(5));
     assert_eq!(eval_int_with_context_mut("a += 3; a", &mut context), Ok(8));
     assert_eq!(eval_int_with_context_mut("a -= 5; a", &mut context), Ok(3));
@@ -1531,7 +1645,7 @@ fn test_type_errors_in_binary_operators() {
 
 #[test]
 fn test_empty_context() {
-    let mut context = EmptyContext;
+    let mut context = EmptyContext::<DefaultNumericTypes>::default();
     assert_eq!(context.get_value("abc"), None);
     assert_eq!(
         context.call_function("abc", &Value::Empty),
@@ -1552,7 +1666,7 @@ fn test_empty_context() {
 
 #[test]
 fn test_empty_context_with_builtin_functions() {
-    let mut context = EmptyContextWithBuiltinFunctions;
+    let mut context = EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default();
     assert_eq!(context.get_value("abc"), None);
     assert_eq!(
         context.call_function("abc", &Value::Empty),
@@ -1568,7 +1682,8 @@ fn test_empty_context_with_builtin_functions() {
 
 #[test]
 fn test_hashmap_context_type_safety() {
-    let mut context = context_map! {"a" => 5, "b" => 5.0}.unwrap();
+    let mut context: HashMapContext<DefaultNumericTypes> =
+        context_map! {"a" => int 5, "b" => float 5.0}.unwrap();
     assert_eq!(
         eval_with_context_mut("a = 4", &mut context),
         Ok(Value::Empty)
@@ -1654,7 +1769,7 @@ fn test_hashmap_context_type_safety() {
 
 #[test]
 fn test_hashmap_context_clone_debug() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     // this variable is captured by the function
     let three = 3;
     context
@@ -1664,7 +1779,9 @@ fn test_hashmap_context_clone_debug() {
                 if let Value::Int(int) = argument {
                     Ok(Value::Int(int * three))
                 } else if let Value::Float(float) = argument {
-                    Ok(Value::Float(float * three as FloatType))
+                    Ok(Value::Float(
+                        float * three as <DefaultNumericTypes as EvalexprNumericTypes>::Float,
+                    ))
                 } else {
                     Err(EvalexprError::expected_number(argument.clone()))
                 }
@@ -1679,7 +1796,9 @@ fn test_hashmap_context_clone_debug() {
             Function::new(move |_| Ok(Value::Int(four))),
         )
         .unwrap();
-    context.set_value("variable_five".into(), 5.into()).unwrap();
+    context
+        .set_value("variable_five".into(), Value::from_int(5))
+        .unwrap();
     let context = context;
     #[allow(clippy::redundant_clone)]
     let cloned_context = context.clone();
@@ -1687,7 +1806,7 @@ fn test_hashmap_context_clone_debug() {
     assert_eq!(format!("{:?}", &context), format!("{:?}", &cloned_context));
     assert_eq!(
         cloned_context.get_value("variable_five"),
-        Some(&Value::from(5))
+        Some(&Value::from_int(5))
     );
     assert_eq!(
         eval_with_context("mult_3 2", &cloned_context),
@@ -1724,7 +1843,8 @@ fn test_error_constructors() {
         })
     );
     assert_eq!(
-        Value::Tuple(vec![Value::Int(4), Value::Int(5)]).as_fixed_len_tuple(3),
+        Value::Tuple(vec![Value::<DefaultNumericTypes>::Int(4), Value::Int(5)])
+            .as_fixed_len_tuple(3),
         Err(EvalexprError::ExpectedFixedLengthTuple {
             expected_length: 3,
             actual: Value::Tuple(vec![Value::Int(4), Value::Int(5)])
@@ -1744,9 +1864,12 @@ fn test_error_constructors() {
         })
     );
 
-    assert_eq!(expect_function_argument_amount(2, 2), Ok(()));
     assert_eq!(
-        expect_function_argument_amount(2, 3),
+        expect_function_argument_amount::<DefaultNumericTypes>(2, 2),
+        Ok(())
+    );
+    assert_eq!(
+        expect_function_argument_amount::<DefaultNumericTypes>(2, 3),
         Err(EvalexprError::WrongFunctionArgumentAmount {
             expected: 3..=3,
             actual: 2
@@ -1756,7 +1879,8 @@ fn test_error_constructors() {
 
 #[test]
 fn test_iterators() {
-    let tree = build_operator_tree("writevar = 5 + 3 + fun(4) + var").unwrap();
+    let tree =
+        build_operator_tree::<DefaultNumericTypes>("writevar = 5 + 3 + fun(4) + var").unwrap();
     let mut iter = tree.iter_identifiers();
     assert_eq!(iter.next(), Some("writevar"));
     assert_eq!(iter.next(), Some("fun"));
@@ -1786,34 +1910,35 @@ fn test_same_operator_chains() {
     #![allow(clippy::eq_op)]
     assert_eq!(
         eval("3.0 / 3.0 / 3.0 / 3.0"),
-        Ok(Value::from(3.0 / 3.0 / 3.0 / 3.0))
+        Ok(Value::from_float(3.0 / 3.0 / 3.0 / 3.0))
     );
     assert_eq!(
         eval("3.0 - 3.0 - 3.0 - 3.0"),
-        Ok(Value::from(3.0 - 3.0 - 3.0 - 3.0))
+        Ok(Value::from_float(3.0 - 3.0 - 3.0 - 3.0))
     );
 }
 
 #[test]
 fn test_long_expression_i89() {
-    let tree = build_operator_tree(
+    let tree = build_operator_tree::<DefaultNumericTypes>(
         "x*0.2*5/4+x*2*4*1*1*1*1*1*1*1+7*math::sin(y)-z/math::sin(3.0/2.0/(1-x*4*1*1*1*1))",
     )
     .unwrap();
     let x = 0.0;
-    let y: FloatType = 3.0;
+    let y: <DefaultNumericTypes as EvalexprNumericTypes>::Float = 3.0;
     let z = 4.0;
     let context = context_map! {
-        "x" => 0.0,
-        "y" => 3.0,
-        "z" => 4.0
+        "x" => float 0.0,
+        "y" => float 3.0,
+        "z" => float 4.0
     }
     .unwrap();
     let expected = x * 0.2 * 5.0 / 4.0
         + x * 2.0 * 4.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0 * 1.0
         + 7.0 * y.sin()
         - z / (3.0 / 2.0 / (1.0 - x * 4.0 * 1.0 * 1.0 * 1.0 * 1.0)).sin();
-    let actual: FloatType = tree.eval_float_with_context(&context).unwrap();
+    let actual: <DefaultNumericTypes as EvalexprNumericTypes>::Float =
+        tree.eval_float_with_context(&context).unwrap();
     assert!(
         (expected - actual).abs() < expected.abs().min(actual.abs()) * 1e-12,
         "expected: {}, actual: {}",
@@ -1825,178 +1950,205 @@ fn test_long_expression_i89() {
 #[test]
 fn test_value_type() {
     assert_eq!(
-        ValueType::from(&Value::String(String::new())),
+        ValueType::from(&Value::<DefaultNumericTypes>::String(String::new())),
         ValueType::String
     );
-    assert_eq!(ValueType::from(&Value::Float(0.0)), ValueType::Float);
-    assert_eq!(ValueType::from(&Value::Int(0)), ValueType::Int);
-    assert_eq!(ValueType::from(&Value::Boolean(true)), ValueType::Boolean);
-    assert_eq!(ValueType::from(&Value::Tuple(Vec::new())), ValueType::Tuple);
-    assert_eq!(ValueType::from(&Value::Empty), ValueType::Empty);
-
     assert_eq!(
-        ValueType::from(&mut Value::String(String::new())),
-        ValueType::String
+        ValueType::from(&Value::<DefaultNumericTypes>::Float(0.0)),
+        ValueType::Float
     );
-    assert_eq!(ValueType::from(&mut Value::Float(0.0)), ValueType::Float);
-    assert_eq!(ValueType::from(&mut Value::Int(0)), ValueType::Int);
     assert_eq!(
-        ValueType::from(&mut Value::Boolean(true)),
+        ValueType::from(&Value::<DefaultNumericTypes>::Int(0)),
+        ValueType::Int
+    );
+    assert_eq!(
+        ValueType::from(&Value::<DefaultNumericTypes>::Boolean(true)),
         ValueType::Boolean
     );
     assert_eq!(
-        ValueType::from(&mut Value::Tuple(Vec::new())),
+        ValueType::from(&Value::<DefaultNumericTypes>::Tuple(Vec::new())),
         ValueType::Tuple
     );
-    assert_eq!(ValueType::from(&mut Value::Empty), ValueType::Empty);
-
-    assert!(!Value::String(String::new()).is_number());
-    assert!(Value::Float(0.0).is_number());
-    assert!(Value::Int(0).is_number());
-    assert!(!Value::Boolean(true).is_number());
-    assert!(!Value::Tuple(Vec::new()).is_number());
-    assert!(!Value::Empty.is_number());
-
-    assert!(!Value::String(String::new()).is_empty());
-    assert!(!Value::Float(0.0).is_empty());
-    assert!(!Value::Int(0).is_empty());
-    assert!(!Value::Boolean(true).is_empty());
-    assert!(!Value::Tuple(Vec::new()).is_empty());
-    assert!(Value::Empty.is_empty());
+    assert_eq!(
+        ValueType::from(&Value::<DefaultNumericTypes>::Empty),
+        ValueType::Empty
+    );
 
     assert_eq!(
-        Value::String(String::new()).as_float(),
+        ValueType::from(&mut Value::<DefaultNumericTypes>::String(String::new())),
+        ValueType::String
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::<DefaultNumericTypes>::Float(0.0)),
+        ValueType::Float
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::<DefaultNumericTypes>::Int(0)),
+        ValueType::Int
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::<DefaultNumericTypes>::Boolean(true)),
+        ValueType::Boolean
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::<DefaultNumericTypes>::Tuple(Vec::new())),
+        ValueType::Tuple
+    );
+    assert_eq!(
+        ValueType::from(&mut Value::<DefaultNumericTypes>::Empty),
+        ValueType::Empty
+    );
+
+    assert!(!Value::<DefaultNumericTypes>::String(String::new()).is_number());
+    assert!(Value::<DefaultNumericTypes>::Float(0.0).is_number());
+    assert!(Value::<DefaultNumericTypes>::Int(0).is_number());
+    assert!(!Value::<DefaultNumericTypes>::Boolean(true).is_number());
+    assert!(!Value::<DefaultNumericTypes>::Tuple(Vec::new()).is_number());
+    assert!(!Value::<DefaultNumericTypes>::Empty.is_number());
+
+    assert!(!Value::<DefaultNumericTypes>::String(String::new()).is_empty());
+    assert!(!Value::<DefaultNumericTypes>::Float(0.0).is_empty());
+    assert!(!Value::<DefaultNumericTypes>::Int(0).is_empty());
+    assert!(!Value::<DefaultNumericTypes>::Boolean(true).is_empty());
+    assert!(!Value::<DefaultNumericTypes>::Tuple(Vec::new()).is_empty());
+    assert!(Value::<DefaultNumericTypes>::Empty.is_empty());
+
+    assert_eq!(
+        Value::<DefaultNumericTypes>::String(String::new()).as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::String(String::new())
         })
     );
-    assert_eq!(Value::Float(0.0).as_float(), Ok(0.0));
+    assert_eq!(Value::<DefaultNumericTypes>::Float(0.0).as_float(), Ok(0.0));
     assert_eq!(
-        Value::Int(0).as_float(),
+        Value::<DefaultNumericTypes>::Int(0).as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Int(0)
         })
     );
     assert_eq!(
-        Value::Boolean(true).as_float(),
+        Value::<DefaultNumericTypes>::Boolean(true).as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Boolean(true)
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_float(),
+        Value::<DefaultNumericTypes>::Tuple(Vec::new()).as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Tuple(Vec::new())
         })
     );
     assert_eq!(
-        Value::Empty.as_float(),
+        Value::<DefaultNumericTypes>::Empty.as_float(),
         Err(EvalexprError::ExpectedFloat {
             actual: Value::Empty
         })
     );
 
     assert_eq!(
-        Value::String(String::new()).as_tuple(),
+        Value::<DefaultNumericTypes>::String(String::new()).as_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::String(String::new())
         })
     );
     assert_eq!(
-        Value::Float(0.0).as_tuple(),
+        Value::<DefaultNumericTypes>::Float(0.0).as_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::Float(0.0)
         })
     );
     assert_eq!(
-        Value::Int(0).as_tuple(),
+        Value::<DefaultNumericTypes>::Int(0).as_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::Int(0)
         })
     );
     assert_eq!(
-        Value::Boolean(true).as_tuple(),
-        Err(EvalexprError::ExpectedTuple {
-            actual: Value::Boolean(true)
-        })
-    );
-    assert_eq!(Value::Tuple(Vec::new()).as_tuple(), Ok(Vec::new()));
-    assert_eq!(
-        Value::Empty.as_tuple(),
-        Err(EvalexprError::ExpectedTuple {
-            actual: Value::Empty
-        })
-    );
-
-    assert_eq!(
-        Value::String(String::new()).as_fixed_len_tuple(0),
-        Err(EvalexprError::ExpectedTuple {
-            actual: Value::String(String::new())
-        })
-    );
-    assert_eq!(
-        Value::Float(0.0).as_fixed_len_tuple(0),
-        Err(EvalexprError::ExpectedTuple {
-            actual: Value::Float(0.0)
-        })
-    );
-    assert_eq!(
-        Value::Int(0).as_fixed_len_tuple(0),
-        Err(EvalexprError::ExpectedTuple {
-            actual: Value::Int(0)
-        })
-    );
-    assert_eq!(
-        Value::Boolean(true).as_fixed_len_tuple(0),
+        Value::<DefaultNumericTypes>::Boolean(true).as_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::Boolean(true)
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_fixed_len_tuple(0),
+        Value::<DefaultNumericTypes>::Tuple(Vec::new()).as_tuple(),
         Ok(Vec::new())
     );
     assert_eq!(
-        Value::Empty.as_fixed_len_tuple(0),
+        Value::<DefaultNumericTypes>::Empty.as_tuple(),
         Err(EvalexprError::ExpectedTuple {
             actual: Value::Empty
         })
     );
 
     assert_eq!(
-        Value::String(String::new()).as_empty(),
+        Value::<DefaultNumericTypes>::String(String::new()).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::String(String::new())
+        })
+    );
+    assert_eq!(
+        Value::<DefaultNumericTypes>::Float(0.0).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Float(0.0)
+        })
+    );
+    assert_eq!(
+        Value::<DefaultNumericTypes>::Int(0).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Int(0)
+        })
+    );
+    assert_eq!(
+        Value::<DefaultNumericTypes>::Boolean(true).as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Boolean(true)
+        })
+    );
+    assert_eq!(
+        Value::<DefaultNumericTypes>::Tuple(Vec::new()).as_fixed_len_tuple(0),
+        Ok(Vec::new())
+    );
+    assert_eq!(
+        Value::<DefaultNumericTypes>::Empty.as_fixed_len_tuple(0),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Empty
+        })
+    );
+
+    assert_eq!(
+        Value::<DefaultNumericTypes>::String(String::new()).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::String(String::new())
         })
     );
     assert_eq!(
-        Value::Float(0.0).as_empty(),
+        Value::<DefaultNumericTypes>::Float(0.0).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Float(0.0)
         })
     );
     assert_eq!(
-        Value::Int(0).as_empty(),
+        Value::<DefaultNumericTypes>::Int(0).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Int(0)
         })
     );
     assert_eq!(
-        Value::Boolean(true).as_empty(),
+        Value::<DefaultNumericTypes>::Boolean(true).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Boolean(true)
         })
     );
     assert_eq!(
-        Value::Tuple(Vec::new()).as_empty(),
+        Value::<DefaultNumericTypes>::Tuple(Vec::new()).as_empty(),
         Err(EvalexprError::ExpectedEmpty {
             actual: Value::Tuple(Vec::new())
         })
     );
-    assert_eq!(Value::Empty.as_empty(), Ok(()));
+    assert_eq!(Value::<DefaultNumericTypes>::Empty.as_empty(), Ok(()));
 
     assert_eq!(
-        Result::from(Value::String(String::new())),
+        Result::from(Value::<DefaultNumericTypes>::String(String::new())),
         Ok(Value::String(String::new()))
     );
 }
@@ -2021,8 +2173,8 @@ fn test_parenthese_combinations() {
         Err(EvalexprError::MissingOperatorOutsideOfBrace)
     );
     assert_eq!(
-        eval_with_context("a+100(a*2)", &context_map! {"a" => 4}.unwrap()),
-        Err(EvalexprError::MissingOperatorOutsideOfBrace)
+        eval_with_context("a+100(a*2)", &context_map! {"a" => int 4}.unwrap()),
+        Err(EvalexprError::<DefaultNumericTypes>::MissingOperatorOutsideOfBrace)
     );
     assert_eq!(eval_int("(((1+2)*(3+4)+(5-(6)))/((7-8)))"), Ok(-20));
     assert_eq!(eval_int("(((((5)))))"), Ok(5));
@@ -2032,17 +2184,31 @@ fn test_parenthese_combinations() {
 fn test_try_from() {
     #![allow(clippy::redundant_clone)]
 
-    let value = Value::String("abc".to_string());
+    let value = Value::<DefaultNumericTypes>::String("abc".to_string());
     assert_eq!(String::try_from(value.clone()), Ok("abc".to_string()));
     assert_eq!(
-        FloatType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedFloat {
+        bool::try_from(value.clone()),
+        Err(EvalexprError::ExpectedBoolean {
             actual: value.clone()
         })
     );
     assert_eq!(
-        IntType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedInt {
+        TupleType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedTuple {
+            actual: value.clone()
+        })
+    );
+    assert_eq!(
+        EmptyType::try_from(value.clone()),
+        Err(EvalexprError::ExpectedEmpty {
+            actual: value.clone()
+        })
+    );
+
+    let value = Value::<DefaultNumericTypes>::Float(1.3);
+    assert_eq!(
+        String::try_from(value.clone()),
+        Err(EvalexprError::ExpectedString {
             actual: value.clone()
         })
     );
@@ -2065,17 +2231,10 @@ fn test_try_from() {
         })
     );
 
-    let value = Value::Float(1.3);
+    let value = Value::<DefaultNumericTypes>::Int(13);
     assert_eq!(
         String::try_from(value.clone()),
         Err(EvalexprError::ExpectedString {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(FloatType::try_from(value.clone()), Ok(1.3));
-    assert_eq!(
-        IntType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedInt {
             actual: value.clone()
         })
     );
@@ -2098,55 +2257,10 @@ fn test_try_from() {
         })
     );
 
-    let value = Value::Int(13);
+    let value = Value::<DefaultNumericTypes>::Boolean(true);
     assert_eq!(
         String::try_from(value.clone()),
         Err(EvalexprError::ExpectedString {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        FloatType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedFloat {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(IntType::try_from(value.clone()), Ok(13));
-    assert_eq!(
-        bool::try_from(value.clone()),
-        Err(EvalexprError::ExpectedBoolean {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        TupleType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedTuple {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        EmptyType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedEmpty {
-            actual: value.clone()
-        })
-    );
-
-    let value = Value::Boolean(true);
-    assert_eq!(
-        String::try_from(value.clone()),
-        Err(EvalexprError::ExpectedString {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        FloatType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedFloat {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        IntType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedInt {
             actual: value.clone()
         })
     );
@@ -2164,22 +2278,11 @@ fn test_try_from() {
         })
     );
 
-    let value = Value::Tuple(vec![Value::Int(1), Value::String("abc".to_string())]);
+    let value =
+        Value::<DefaultNumericTypes>::Tuple(vec![Value::Int(1), Value::String("abc".to_string())]);
     assert_eq!(
         String::try_from(value.clone()),
         Err(EvalexprError::ExpectedString {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        FloatType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedFloat {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        IntType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedInt {
             actual: value.clone()
         })
     );
@@ -2200,22 +2303,10 @@ fn test_try_from() {
         })
     );
 
-    let value = Value::Empty;
+    let value = Value::<DefaultNumericTypes>::Empty;
     assert_eq!(
         String::try_from(value.clone()),
         Err(EvalexprError::ExpectedString {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        FloatType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedFloat {
-            actual: value.clone()
-        })
-    );
-    assert_eq!(
-        IntType::try_from(value.clone()),
-        Err(EvalexprError::ExpectedInt {
             actual: value.clone()
         })
     );
@@ -2239,7 +2330,7 @@ fn assignment_lhs_is_identifier() {
     let tree = build_operator_tree("a = 1").unwrap();
     let operators: Vec<_> = tree.iter().map(|node| node.operator().clone()).collect();
 
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     tree.eval_with_context_mut(&mut context).unwrap();
     assert_eq!(context.get_value("a"), Some(&Value::Int(1)));
 
@@ -2261,14 +2352,17 @@ fn assignment_lhs_is_identifier() {
 
 #[test]
 fn test_variable_assignment_and_iteration() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     eval_with_context_mut("a = 5; b = 5.0", &mut context).unwrap();
 
     let mut variables: Vec<_> = context.iter_variables().collect();
     variables.sort_unstable_by(|(name_a, _), (name_b, _)| name_a.cmp(name_b));
     assert_eq!(
         variables,
-        vec![("a".to_string(), 5.into()), ("b".to_string(), 5.0.into())],
+        vec![
+            ("a".to_string(), Value::from_int(5)),
+            ("b".to_string(), Value::from_float(5.0))
+        ],
     );
 
     let mut variables: Vec<_> = context.iter_variable_names().collect();
@@ -2278,7 +2372,10 @@ fn test_variable_assignment_and_iteration() {
 
 #[test]
 fn test_negative_power() {
-    println!("{:?}", build_operator_tree("3^-2").unwrap());
+    println!(
+        "{:?}",
+        build_operator_tree::<DefaultNumericTypes>("3^-2").unwrap()
+    );
     assert_eq!(eval("3^-2"), Ok(Value::Float(1.0 / 9.0)));
     assert_eq!(eval("3^(-2)"), Ok(Value::Float(1.0 / 9.0)));
     assert_eq!(eval("-3^2"), Ok(Value::Float(-9.0)));
@@ -2289,9 +2386,12 @@ fn test_negative_power() {
 
 #[test]
 fn test_builtin_functions_context() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     // Builtin functions are enabled by default for HashMapContext.
-    assert_eq!(eval_with_context("max(1,3)", &context), Ok(Value::from(3)));
+    assert_eq!(
+        eval_with_context("max(1,3)", &context),
+        Ok(Value::from_int(3))
+    );
     // Disabling builtin function in Context.
     context.set_builtin_functions_disabled(true).unwrap();
     // Builtin functions are disabled and using them returns an error.
@@ -2357,7 +2457,7 @@ fn test_comments() {
 
 #[test]
 fn test_clear() {
-    let mut context = HashMapContext::new();
+    let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context.set_value("abc".into(), "def".into()).unwrap();
     assert_eq!(context.get_value("abc"), Some(&("def".into())));
     context.clear_functions();
@@ -2383,7 +2483,9 @@ fn test_clear() {
     context.clear_functions();
     assert!(eval_with_context("abc(5)", &context).is_err());
 
-    context.set_value("five".into(), 5.into()).unwrap();
+    context
+        .set_value("five".into(), Value::from_int(5))
+        .unwrap();
     context
         .set_function(
             "abc".into(),

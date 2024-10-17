@@ -1,12 +1,15 @@
 use crate::function::builtin::builtin_function;
 
+use crate::value::numeric_types::{
+    DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes,
+};
 use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
 mod display;
 
 /// An enum that represents operators in the operator tree.
 #[derive(Debug, PartialEq, Clone)]
-pub enum Operator {
+pub enum Operator<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// A root node in the operator tree.
     /// The whole expression is stored under a root node, as well as each subexpression surrounded by parentheses.
     RootNode,
@@ -72,7 +75,7 @@ pub enum Operator {
     /// A constant value.
     Const {
         /** The value of the constant. */
-        value: Value,
+        value: Value<NumericTypes>,
     },
     /// A write to a variable identifier.
     VariableIdentifierWrite {
@@ -91,8 +94,8 @@ pub enum Operator {
     },
 }
 
-impl Operator {
-    pub(crate) fn value(value: Value) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
+    pub(crate) fn value(value: Value<NumericTypes>) -> Self {
         Operator::Const { value }
     }
 
@@ -178,11 +181,11 @@ impl Operator {
     }
 
     /// Evaluates the operator with the given arguments and context.
-    pub(crate) fn eval<C: Context>(
+    pub(crate) fn eval<C: Context<NumericTypes = NumericTypes>>(
         &self,
-        arguments: &[Value],
+        arguments: &[Value<NumericTypes>],
         context: &C,
-    ) -> EvalexprResult<Value> {
+    ) -> EvalexprResultValue<NumericTypes> {
         use crate::operator::Operator::*;
         match self {
             RootNode => {
@@ -203,15 +206,7 @@ impl Operator {
                     result.push_str(&b);
                     Ok(Value::String(result))
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_add(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::addition_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_add(&b).map(Value::Int)
                 } else if let (Ok(a), Ok(b)) = (arguments[0].as_number(), arguments[1].as_number())
                 {
                     Ok(Value::Float(a + b))
@@ -231,15 +226,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_sub(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::subtraction_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_sub(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? - arguments[1].as_number()?,
@@ -251,12 +238,7 @@ impl Operator {
                 arguments[0].as_number()?;
 
                 if let Ok(a) = arguments[0].as_int() {
-                    let result = a.checked_neg();
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::negation_error(arguments[0].clone()))
-                    }
+                    a.checked_neg().map(Value::Int)
                 } else {
                     Ok(Value::Float(-arguments[0].as_number()?))
                 }
@@ -267,15 +249,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_mul(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::multiplication_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_mul(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? * arguments[1].as_number()?,
@@ -288,15 +262,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_div(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::division_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_div(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? / arguments[1].as_number()?,
@@ -309,15 +275,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 if let (Ok(a), Ok(b)) = (arguments[0].as_int(), arguments[1].as_int()) {
-                    let result = a.checked_rem(b);
-                    if let Some(result) = result {
-                        Ok(Value::Int(result))
-                    } else {
-                        Err(EvalexprError::modulation_error(
-                            arguments[0].clone(),
-                            arguments[1].clone(),
-                        ))
-                    }
+                    a.checked_rem(&b).map(Value::Int)
                 } else {
                     Ok(Value::Float(
                         arguments[0].as_number()? % arguments[1].as_number()?,
@@ -330,7 +288,7 @@ impl Operator {
                 arguments[1].as_number()?;
 
                 Ok(Value::Float(
-                    arguments[0].as_number()?.powf(arguments[1].as_number()?),
+                    arguments[0].as_number()?.pow(&arguments[1].as_number()?),
                 ))
             },
             Eq => {
@@ -477,11 +435,13 @@ impl Operator {
     }
 
     /// Evaluates the operator with the given arguments and mutable context.
-    pub(crate) fn eval_mut<C: ContextWithMutableVariables>(
+    pub(crate) fn eval_mut<
+        C: ContextWithMutableVariables + Context<NumericTypes = NumericTypes>,
+    >(
         &self,
-        arguments: &[Value],
+        arguments: &[Value<NumericTypes>],
         context: &mut C,
-    ) -> EvalexprResult<Value> {
+    ) -> EvalexprResultValue<C::NumericTypes> {
         use crate::operator::Operator::*;
         match self {
             Assign => {

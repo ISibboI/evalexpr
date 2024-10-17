@@ -6,6 +6,7 @@ on:
 
 env:
   RUSTFLAGS: -Dwarnings
+  RUSTDOCFLAGS: -Dwarnings
 
 jobs:
   rust_check:
@@ -58,6 +59,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with: 
+          toolchain: stable
           components: rustfmt
 
       - name: cargo format
@@ -138,6 +140,8 @@ jobs:
 
       - name: Install toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
 
       - name: cargo doc
         run: cargo doc --all-features
@@ -178,7 +182,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: CLI
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: cargo run -- p = 2\; p + 3
           contains: 5

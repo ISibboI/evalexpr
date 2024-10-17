@@ -1,20 +1,20 @@
-use crate::{interface::build_operator_tree, Node};
+use crate::{interface::build_operator_tree, EvalexprNumericTypes, Node};
 use serde::{de, Deserialize, Deserializer};
-use std::fmt;
+use std::{fmt, marker::PhantomData};
 
-impl<'de> Deserialize<'de> for Node {
+impl<'de, NumericTypes: EvalexprNumericTypes> Deserialize<'de> for Node<NumericTypes> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_str(NodeVisitor)
+        deserializer.deserialize_str(NodeVisitor(PhantomData))
     }
 }
 
-struct NodeVisitor;
+struct NodeVisitor<NumericTypes: EvalexprNumericTypes>(PhantomData<NumericTypes>);
 
-impl de::Visitor<'_> for NodeVisitor {
-    type Value = Node;
+impl<NumericTypes: EvalexprNumericTypes> de::Visitor<'_> for NodeVisitor<NumericTypes> {
+    type Value = Node<NumericTypes>;
 
     fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(

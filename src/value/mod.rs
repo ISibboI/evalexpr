@@ -1,17 +1,14 @@
-use crate::error::{EvalexprError, EvalexprResult};
+use crate::error::{EvalexprError, EvalexprResult, EvalexprResultValue};
 use std::{convert::TryFrom, ops::RangeInclusive};
 
+use self::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes};
+
 mod display;
+pub mod numeric_types;
 pub mod value_type;
 
-/// The type used to represent integers in `Value::Int`.
-pub type IntType = i64;
-
-/// The type used to represent floats in `Value::Float`.
-pub type FloatType = f64;
-
 /// The type used to represent tuples in `Value::Tuple`.
-pub type TupleType = Vec<Value>;
+pub type TupleType<NumericTypes = DefaultNumericTypes> = Vec<Value<NumericTypes>>;
 
 /// The type used to represent empty values in `Value::Empty`.
 pub type EmptyType = ();
@@ -22,23 +19,23 @@ pub const EMPTY_VALUE: () = ();
 /// The value type used by the parser.
 /// Values can be of different subtypes that are the variants of this enum.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-pub enum Value {
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum Value<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes> {
     /// A string value.
     String(String),
     /// A float value.
-    Float(FloatType),
+    Float(NumericTypes::Float),
     /// An integer value.
-    Int(IntType),
+    Int(NumericTypes::Int),
     /// A boolean value.
     Boolean(bool),
     /// A tuple value.
-    Tuple(TupleType),
+    Tuple(TupleType<NumericTypes>),
     /// An empty value.
     Empty,
 }
 
-impl Value {
+impl<NumericTypes: EvalexprNumericTypes> Value<NumericTypes> {
     /// Returns true if `self` is a `Value::String`.
     pub fn is_string(&self) -> bool {
         matches!(self, Value::String(_))
@@ -74,7 +71,7 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `String`, or returns `Err` if `self` is not a `Value::String`.
-    pub fn as_string(&self) -> EvalexprResult<String> {
+    pub fn as_string(&self) -> EvalexprResult<String, NumericTypes> {
         match self {
             Value::String(string) => Ok(string.clone()),
             value => Err(EvalexprError::expected_string(value.clone())),
@@ -82,33 +79,33 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `IntType`, or returns `Err` if `self` is not a `Value::Int`.
-    pub fn as_int(&self) -> EvalexprResult<IntType> {
+    pub fn as_int(&self) -> EvalexprResult<NumericTypes::Int, NumericTypes> {
         match self {
-            Value::Int(i) => Ok(*i),
+            Value::Int(i) => Ok(i.clone()),
             value => Err(EvalexprError::expected_int(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float`.
-    pub fn as_float(&self) -> EvalexprResult<FloatType> {
+    pub fn as_float(&self) -> EvalexprResult<NumericTypes::Float, NumericTypes> {
         match self {
-            Value::Float(f) => Ok(*f),
+            Value::Float(f) => Ok(f.clone()),
             value => Err(EvalexprError::expected_float(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `FloatType`, or returns `Err` if `self` is not a `Value::Float` or `Value::Int`.
     /// Note that this method silently converts `IntType` to `FloatType`, if `self` is a `Value::Int`.
-    pub fn as_number(&self) -> EvalexprResult<FloatType> {
+    pub fn as_number(&self) -> EvalexprResult<NumericTypes::Float, NumericTypes> {
         match self {
-            Value::Float(f) => Ok(*f),
-            Value::Int(i) => Ok(*i as FloatType),
+            Value::Float(f) => Ok(f.clone()),
+            Value::Int(i) => Ok(NumericTypes::int_as_float(i)),
             value => Err(EvalexprError::expected_number(value.clone())),
         }
     }
 
     /// Clones the value stored in  `self` as `bool`, or returns `Err` if `self` is not a `Value::Boolean`.
-    pub fn as_boolean(&self) -> EvalexprResult<bool> {
+    pub fn as_boolean(&self) -> EvalexprResult<bool, NumericTypes> {
         match self {
             Value::Boolean(boolean) => Ok(*boolean),
             value => Err(EvalexprError::expected_boolean(value.clone())),
@@ -116,7 +113,7 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `TupleType`, or returns `Err` if `self` is not a `Value::Tuple`.
-    pub fn as_tuple(&self) -> EvalexprResult<TupleType> {
+    pub fn as_tuple(&self) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => Ok(tuple.clone()),
             value => Err(EvalexprError::expected_tuple(value.clone())),
@@ -124,7 +121,10 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` of the required length.
-    pub fn as_fixed_len_tuple(&self, len: usize) -> EvalexprResult<TupleType> {
+    pub fn as_fixed_len_tuple(
+        &self,
+        len: usize,
+    ) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => {
                 if tuple.len() == len {
@@ -138,7 +138,10 @@ impl Value {
     }
 
     /// Clones the value stored in `self` as `TupleType` or returns `Err` if `self` is not a `Value::Tuple` with length in the required range.
-    pub fn as_ranged_len_tuple(&self, range: RangeInclusive<usize>) -> EvalexprResult<TupleType> {
+    pub fn as_ranged_len_tuple(
+        &self,
+        range: RangeInclusive<usize>,
+    ) -> EvalexprResult<TupleType<NumericTypes>, NumericTypes> {
         match self {
             Value::Tuple(tuple) => {
                 if range.contains(&tuple.len()) {
@@ -155,7 +158,7 @@ impl Value {
     }
 
     /// Returns `()`, or returns`Err` if `self` is not a `Value::Tuple`.
-    pub fn as_empty(&self) -> EvalexprResult<()> {
+    pub fn as_empty(&self) -> EvalexprResult<(), NumericTypes> {
         match self {
             Value::Empty => Ok(()),
             value => Err(EvalexprError::expected_empty(value.clone())),
@@ -173,60 +176,60 @@ impl Value {
             Value::Empty => String::from("()"),
         }
     }
+
+    /// Create a new `Value` from its corresponding raw float type.
+    pub fn from_float(float: NumericTypes::Float) -> Self {
+        Self::Float(float)
+    }
+
+    /// Create a new `Value` from its corresponding raw int type.
+    pub fn from_int(int: NumericTypes::Int) -> Self {
+        Self::Int(int)
+    }
 }
 
-impl From<String> for Value {
+impl<NumericTypes: EvalexprNumericTypes> From<String> for Value<NumericTypes> {
     fn from(string: String) -> Self {
         Value::String(string)
     }
 }
 
-impl From<&str> for Value {
+impl<NumericTypes: EvalexprNumericTypes> From<&str> for Value<NumericTypes> {
     fn from(string: &str) -> Self {
         Value::String(string.to_string())
     }
 }
 
-impl From<FloatType> for Value {
-    fn from(float: FloatType) -> Self {
-        Value::Float(float)
-    }
-}
-
-impl From<IntType> for Value {
-    fn from(int: IntType) -> Self {
-        Value::Int(int)
-    }
-}
-
-impl From<bool> for Value {
+impl<NumericTypes: EvalexprNumericTypes> From<bool> for Value<NumericTypes> {
     fn from(boolean: bool) -> Self {
         Value::Boolean(boolean)
     }
 }
 
-impl From<TupleType> for Value {
-    fn from(tuple: TupleType) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> From<TupleType<NumericTypes>> for Value<NumericTypes> {
+    fn from(tuple: TupleType<NumericTypes>) -> Self {
         Value::Tuple(tuple)
     }
 }
 
-impl From<Value> for EvalexprResult<Value> {
-    fn from(value: Value) -> Self {
+impl<NumericTypes: EvalexprNumericTypes> From<Value<NumericTypes>>
+    for EvalexprResultValue<NumericTypes>
+{
+    fn from(value: Value<NumericTypes>) -> Self {
         Ok(value)
     }
 }
 
-impl From<()> for Value {
+impl<NumericTypes: EvalexprNumericTypes> From<()> for Value<NumericTypes> {
     fn from(_: ()) -> Self {
         Value::Empty
     }
 }
 
-impl TryFrom<Value> for String {
-    type Error = EvalexprError;
+impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for String {
+    type Error = EvalexprError<NumericTypes>;
 
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
+    fn try_from(value: Value<NumericTypes>) -> Result<Self, Self::Error> {
         if let Value::String(value) = value {
             Ok(value)
         } else {
@@ -235,34 +238,10 @@ impl TryFrom<Value> for String {
     }
 }
 
-impl TryFrom<Value> for FloatType {
-    type Error = EvalexprError;
+impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for bool {
+    type Error = EvalexprError<NumericTypes>;
 
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        if let Value::Float(value) = value {
-            Ok(value)
-        } else {
-            Err(EvalexprError::ExpectedFloat { actual: value })
-        }
-    }
-}
-
-impl TryFrom<Value> for IntType {
-    type Error = EvalexprError;
-
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        if let Value::Int(value) = value {
-            Ok(value)
-        } else {
-            Err(EvalexprError::ExpectedInt { actual: value })
-        }
-    }
-}
-
-impl TryFrom<Value> for bool {
-    type Error = EvalexprError;
-
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
+    fn try_from(value: Value<NumericTypes>) -> Result<Self, Self::Error> {
         if let Value::Boolean(value) = value {
             Ok(value)
         } else {
@@ -271,10 +250,10 @@ impl TryFrom<Value> for bool {
     }
 }
 
-impl TryFrom<Value> for TupleType {
-    type Error = EvalexprError;
+impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for TupleType<NumericTypes> {
+    type Error = EvalexprError<NumericTypes>;
 
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
+    fn try_from(value: Value<NumericTypes>) -> Result<Self, Self::Error> {
         if let Value::Tuple(value) = value {
             Ok(value)
         } else {
@@ -283,10 +262,10 @@ impl TryFrom<Value> for TupleType {
     }
 }
 
-impl TryFrom<Value> for () {
-    type Error = EvalexprError;
+impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for () {
+    type Error = EvalexprError<NumericTypes>;
 
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
+    fn try_from(value: Value<NumericTypes>) -> Result<Self, Self::Error> {
         if let Value::Empty = value {
             Ok(())
         } else {
@@ -297,47 +276,62 @@ impl TryFrom<Value> for () {
 
 #[cfg(test)]
 mod tests {
-    use crate::value::{TupleType, Value};
+    use crate::value::{numeric_types::DefaultNumericTypes, TupleType, Value};
 
     #[test]
     fn test_value_conversions() {
         assert_eq!(
-            Value::from("string").as_string(),
+            Value::<DefaultNumericTypes>::from("string").as_string(),
             Ok(String::from("string"))
         );
-        assert_eq!(Value::from(3).as_int(), Ok(3));
-        assert_eq!(Value::from(3.3).as_float(), Ok(3.3));
-        assert_eq!(Value::from(true).as_boolean(), Ok(true));
+        assert_eq!(Value::<DefaultNumericTypes>::from_int(3).as_int(), Ok(3));
         assert_eq!(
-            Value::from(TupleType::new()).as_tuple(),
+            Value::<DefaultNumericTypes>::from_float(3.3).as_float(),
+            Ok(3.3)
+        );
+        assert_eq!(
+            Value::<DefaultNumericTypes>::from(true).as_boolean(),
+            Ok(true)
+        );
+        assert_eq!(
+            Value::<DefaultNumericTypes>::from(TupleType::new()).as_tuple(),
             Ok(TupleType::new())
         );
     }
 
     #[test]
     fn test_value_checks() {
-        assert!(Value::from("string").is_string());
-        assert!(Value::from(3).is_int());
-        assert!(Value::from(3.3).is_float());
-        assert!(Value::from(true).is_boolean());
-        assert!(Value::from(TupleType::new()).is_tuple());
+        assert!(Value::<DefaultNumericTypes>::from("string").is_string());
+        assert!(Value::<DefaultNumericTypes>::from_int(3).is_int());
+        assert!(Value::<DefaultNumericTypes>::from_float(3.3).is_float());
+        assert!(Value::<DefaultNumericTypes>::from(true).is_boolean());
+        assert!(Value::<DefaultNumericTypes>::from(TupleType::new()).is_tuple());
     }
 
     #[test]
     fn test_value_str_from() {
-        assert_eq!(Value::from("string").str_from(), "string");
-        assert_eq!(Value::from(3.3).str_from(), "3.3");
-        assert_eq!(Value::from(3).str_from(), "3");
-        assert_eq!(Value::from(true).str_from(), "true");
-        assert_eq!(Value::from(()).str_from(), "()");
         assert_eq!(
-            Value::from(TupleType::from([
-                Value::from("string"),
-                Value::from(3.3),
-                Value::from(3),
-                Value::from(TupleType::from([Value::from(42), Value::from(4.2),])),
-                Value::from(()),
-                Value::from(true),
+            Value::<DefaultNumericTypes>::from("string").str_from(),
+            "string"
+        );
+        assert_eq!(
+            Value::<DefaultNumericTypes>::from_float(3.3).str_from(),
+            "3.3"
+        );
+        assert_eq!(Value::<DefaultNumericTypes>::from_int(3).str_from(), "3");
+        assert_eq!(Value::<DefaultNumericTypes>::from(true).str_from(), "true");
+        assert_eq!(Value::<DefaultNumericTypes>::from(()).str_from(), "()");
+        assert_eq!(
+            Value::<DefaultNumericTypes>::from(TupleType::from([
+                Value::<DefaultNumericTypes>::from("string"),
+                Value::<DefaultNumericTypes>::from_float(3.3),
+                Value::<DefaultNumericTypes>::from_int(3),
+                Value::<DefaultNumericTypes>::from(TupleType::from([
+                    Value::<DefaultNumericTypes>::from_int(42),
+                    Value::<DefaultNumericTypes>::from_float(4.2),
+                ])),
+                Value::<DefaultNumericTypes>::from(()),
+                Value::<DefaultNumericTypes>::from(true),
             ]))
             .str_from(),
             r#"("string", 3.3, 3, (42, 4.2), (), true)"#

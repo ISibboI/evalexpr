@@ -9,8 +9,8 @@ repository = "https://github.com/ISibboI/evalexpr.git"
 homepage = "https://github.com/ISibboI/evalexpr"
 documentation = "https://docs.rs/evalexpr"
 readme = "README.md"
-license = "MIT"
-edition = "2018"
+license = "AGPL-3.0-only"
+edition = "2021"
 rust-version = "1.65.0"
 
 [badges]
@@ -23,19 +23,19 @@ name = "evalexpr"
 path = "src/lib.rs"
 
 [dependencies]
-regex = { version = "1.5.5", optional = true}
-serde = { version = "1.0.133", optional = true}
-serde_derive = { version = "1.0.133", optional = true}
-rand = { version = "0.8.5", optional = true}
+regex = { version = "1.11.0", optional = true }
+serde = { version = "1.0.210", features = ["derive"], optional = true }
+rand = { version = "0.8.5", optional = true }
 
 [features]
-serde_support = ["serde", "serde_derive"]
-regex_support = ["regex"]
+serde = ["dep:serde"]
+regex = ["dep:regex"]
+rand = ["dep:rand"]
 
 [dev-dependencies]
-ron = "0.7.0"
+ron = "0.7.1"
 rand = "0.8.5"
 rand_pcg = "0.3.1"
 
 [lints.rust]
- unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
