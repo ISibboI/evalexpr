@@ -16,7 +16,7 @@ use crate::{
 /// ```rust
 /// use evalexpr::*;
 ///
-/// assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
+/// assert_eq!(eval("1 + 2 + 3"), Ok(Value::from_int(6)));
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -31,11 +31,11 @@ pub fn eval(string: &str) -> EvalexprResultValue {
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut context = HashMapContext::new();
-/// context.set_value("one".into(), 1.into()).unwrap(); // Do proper error handling here
-/// context.set_value("two".into(), 2.into()).unwrap(); // Do proper error handling here
-/// context.set_value("three".into(), 3.into()).unwrap(); // Do proper error handling here
-/// assert_eq!(eval_with_context("one + two + three", &context), Ok(Value::from(6)));
+/// let mut context = HashMapContext::<DefaultNumericTypes>::new();
+/// context.set_value("one".into(), Value::from_int(1)).unwrap(); // Do proper error handling here
+/// context.set_value("two".into(), Value::from_int(2)).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), Value::from_int(3)).unwrap(); // Do proper error handling here
+/// assert_eq!(eval_with_context("one + two + three", &context), Ok(Value::from_int(6)));
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -53,11 +53,11 @@ pub fn eval_with_context<C: Context>(
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut context = HashMapContext::new();
-/// context.set_value("one".into(), 1.into()).unwrap(); // Do proper error handling here
-/// context.set_value("two".into(), 2.into()).unwrap(); // Do proper error handling here
-/// context.set_value("three".into(), 3.into()).unwrap(); // Do proper error handling here
-/// assert_eq!(eval_with_context_mut("one + two + three", &mut context), Ok(Value::from(6)));
+/// let mut context = HashMapContext::<DefaultNumericTypes>::new();
+/// context.set_value("one".into(), Value::from_int(1)).unwrap(); // Do proper error handling here
+/// context.set_value("two".into(), Value::from_int(2)).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), Value::from_int(3)).unwrap(); // Do proper error handling here
+/// assert_eq!(eval_with_context_mut("one + two + three", &mut context), Ok(Value::from_int(6)));
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*
@@ -80,15 +80,15 @@ pub fn eval_with_context_mut<C: ContextWithMutableVariables>(
 ///
 /// let precomputed = build_operator_tree("one + two + three").unwrap(); // Do proper error handling here
 ///
-/// let mut context = HashMapContext::new();
-/// context.set_value("one".into(), 1.into()).unwrap(); // Do proper error handling here
-/// context.set_value("two".into(), 2.into()).unwrap(); // Do proper error handling here
-/// context.set_value("three".into(), 3.into()).unwrap(); // Do proper error handling here
+/// let mut context = HashMapContext::<DefaultNumericTypes>::new();
+/// context.set_value("one".into(), Value::from_int(1)).unwrap(); // Do proper error handling here
+/// context.set_value("two".into(), Value::from_int(2)).unwrap(); // Do proper error handling here
+/// context.set_value("three".into(), Value::from_int(3)).unwrap(); // Do proper error handling here
 ///
-/// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from(6)));
+/// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from_int(6)));
 ///
-/// context.set_value("three".into(), 5.into()).unwrap(); // Do proper error handling here
-/// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from(8)));
+/// context.set_value("three".into(), Value::from_int(5)).unwrap(); // Do proper error handling here
+/// assert_eq!(precomputed.eval_with_context(&context), Ok(Value::from_int(8)));
 /// ```
 ///
 /// *See the [crate doc](index.html) for more examples and explanations of the expression format.*

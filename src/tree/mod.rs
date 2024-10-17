@@ -31,10 +31,10 @@ mod iter;
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut context = HashMapContext::new();
-/// context.set_value("alpha".into(), 2.into()).unwrap(); // Do proper error handling here
+/// let mut context = HashMapContext::<DefaultNumericTypes>::new();
+/// context.set_value("alpha".into(), Value::from_int(2)).unwrap(); // Do proper error handling here
 /// let node = build_operator_tree("1 + alpha").unwrap(); // Do proper error handling here
-/// assert_eq!(node.eval_with_context(&context), Ok(Value::from(3)));
+/// assert_eq!(node.eval_with_context(&context), Ok(Value::from_int(3)));
 /// ```
 ///
 #[derive(Debug, PartialEq, Clone)]
@@ -63,7 +63,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree::<DefaultNumericTypes>("a + b + c * f()").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_identifiers();
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.next(), Some("b"));
@@ -88,7 +88,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let mut tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    /// let mut tree = build_operator_tree::<DefaultNumericTypes>("a + b + c * f()").unwrap(); // Do proper error handling here
     ///
     /// for identifier in tree.iter_identifiers_mut() {
     ///     *identifier = String::from("x");
@@ -120,7 +120,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree::<DefaultNumericTypes>("a + f(b + c)").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_variable_identifiers();
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.next(), Some("b"));
@@ -143,7 +143,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let mut tree = build_operator_tree("a + b + c * f()").unwrap(); // Do proper error handling here
+    /// let mut tree = build_operator_tree::<DefaultNumericTypes>("a + b + c * f()").unwrap(); // Do proper error handling here
     ///
     /// for identifier in tree.iter_variable_identifiers_mut() {
     ///     *identifier = String::from("x");
@@ -174,7 +174,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree::<DefaultNumericTypes>("d = a + f(b + c)").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_read_variable_identifiers();
     /// assert_eq!(iter.next(), Some("a"));
     /// assert_eq!(iter.next(), Some("b"));
@@ -196,7 +196,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let mut tree = build_operator_tree::<DefaultNumericTypes>("d = a + f(b + c)").unwrap(); // Do proper error handling here
     ///
     /// for identifier in tree.iter_read_variable_identifiers_mut() {
     ///     *identifier = String::from("x");
@@ -227,7 +227,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree::<DefaultNumericTypes>("d = a + f(b + c)").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_write_variable_identifiers();
     /// assert_eq!(iter.next(), Some("d"));
     /// assert_eq!(iter.next(), None);
@@ -247,7 +247,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let mut tree = build_operator_tree::<DefaultNumericTypes>("d = a + f(b + c)").unwrap(); // Do proper error handling here
     ///
     /// for identifier in tree.iter_write_variable_identifiers_mut() {
     ///     *identifier = String::from("x");
@@ -278,7 +278,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let tree = build_operator_tree("a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let tree = build_operator_tree::<DefaultNumericTypes>("a + f(b + c)").unwrap(); // Do proper error handling here
     /// let mut iter = tree.iter_function_identifiers();
     /// assert_eq!(iter.next(), Some("f"));
     /// assert_eq!(iter.next(), None);
@@ -298,7 +298,7 @@ impl<NumericTypes: EvalexprNumericTypes> Node<NumericTypes> {
     /// ```rust
     /// use evalexpr::*;
     ///
-    /// let mut tree = build_operator_tree("d = a + f(b + c)").unwrap(); // Do proper error handling here
+    /// let mut tree = build_operator_tree::<DefaultNumericTypes>("d = a + f(b + c)").unwrap(); // Do proper error handling here
     ///
     /// for identifier in tree.iter_function_identifiers_mut() {
     ///     *identifier = String::from("x");

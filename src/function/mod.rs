@@ -38,11 +38,11 @@ where
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let mut context = HashMapContext::new();
+/// let mut context = HashMapContext::<DefaultNumericTypes>::new();
 /// context.set_function("id".into(), Function::new(|argument| {
 ///     Ok(argument.clone())
 /// })).unwrap(); // Do proper error handling here
-/// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from(4)));
+/// assert_eq!(eval_with_context("id(4)", &context), Ok(Value::from_int(4)));
 /// ```
 pub struct Function<NumericTypes: EvalexprNumericTypes> {
     function: Box<dyn ClonableFn<NumericTypes>>,

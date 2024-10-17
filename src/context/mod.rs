@@ -249,7 +249,7 @@ impl<NumericTypes: EvalexprNumericTypes> HashMapContext<NumericTypes> {
     /// ```rust
     /// # use evalexpr::*;
     ///
-    /// let mut context = HashMapContext::new();
+    /// let mut context = HashMapContext::<DefaultNumericTypes>::new();
     /// context.set_value("abc".into(), "def".into()).unwrap();
     /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
     /// context.clear_variables();
@@ -273,7 +273,7 @@ impl<NumericTypes: EvalexprNumericTypes> HashMapContext<NumericTypes> {
     /// ```rust
     /// # use evalexpr::*;
     ///
-    /// let mut context = HashMapContext::new();
+    /// let mut context = HashMapContext::<DefaultNumericTypes>::new();
     /// context.set_value("abc".into(), "def".into()).unwrap();
     /// assert_eq!(context.get_value("abc"), Some(&("def".into())));
     /// context.clear();
@@ -391,12 +391,12 @@ impl<NumericTypes: EvalexprNumericTypes> Default for HashMapContext<NumericTypes
 /// ```rust
 /// use evalexpr::*;
 ///
-/// let ctx = evalexpr::context_map! {
-///     "x" => 8,
-///     "f" => Function::new(|_| Ok(42.into()))
+/// let ctx: HashMapContext<DefaultNumericTypes> = context_map! {
+///     "x" => int 8,
+///     "f" => Function::new(|_| Ok(Value::from_int(42)))
 /// }.unwrap(); // Do proper error handling here
 ///
-/// assert_eq!(eval_with_context("x + f()", &ctx), Ok(50.into()));
+/// assert_eq!(eval_with_context("x + f()", &ctx), Ok(Value::from_int(50)));
 /// ```
 #[macro_export]
 macro_rules! context_map {
