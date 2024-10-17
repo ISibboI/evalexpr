@@ -181,7 +181,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: CLI
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: cargo run -- p = 2\; p + 3
           contains: 5
