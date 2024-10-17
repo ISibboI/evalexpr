@@ -2544,3 +2544,33 @@ fn test_compare_different_numeric_types() {
     assert_eq!(eval("1 >= 2"), Ok(false.into()));
     assert_eq!(eval("1 >= 2.0"), Ok(false.into()));
 }
+
+#[test]
+fn test_escape_sequences() {
+    assert_eq!(
+        eval("\"\\x\""),
+        Err(EvalexprError::IllegalEscapeSequence("\\x".to_string()))
+    );
+    assert_eq!(
+        eval("\"\\"),
+        Err(EvalexprError::IllegalEscapeSequence("\\".to_string()))
+    );
+}
+
+#[test]
+fn test_unmatched_partial_tokens() {
+    assert_eq!(
+        eval("|"),
+        Err(EvalexprError::UnmatchedPartialToken {
+            first: PartialToken::VerticalBar,
+            second: None
+        })
+    );
+}
+
+#[test]
+fn test_node_mutable_access() {
+    let mut node = build_operator_tree::<DefaultNumericTypes>("5").unwrap();
+    assert_eq!(node.children_mut().len(), 1);
+    assert_eq!(*node.operator_mut(), Operator::RootNode);
+}
