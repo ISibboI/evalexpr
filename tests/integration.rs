@@ -2500,3 +2500,47 @@ fn test_clear() {
     assert!(context.get_value("five").is_none());
     assert!(eval_with_context("abc(5)", &context).is_err());
 }
+
+#[test]
+fn test_iter_empty_contexts() {
+    assert_eq!(
+        EmptyContext::<DefaultNumericTypes>::default()
+            .iter_variables()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContext::<DefaultNumericTypes>::default()
+            .iter_variable_names()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .iter_variables()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .iter_variable_names()
+            .next(),
+        None
+    );
+}
+
+#[test]
+fn test_empty_context_builtin_functions() {
+    assert!(EmptyContext::<DefaultNumericTypes>::default().are_builtin_functions_disabled());
+    assert!(
+        !EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .are_builtin_functions_disabled()
+    );
+}
+
+#[test]
+fn test_compare_different_numeric_types() {
+    assert_eq!(eval("1 < 2.0"), Ok(true.into()));
+    assert_eq!(eval("1 >= 2"), Ok(false.into()));
+    assert_eq!(eval("1 >= 2.0"), Ok(false.into()));
+}
