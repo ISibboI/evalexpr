@@ -32,13 +32,13 @@ Then you can use `evalexpr` to **evaluate expressions** like this:
 ```rust
 use evalexpr::*;
 
-assert_eq!(eval("1 + 2 + 3"), Ok(Value::from(6)));
+assert_eq!(eval("1 + 2 + 3"), Ok(Value::from_int(6)));
 // `eval` returns a variant of the `Value` enum,
 // while `eval_[type]` returns the respective type directly.
 // Both can be used interchangeably.
 assert_eq!(eval_int("1 + 2 + 3"), Ok(6));
-assert_eq!(eval("1 /* inline comments are supported */ - 2 * 3 // as are end-of-line comments"), Ok(Value::from(-5)));
-assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from(7.0)));
+assert_eq!(eval("1 /* inline comments are supported */ - 2 * 3 // as are end-of-line comments"), Ok(Value::from_int(-5)));
+assert_eq!(eval("1.0 + 2 * 3"), Ok(Value::from_float(7.0)));
 assert_eq!(eval("true && 4 > 2"), Ok(Value::from(true)));
 ```
 
@@ -47,14 +47,14 @@ You can **chain** expressions and **assign** to variables like this:
 ```rust
 use evalexpr::*;
 
-let mut context = HashMapContext::new();
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
 // Assign 5 to a like this
 assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
 // The HashMapContext is type safe, so this will fail now
 assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
-           Err(EvalexprError::expected_int(Value::from(5.0))));
+           Err(EvalexprError::expected_int(Value::from_float(5.0))));
 // We can check which value the context stores for a like this
-assert_eq!(context.get_value("a"), Some(&Value::from(5)));
+assert_eq!(context.get_value("a"), Some(&Value::from_int(5)));
 // And use the value in another expression like this
 assert_eq!(eval_int_with_context_mut("a = a + 2; a", &mut context), Ok(7));
 // It is also possible to save a bit of typing by using an operator-assignment operator
@@ -66,9 +66,9 @@ And you can use **variables** and **functions** in expressions like this:
 ```rust
 use evalexpr::*;
 
-let context = context_map! {
-    "five" => 5,
-    "twelve" => 12,
+let context: HashMapContext<DefaultNumericTypes> = context_map! {
+    "five" => int 5,
+    "twelve" => int 12,
     "f" => Function::new(|argument| {
         if let Ok(int) = argument.as_int() {
             Ok(Value::Int(int / 2))
@@ -102,16 +102,16 @@ You can also **precompile** expressions like this:
 ```rust
 use evalexpr::*;
 
-let precompiled = build_operator_tree("a * b - c > 5").unwrap(); // Do proper error handling here
+let precompiled = build_operator_tree::<DefaultNumericTypes>("a * b - c > 5").unwrap(); // Do proper error handling here
 
 let mut context = context_map! {
-    "a" => 6,
-    "b" => 2,
-    "c" => 3
+    "a" => int 6,
+    "b" => int 2,
+    "c" => int 3,
 }.unwrap(); // Do proper error handling here
 assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(true)));
 
-context.set_value("c".into(), 8.into()).unwrap(); // Do proper error handling here
+context.set_value("c".into(), Value::from_int(8)).unwrap(); // Do proper error handling here
 assert_eq!(precompiled.eval_with_context(&context), Ok(Value::from(false)));
 // `Node::eval_with_context` returns a variant of the `Value` enum,
 // while `Node::eval_[type]_with_context` returns the respective type directly.
@@ -184,9 +184,9 @@ Example:
 ```rust
 use evalexpr::*;
 
-assert_eq!(eval("1 / 2"), Ok(Value::from(0)));
-assert_eq!(eval("1.0 / 2"), Ok(Value::from(0.5)));
-assert_eq!(eval("2^2"), Ok(Value::from(4.0)));
+assert_eq!(eval("1 / 2"), Ok(Value::from_int(0)));
+assert_eq!(eval("1.0 / 2"), Ok(Value::from_float(0.5)));
+assert_eq!(eval("2^2"), Ok(Value::from_float(4.0)));
 ```
 
 #### The Aggregation Operator
@@ -200,7 +200,7 @@ Example:
 use evalexpr::*;
 
 assert_eq!(eval("1, \"b\", 3"),
-           Ok(Value::from(vec![Value::from(1), Value::from("b"), Value::from(3)])));
+           Ok(Value::from(vec![Value::from_int(1), Value::from("b"), Value::from_int(3)])));
 ```
 
 To create nested tuples, use parentheses:
@@ -209,8 +209,8 @@ To create nested tuples, use parentheses:
 use evalexpr::*;
 
 assert_eq!(eval("1, 2, (true, \"b\")"), Ok(Value::from(vec![
-    Value::from(1),
-    Value::from(2),
+    Value::from_int(1),
+    Value::from_int(2),
     Value::from(vec![
         Value::from(true),
         Value::from("b")
@@ -229,13 +229,13 @@ That means that if an identifier is assigned a value of a type once, it cannot b
 ```rust
 use evalexpr::*;
 
-let mut context = HashMapContext::new();
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
 assert_eq!(eval_with_context("a = 5", &context), Err(EvalexprError::ContextNotMutable));
 assert_eq!(eval_empty_with_context_mut("a = 5", &mut context), Ok(EMPTY_VALUE));
 assert_eq!(eval_empty_with_context_mut("a = 5.0", &mut context),
-           Err(EvalexprError::expected_int(5.0.into())));
+           Err(EvalexprError::expected_int(Value::from_float(5.0))));
 assert_eq!(eval_int_with_context("a", &context), Ok(5));
-assert_eq!(context.get_value("a"), Some(5.into()).as_ref());
+assert_eq!(context.get_value("a"), Some(Value::from_int(5)).as_ref());
 ```
 
 For each binary operator, there exists an equivalent operator-assignment operator.
@@ -260,9 +260,9 @@ Expression chaining is useful together with assignment to create small scripts.
 ```rust
 use evalexpr::*;
 
-let mut context = HashMapContext::new();
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
 assert_eq!(eval("1;2;3;4;"), Ok(Value::Empty));
-assert_eq!(eval("1;2;3;4"), Ok(4.into()));
+assert_eq!(eval("1;2;3;4"), Ok(Value::from_int(4)));
 
 // Initialization of variables via script
 assert_eq!(eval_empty_with_context_mut("hp = 1; max_hp = 5; heal_amount = 3;", &mut context),
@@ -290,15 +290,15 @@ assert_eq!(eval("a = 5;"), Ok(Value::from(())));
 // The context is not preserved between eval calls
 assert_eq!(eval("a"), Err(EvalexprError::VariableIdentifierNotFound("a".to_string())));
 
-let mut context = HashMapContext::new();
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
 assert_eq!(eval_with_context_mut("a = 5;", &mut context), Ok(Value::from(())));
 // Assignments require mutable contexts
 assert_eq!(eval_with_context("a = 6", &context), Err(EvalexprError::ContextNotMutable));
 // The HashMapContext is type safe
 assert_eq!(eval_with_context_mut("a = 5.5", &mut context),
-           Err(EvalexprError::ExpectedInt { actual: Value::from(5.5) }));
+           Err(EvalexprError::ExpectedInt { actual: Value::from_float(5.5) }));
 // Reading a variable does not require a mutable context
-assert_eq!(eval_with_context("a", &context), Ok(Value::from(5)));
+assert_eq!(eval_with_context("a", &context), Ok(Value::from_int(5)));
 
 ```
 
@@ -318,16 +318,16 @@ Take a look at the following example:
 ```rust
 use evalexpr::*;
 
-let mut context = HashMapContext::new();
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
 // We can set variables in code like this...
-context.set_value("a".into(), 5.into());
+context.set_value("a".into(), Value::from_int(5));
 // ...and read from them in expressions
 assert_eq!(eval_int_with_context("a", &context), Ok(5));
 // We can write or overwrite variables in expressions...
 assert_eq!(eval_with_context_mut("a = 10; b = 1.0;", &mut context), Ok(().into()));
 // ...and read the value in code like this
-assert_eq!(context.get_value("a"), Some(&Value::from(10)));
-assert_eq!(context.get_value("b"), Some(&Value::from(1.0)));
+assert_eq!(context.get_value("a"), Some(&Value::from_int(10)));
+assert_eq!(context.get_value("b"), Some(&Value::from_float(1.0)));
 ```
 
 Contexts are also required for user-defined functions.
@@ -336,8 +336,8 @@ Those can be passed one by one with the `set_function` method, but it might be m
 ```rust
 use evalexpr::*;
 
-let context = context_map!{
-    "f" => Function::new(|args| Ok(Value::from(args.as_int()? + 5))),
+let context: HashMapContext<DefaultNumericTypes> = context_map!{
+    "f" => Function::new(|args| Ok(Value::from_int(args.as_int()? + 5))),
 }.unwrap_or_else(|error| panic!("Error creating context: {}", error));
 assert_eq!(eval_int_with_context("f 5", &context), Ok(10));
 ```
@@ -351,8 +351,8 @@ They can be disabled if needed as follows:
 
 ```rust
 use evalexpr::*;
-let mut context = HashMapContext::new();
-assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from(3)));
+let mut context = HashMapContext::<DefaultNumericTypes>::new();
+assert_eq!(eval_with_context("max(1,3)",&context),Ok(Value::from_int(3)));
 context.set_builtin_functions_disabled(true).unwrap(); // Do proper error handling here
 assert_eq!(eval_with_context("max(1,3)",&context),Err(EvalexprError::FunctionIdentifierNotFound(String::from("max"))));
 ```
@@ -568,7 +568,7 @@ let mut context = context_map!{
 // In ron format, strings are surrounded by "
 let serialized_free = "\"five * five\"";
 match ron::de::from_str::<Node>(serialized_free) {
-    Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from(25))),
+    Ok(free) => assert_eq!(free.eval_with_context(&context), Ok(Value::from_int(25))),
     Err(error) => {
         () // Handle error
     }
