@@ -582,8 +582,8 @@ but note that only the variables get (de)serialized, not the functions.
 
 ## License
 
-This crate is primarily distributed under the terms of the MIT license.
-See [LICENSE](LICENSE) for details.
+This crate is primarily distributed under the terms of the AGPL3 license.
+See [LICENSE](/LICENSE) for details.
 
 
 <!-- cargo-sync-readme end -->

@@ -565,8 +565,8 @@
 //!
 //! ## License
 //!
-//! This crate is primarily distributed under the terms of the MIT license.
-//! See [LICENSE](LICENSE) for details.
+//! This crate is primarily distributed under the terms of the AGPL3 license.
+//! See [LICENSE](/LICENSE) for details.
 //!
 
 #![deny(missing_docs)]
