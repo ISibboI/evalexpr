@@ -1,6 +1,6 @@
 # Change Log
 
-## [11.3.1](https://github.com/ISibboI/evalexpr/compare/11.3.1...12.0.0) - 2024-10-17
+## [12.0.0](https://github.com/ISibboI/evalexpr/compare/11.3.1...12.0.0) - 2024-10-17
 
 ### Changed
 
