@@ -33,3 +33,32 @@ impl<NumericTypes: EvalexprNumericTypes> de::Visitor<'_> for NodeVisitor<Numeric
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        fmt::{Debug, Formatter, Write},
+        marker::PhantomData,
+    };
+
+    use serde::de::Visitor;
+
+    use crate::DefaultNumericTypes;
+
+    use super::NodeVisitor;
+
+    #[test]
+    fn node_visitor() {
+        struct Debugger;
+
+        impl Debug for Debugger {
+            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+                NodeVisitor::<DefaultNumericTypes>(PhantomData).expecting(f)
+            }
+        }
+
+        let mut output = String::new();
+        write!(output, "{:?}", Debugger).unwrap();
+        assert!(!output.is_empty());
+    }
+}
