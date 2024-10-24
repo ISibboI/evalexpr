@@ -11,6 +11,7 @@ mod sqrt;
 mod atan;
 pub  mod bucket_functions;
 pub  mod report_uri_functions;
+mod date_utils;
 
 use std::fmt::Display;
 // Re-export the functions to the root of the crate
@@ -22,6 +23,7 @@ pub use pow::*;
 pub use sqrt::*;
 pub use atan::*;
 pub use bucket_functions::*;
+pub use date_utils::*;
 pub use simple_moving_average::simple_moving_average;
 pub use simple_cumulative_sum::simple_cumulative_sum;
 pub use simple_cumilative_returns::simple_cumulative_returns;
