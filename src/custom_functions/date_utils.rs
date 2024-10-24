@@ -38,7 +38,7 @@ where
     }
     let days = BUSINESS_DAY_CALENDAR.work_days_between(start_date, end_date);
     // Return the result as an integer value
-    Ok(Value::Int(days))
+    Ok(Value::Int(days - 1))
 }
 
 
