@@ -15,8 +15,16 @@ where
     <TR as TryInto<Value>>::Error: Debug,
 {
     // Convert inputs to strings and then to NaiveDate
-    let start_date_str = start_date.try_into().map_err(|err| CustomError(format!("{err:?}")))?.as_string()?;
-    let end_date_str = end_date.try_into().map_err(|err| CustomError(format!("{err:?}")))?.as_string()?;
+    let mut start_date_str = start_date.try_into().map_err(|err| CustomError(format!("{err:?}")))?.as_string()?;
+    let mut end_date_str = end_date.try_into().map_err(|err| CustomError(format!("{err:?}")))?.as_string()?;
+
+    // Trim the date strings if they are longer than 10 characters
+    if start_date_str.len() > 10 {
+        start_date_str = start_date_str[..10].to_string();
+    }
+    if end_date_str.len() > 10 {
+        end_date_str = end_date_str[..10].to_string();
+    }
 
     // Parse the strings into NaiveDate
     let start_date = NaiveDate::parse_from_str(&start_date_str, "%Y-%m-%d")
