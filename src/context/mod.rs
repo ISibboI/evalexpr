@@ -419,12 +419,12 @@ macro_rules! context_map {
     }};
     // add an integer value, and chain the eventual error with the ones in the next values
     ( ($ctx:expr) $k:expr => int $v:expr , $($tt:tt)*) => {{
-        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), Value::from_int($v.into()))
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), $crate::Value::from_int($v.into()))
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
     // add a float value, and chain the eventual error with the ones in the next values
     ( ($ctx:expr) $k:expr => float $v:expr , $($tt:tt)*) => {{
-        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), Value::from_float($v.into()))
+        $crate::ContextWithMutableVariables::set_value($ctx, $k.into(), $crate::Value::from_float($v.into()))
             .and($crate::context_map!(($ctx) $($tt)*))
     }};
     // add a value, and chain the eventual error with the ones in the next values

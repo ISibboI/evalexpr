@@ -1,5 +1,17 @@
 # Change Log
 
+## [12.0.1](https://github.com/ISibboI/evalexpr/compare/12.0.0...12.0.1) - 2024-10-25
+
+### Fixed
+
+ * Fixed the `math_consts_context!` macro that was broken by in 12.0.0 (#173)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [jeffrey182](https://github.com/jeffrey182)
+
 ## [12.0.0](https://github.com/ISibboI/evalexpr/compare/11.3.1...12.0.0) - 2024-10-17
 
 ### Changed
