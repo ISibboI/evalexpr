@@ -28,11 +28,28 @@ macro_rules! math_consts_context {
         )
     };
     ($($name:ident),*) => {{
-        use $crate::ContextWithMutableVariables;
         $crate::context_map! {
             $(
-                stringify!($name) => core::f64::consts::$name,
+                stringify!($name) => float core::f64::consts::$name,
             )*
         }
     }};
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn math_consts_context() {
+        let context: crate::HashMapContext = math_consts_context!().unwrap();
+
+        {
+            use crate::{Context, Value};
+
+            assert_eq!(
+                context.get_value("PI"),
+                Some(&Value::Float(core::f64::consts::PI))
+            );
+        }
+    }
 }
