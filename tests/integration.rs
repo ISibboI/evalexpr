@@ -2500,3 +2500,77 @@ fn test_clear() {
     assert!(context.get_value("five").is_none());
     assert!(eval_with_context("abc(5)", &context).is_err());
 }
+
+#[test]
+fn test_iter_empty_contexts() {
+    assert_eq!(
+        EmptyContext::<DefaultNumericTypes>::default()
+            .iter_variables()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContext::<DefaultNumericTypes>::default()
+            .iter_variable_names()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .iter_variables()
+            .next(),
+        None
+    );
+    assert_eq!(
+        EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .iter_variable_names()
+            .next(),
+        None
+    );
+}
+
+#[test]
+fn test_empty_context_builtin_functions() {
+    assert!(EmptyContext::<DefaultNumericTypes>::default().are_builtin_functions_disabled());
+    assert!(
+        !EmptyContextWithBuiltinFunctions::<DefaultNumericTypes>::default()
+            .are_builtin_functions_disabled()
+    );
+}
+
+#[test]
+fn test_compare_different_numeric_types() {
+    assert_eq!(eval("1 < 2.0"), Ok(true.into()));
+    assert_eq!(eval("1 >= 2"), Ok(false.into()));
+    assert_eq!(eval("1 >= 2.0"), Ok(false.into()));
+}
+
+#[test]
+fn test_escape_sequences() {
+    assert_eq!(
+        eval("\"\\x\""),
+        Err(EvalexprError::IllegalEscapeSequence("\\x".to_string()))
+    );
+    assert_eq!(
+        eval("\"\\"),
+        Err(EvalexprError::IllegalEscapeSequence("\\".to_string()))
+    );
+}
+
+#[test]
+fn test_unmatched_partial_tokens() {
+    assert_eq!(
+        eval("|"),
+        Err(EvalexprError::UnmatchedPartialToken {
+            first: PartialToken::VerticalBar,
+            second: None
+        })
+    );
+}
+
+#[test]
+fn test_node_mutable_access() {
+    let mut node = build_operator_tree::<DefaultNumericTypes>("5").unwrap();
+    assert_eq!(node.children_mut().len(), 1);
+    assert_eq!(*node.operator_mut(), Operator::RootNode);
+}
