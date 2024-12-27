@@ -2,7 +2,7 @@ use crate::{
     error::EvalexprResultValue,
     token::Token,
     value::{
-        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
         TupleType, EMPTY_VALUE,
     },
     Context, ContextWithMutableVariables, EmptyType, HashMapContext,

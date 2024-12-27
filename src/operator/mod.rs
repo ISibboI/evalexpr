@@ -4,7 +4,10 @@ use crate::{
     context::Context,
     error::*,
     value::{
-        numeric_types::{DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
+        numeric_types::{
+            default_numeric_types::DefaultNumericTypes, EvalexprFloat, EvalexprInt,
+            EvalexprNumericTypes,
+        },
         Value,
     },
     ContextWithMutableVariables,
