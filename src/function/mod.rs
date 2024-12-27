@@ -3,7 +3,7 @@ use std::fmt;
 use crate::{
     error::EvalexprResultValue,
     value::{
-        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
         Value,
     },
 };

@@ -2,7 +2,9 @@ use std::str::FromStr;
 
 use crate::{
     error::{EvalexprError, EvalexprResult},
-    value::numeric_types::{DefaultNumericTypes, EvalexprInt, EvalexprNumericTypes},
+    value::numeric_types::{
+        default_numeric_types::DefaultNumericTypes, EvalexprInt, EvalexprNumericTypes,
+    },
 };
 
 mod display;
@@ -507,7 +509,7 @@ fn parse_dec_or_hex<NumericTypes: EvalexprNumericTypes>(
 mod tests {
     use crate::{
         token::{char_to_partial_token, tokenize, Token},
-        value::numeric_types::DefaultNumericTypes,
+        value::numeric_types::default_numeric_types::DefaultNumericTypes,
     };
     use std::fmt::Write;
 

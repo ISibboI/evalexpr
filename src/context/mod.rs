@@ -10,7 +10,7 @@ use crate::{
     error::EvalexprResultValue,
     function::Function,
     value::{
-        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
         value_type::ValueType,
         Value,
     },

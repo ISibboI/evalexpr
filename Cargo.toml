@@ -26,11 +26,13 @@ path = "src/lib.rs"
 regex = { version = "1.11.1", optional = true }
 serde = { version = "1.0.213", features = ["derive"], optional = true }
 rand = { version = "0.8.5", optional = true }
+# num-traits = { version = "0.2.19", optional = true }
 
 [features]
 serde = ["dep:serde"]
 regex = ["dep:regex"]
 rand = ["dep:rand"]
+# num-traits = ["dep:num-traits"]
 
 [dev-dependencies]
 ron = "0.8.1"

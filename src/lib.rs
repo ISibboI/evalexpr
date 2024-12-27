@@ -592,7 +592,10 @@ pub use crate::{
     token::PartialToken,
     tree::Node,
     value::{
-        numeric_types::{DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
+        numeric_types::{
+            default_numeric_types::DefaultNumericTypes, EvalexprFloat, EvalexprInt,
+            EvalexprNumericTypes,
+        },
         value_type::ValueType,
         EmptyType, TupleType, Value, EMPTY_VALUE,
     },
