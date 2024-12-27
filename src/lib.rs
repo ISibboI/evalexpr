@@ -418,31 +418,35 @@
 //! | `Value::Tuple` | `(3, 55.0, false, ())`, `(1, 2)` |
 //! | `Value::Empty` | `()` |
 //!
-//! Integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+//! By default, integers are internally represented as `i64`, and floating point numbers are represented as `f64`.
+//! The numeric types are defined by the `Context` trait and can for example be customised by implementing a custom context.
+//! Alternatively, for example the standard `HashMapContext` type takes the numeric types as type parameters, so it works with arbitrary numeric types.
 //! Tuples are represented as `Vec<Value>` and empty values are not stored, but represented by Rust's unit type `()` where necessary.
 //!
 //! There exist type aliases for some of the types.
 //! They include `IntType`, `FloatType`, `TupleType` and `EmptyType`.
 //!
-//! Values can be constructed either directly or using the `From` trait.
-//! They can be decomposed using the `Value::as_[type]` methods.
+//! Values can be constructed either directly or using `from` functions.
+//! For integers and floats, the `from` functions are `from_int` and `from_float`, and all others use the `From` trait.
+//! See the examples below for further details.
+//! Values can also be decomposed using the `Value::as_[type]` methods.
 //! The type of a value can be checked using the `Value::is_[type]` methods.
 //!
 //! **Examples for constructing a value:**
 //!
 //! | Code | Result |
 //! |------|--------|
-//! | `Value::from(4)` | `Value::Int(4)` |
-//! | `Value::from(4.4)` | `Value::Float(4.4)` |
+//! | `Value::from_int(4)` | `Value::Int(4)` |
+//! | `Value::from_float(4.4)` | `Value::Float(4.4)` |
 //! | `Value::from(true)` | `Value::Boolean(true)` |
-//! | `Value::from(vec![Value::from(3)])` | `Value::Tuple(vec![Value::Int(3)])` |
+//! | `Value::from(vec![Value::from_int(3)])` | `Value::Tuple(vec![Value::Int(3)])` |
 //!
 //! **Examples for deconstructing a value:**
 //!
 //! | Code | Result |
 //! |------|--------|
-//! | `Value::from(4).as_int()` | `Ok(4)` |
-//! | `Value::from(4.4).as_float()` | `Ok(4.4)` |
+//! | `Value::from_int(4).as_int()` | `Ok(4)` |
+//! | `Value::from_float(4.4).as_float()` | `Ok(4.4)` |
 //! | `Value::from(true).as_int()` | `Err(Error::ExpectedInt {actual: Value::Boolean(true)})` |
 //!
 //! Values have a precedence of 200.
@@ -502,20 +506,6 @@
 //!
 //! Functions have a precedence of 190.
 //!
-//! ### [Serde](https://serde.rs)
-//!
-//! To use this crate with serde, the `serde_support` feature flag has to be set.
-//! This can be done like this in the `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies]
-//! evalexpr = {version = "<desired version>", features = ["serde_support"]}
-//! ```
-//!
-//! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
-//! The implementation expects a [serde `string`](https://serde.rs/data-model.html) as input.
-//! Example parsing with [ron format](docs.rs/ron):
-//!
 //! ### Comments
 //!
 //! Evalexpr supports C-style inline comments and end-of-line comments.
@@ -537,6 +527,20 @@
 //!     Ok(Value::Int(4))
 //! );
 //! ```
+//!
+//! ### [Serde](https://serde.rs)
+//!
+//! To use this crate with serde, the `serde_support` feature flag has to be set.
+//! This can be done like this in the `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! evalexpr = {version = "<desired version>", features = ["serde_support"]}
+//! ```
+//!
+//! This crate implements `serde::de::Deserialize` for its type `Node` that represents a parsed expression tree.
+//! The implementation expects a [serde `string`](https://serde.rs/data-model.html) as input.
+//! Example parsing with [ron format](https://docs.rs/ron):
 //!
 //! ```rust
 //! # #[cfg(feature = "serde_support")] {
