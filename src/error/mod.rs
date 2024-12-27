@@ -7,8 +7,13 @@
 
 use std::ops::RangeInclusive;
 
-use crate::value::numeric_types::{DefaultNumericTypes, EvalexprNumericTypes};
-use crate::{token::PartialToken, value::value_type::ValueType};
+use crate::{
+    token::PartialToken,
+    value::{
+        numeric_types::{DefaultNumericTypes, EvalexprNumericTypes},
+        value_type::ValueType,
+    },
+};
 
 use crate::{operator::Operator, value::Value};
 

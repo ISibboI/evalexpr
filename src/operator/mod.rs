@@ -1,9 +1,14 @@
 use crate::function::builtin::builtin_function;
 
-use crate::value::numeric_types::{
-    DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes,
+use crate::{
+    context::Context,
+    error::*,
+    value::{
+        numeric_types::{DefaultNumericTypes, EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
+        Value,
+    },
+    ContextWithMutableVariables,
 };
-use crate::{context::Context, error::*, value::Value, ContextWithMutableVariables};
 
 mod display;
 

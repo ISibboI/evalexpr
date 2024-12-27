@@ -138,8 +138,14 @@ impl<NumericTypes: EvalexprNumericTypes> Context for EmptyContext<NumericTypes> 
 }
 
 impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext for EmptyContext<NumericTypes> {
-    type VariableIterator<'a> = iter::Empty<(String, Value<Self::NumericTypes>)> where Self: 'a;
-    type VariableNameIterator<'a> = iter::Empty<String> where Self: 'a;
+    type VariableIterator<'a>
+        = iter::Empty<(String, Value<Self::NumericTypes>)>
+    where
+        Self: 'a;
+    type VariableNameIterator<'a>
+        = iter::Empty<String>
+    where
+        Self: 'a;
 
     fn iter_variables(&self) -> Self::VariableIterator<'_> {
         iter::empty()
@@ -201,8 +207,14 @@ impl<NumericTypes: EvalexprNumericTypes> Context
 impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext
     for EmptyContextWithBuiltinFunctions<NumericTypes>
 {
-    type VariableIterator<'a> = iter::Empty<(String, Value<Self::NumericTypes>)> where Self: 'a;
-    type VariableNameIterator<'a> = iter::Empty<String> where Self:'a;
+    type VariableIterator<'a>
+        = iter::Empty<(String, Value<Self::NumericTypes>)>
+    where
+        Self: 'a;
+    type VariableNameIterator<'a>
+        = iter::Empty<String>
+    where
+        Self: 'a;
 
     fn iter_variables(&self) -> Self::VariableIterator<'_> {
         iter::empty()
@@ -356,12 +368,17 @@ impl<NumericTypes: EvalexprNumericTypes> ContextWithMutableFunctions
 }
 
 impl<NumericTypes: EvalexprNumericTypes> IterateVariablesContext for HashMapContext<NumericTypes> {
-    type VariableIterator<'a> = std::iter::Map<
+    type VariableIterator<'a>
+        = std::iter::Map<
         std::collections::hash_map::Iter<'a, String, Value<NumericTypes>>,
         fn((&String, &Value<NumericTypes>)) -> (String, Value<NumericTypes>),
-    > where Self: 'a;
-    type VariableNameIterator<'a> =
-        std::iter::Cloned<std::collections::hash_map::Keys<'a, String, Value<NumericTypes>>> where Self: 'a;
+    >
+    where
+        Self: 'a;
+    type VariableNameIterator<'a>
+        = std::iter::Cloned<std::collections::hash_map::Keys<'a, String, Value<NumericTypes>>>
+    where
+        Self: 'a;
 
     fn iter_variables(&self) -> Self::VariableIterator<'_> {
         self.variables
