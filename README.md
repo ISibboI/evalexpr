@@ -621,3 +621,4 @@ If there is already an issue describing what you want to say, please add a thumb
  * This crate uses the [`sync-readme`](https://github.com/phaazon/cargo-sync-readme) cargo subcommand to keep the documentation in `src/lib.rs` and `README.md` in sync.
    The subcommand only syncs from the documentation in `src/lib.rs` to `README.md`.
    So please alter the documentation in the `src/lib.rs` rather than altering anything in between `<!-- cargo-sync-readme start -->` and `<!-- cargo-sync-readme end -->` in the `README.md`.
+ * Your contributions are assumed to be licensed under the [MIT License](https://opensource.org/license/mit). I relicense them under the [AGPL3 license](/LICENSE).
