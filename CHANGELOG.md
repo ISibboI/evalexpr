@@ -1,5 +1,20 @@
 # Change Log
 
+## [12.0.2](https://github.com/ISibboI/evalexpr/compare/12.0.1...12.0.2) - 2024-12-27
+
+### Fixed
+
+ * Link to `ron` format in documentation (#177)
+ * Use the correct `Value` construction functions in documentation (#178)
+ * Add hint about new licensing also to notes for contributors.
+ * Fixed copy-paste error with the `Comments` section in documentation.
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Ryan Butler](https://github.com/TheButlah)
+
 ## [12.0.1](https://github.com/ISibboI/evalexpr/compare/12.0.0...12.0.1) - 2024-10-25
 
 ### Fixed
