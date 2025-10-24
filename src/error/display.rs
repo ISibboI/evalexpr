@@ -87,7 +87,7 @@ impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericT
             UnmatchedLBrace => write!(f, "Found an unmatched opening parenthesis '('."),
             UnmatchedRBrace => write!(f, "Found an unmatched closing parenthesis ')'."),
             UnmatchedDoubleQuote => write!(f, "Found an unmatched double quote '\"'"),
-            MissingOperatorOutsideOfBrace { .. } => write!(
+            MissingOperatorOutsideOfBrace => write!(
                 f,
                 "Found an opening parenthesis that is preceded by something that does not take \
                  any arguments on the right, or found a closing parenthesis that is succeeded by \
