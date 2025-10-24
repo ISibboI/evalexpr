@@ -1,5 +1,17 @@
 # Change Log
 
+## [12.0.3](https://github.com/ISibboI/evalexpr/compare/12.0.2...12.0.3) - 2025-10-24
+
+### Fixed
+
+ * Add serde support to DefaultNumericTypes (#185)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Gary Pennington](https://github.com/garypen)
+
 ## [12.0.2](https://github.com/ISibboI/evalexpr/compare/12.0.1...12.0.2) - 2024-12-27
 
 ### Fixed
