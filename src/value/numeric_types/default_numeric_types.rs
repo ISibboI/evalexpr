@@ -7,6 +7,10 @@ use super::{EvalexprFloat, EvalexprInt, EvalexprNumericTypes};
 /// See [`EvalexprNumericTypes`].
 ///
 /// This empty struct uses [`i64`] as its integer type and [`f64`] as its float type.
+#[cfg_attr(
+    feature = "serde",
+    derive(Default, serde::Serialize, serde::Deserialize)
+)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DefaultNumericTypes;
 
