@@ -146,6 +146,12 @@ fn test_with_context() {
     assert_eq!(context.remove_value("half"), Ok(Some(Value::Float(0.5))));
     assert_eq!(context.remove_value("zero"), Ok(Some(Value::Int(0))));
     assert_eq!(context.remove_value("zero"), Ok(None));
+    assert_eq!(
+        eval_with_context("zero", &context),
+        Err(EvalexprError::VariableIdentifierNotFound(
+            "zero".to_string()
+        ))
+    );
 }
 
 #[test]
