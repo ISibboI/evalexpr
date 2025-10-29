@@ -59,7 +59,7 @@ pub trait ContextWithMutableVariables: Context {
     /// Removes the variable with the given identifier from the context.
     fn remove_value(
         &mut self,
-        _identifier: &str
+        _identifier: &str,
     ) -> EvalexprResult<Option<Value<Self::NumericTypes>>, Self::NumericTypes> {
         Err(EvalexprError::ContextNotMutable)
     }
@@ -361,7 +361,7 @@ impl<NumericTypes: EvalexprNumericTypes> ContextWithMutableVariables
     }
     fn remove_value(
         &mut self,
-        identifier: &str
+        identifier: &str,
     ) -> EvalexprResult<Option<Value<Self::NumericTypes>>, Self::NumericTypes> {
         // Removes a value from the `self.variables`, returning the value at the key if the key was previously in the map.
         Ok(self.variables.remove(identifier))
