@@ -56,6 +56,14 @@ pub trait ContextWithMutableVariables: Context {
     ) -> EvalexprResult<(), Self::NumericTypes> {
         Err(EvalexprError::ContextNotMutable)
     }
+
+    /// Removes the variable with the given identifier from the context.
+    fn remove_value(
+        &mut self,
+        _identifier: &str,
+    ) -> EvalexprResult<Option<Value<Self::NumericTypes>>, Self::NumericTypes> {
+        Err(EvalexprError::ContextNotMutable)
+    }
 }
 
 /// A context that allows to assign to function identifiers.
@@ -351,6 +359,14 @@ impl<NumericTypes: EvalexprNumericTypes> ContextWithMutableVariables
         // Implicit else, because `self.variables` and `identifier` are not unborrowed in else
         self.variables.insert(identifier, value);
         Ok(())
+    }
+
+    fn remove_value(
+        &mut self,
+        identifier: &str,
+    ) -> EvalexprResult<Option<Value<Self::NumericTypes>>, Self::NumericTypes> {
+        // Removes a value from the `self.variables`, returning the value at the key if the key was previously in the map.
+        Ok(self.variables.remove(identifier))
     }
 }
 

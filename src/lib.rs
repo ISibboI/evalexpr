@@ -309,6 +309,10 @@
 //! // ...and read the value in code like this
 //! assert_eq!(context.get_value("a"), Some(&Value::from_int(10)));
 //! assert_eq!(context.get_value("b"), Some(&Value::from_float(1.0)));
+//! // ...and remove the value in code like this
+//! assert_eq!(context.remove_value("a"), Ok(Some(Value::from_int(10))));
+//! // ...and if the value does not exist when removing, it returns None.
+//! assert_eq!(context.remove_value("a"), Ok(None));
 //! ```
 //!
 //! Contexts are also required for user-defined functions.
