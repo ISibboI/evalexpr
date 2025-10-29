@@ -1,5 +1,17 @@
 # Change Log
 
+## [13.0.0](https://github.com/ISibboI/evalexpr/compare/12.0.3...13.0.0) - 2025-10-29
+
+### Added
+
+ * Function remove_value to HashMapContext (#189)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Sudo Dios](https://github.com/SudoDios)
+
 ## [12.0.3](https://github.com/ISibboI/evalexpr/compare/12.0.2...12.0.3) - 2025-10-24
 
 ### Fixed
