@@ -155,6 +155,155 @@ fn test_with_context() {
 }
 
 #[test]
+fn test_dot_attribute() {
+    let mut context = HashMapContext::new();
+
+    context
+        .set_function(
+            "array".to_string(),
+            Function::new(|argument| Ok(Value::Tuple(argument.as_tuple()?))),
+        )
+        .unwrap();
+
+    context
+        .set_function(
+            "dot".to_string(),
+            Function::new(move |argument| {
+                let x = argument.as_fixed_len_tuple(3)?;
+                if let (Value::Tuple(id), Value::String(method)) = (&x[0], &x[1]) {
+                    match method.as_str() {
+                        "push" => {
+                            // array.push(x)
+                            let mut array = id.clone();
+                            array.push(x[2].clone());
+                            return Ok(Value::Tuple(array));
+                        },
+                        "get" => {
+                            // array.get(i)
+                            let index = x[2].as_int()?;
+                            let value = &id[index as usize];
+                            return Ok(value.clone());
+                        },
+                        "length" => {
+                            // array.length
+                            return Ok(Value::Int(id.len() as i64));
+                        },
+                        _ => {},
+                    }
+                }
+                Err(EvalexprError::CustomMessage("unexpected dot call".into()))
+            }),
+        )
+        .unwrap();
+
+    assert_eq!(
+        eval_with_context_mut(
+            "v = array(1,2,3,4,5); 
+             v = v.push(6); 
+             v.length == v.get(5)",
+            &mut context
+        ),
+        Ok(Value::Boolean(true))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("v.get(4)", &mut context),
+        Ok(Value::Int(5))
+    );
+
+    // attribute is a method with empty input
+    assert_eq!(
+        eval_with_context_mut("v.length() == v.length", &mut context),
+        Ok(Value::Boolean(true))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("v.100(4)", &mut context),
+        Err(EvalexprError::FunctionIdentifierNotFound("v.100".into()))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("v.100", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("v.100".into()))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("100.v100", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("100.v100".into()))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("abc.efg", &mut context),
+        Err(EvalexprError::VariableIdentifierNotFound("abc".into()))
+    );
+}
+
+#[test]
+fn test_dot_function() {
+    let mut context = HashMapContext::new();
+    context
+        .set_function(
+            "dot".to_string(),
+            Function::new(|argument| {
+                let x = argument.as_fixed_len_tuple(3)?;
+                if let (Value::Int(id), Value::String(method), args) = (&x[0], &x[1], &x[2]) {
+                    if method == "add" {
+                        let input = args.as_fixed_len_tuple(2)?;
+                        if let (Value::Int(a), Value::Int(b)) = (&input[0], &input[1]) {
+                            return Ok(Value::Int(id + a + b));
+                        }
+                    }
+                }
+                Err(EvalexprError::CustomMessage("unexpected dot call".into()))
+            }),
+        )
+        .unwrap();
+    context
+        .set_value("object".to_string(), Value::Int(10))
+        .unwrap();
+
+    // success
+    assert_eq!(
+        eval_with_context("object.add(5, 6)", &context),
+        Ok(Value::Int(21))
+    );
+
+    assert_eq!(
+        eval_with_context_mut("alien = 100; alien.add(5, 6)", &mut context),
+        Ok(Value::Int(111))
+    );
+
+    // empty
+    assert_eq!(
+        eval_with_context("object.add()", &context),
+        Err(EvalexprError::ExpectedTuple {
+            actual: Value::Empty
+        })
+    );
+
+    // too many
+    assert_eq!(
+        eval_with_context("object.add(5, 6, 7)", &context),
+        Err(EvalexprError::ExpectedFixedLenTuple {
+            expected_len: 2,
+            actual: Value::Tuple(vec![Value::Int(5), Value::Int(6), Value::Int(7)])
+        })
+    );
+
+    // user dose not implement
+    assert_eq!(
+        eval_with_context("object.remove(5, 6)", &context),
+        Err(EvalexprError::CustomMessage("unexpected dot call".into()))
+    );
+
+    // no such identifier
+    assert_eq!(
+        eval_with_context("unkown.add(5)", &context),
+        Err(EvalexprError::VariableIdentifierNotFound("unkown".into()))
+    );
+}
+
+#[test]
 fn test_functions() {
     let mut context = HashMapContext::<DefaultNumericTypes>::new();
     context
