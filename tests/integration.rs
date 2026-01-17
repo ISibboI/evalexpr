@@ -2610,3 +2610,18 @@ fn test_node_mutable_access() {
     assert_eq!(node.children_mut().len(), 1);
     assert_eq!(*node.operator_mut(), Operator::RootNode);
 }
+
+#[test]
+fn test_tree_combining() {
+    let a = build_operator_tree::<DefaultNumericTypes>("1").unwrap();
+    let b = build_operator_tree::<DefaultNumericTypes>("4").unwrap();
+
+    let combined = combine_trees(a.clone(), b, Operator::Add).unwrap();
+    assert_eq!(combined.eval(), Ok(Value::Int(5)));
+
+    let c = build_operator_tree::<DefaultNumericTypes>("4+2").unwrap();
+    assert_eq!(
+        combine_trees(a, c, Operator::Add).unwrap().eval(),
+        Ok(Value::Int(7))
+    );
+}

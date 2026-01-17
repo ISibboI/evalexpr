@@ -246,6 +246,9 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
     /// The feature `rand` is not enabled, but required for the used function.
     RandNotEnabled,
 
+    /// An unsuitable Operator was used
+    UnsuitableOperator(Operator<NumericTypes>),
+
     /// A custom error explained by its message.
     CustomMessage(String),
 }

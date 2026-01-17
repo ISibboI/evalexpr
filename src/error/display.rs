@@ -150,6 +150,7 @@ impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericT
                 int
             ),
             RandNotEnabled => write!(f, "The feature 'rand' must be enabled to use randomness"),
+            UnsuitableOperator(operator) => write!(f, "Unsuitable operator used: {operator}"),
             CustomMessage(message) => write!(f, "Error: {}", message),
         }
     }

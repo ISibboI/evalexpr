@@ -5,7 +5,7 @@ extern crate rand;
 extern crate rand_pcg;
 extern crate test;
 
-use evalexpr::{build_operator_tree, DefaultNumericTypes};
+use evalexpr::{build_operator_tree, combine_trees, DefaultNumericTypes, Operator};
 use rand::{distributions::Uniform, seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{fmt::Write, hint::black_box};
@@ -137,4 +137,27 @@ fn bench_evaluate_large_tuple_expression(bencher: &mut Bencher) {
     dbg!(&large_tuple_expression);
 
     bencher.iter(|| large_tuple_expression.eval().unwrap());
+}
+
+#[bench]
+fn bench_tree_combining(bencher: &mut Bencher) {
+    let mut gen = Pcg32::seed_from_u64(33);
+    let small_expressions: Vec<_> = generate_small_expressions(BENCHMARK_LEN, &mut gen)
+        .iter()
+        .zip(&generate_small_expressions(BENCHMARK_LEN, &mut gen))
+        .map(|(expression_a, expression_b)| {
+            (
+                build_operator_tree::<DefaultNumericTypes>(expression_a).unwrap(),
+                build_operator_tree::<DefaultNumericTypes>(expression_b).unwrap(),
+            )
+        })
+        .collect();
+
+    bencher.iter(|| {
+        for expression in &small_expressions {
+            black_box(
+                combine_trees(expression.0.clone(), expression.1.clone(), Operator::Add).unwrap(),
+            );
+        }
+    });
 }

@@ -973,3 +973,39 @@ pub(crate) fn tokens_to_operator_tree<NumericTypes: EvalexprNumericTypes>(
         Err(EvalexprError::UnmatchedRBrace)
     }
 }
+
+/// combine two trees with a specific binary+ operator.
+pub(crate) fn combine_trees<NumericTypes: EvalexprNumericTypes>(
+    a: Node<NumericTypes>,
+    b: Node<NumericTypes>,
+    operator: Operator<NumericTypes>,
+) -> EvalexprResult<Node<NumericTypes>, NumericTypes> {
+    if operator.is_unary() {
+        return Err(EvalexprError::UnsuitableOperator(operator));
+    }
+
+    let mut node: Node<NumericTypes> = Node::new(operator);
+
+    node.children.push(extract_root(a)?);
+    node.children.push(extract_root(b)?);
+
+    let mut root = Node::root_node();
+
+    root.children.push(node);
+
+    Ok(root)
+}
+
+/// extract root
+fn extract_root<NumericTypes: EvalexprNumericTypes>(
+    a: Node<NumericTypes>,
+) -> EvalexprResult<Node<NumericTypes>, NumericTypes> {
+    if a.operator == Operator::RootNode {
+        Ok(a)
+    } else {
+        a.children
+            .into_iter()
+            .next()
+            .map_or_else(|| Err(EvalexprError::OutOfBoundsAccess), Ok)
+    }
+}
