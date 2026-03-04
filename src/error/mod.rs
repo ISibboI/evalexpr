@@ -93,6 +93,14 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
         actual: Value<NumericTypes>,
     },
 
+    /// A tuple value of a certain length was expected.
+    ExpectedSameLengthTuples {
+        /// The tuple with expected length.
+        expected: Value<NumericTypes>,
+        /// The actual tuple with unexpected length.
+        actual: Value<NumericTypes>,
+    },
+
     /// A tuple value of a certain length range was expected.
     ExpectedRangedLengthTuple {
         /// The expected length range.
@@ -326,6 +334,14 @@ impl<NumericTypes: EvalexprNumericTypes> EvalexprError<NumericTypes> {
             expected_length: expected_len,
             actual,
         }
+    }
+
+    /// Constructs `EvalexprError::ExpectedSameLengthTuples {expected, actual}`.
+    pub fn expected_same_len_tuples(
+        expected: Value<NumericTypes>,
+        actual: Value<NumericTypes>,
+    ) -> Self {
+        EvalexprError::ExpectedSameLengthTuples { expected, actual }
     }
 
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
