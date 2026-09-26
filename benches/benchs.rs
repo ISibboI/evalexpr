@@ -1,12 +1,10 @@
 #![feature(test)]
 #![cfg(not(tarpaulin_include))]
 
-extern crate rand;
-extern crate rand_pcg;
 extern crate test;
 
 use evalexpr::{DefaultNumericTypes, build_operator_tree};
-use rand::{Rng, SeedableRng, distributions::Uniform, seq::SliceRandom};
+use rand::{Rng, RngExt, SeedableRng, distr::Uniform, prelude::IndexedRandom};
 use rand_pcg::Pcg32;
 use std::{fmt::Write, hint::black_box};
 use test::Bencher;
@@ -15,7 +13,7 @@ const BENCHMARK_LEN: usize = 100_000;
 const EXPONENTIAL_TUPLE_ITERATIONS: usize = 12;
 
 fn generate_expression<Gen: Rng>(len: usize, rng: &mut Gen) -> String {
-    let int_distribution = Uniform::new_inclusive(1, 100);
+    let int_distribution = Uniform::new_inclusive(1, 100).unwrap();
     let whitespaces = [" ", "", "", "  ", " \n", "       "];
     let operators = ["+", "-", "*", "/", "%", "^"];
     let mut result = String::new();
