@@ -21,16 +21,13 @@ impl<'a, NumericTypes: EvalexprNumericTypes> Iterator for NodeIter<'a, NumericTy
         loop {
             let mut result = None;
 
-            if let Some(last) = self.stack.last_mut() {
-                if let Some(next) = last.next() {
-                    result = Some(next);
-                } else {
-                    // Can not fail because we just borrowed last.
-                    // We just checked that the iterator is empty, so we can safely discard it.
-                    let _ = self.stack.pop().unwrap();
-                }
+            let last = self.stack.last_mut()?;
+            if let Some(next) = last.next() {
+                result = Some(next);
             } else {
-                return None;
+                // Can not fail because we just borrowed last.
+                // We just checked that the iterator is empty, so we can safely discard it.
+                let _ = self.stack.pop().unwrap();
             }
 
             if let Some(result) = result {
@@ -61,16 +58,13 @@ impl<'a, NumericTypes: EvalexprNumericTypes> Iterator for OperatorIterMut<'a, Nu
         loop {
             let mut result = None;
 
-            if let Some(last) = self.stack.last_mut() {
-                if let Some(next) = last.next() {
-                    result = Some(next);
-                } else {
-                    // Can not fail because we just borrowed last.
-                    // We just checked that the iterator is empty, so we can safely discard it.
-                    let _ = self.stack.pop().unwrap();
-                }
+            let last = self.stack.last_mut()?;
+            if let Some(next) = last.next() {
+                result = Some(next);
             } else {
-                return None;
+                // Can not fail because we just borrowed last.
+                // We just checked that the iterator is empty, so we can safely discard it.
+                let _ = self.stack.pop().unwrap();
             }
 
             if let Some(result) = result {
