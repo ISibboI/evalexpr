@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{value::numeric_types::EvalexprNumericTypes, EvalexprError};
+use crate::{EvalexprError, value::numeric_types::EvalexprNumericTypes};
 
 impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericTypes> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {

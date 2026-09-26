@@ -1,12 +1,12 @@
 use crate::{
+    Context, ContextWithMutableVariables, EMPTY_VALUE, EmptyType, EvalexprError, EvalexprResult,
+    HashMapContext, Node, Value,
     error::EvalexprResultValue,
     token, tree,
     value::{
-        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
         TupleType,
+        numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes},
     },
-    Context, ContextWithMutableVariables, EmptyType, EvalexprError, EvalexprResult, HashMapContext,
-    Node, Value, EMPTY_VALUE,
 };
 
 /// Evaluate the given expression string.

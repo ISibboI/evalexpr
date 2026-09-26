@@ -1,7 +1,7 @@
 use crate::error::{EvalexprError, EvalexprResult, EvalexprResultValue};
 use std::{convert::TryFrom, ops::RangeInclusive};
 
-use self::numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes};
+use self::numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes};
 
 mod display;
 pub mod numeric_types;
@@ -277,7 +277,7 @@ impl<NumericTypes: EvalexprNumericTypes> TryFrom<Value<NumericTypes>> for () {
 #[cfg(test)]
 mod tests {
     use crate::value::{
-        numeric_types::default_numeric_types::DefaultNumericTypes, TupleType, Value,
+        TupleType, Value, numeric_types::default_numeric_types::DefaultNumericTypes,
     };
 
     #[test]

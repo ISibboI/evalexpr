@@ -1,11 +1,11 @@
 use crate::{
+    Context, ContextWithMutableVariables, EmptyType, HashMapContext,
     error::EvalexprResultValue,
     token::Token,
     value::{
-        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
-        TupleType, EMPTY_VALUE,
+        EMPTY_VALUE, TupleType,
+        numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes},
     },
-    Context, ContextWithMutableVariables, EmptyType, HashMapContext,
 };
 
 use crate::{

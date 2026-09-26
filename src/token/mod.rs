@@ -3,7 +3,7 @@ use std::str::FromStr;
 use crate::{
     error::{EvalexprError, EvalexprResult},
     value::numeric_types::{
-        default_numeric_types::DefaultNumericTypes, EvalexprInt, EvalexprNumericTypes,
+        EvalexprInt, EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes,
     },
 };
 
@@ -513,7 +513,7 @@ fn parse_integer<NumericTypes: EvalexprNumericTypes>(
 #[cfg(test)]
 mod tests {
     use crate::{
-        token::{char_to_partial_token, tokenize, Token},
+        token::{Token, char_to_partial_token, tokenize},
         value::numeric_types::default_numeric_types::DefaultNumericTypes,
     };
     use std::fmt::Write;

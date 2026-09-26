@@ -1,16 +1,16 @@
 use crate::function::builtin::builtin_function;
 
 use crate::{
+    ContextWithMutableVariables,
     context::Context,
     error::*,
     value::{
-        numeric_types::{
-            default_numeric_types::DefaultNumericTypes, EvalexprFloat, EvalexprInt,
-            EvalexprNumericTypes,
-        },
         Value,
+        numeric_types::{
+            EvalexprFloat, EvalexprInt, EvalexprNumericTypes,
+            default_numeric_types::DefaultNumericTypes,
+        },
     },
-    ContextWithMutableVariables,
 };
 
 mod display;

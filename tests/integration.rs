@@ -621,47 +621,61 @@ fn test_errors() {
 
 #[test]
 fn test_no_panic() {
-    assert!(eval(&format!(
-        "{} + {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "-{} - {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "-(-{} - 1)",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} * {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} / {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        0
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} % {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        0
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} ^ {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_ok());
+    assert!(
+        eval(&format!(
+            "{} + {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "-{} - {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "-(-{} - 1)",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} * {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} / {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            0
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} % {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            0
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} ^ {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_ok()
+    );
     assert!(eval("if").is_err());
     assert!(eval("if()").is_err());
     assert!(eval("if(true, 1)").is_err());
@@ -1813,7 +1827,7 @@ fn test_hashmap_context_clone_debug() {
     #[allow(clippy::redundant_clone)]
     let cloned_context = context.clone();
 
-    assert_eq!(format!("{:?}", &context), format!("{:?}", &cloned_context));
+    assert_eq!(format!("{:?}", context), format!("{:?}", &cloned_context));
     assert_eq!(
         cloned_context.get_value("variable_five"),
         Some(&Value::from_int(5))

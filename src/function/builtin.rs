@@ -2,8 +2,8 @@
 use regex::Regex;
 
 use crate::{
-    value::numeric_types::{EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
     EvalexprError, Function, Value, ValueType,
+    value::numeric_types::{EvalexprFloat, EvalexprInt, EvalexprNumericTypes},
 };
 
 macro_rules! simple_math {
