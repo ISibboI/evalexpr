@@ -20,7 +20,10 @@ fn test_serde_errors() {
         ron::de::from_str::<Node>("[\"5==5\"]"),
         Err(ron::de::SpannedError {
             code: ron::Error::ExpectedString,
-            position: ron::de::Position { col: 1, line: 1 }
+            span: ron::de::Span {
+                start: ron::de::Position { line: 1, col: 1 },
+                end: ron::de::Position { line: 1, col: 1 }
+            }
         })
     );
     assert_eq!(
@@ -30,7 +33,10 @@ fn test_serde_errors() {
                 "Found a partial token '&' that should be followed by another partial token."
                     .to_owned()
             ),
-            position: ron::de::Position { line: 1, col: 4 }
+            span: ron::de::Span {
+                start: ron::de::Position { line: 1, col: 2 },
+                end: ron::de::Position { line: 1, col: 4 }
+            }
         })
     );
     // Ensure that this does not panic.
