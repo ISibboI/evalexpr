@@ -1,7 +1,7 @@
 #![cfg(not(tarpaulin_include))]
 #![cfg(feature = "serde")]
 
-use evalexpr::{build_operator_tree, Node};
+use evalexpr::{Node, build_operator_tree};
 
 #[test]
 fn test_serde() {

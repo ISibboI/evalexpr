@@ -1,4 +1,4 @@
-use crate::{operator::Operator, value::numeric_types::EvalexprNumericTypes, Node};
+use crate::{Node, operator::Operator, value::numeric_types::EvalexprNumericTypes};
 use std::slice::{Iter, IterMut};
 
 /// An iterator that traverses an operator tree in pre-order.

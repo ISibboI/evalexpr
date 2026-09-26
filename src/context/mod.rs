@@ -7,14 +7,14 @@
 use std::{collections::HashMap, iter, marker::PhantomData};
 
 use crate::{
+    EvalexprError, EvalexprResult,
     error::EvalexprResultValue,
     function::Function,
     value::{
-        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
-        value_type::ValueType,
         Value,
+        numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes},
+        value_type::ValueType,
     },
-    EvalexprError, EvalexprResult,
 };
 
 mod predefined;

@@ -10,7 +10,7 @@ use std::ops::RangeInclusive;
 use crate::{
     token::PartialToken,
     value::{
-        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
+        numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes},
         value_type::ValueType,
     },
 };
@@ -465,8 +465,8 @@ pub type EvalexprResultValue<NumericTypes = DefaultNumericTypes> =
 #[cfg(test)]
 mod tests {
     use crate::{
-        value::numeric_types::default_numeric_types::DefaultNumericTypes, EvalexprError, Value,
-        ValueType,
+        EvalexprError, Value, ValueType,
+        value::numeric_types::default_numeric_types::DefaultNumericTypes,
     };
 
     /// Tests whose only use is to bring test coverage of trivial lines up, like trivial constructors.

@@ -1,5 +1,5 @@
-use crate::{interface::build_operator_tree, EvalexprNumericTypes, Node};
-use serde::{de, Deserialize, Deserializer};
+use crate::{EvalexprNumericTypes, Node, interface::build_operator_tree};
+use serde::{Deserialize, Deserializer, de};
 use std::{fmt, marker::PhantomData};
 
 impl<'de, NumericTypes: EvalexprNumericTypes> Deserialize<'de> for Node<NumericTypes> {

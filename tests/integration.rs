@@ -621,47 +621,61 @@ fn test_errors() {
 
 #[test]
 fn test_no_panic() {
-    assert!(eval(&format!(
-        "{} + {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "-{} - {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "-(-{} - 1)",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} * {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} / {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        0
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} % {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        0
-    ))
-    .is_err());
-    assert!(eval(&format!(
-        "{} ^ {}",
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
-        <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
-    ))
-    .is_ok());
+    assert!(
+        eval(&format!(
+            "{} + {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "-{} - {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "-(-{} - 1)",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} * {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} / {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            0
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} % {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            0
+        ))
+        .is_err()
+    );
+    assert!(
+        eval(&format!(
+            "{} ^ {}",
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX,
+            <DefaultNumericTypes as EvalexprNumericTypes>::Int::MAX
+        ))
+        .is_ok()
+    );
     assert!(eval("if").is_err());
     assert!(eval("if()").is_err());
     assert!(eval("if(true, 1)").is_err());

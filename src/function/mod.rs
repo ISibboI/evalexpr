@@ -3,8 +3,8 @@ use std::fmt;
 use crate::{
     error::EvalexprResultValue,
     value::{
-        numeric_types::{default_numeric_types::DefaultNumericTypes, EvalexprNumericTypes},
         Value,
+        numeric_types::{EvalexprNumericTypes, default_numeric_types::DefaultNumericTypes},
     },
 };
 
