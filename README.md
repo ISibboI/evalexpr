@@ -14,7 +14,7 @@ It is very lightweight and comes with no further dependencies.
 Evalexpr is [available on crates.io](https://crates.io/crates/evalexpr), and its [API Documentation is available on docs.rs](https://docs.rs/evalexpr).
 
 
-**Minimum Supported Rust Version:** 1.65.0
+**Minimum Supported Rust Version:** 1.85.1
 
 <!-- cargo-sync-readme start -->
 
