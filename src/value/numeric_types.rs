@@ -99,11 +99,11 @@ pub trait EvalexprInt<NumericTypes: EvalexprNumericTypes<Int = Self>>:
     /// Perform a bitnot operation.
     fn bitnot(&self) -> Self;
 
-    /// Perform a shl operation.
-    fn bit_shift_left(&self, rhs: &Self) -> Self;
+    /// Perform a shl operation, returning an error on overflow.
+    fn checked_bit_shift_left(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
 
-    /// Perform a shr operation.
-    fn bit_shift_right(&self, rhs: &Self) -> Self;
+    /// Perform a shr operation, returning an error on overflow.
+    fn checked_bit_shift_right(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes>;
 }
 
 /// A float type that can be used by `evalexpr`.

@@ -47,6 +47,17 @@ macro_rules! int_function {
     };
 }
 
+macro_rules! fallible_int_function {
+    ($func:ident, 2) => {
+        Some(Function::new(|argument| {
+            let tuple = argument.as_fixed_len_tuple(2)?;
+            let (a, b): (NumericTypes::Int, NumericTypes::Int) =
+                (tuple[0].as_int()?, tuple[1].as_int()?);
+            Ok(Value::Int(a.$func(&b)?))
+        }))
+    };
+}
+
 pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
     identifier: &str,
 ) -> Option<Function<NumericTypes>> {
@@ -304,8 +315,8 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "bitor" => int_function!(bitor, 2),
         "bitxor" => int_function!(bitxor, 2),
         "bitnot" => int_function!(bitnot),
-        "shl" => int_function!(bit_shift_left, 2),
-        "shr" => int_function!(bit_shift_right, 2),
+        "shl" => fallible_int_function!(checked_bit_shift_left, 2),
+        "shr" => fallible_int_function!(checked_bit_shift_right, 2),
         _ => None,
     }
 }

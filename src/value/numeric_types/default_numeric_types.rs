@@ -1,4 +1,4 @@
-use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
+use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 use crate::{EvalexprError, EvalexprResult, Value};
 
@@ -149,12 +149,30 @@ impl<NumericTypes: EvalexprNumericTypes<Int = Self>> EvalexprInt<NumericTypes> f
         Not::not(*self)
     }
 
-    fn bit_shift_left(&self, rhs: &Self) -> Self {
-        Shl::shl(*self, *rhs)
+    fn checked_bit_shift_left(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        (*rhs)
+            .try_into()
+            .ok()
+            .and_then(|rhs| (*self).checked_shl(rhs))
+            .ok_or_else(|| {
+                EvalexprError::shift_left_error(
+                    Value::<NumericTypes>::from_int(*self),
+                    Value::<NumericTypes>::from_int(*rhs),
+                )
+            })
     }
 
-    fn bit_shift_right(&self, rhs: &Self) -> Self {
-        Shr::shr(*self, *rhs)
+    fn checked_bit_shift_right(&self, rhs: &Self) -> EvalexprResult<Self, NumericTypes> {
+        (*rhs)
+            .try_into()
+            .ok()
+            .and_then(|rhs| (*self).checked_shr(rhs))
+            .ok_or_else(|| {
+                EvalexprError::shift_right_error(
+                    Value::<NumericTypes>::from_int(*self),
+                    Value::<NumericTypes>::from_int(*rhs),
+                )
+            })
     }
 }
 

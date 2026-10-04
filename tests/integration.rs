@@ -2624,3 +2624,25 @@ fn test_node_mutable_access() {
     assert_eq!(node.children_mut().len(), 1);
     assert_eq!(*node.operator_mut(), Operator::RootNode);
 }
+
+#[test]
+fn test_shift_operators() {
+    assert_eq!(eval("shl(1, 2)"), Ok(Value::Int(4)));
+    assert_eq!(eval("shr(4, 2)"), Ok(Value::Int(1)));
+    assert_eq!(eval("shl(2, 63)"), Ok(Value::Int(0)));
+    assert_eq!(eval("shr(4, 63)"), Ok(Value::Int(0)));
+    assert_eq!(
+        eval("shl(1, 64)"),
+        Err(EvalexprError::ShiftLeftError {
+            value: Value::Int(1),
+            shift: Value::Int(64)
+        })
+    );
+    assert_eq!(
+        eval("shr(4, 64)"),
+        Err(EvalexprError::ShiftRightError {
+            value: Value::Int(4),
+            shift: Value::Int(64)
+        })
+    );
+}

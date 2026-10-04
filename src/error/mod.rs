@@ -208,6 +208,22 @@ pub enum EvalexprError<NumericTypes: EvalexprNumericTypes = DefaultNumericTypes>
         divisor: Value<NumericTypes>,
     },
 
+    /// A shift left operation performed by Rust failed.
+    ShiftLeftError {
+        /// The first argument of the shift left operation.
+        value: Value<NumericTypes>,
+        /// The second argument of the shift left operation.
+        shift: Value<NumericTypes>,
+    },
+
+    /// A shift right operation performed by Rust failed.
+    ShiftRightError {
+        /// The first argument of the shift right operation.
+        value: Value<NumericTypes>,
+        /// The second argument of the shift right operation.
+        shift: Value<NumericTypes>,
+    },
+
     /// A regular expression could not be parsed
     InvalidRegex {
         /// The invalid regular expression
@@ -408,7 +424,18 @@ impl<NumericTypes: EvalexprNumericTypes> EvalexprError<NumericTypes> {
         EvalexprError::ModulationError { dividend, divisor }
     }
 
-    /// Constructs `EvalexprError::InvalidRegex(regex)`
+    pub(crate) fn shift_left_error(value: Value<NumericTypes>, shift: Value<NumericTypes>) -> Self {
+        EvalexprError::ShiftLeftError { value, shift }
+    }
+
+    pub(crate) fn shift_right_error(
+        value: Value<NumericTypes>,
+        shift: Value<NumericTypes>,
+    ) -> Self {
+        EvalexprError::ShiftRightError { value, shift }
+    }
+
+    /// Constructs `EvalexprError::InvalidRegex(regex)`.
     pub fn invalid_regex(regex: String, message: String) -> Self {
         EvalexprError::InvalidRegex { regex, message }
     }

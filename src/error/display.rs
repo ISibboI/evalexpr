@@ -125,6 +125,8 @@ impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericT
             ModulationError { dividend, divisor } => {
                 write!(f, "Error modulating {} % {}", dividend, divisor)
             },
+            ShiftLeftError { value, shift } => write!(f, "Error shifting {} << {}", value, shift),
+            ShiftRightError { value, shift } => write!(f, "Error shifting {} >> {}", value, shift),
             InvalidRegex { regex, message } => write!(
                 f,
                 "Regular expression {:?} is invalid: {:?}",
