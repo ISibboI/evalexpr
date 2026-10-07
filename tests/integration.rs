@@ -1562,6 +1562,46 @@ fn test_tuple_definitions() {
 }
 
 #[test]
+fn test_tuple_operations() {
+    assert_eq!(
+        eval("!(false, true, true)"),
+        Ok(Value::Tuple(vec![
+            Value::Boolean(true),
+            Value::Boolean(false),
+            Value::Boolean(false),
+        ]))
+    );
+    assert_eq!(
+        eval("(1, 2, 3) + (4, 5, 6)"),
+        Ok(Value::Tuple(vec![
+            Value::from_int(5),
+            Value::from_int(7),
+            Value::from_int(9),
+        ]))
+    );
+    assert_eq!(
+        eval("(6, 5, 4) - (1, 2, 3)"),
+        Ok(Value::Tuple(vec![
+            Value::from_int(5),
+            Value::from_int(3),
+            Value::from_int(1),
+        ]))
+    );
+
+    assert_eq!(
+        eval("(1, 2, 3) + (4, 5)"),
+        Err(EvalexprError::ExpectedSameLengthTuples {
+            expected: Value::Tuple(vec![
+                Value::from_int(1),
+                Value::from_int(2),
+                Value::from_int(3),
+            ]),
+            actual: Value::Tuple(vec![Value::from_int(4), Value::from_int(5),])
+        })
+    );
+}
+
+#[test]
 fn test_implicit_context() {
     assert_eq!(
         eval("a = 2 + 4 * 2; b = -5 + 3 * 5; a == b"),
