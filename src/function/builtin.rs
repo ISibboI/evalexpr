@@ -229,7 +229,9 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         })),
         "len" => Some(Function::new(|argument| {
             if let Ok(subject) = argument.as_string() {
-                Ok(Value::Int(NumericTypes::Int::from_usize(subject.len())?))
+                Ok(Value::Int(NumericTypes::Int::from_usize(
+                    subject.chars().count(),
+                )?))
             } else if let Ok(subject) = argument.as_tuple() {
                 Ok(Value::Int(NumericTypes::Int::from_usize(subject.len())?))
             } else {
@@ -289,6 +291,7 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
         "str::substring" => Some(Function::new(|argument| {
             let args = argument.as_ranged_len_tuple(2..=3)?;
             let subject = args[0].as_string()?;
+            let length = subject.chars().count();
             let start: NumericTypes::Int = args[1].as_int()?;
             let start = start
                 .into_usize()
@@ -298,12 +301,18 @@ pub fn builtin_function<NumericTypes: EvalexprNumericTypes>(
                 end.into_usize()
                     .map_err(|_| EvalexprError::OutOfBoundsAccess)?
             } else {
-                subject.len()
+                length
             };
-            if start > end || end > subject.len() {
+            if start > end || end > length {
                 return Err(EvalexprError::OutOfBoundsAccess);
             }
-            Ok(Value::from(&subject[start..end]))
+            Ok(Value::from(
+                subject
+                    .chars()
+                    .skip(start)
+                    .take(end - start)
+                    .collect::<String>(),
+            ))
         })),
         #[cfg(feature = "rand")]
         "random" => Some(Function::new(|argument| {

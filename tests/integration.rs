@@ -426,6 +426,7 @@ fn test_builtin_functions() {
     assert_eq!(eval("max(4.0, 3)"), Ok(Value::Float(4.0)));
     assert_eq!(eval("len(\"foobar\")"), Ok(Value::Int(6)));
     assert_eq!(eval("len(\"a\", \"b\")"), Ok(Value::Int(2)));
+    assert_eq!(eval("len(\"ä\")"), Ok(Value::Int(1)));
     //Contians
     assert_eq!(
         eval("contains(1, 2, 3)"),
@@ -572,6 +573,11 @@ fn test_builtin_functions() {
     assert!(eval("str::substring(\"foobar\", -1)").is_err());
     assert!(eval("str::substring(\"foobar\", 0, -1)").is_err());
     assert!(eval("str::substring(\"foobar\", 0, 1, 1)").is_err());
+    assert_eq!(
+        eval("str::substring(\"äöü\", 1, 2)"),
+        Ok(Value::String(String::from("ö")))
+    );
+    assert!(eval("str::substring(\"äöü\", 0, 4)").is_err());
     // Bitwise
     assert_eq!(eval("bitand(5, -1)"), Ok(Value::Int(5)));
     assert_eq!(eval("bitand(6, 5)"), Ok(Value::Int(4)));
