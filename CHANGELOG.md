@@ -1,5 +1,17 @@
 # Change Log
 
+## [14.0.0](https://github.com/ISibboI/evalexpr/compare/13.1.0...14.0.0) - 2026-11-21
+
+### Changed
+
+ * String indexing is now based on characters, and not a mix of bytes and characters as before (#205)
+
+### Contributors
+
+My warmhearted thanks goes to:
+
+ * [Sai Asish Y](https://github.com/SAY-5)
+
 ## [13.1.0](https://github.com/ISibboI/evalexpr/compare/13.0.0...13.1.0) - 2025-11-26
 
 ### Added
