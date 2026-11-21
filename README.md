@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/crates/v/evalexpr.svg)](https://crates.io/crates/evalexpr)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Downloads](https://img.shields.io/crates/d/evalexpr.svg)](https://crates.io/crates/evalexpr)
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 [![Coverage Status](https://coveralls.io/repos/github/ISibboI/evalexpr/badge.svg?branch=main)](https://coveralls.io/github/ISibboI/evalexpr?branch=main)
 [![](http://meritbadge.herokuapp.com/evalexpr)](https://crates.io/crates/evalexpr)
 [![](https://docs.rs/evalexpr/badge.svg)](https://docs.rs/evalexpr)
