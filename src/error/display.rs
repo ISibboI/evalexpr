@@ -50,6 +50,11 @@ impl<NumericTypes: EvalexprNumericTypes> fmt::Display for EvalexprError<NumericT
                 "Expected a Value::Tuple of length {}, but got {:?}.",
                 expected_length, actual
             ),
+            ExpectedSameLengthTuples { expected, actual } => write!(
+                f,
+                "Expected a the same length for tuples {:?} and {:?}.",
+                expected, actual
+            ),
             ExpectedRangedLengthTuple {
                 expected_length,
                 actual,

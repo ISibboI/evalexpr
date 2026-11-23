@@ -195,6 +195,37 @@ impl<NumericTypes: EvalexprNumericTypes> Operator<NumericTypes> {
         context: &C,
     ) -> EvalexprResultValue<NumericTypes> {
         use crate::operator::Operator::*;
+
+        // Check if we can do piecewise operations on tuples
+        match self {
+            Add | Sub | Neg | Mul | Div | And | Or | Not => match arguments {
+                [Value::Tuple(a_elements), Value::Tuple(b_elements)] => {
+                    if a_elements.len() != b_elements.len() {
+                        return Err(EvalexprError::expected_same_len_tuples(
+                            arguments[0].clone(),
+                            arguments[1].clone(),
+                        ));
+                    }
+
+                    let mut computed = Vec::with_capacity(a_elements.len());
+                    for (a, b) in a_elements.iter().zip(b_elements) {
+                        computed.push(self.eval(&[a.clone(), b.clone()], context)?);
+                    }
+
+                    return Ok(Value::Tuple(computed));
+                },
+                [Value::Tuple(elements)] => {
+                    let mut computed = Vec::with_capacity(elements.len());
+                    for element in elements {
+                        computed.push(self.eval(std::slice::from_ref(element), context)?);
+                    }
+                    return Ok(Value::Tuple(computed));
+                },
+                _ => {},
+            },
+            _ => {},
+        }
+
         match self {
             RootNode => {
                 if let Some(first) = arguments.first() {
